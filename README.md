@@ -43,6 +43,6 @@ cd twoverflow
 npm install
 ```
 
-To compile run `npm run build-prod` or `npm run build` to skip minifined/map version and clean temporary files.
+To compile run `npm run build`.
 
 The script will be compiled inside `dist/`

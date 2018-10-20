@@ -24,10 +24,11 @@
     "grunt-eslint": "^19.0.0",
     "grunt-replace": "^1.0.1"
   },
-  "scripts": {
-    "build": "grunt build --keep-temp",
-    "build-prod": "grunt build --minify",
-    "deploy": "node scripts/deploy.js"
+  "scripts": {  
+    "build": "grunt build --minify",
+    "build-dev": "grunt build --keep-temp",
+    "release": "node scripts/release.js",
+    "release-dev": "node scripts/release-dev.js"
   },
   "dependencies": {
     "hoek": "^5.0.3"
