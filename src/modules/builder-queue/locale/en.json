@@ -1,0 +1,16 @@
+{
+    "title": "BuilderQueue",
+    "info.header": "Title",
+    "info.content": "Content",
+    "general.disabled": "— Disabled —",
+    "general.started": "BuilderQueue started",
+    "general.stopped": "BuilderQueue stopped",
+    "settings": "Settings",
+    "settings.groupVillages": "Build only on villages with the group",
+    "settings.buildingPreset": "Building order preset",
+    "settings.buildingsOrder": "Build Order",
+    "settings.buildingsOrderFinal": "Buildings Level",
+    "settings.saved": "Settings saved!",
+    "logs.noBuilds": "No builds started",
+    "logs.clear": "Clear logs"
+}

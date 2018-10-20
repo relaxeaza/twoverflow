@@ -1,0 +1,18 @@
+{
+	"title": "Strażnik",
+	"filters.tooltip.current-only": "Tylko aktywna wioska",
+	"filters.types": "Rodzaj",
+	"filters.tooltip.show-attacks": "Pokaż ataki",
+	"filters.tooltip.show-supports": "Pokaż wsparcia",
+	"filters.tooltip.show-relocations": "Pokaż przeniesienia",
+	"filters.incoming-units": "Nadchodzące jednostki",
+	"tooltip.command-type": "Rodzaj",
+	"tooltip.slowest-unit": "Najwolniejsza jednostka",
+	"command-type": "Rodzaj",
+	"slowest-unit": "Co?",
+	"actions": "Dostępne akcje",
+	"no-incoming": "Brak nadchodzących wojsk.",
+	"commands.tooltip.copy-arrival": "Kopiuj czas dotarcia.",
+	"commands.tooltip.copy-back": "Kopiuj czas powrotu do wioski źródłowej.",
+	"commands.tooltip.set-remove": "Wstaw rozkaz wycofania wojsk przed dotarciem ataku do Kolejki rozkazów."
+}

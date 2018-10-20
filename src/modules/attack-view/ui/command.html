@@ -1,0 +1,28 @@
+<td class="commandType">
+    <span class="icon-20x20-<#= commandType #>"></span>
+</td>
+<td class="originCharacter character player-<#= originCharacter.id #>">
+    <span class="name"><#= originCharacter.name #> </span>
+</td>
+<td class="originVillage village village-<#= originVillage.id #>">
+    <span class="name"><#= originVillage.name #></span>
+    <span class="coords"> <#= originVillage.x #>|<#= originVillage.y #></span>
+</td>
+<td class="targetVillage village village-<#= targetVillage.id #>">
+    <span class="name"><#= targetVillage.name #></span>
+    <span class="coords"> <#= targetVillage.x #>|<#= targetVillage.y #></span>
+</td>
+<td><span class="icon-20x20-unit-<#= slowestUnit #>"></span></td>
+<td>
+    <div class="progress-wrapper" tooltip="<#= arrivalDate #>">
+        <div class="progress-bar arrivalProgress" style="width:<#= progress #>%"></div>
+        <div class="progress-text">
+            <span class="arrivalIn"><#= arrivalIn #></span>
+        </div>
+    </div>
+</td>
+<td class="actions">
+    <a class="copyArriveTime btn btn-orange size-20x20 icon-20x20-arrivetime" tooltip="<#= locale("attackView", "commands.tooltip.copy-arrival") #>"></a>
+    <a class="copyBackTime btn btn-red size-20x20 icon-20x20-backtime" tooltip="<#= locale("attackView", "commands.tooltip.copy-back") #>"></a>
+    <a class="removeTroops btn btn-orange size-20x20 icon-20x20-units-outgoing" tooltip="<#= locale("attackView", "commands.tooltip.set-remove") #>"></a>
+</td>

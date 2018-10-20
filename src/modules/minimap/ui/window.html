@@ -1,0 +1,348 @@
+<div class="win-content message-list-wrapper searchable-list ng-scope">
+    <header class="win-head">
+        <h2><#= locale("minimap", "title") #> <span class="small">v<#= version #></span></h2>
+        <ul class="list-btn">
+            <li><a href="#" class="twOverflow-close size-34x34 btn-red icon-26x26-close"></a></li>
+        </ul>
+    </header>
+
+    <div class="tabs tabs-bg">
+        <div class="tabs-three-col">
+            <div class="tab" tab="minimap">
+                <div class="tab-inner">
+                    <div><a href="#" class="btn-icon btn-orange"><#= locale("minimap", "minimap") #></a></div>
+                </div>
+            </div>
+
+            <div class="tab" tab="highlights">
+                <div class="tab-inner">
+                    <div><a href="#" class="btn-icon btn-orange"><#= locale("minimap", "highlights") #></a></div>
+                </div>
+            </div>
+
+            <div class="tab" tab="settings">
+                <div class="tab-inner">
+                    <div><a href="#" class="btn-icon btn-orange"><#= locale("common", "settings") #></a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="win-main">
+        
+        <!-- minimap -->
+
+        <div class="box-paper footer has-footer-upper twOverflow-content-minimap">
+            <canvas class="cross"></canvas>
+            <canvas class="minimap"></canvas>
+        </div>
+
+        <!-- highlights -->
+
+        <div class="box-paper footer has-footer-upper twOverflow-content-highlights">
+            <h5 class="twx-section"><#= locale("minimap", "add") #></h5>
+
+            <form class="addForm">
+                <table class="tbl-border-light tbl-striped">
+                    <colgroup>
+                        <col width="30%">
+                        <col width="6%">
+                        <col>
+                        <col width="25%">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td class="item-input">
+                                <input type="text" class="textfield-border" autocomplete="off" placeholder="<#= locale("minimap", "entry/id") #>">
+                            </td>
+                            <td><span class="item-icon"></span></td>
+                            <td class="item-name"></td>
+                            <td>
+                                <input type="text" class="item-color textfield-border" value="#000000" tooltip="<#= locale("minimap", "color") #>"/>
+                                <span class="open-color-picker btn-orange icon-26x26-rte-color-picker" tooltip="<#= locale("minimap", "color-picker") #>"></span>
+                                <span class="item-add btn-orange icon-26x26-plus" tooltip="<#= locale("minimap", "add") #>"></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+
+            <div class="highlights">
+                <h5 class="twx-section"><#= locale("minimap", "highlights") #></h5>
+
+                <table class="tbl-border-light tbl-striped">
+                    <colgroup>
+                        <col width="6%">
+                        <col>
+                        <col width="7%">
+                        <col width="7%">
+                    </colgroup>
+                    
+                    <# types.forEach(function (type) { #>
+                        <tbody class="<#= type #>"></tbody>
+                    <# }) #>
+                </table>
+            </div>
+        </div>
+
+        <!-- settings -->
+
+        <div class="box-paper footer has-footer-upper twOverflow-content-settings">
+            <h5 class="twx-section"><#= locale("common", "misc") #></h5>
+
+            <form class="settings">    
+                <table class="tbl-border-light tbl-striped">
+                    <colgroup>
+                        <col width="60%">
+                        <col>
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td><#= locale("minimap", "settings.right-click-action") #></td>
+                            <td>
+                                <select data-setting="rightClickAction">
+                                    <option value="highlight-village"><#= locale("minimap", "settings.easy-highlight-village") #></option>
+                                    <option value="highlight-player"><#= locale("minimap", "settings.easy-highlight-player") #></option>
+                                    <option value="highlight-tribe"><#= locale("minimap", "settings.easy-highlight-tribe") #></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.show-cross") #></td>
+                            <td>
+                                <label class="size-26x26 btn-orange icon-26x26-checkbox" for="settings-showCross">
+                                    <input id="settings-showCross" type="checkbox" data-setting="showCross">
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.show-demarcations") #></td>
+                            <td>
+                                <label class="size-26x26 btn-orange icon-26x26-checkbox" for="settings-showDemarcations">
+                                    <input id="settings-showDemarcations" type="checkbox" data-setting="showDemarcations">
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.show-barbarians") #></td>
+                            <td>
+                                <label class="size-26x26 btn-orange icon-26x26-checkbox" for="settings-showBarbarians">
+                                    <input id="settings-showBarbarians" type="checkbox" data-setting="showBarbarians">
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.show-ghost-villages") #></td>
+                            <td>
+                                <label class="size-26x26 btn-orange icon-26x26-checkbox" for="settings-showGhostVillages">
+                                    <input id="settings-showGhostVillages" type="checkbox" data-setting="showGhostVillages">
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.show-only-custom-highlights") #></td>
+                            <td>
+                                <label class="size-26x26 btn-orange icon-26x26-checkbox" for="settings-showOnlyCustomHighlights">
+                                    <input id="settings-showOnlyCustomHighlights" type="checkbox" data-setting="showOnlyCustomHighlights">
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.highlight-own") #></td>
+                            <td>
+                                <label class="size-26x26 btn-orange icon-26x26-checkbox" for="settings-highlightOwn">
+                                    <input id="settings-highlightOwn" type="checkbox" data-setting="highlightOwn">
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.highlight-selected") #></td>
+                            <td>
+                                <label class="size-26x26 btn-orange icon-26x26-checkbox" for="settings-highlightSelected">
+                                    <input id="settings-highlightSelected" type="checkbox" data-setting="highlightSelected">
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.highlight-diplomacy") #></td>
+                            <td>
+                                <label class="size-26x26 btn-orange icon-26x26-checkbox" for="settings-highlightDiplomacy">
+                                    <input id="settings-highlightDiplomacy" type="checkbox" data-setting="highlightDiplomacy">
+                                </label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="twx-section"><#= locale("minimap", "misc-colors") #></h5>
+                
+                <table class="tbl-border-light tbl-striped">
+                    <colgroup>
+                        <col width="60%">
+                        <col>
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.background") #></td>
+                            <td><input class="entry-color" data-setting="colorBackground" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.province") #></td>
+                            <td><input class="entry-color" data-setting="colorProvince" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.continent") #></td>
+                            <td><input class="entry-color" data-setting="colorContinent" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.cross") #></td>
+                            <td><input class="entry-color" data-setting="colorCross" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.quick-highlight") #></td>
+                            <td><input class="entry-color" data-setting="colorQuickHighlight" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.player") #></td>
+                            <td><input class="entry-color" data-setting="colorPlayer" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.selected") #></td>
+                            <td><input class="entry-color" data-setting="colorSelected" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.ghost") #></td>
+                            <td><input class="entry-color" data-setting="colorGhost" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="twx-section"><#= locale("minimap", "diplomacy-colors") #></h5>
+                
+                <table class="tbl-border-light tbl-striped">
+                    <colgroup>
+                        <col width="60%">
+                        <col>
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.ally") #></td>
+                            <td><input class="entry-color" data-setting="colorAlly" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.pna") #></td>
+                            <td><input class="entry-color" data-setting="colorFriendly" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.enemy") #></td>
+                            <td><input class="entry-color" data-setting="colorEnemy" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.other") #></td>
+                            <td><input class="entry-color" data-setting="colorUgly" /></td>
+                        </tr>
+                        <tr>
+                            <td><#= locale("minimap", "settings.colors.barbarian") #></td>
+                            <td><input class="entry-color" data-setting="colorBarbarian" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+
+    <footer class="win-foot">
+        <ul class="list-btn list-center buttons">
+            <li class="twOverflow-button-settings">
+                <a class="btn-red btn-border reset"><#= locale("common", "reset") #></a>
+            </li>
+            <li class="twOverflow-button-settings">
+                <a class="btn-orange btn-border save"><#= locale("common", "save") #></a>
+            </li>
+        </ul>
+    </footer>
+</div>
+
+<!-- minimap tooltip -->
+
+<div class="minimap-tooltip box-border-darker box-wrapper" style="display: none">
+    <table class="tbl-border-light tbl-striped">
+        <colgroup>
+            <col width="50%">
+            <col width="50%">
+        </colgroup>
+        <tbody>
+            <tr>
+                <td class="cell-space-left">
+                    <div class="ff-cell-fix">
+                        <span class="size-34x34 icon-bg-black icon-26x26-village"></span>
+                        <div class="text">
+                            <span><#= locale("minimap", "tooltip.village") #></span>
+                            <span class="overflow-ellipsis village-name"></span>
+                        </div>
+                    </div>
+                </td>
+                <td class="cell-space-left">
+                    <div class="ff-cell-fix">
+                        <span class="size-34x34 icon-bg-black icon-26x26-points"></span>
+                        <div class="text">
+                            <span><#= locale("minimap", "tooltip.village-points") #></span>
+                            <span class="village-points"></span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="cell-space-left">
+                    <div class="ff-cell-fix">
+                        <span class="size-34x34 icon-bg-black icon-34x34-player"></span>
+                        <div class="text text-limited">
+                            <span><#= locale("minimap", "tooltip.player") #></span>
+                            <span class="overflow-ellipsis player-name"></span>
+                        </div>
+                    </div>
+                </td>
+                <td class="cell-space-left">
+                    <div class="ff-cell-fix">
+                        <span class="size-34x34 icon-bg-black icon-26x26-points"></span>
+                        <div class="text">
+                            <span><#= locale("minimap", "tooltip.player-points") #></span>
+                            <span class="player-points"></span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="cell-space-left">
+                    <div class="ff-cell-fix">
+                        <span class="size-34x34 icon-bg-black icon-34x34-tribe"></span>
+                        <div class="text text-limited">
+                            <span><#= locale("minimap", "tooltip.tribe") #></span>
+                            <span class="overflow-ellipsis tribe-name"></span>
+                        </div>
+                    </div>
+                </td>
+                <td class="cell-space-left">
+                    <div class="ff-cell-fix">
+                        <span class="size-34x34 icon-bg-black icon-34x34-tribe-points"></span>
+                        <div class="text">
+                            <span><#= locale("minimap", "tooltip.tribe-points") #></span>
+                            <span class="tribe-points"></span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="cell-space-left">
+                    <div class="ff-cell-fix">
+                        <span class="size-34x34 icon-bg-black icon-34x34-province"></span>
+                        <div class="text">
+                            <span><#= locale("minimap", "tooltip.province") #></span>
+                            <span class="overflow-ellipsis province-name"></span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

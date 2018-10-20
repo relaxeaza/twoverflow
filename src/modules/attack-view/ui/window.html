@@ -1,0 +1,92 @@
+<div class="win-content message-list-wrapper searchable-list ng-scope">
+    <header class="win-head">
+        <h2><#= locale("attackView", "title") #> <span class="small">v<#= version #></span></h2>
+        <ul class="list-btn">
+            <li><a href="#" class="twOverflow-close size-34x34 btn-red icon-26x26-close"></a></li>
+        </ul>
+    </header>
+
+    <div class="win-main">
+        <div class="box-paper">
+
+            <div class="filters">
+                <table class="tbl-border-light">
+                    <tbody>
+                        <tr><th><#= locale("common", "village") #></th></tr>
+                        <tr>
+                            <td>
+                                <div class="box-border-dark icon village" tooltip="<#= locale("attackView", "filters.tooltip.current-only") #>">
+                                    <span class="icon-34x34-village-info icon-bg-black"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="tbl-border-light">
+                    <tbody>
+                        <tr><th><#= locale("attackView", "filters.types") #></th></tr>
+                        <tr>
+                            <td>
+                                <div data-filter="ATTACK" class="box-border-dark icon commandTypes attack" tooltip="<#= locale("attackView", "filters.tooltip.show-attacks") #>">
+                                    <span class="icon-34x34-attack icon-bg-black"></span>
+                                </div>
+                                <div data-filter="SUPPORT" class="box-border-dark icon commandTypes support" tooltip="<#= locale("attackView", "filters.tooltip.show-supports") #>">
+                                    <span class="icon-34x34-support icon-bg-black"></span>
+                                </div>
+                                <div data-filter="RELOCATE" class="box-border-dark icon commandTypes relocate" tooltip="<#= locale("attackView", "filters.tooltip.show-relocations") #>">
+                                    <span class="icon-34x34-relocate icon-bg-black"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="tbl-border-light">
+                    <tbody>
+                        <tr><th><#= locale("attackView", "filters.incoming-units") #></th></tr>
+                        <tr>
+                            <td>
+                                <# UNIT_SPEED_ORDER.forEach(function(unit) { #>
+                                    <div data-filter="<#= unit #>" class="box-border-dark icon incomingUnits <#= unit #>" tooltip="<#= locale("common", unit) #>">
+                                        <span class="icon-34x34-unit-<#= unit #> icon-bg-black"></span>
+                                    </div>
+                                <# }) #>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <table class="tbl-border-light commands-table">
+                <colgroup>
+                    <col width="7%">
+                    <col width="14%">
+                    <col width="">
+                    <col width="">
+                    <col width="4%">
+                    <col width="12%">
+                    <col width="11%">
+                </colgroup>
+                
+                <thead class="sorting">
+                    <tr>
+                        <th data-sort="COMMAND_TYPE" tooltip="<#= locale("attackView", "tooltip.command-type") #>"><#= locale("attackView", "command-type") #></th>
+                        <th data-sort="ORIGIN_CHARACTER"><#= locale("common", "player") #></th>
+                        <th data-sort="ORIGIN_VILLAGE"><#= locale("common", "origin") #></th>
+                        <th data-sort="TARGET_VILLAGE"><#= locale("common", "target") #></th>
+                        <th tooltip="<#= locale("attackView", "tooltip.slowest-unit") #>"><#= locale("attackView", "slowest-unit") #></th>
+                        <th data-sort="TIME_COMPLETED">Arrive</th>
+                        <th><#= locale("attackView", "actions") #></th>
+                    </tr>
+                </thead>
+                <tbody class="commands"></tbody>
+                <tbody class="empty">
+                    <tr>
+                        <td colspan="7"><#= locale("attackView", "no-incoming") #></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

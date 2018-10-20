@@ -1,0 +1,25 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "rules": {
+        "indent": [
+            "error",
+            4
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "never"
+        ],
+        "no-console": 0
+    },
+    "globals": {
+        "angular": true,
+        "injector": true
+    }
+}

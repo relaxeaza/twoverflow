@@ -1,0 +1,38 @@
+{
+  "name": "tw2overflow",
+  "title": "TWOverflow",
+  "description": "Tools for Tribal Wars 2",
+  "author": {
+    "name": "Relaxeaza",
+    "email": "mafrazzrafael@gmail.com",
+    "url": "https://gitlab.com/relaxeaza",
+    "gitlab_user_id": 518047
+  },
+  "private": true,
+  "version": "1.0.7",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/twoverflow/"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-htmlmin": "^2.3.0",
+    "grunt-contrib-less": "^1.4.1",
+    "grunt-contrib-uglify": "^2.2.0",
+    "grunt-eslint": "^19.0.0",
+    "grunt-replace": "^1.0.1"
+  },
+  "scripts": {
+    "build": "grunt build --keep-temp",
+    "build-prod": "grunt build --minify",
+    "deploy": "node scripts/deploy.js"
+  },
+  "dependencies": {
+    "hoek": "^5.0.3"
+  }
+}

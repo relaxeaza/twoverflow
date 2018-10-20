@@ -1,0 +1,74 @@
+#BuilderQueue {
+    .buildingOrder,
+    .buildingOrderFinal {
+        td {
+            background: url("data:image/png;base64,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") #d1ad86;
+        }
+
+        tr.reached td {
+            background-color: #b9af7e;
+        }
+
+        tr.progress td {
+            background-color: #af9d57;
+        }
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+        color: #000;
+        min-width: 70%;
+    }
+
+    .settings {
+        .helper {
+            font-weight: bold;
+            vertical-align: -1px;
+            font-family: helvetica;
+            color: rgba(0, 0, 0, 0.3);
+
+            &:hover {
+                color: #000;
+            }
+        }
+
+        .custom-select {
+            width: 200px;
+        }
+
+        td {
+            text-align: center;
+        }
+
+        .green {
+            color: #297720;
+        }
+    }
+
+    .buildLog {
+        td {
+            text-align: center;
+        }
+        
+        .village:hover {
+            color: #fff;
+            text-shadow: 0px 1px 0 #000;
+        }
+    }
+
+    table.header-center th {
+        text-align: center;
+    }
+
+    .noBuilds td {
+        height: 26px;
+        text-align: center;
+    }
+
+    .force-26to20 {
+        transform: scale(0.8);
+        width: 20px;
+        height: 20px;
+    }
+}
