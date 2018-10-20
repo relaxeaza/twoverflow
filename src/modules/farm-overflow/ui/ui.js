@@ -443,7 +443,6 @@ define('two/farm/ui', [
             template: '__farm_html_window',
             replaces: {
                 version: Farm.version,
-                author: __overflow_author,
                 locale: Locale
             },
             css: '__farm_css_style'

@@ -36,7 +36,6 @@ define('two/attackView/ui', [
             activeTab: 'attacks',
             replaces: {
                 version: attackView.version,
-                author: __overflow_author,
                 locale: Locale,
                 UNIT_SPEED_ORDER: attackView.UNIT_SPEED_ORDER
             },

@@ -4,16 +4,13 @@
   "description": "Tools for Tribal Wars 2",
   "author": {
     "name": "Relaxeaza",
-    "email": "mafrazzrafael@gmail.com",
-    "url": "https://gitlab.com/relaxeaza",
-    "gitlab_user_id": 518047
+    "url": "https://gitlab.com/relaxeaza"
   },
   "private": true,
   "version": "1.0.7",
-  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/twoverflow/"
+    "url": "https://gitlab.com/relaxeaza/twoverflow"
   },
   "devDependencies": {
     "grunt": "^1.0.1",

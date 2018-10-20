@@ -1,10 +1,5 @@
 /*!
  * __overflow_title v__overflow_version
- *
- * Copyright __overflow_author_name <__overflow_author_email>
- * __overflow_license License
- *
- * __overflow_date
  */
 
 ;(function (window, undefined) {

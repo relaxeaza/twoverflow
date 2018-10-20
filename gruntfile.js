@@ -196,10 +196,8 @@ module.exports = function (grunt) {
         json: {
             overflow_title: pkg.title,
             overflow_version: pkg.version,
-            overflow_license: pkg.license,
             overflow_author: JSON.stringify(pkg.author),
             overflow_author_name: pkg.author.name,
-            overflow_author_email: pkg.author.email,
             overflow_author_url: pkg.author.url,
             overflow_date: new Date().toLocaleString(),
             overflow_locales: fs.readFileSync(`${temp}/src/modules/core/locale/locales.json`, 'utf8')
