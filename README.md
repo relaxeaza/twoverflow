@@ -11,7 +11,7 @@
 
 ## Installation
 
-See [https://gitlab.com/relaxeaza/twoverflow/wikis/home](https://gitlab.com/relaxeaza/twoverflow/wikis/home).
+See [https://gitlab.com/relaxeaza/twoverflow/wikis/Installation](https://gitlab.com/relaxeaza/twoverflow/wikis/Installation).
 
 # For developers
 
