@@ -1,4 +1,5 @@
 {
     "name": "AttackView",
-    "id": "attackView"
+    "id": "attackView",
+    "version": "1.0.0"
 }
