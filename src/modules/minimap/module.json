@@ -1,4 +1,5 @@
 {
     "name": "Minimap",
-    "id": "minimap"
+    "id": "minimap",
+    "version": "1.3.0"
 }

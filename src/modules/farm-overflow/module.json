@@ -1,4 +1,5 @@
 {
     "name": "FarmOverflow",
-    "id": "farm"
+    "id": "farm",
+    "version": "4.0.1"
 }

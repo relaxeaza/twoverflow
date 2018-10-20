@@ -1,4 +1,5 @@
 {
     "name": "AutoCollector",
-    "id": "collector"
+    "id": "collector",
+    "version": "1.2.0"
 }
