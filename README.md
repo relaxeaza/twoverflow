@@ -13,75 +13,23 @@
 
 See [https://gitlab.com/relaxeaza/twoverflow/wikis/Installation](https://gitlab.com/relaxeaza/twoverflow/wikis/Installation).
 
-# For developers
+## Testing version
 
-## Module Structure
+You can run the testing version to experiment new features and bug fixes before the stable release.
 
-```
-/
-|-- module.json (required)
-|-- src (required)
-|-- |-- core.js (required)
-|-- |-- init.js (required)
-|-- |-- customScript1.js
-|-- |-- customScript2.js
-|-- ui
-|-- |-- ui.js (optional)
-|-- |-- customMarkup1.html
-|-- |-- customMarkup2.html
-|-- |-- customStyle1.less
-|-- |-- customStyle2.less
-|-- locale
-|-- |-- en.json
-|-- |-- pt.json
-```
+See [https://gitlab.com/relaxeaza/twoverflow/wikis/Testing-version](https://gitlab.com/relaxeaza/twoverflow/wikis/Testing-version)
 
-### Root Folder
+## Languages
 
-Module Root folder can have any name.
+- English
+- Português
+- Polish
 
-### The module.json File
+Please help to translate the TWOverflow here: [https://crowdin.com/project/twoverflow](https://crowdin.com/project/twoverflow).
 
-The `module.json` contain basic information about the module.
-Only the `id` key is required and must be lower case and a single word.
-Any other keys can be included and can be retrivied in any `.js` script across the module with the fallowing code: `__moduleId_customKey`.
+## Creating your own modules
 
-### Interface Folder
-
-If `ui.js` is present inside the `ui` folder, the script will be called with all custom files ready to use. The purpose of the script must be to build de interface.
-
-Any `.html` files included inside the interface folder will be minified and can be retrivied by `.js` scripts using the fallowing code: `__moduleId_html_fileName`. Note: `moduleId` must be replaced with the name of the module and `fileName` by the name of the file (without extension) that will be retrivied. Exemple: `__myModule_html_customMarkup1`.
-The same goes to style files: `__myModule_css_customStyle1`
-
-The folder can include unlimited custom files.
-
-### Locale Folder
-
-Locale files must a `json` named with simple language codes (en, pt, pl, it...).
-
-The files will be compiled to a single object with the fallowing structure:
-
-```
-{
-    "en": {
-        "key": "string",
-        ...
-    },
-    "pt": {
-        "key": "string",
-        ...
-    },
-    ...
-}
-```
-
-The object can be retrivied in any ".js" script using the fallowing code: `__moduleId_locale`.
-
-### Source Folder
-
-The `src` folder must have a `.js` script named with the same name of the module that will include the logic of the module, and a `init.js` script that must start the module script.
-
-The folder can include any custom `.js` files and all will be concatened between the `core.js` script (first file) and the `init.js` (last file).
+See [https://gitlab.com/relaxeaza/twoverflow/wikis/Custom-modules](https://gitlab.com/relaxeaza/twoverflow/wikis/Custom-modules)
 
 ## Compiling from source
 
@@ -95,14 +43,6 @@ cd twoverflow
 npm install
 ```
 
-To compile run `npm run build-prod` or `npm run build` to skip minifined/map version and clean temp files.
+To compile run `npm run build-prod` or `npm run build` to skip minifined/map version and clean temporary files.
 
 The script will be compiled inside `dist/`
-
-## Languages
-
-- English
-- Português
-- Polish
-
-Please help to translate the TWOverflow [here](https://crowdin.com/project/twoverflow).
