@@ -2,7 +2,6 @@ require([
     'two/ready',
     'two/farm',
     'two/farm/ui',
-    'two/farm/analytics',
     'two/farm/cycle'
 ], function (
     ready,

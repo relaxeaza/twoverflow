@@ -1,8 +1,7 @@
 require([
     'two/ready',
     'two/queue',
-    'two/queue/ui',
-    'two/queue/analytics'
+    'two/queue/ui'
 ], function (
     ready,
     Queue
@@ -14,7 +13,6 @@ require([
     ready(function () {
         Queue.init()
         Queue.interface()
-        Queue.analytics()
 
         if (Queue.getWaitingCommands().length > 0) {
             Queue.start(true)
