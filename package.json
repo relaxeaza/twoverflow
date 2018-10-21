@@ -7,12 +7,13 @@
     "url": "https://gitlab.com/relaxeaza"
   },
   "private": true,
-  "version": "1.0.7",
+  "version": "2.0.0",
   "repository": {
     "type": "git",
     "url": "https://gitlab.com/relaxeaza/twoverflow"
   },
   "devDependencies": {
+    "git-promise": "^0.3.1",
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.0.0",
@@ -24,11 +25,10 @@
     "grunt-eslint": "^19.0.0",
     "grunt-replace": "^1.0.1"
   },
-  "scripts": {  
+  "scripts": {
     "build": "grunt build --minify",
-    "build-dev": "grunt build --keep-temp",
     "release": "node scripts/release.js",
-    "release-dev": "node scripts/release-dev.js"
+    "release-testing": "node scripts/release.js --testing"
   },
   "dependencies": {
     "hoek": "^5.0.3"
