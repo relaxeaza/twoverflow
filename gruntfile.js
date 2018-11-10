@@ -155,7 +155,8 @@ var generateAllModules = function (excludeModules) {
 
         var moduleInfo = JSON.parse(fs.readFileSync(`src/modules/${moduleDir}/module.json`, 'utf8'))
 
-        if (excludeModules && excludeModules.includes(moduleInfo.id)) {   
+        if (excludeModules && excludeModules.includes(moduleInfo.id)) {
+            console.log(`Ignoring module ${moduleInfo.id}`)
             return false
         }
 
@@ -350,7 +351,7 @@ module.exports = function (grunt) {
     var flags = grunt.option.flags()
 
     if (flags.includes('--minify')) {
-        grunt.loadNpmTasks('grunt-contrib-uglify')
+        grunt.loadNpmTasks('grunt-contrib-uglify-es')
         tasks.push('uglify')
     }
 

@@ -1,7 +1,19 @@
 require([
-    'two/locale'
+    'two/locale',
+    'helper/i18n'
 ], function (
-    Locale
+    Locale,
+    i18n
 ) {
-    Locale.create('common', __overflow_locales, 'en')
+    var updateModuleLang = function () {
+        var langs = __overflow_locales
+        var current = rootScope.loc.ale
+        var data = current in langs
+            ? langs[current]
+            : langs['en_us']
+
+        i18n.setJSON(data)
+    }
+
+    updateModuleLang()
 })

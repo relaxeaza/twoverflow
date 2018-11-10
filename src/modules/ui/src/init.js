@@ -1,15 +1,7 @@
 require([
-    'two/ready',
-    'two/ui'
+    'two/ready'
 ], function (
-    ready,
-    Interface
+    ready
 ) {
-    if (Interface.isInitialized()) {
-        return false
-    }
-
-    ready(function () {
-        Interface.init()
-    })
+    
 })

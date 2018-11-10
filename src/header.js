@@ -5,6 +5,7 @@
 ;(function (window, undefined) {
 
 var rootScope = injector.get('$rootScope')
+var $rootScope = rootScope
 var transferredSharedDataService = injector.get('transferredSharedDataService')
 var modelDataService = injector.get('modelDataService')
 var socketService = injector.get('socketService')
@@ -17,3 +18,4 @@ var armyService = injector.get('armyService')
 var villageService = injector.get('villageService')
 var mapService = injector.get('mapService')
 var $filter = injector.get('$filter')
+var storageService = injector.get('storageService')

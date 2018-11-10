@@ -74,14 +74,6 @@ define('two/farm', [
         COMMANDS: 'commands',
         FULL_STORAGE: 'full_storage'
     }
-    var ERROR_TYPES = {
-        TIME_LIMIT: 'time_limit',
-        COMMAND_LIMIT: 'command_limit',
-        FULL_STORAGE: 'full_storage',
-        NO_UNITS: 'no_units',
-        PRESET_FIRST: 'preset_first',
-        NO_SELECTED_VILLAGE: 'no_selected_village'
-    }
     var currentStatus = FARM_STATES.PAUSED
     var SETTINGS_MAP = {
         presets: {
@@ -577,7 +569,7 @@ define('two/farm', [
             case 'start':
             case 'init':
             case 'begin':
-                restart()
+                retart()
 
                 sendMessageReply(data.message_id, genStatusReply())
                 eventQueue.trigger(eventTypeProvider.FARM_REMOTE_COMMAND, ['on'])
@@ -618,7 +610,7 @@ define('two/farm', [
                 if (hasPresets) {
                     if (globalWaiting) {
                         resetWaitingVillages()
-                        restart()
+                        retart()
                     }
                 } else {
                     eventQueue.trigger(eventTypeProvider.FARM_NO_PRESET)
@@ -727,7 +719,7 @@ define('two/farm', [
         var reconnectHandler = function () {
             if (commander.running) {
                 setTimeout(function () {
-                    restart()
+                    retart()
                 }, 5000)
             }
         }
@@ -841,14 +833,25 @@ define('two/farm', [
 
         eventQueue.register(eventTypeProvider.FARM_STEP_CYCLE_END, function () {
             updateCurrentStatus(FARM_STATES.STEP_CYCLE_END)
+
+            if (settings.stepCycleNotifs) {
+                utils.emitNotif('error', $filter('i18n')('step_cycle_end', $rootScope.loc.ale, textObject))
+            }
         })
 
         eventQueue.register(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, function () {
             updateCurrentStatus(FARM_STATES.STEP_CYCLE_END_NO_VILLAGES)
+            utils.emitNotif('error', $filter('i18n')('step_cycle_end_no_villages', $rootScope.loc.ale, textObject))
         })
 
         eventQueue.register(eventTypeProvider.FARM_STEP_CYCLE_NEXT, function () {
             updateCurrentStatus(FARM_STATES.STEP_CYCLE_NEXT)
+
+            if (settings.stepCycleNotifs) {
+                var next = timeHelper.gameTime() + (settings.stepCycleInterval * 60)
+
+                utils.emitNotif('success', $filter('i18n')('step_cycle_next', $rootScope.loc.ale, textObject, utils.formatDate(next)))
+            }
         })
 
         eventQueue.register(eventTypeProvider.FARM_FULL_STORAGE, function () {
@@ -1502,13 +1505,19 @@ define('two/farm', [
 
     var start = function (_manual) {
         if (!selectedPresets.length) {
-            eventQueue.trigger(eventTypeProvider.FARM_ERROR, [ERROR_TYPES.PRESET_FIRST, _manual])
-            return ERROR_TYPES.PRESET_FIRST
+            if (_manual) {
+                utils.emitNotif('error', $filter('i18n')('preset_first', $rootScope.loc.ale, textObject))
+            }
+
+            return false
         }
 
         if (!selectedVillage) {
-            eventQueue.trigger(eventTypeProvider.FARM_ERROR, ERROR_TYPES.NO_SELECTED_VILLAGE, _manual)
-            return ERROR_TYPES.NO_SELECTED_VILLAGE
+            if (_manual) {
+                utils.emitNotif('error',$filter('i18n')('no_selected_village', $rootScope.loc.ale, textObject))
+            }
+
+            return false
         }
 
         if (!$gameState.getGameState(GAME_STATES.ALL_VILLAGES_READY)) {
@@ -1539,8 +1548,12 @@ define('two/farm', [
     var pause = function (_manual) {
         breakCommander()
 
-        eventQueue.trigger(eventTypeProvider.FARM_PAUSE, _manual)
+        eventQueue.trigger(eventTypeProvider.FARM_PAUSE)
         clearTimeout(cycle.getTimeoutId())
+
+        if (_manual) {
+            utils.emitNotif('success', $filter('i18n')('paused', $rootScope.loc.ale, textObject))
+        }
 
         return true
     }
@@ -1630,7 +1643,7 @@ define('two/farm', [
         }
 
         if (commander.running) {
-            restart()
+            retart()
         }
 
         eventQueue.trigger(eventTypeProvider.FARM_SETTINGS_CHANGE, [modify])
@@ -1673,6 +1686,12 @@ define('two/farm', [
 
     var Commander = (function () {
         var lastCommand = false
+        var ERROR_TYPES = {
+            TIME_LIMIT: 'time_limit',
+            COMMAND_LIMIT: 'command_limit',
+            FULL_STORAGE: 'full_storage',
+            NO_UNITS: 'no_units'
+        }
 
         /**
          * Control the cycle of commands, sending attacks, changing village and targets.
@@ -2126,7 +2145,11 @@ define('two/farm', [
             commander = new Commander()
             commander.running = true
 
-            eventQueue.trigger(eventTypeProvider.FARM_START, _manual)
+            eventQueue.trigger(eventTypeProvider.FARM_STEP_CYCLE_START)
+
+            if (_manual) {
+                utils.emitNotif('success', $filter('i18n')('farm_started', $rootScope.loc.ale, textObject))
+            }
 
             if (!getFreeVillages().length) {
                 if (singleVillage) {
@@ -2157,8 +2180,7 @@ define('two/farm', [
 
             commander = new Commander()
             commander.running = true
-            
-            eventQueue.trigger(eventTypeProvider.FARM_START, _manual)
+            eventQueue.trigger(eventTypeProvider.FARM_STEP_CYCLE_START)
 
             if (freeVillages.length === 0) {
                 eventQueue.trigger(eventTypeProvider.FARM_STEP_CYCLE_NEXT_NO_VILLAGES)
@@ -2172,7 +2194,9 @@ define('two/farm', [
                 return
             }
 
-            if (!_manual) {
+            if (_manual) {
+                utils.emitNotif('success', $filter('i18n')('farm_started', $rootScope.loc.ale, textObject))
+            } else {
                 eventQueue.trigger(eventTypeProvider.FARM_STEP_CYCLE_RESTART)
             }
 
@@ -2243,7 +2267,6 @@ define('two/farm', [
         'getSelectedVillage': getSelectedVillage,
         'getLastAttack': getLastAttack,
         'getCurrentStatus': getCurrentStatus,
-        'getSettings': getSettings,
-        'ERROR_TYPES': ERROR_TYPES
+        'getSettings': getSettings
     }
 })

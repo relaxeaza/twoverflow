@@ -1,665 +1,405 @@
 define('two/farm/ui', [
     'two/farm',
-    'two/locale',
-    'two/ui',
-    'two/ui/buttonLink',
+    'two/ui2',
     'two/FrontButton',
-    'two/utils',
-    'two/eventQueue',
+    'queues/EventQueue',
+    'struct/MapData',
     'helper/time',
-    'ejs'
+    'two/farm/Events',
+    'two/utils'
 ], function (
-    Farm,
-    Locale,
-    Interface,
-    buttonLink,
+    farmOverflow,
+    ui,
     FrontButton,
-    utils,
     eventQueue,
-    $timeHelper,
-    ejs
+    mapData,
+    timeHelper,
+    farmEventTypes,
+    utils
 ) {
-    var ui
-    var opener
-    var $window
-    var $events
-    var $last
-    var $status
-    var $start
-    var $settings
-    var $preset
+    var textObject = 'farm'
+    var textObjectCommon = 'common'
+    var SELECT_SETTINGS = ['presets', 'groupIgnore', 'groupInclude' ,'groupOnly']
+    var ERROR_TYPES = farmOverflow.ERROR_TYPES
 
-    /**
-     * Contagem de eventos inseridos na visualização.
-     *
-     * @type {Number}
-     */
-    var eventsCount = 1
+    var buildWindow = function () {
+        var listeners = []
 
-    /**
-     * Usado para obter a identificação dos presets e a descrição.
-     *
-     * @type {RegExp}
-     */
-    var rpreset = /(\(|\{|\[|\"|\')[^\)\}\]\"\']+(\)|\}|\]|\"|\')/
-
-    /**
-     * Tradução de "desativado" para a linguagem selecionada.
-     *
-     * @type {String}
-     */
-    var disabled
-
-    /**
-     * Lista de grupos disponíveis na conta do jogador
-     *
-     * @type {Object}
-     */
-    var groups
-
-    /**
-     * Elementos dos grupos usados pelo FarmOverflow.
-     *
-     * @type {Object}
-     */
-    var $groups
-
-    /**
-     * Loop em todas configurações do FarmOverflow
-     *
-     * @param {Function} callback
-     */
-    var eachSetting = function (callback) {
-        $window.find('[data-setting]').forEach(function ($input) {
-            var settingId = $input.dataset.setting
-
-            callback($input, settingId)
-        })
-    }
-
-    var saveSettings = function () {
-        var newSettings = {}
-
-        eachSetting(function ($input, settingId) {
-            var inputType = Farm.settingsMap[settingId].inputType
-
-            switch (inputType) {
-            case 'text':
-                newSettings[settingId] = $input.type === 'number'
-                    ? parseInt($input.value, 10)
-                    : $input.value
-
-                break
-            case 'select':
-                newSettings[settingId] = $input.dataset.value
-
-                break
-            case 'checkbox':
-                newSettings[settingId] = $input.checked
-
-                break
-            }
-        })
-
-        if (Farm.updateSettings(newSettings)) {
-            utils.emitNotif('success', Locale('farm', 'settings.saved'))
-
-            return true
+        var disabledSelects = function (settings) {
+            SELECT_SETTINGS.forEach(function (item) {
+                if (angular.isArray(settings[item])) {
+                    if (!settings[item].length) {
+                        settings[item] = [disabledOption()]
+                    }
+                } else if (!settings[item]) {
+                    settings[item] = disabledOption()
+                }
+            })
         }
 
-        return false
-    }
+        var selectTab = function (tabType) {
+            $scope.selectedTab = tabType
+        }
 
-    /**
-     * Insere as configurações na interface.
-     */
-    var populateSettings = function () {
-        eachSetting(function ($input, settingId) {
-            var inputType = Farm.settingsMap[settingId].inputType
+        var convertListObjects = function (obj, _includeIcon) {
+            var list = []
+            var item
+            var i
 
-            switch (inputType) {
-            case 'text':
-                $input.value = Farm.settings[settingId]
-
-                break
-            case 'select':
-                $input.dataset.value = Farm.settings[settingId]
-
-                break
-            case 'checkbox':
-                if (Farm.settings[settingId]) {
-                    $input.checked = true
-                    $input.parentElement.classList.add('icon-26x26-checkbox-checked')
+            for (i in obj) {
+                item = {
+                    name: obj[i].name,
+                    value: obj[i].id
                 }
 
-                break
-            }
-        })
-    }
-
-    /**
-     * Popula a lista de eventos que foram gerados em outras execuções
-     * do FarmOverflow.
-     */
-    var populateEvents = function () {
-        var lastEvents = Farm.getLastEvents()
-
-        // Caso tenha algum evento, remove a linha inicial "Nada aqui ainda"
-        if (lastEvents.length > 0) {
-            $events.find('.nothing').remove()
-        }
-
-        lastEvents.some(function (event) {
-            if (eventsCount >= Farm.settings.eventsLimit) {
-                return true
-            }
-
-            if (!Farm.settings.eventAttack && event.type === 'sendCommand') {
-                return false
-            }
-
-            if (!Farm.settings.eventVillageChange && event.type === 'nextVillage') {
-                return false
-            }
-
-            if (!Farm.settings.eventPriorityAdd && event.type === 'priorityTargetAdded') {
-                return false
-            }
-
-            if (!Farm.settings.eventIgnoredVillage && event.type === 'ignoredVillage') {
-                return false
-            }
-
-            addEvent(event, true)
-        })
-    }
-
-    /**
-     * Configura todos eventos dos elementos da interface.
-     */
-    var bindEvents = function () {
-        angularHotkeys.add(Farm.settings.hotkeySwitch, function () {
-            Farm.switch()
-        })
-
-        angularHotkeys.add(Farm.settings.hotkeyWindow, function () {
-            ui.openWindow()
-        })
-
-        $start.on('click', function () {
-            Farm.switch()
-        })
-
-        $window.find('.save').on('click', function (event) {
-            saveSettings()
-        })
-    }
-
-    /**
-     * Adiciona um evento na aba "Eventos".
-     *
-     * @param {Object} options - Opções do evento.
-     * @param {Boolean=} _populate - Indica quando o script está apenas populando
-     *      a lista de eventos, então não é alterado o "banco de dados".
-     */
-    var addEvent = function (options, _populate) {
-        $events.find('.nothing').remove()
-
-        if (eventsCount >= Farm.settings.eventsLimit) {
-            $events.find('tr:last-child').remove()
-        }
-
-        var lastEvents = Farm.getLastEvents()
-
-        if (lastEvents.length >= Farm.settings.eventsLimit) {
-            lastEvents.pop()
-        }
-
-        addRow($events, options, _populate)
-        eventsCount++
-
-        if (!_populate) {
-            options.timestamp = $timeHelper.gameTime()
-
-            lastEvents.unshift(options)
-            Farm.setLastEvents(lastEvents)
-        }
-    }
-
-    /**
-     * Adiciona uma linha (tr) com links internos do jogo.
-     *
-     * @param {Object} options
-     * @param {Boolean} [_populate] - Indica quando o script está apenas populando
-     *      a lista de eventos, então os elementos são adicionados no final da lista.
-     */
-    var addRow = function ($where, options, _populate) {
-        var linkButton = {}
-        var linkTemplate = {}
-        var links = options.links
-        var timestamp = options.timestamp || $timeHelper.gameTime()
-        var eventElement = document.createElement('tr')
-
-        if (links) {
-            for (var key in links) {
-                linkButton[key] = buttonLink(links[key].type, links[key].name, links[key].id)
-                linkTemplate[key] = '<a id="' + linkButton[key].id + '"></a>'
-            }
-
-            options.content = Locale('farm', 'events.' + options.type, linkTemplate)
-        }
-
-        var longDate = utils.formatDate(timestamp)
-        var shortDate = utils.formatDate(timestamp, 'HH:mm:ss')
-
-        eventElement.innerHTML = ejs.render('__farm_html_event', {
-            longDate: longDate,
-            shortDate: shortDate,
-            icon: options.icon,
-            content: options.content
-        })
-
-        if (links) {
-            for (var key in linkButton) {
-                eventElement.querySelector('#' + linkButton[key].id).replaceWith(linkButton[key].elem)
-            }
-        }
-
-        $where[_populate ? 'append' : 'prepend'](eventElement)
-
-        // Recalcula o scrollbar apenas se a janela e
-        // aba correta estiverem abertas.
-        if (ui.isVisible('log')) {
-            ui.recalcScrollbar()
-        }
-
-        ui.setTooltips()
-    }
-
-    /**
-     * Atualiza o elemento com a aldeias atualmente selecionada
-     */
-    var updateSelectedVillage = function () {
-        var $selected = $window.find('.selected')
-        var selectedVillage = Farm.getSelectedVillage()
-
-        if (!selectedVillage) {
-            return $selected.html(Locale('common', 'none'))
-        }
-
-        var village = buttonLink('village', utils.genVillageLabel(selectedVillage), selectedVillage.id)
-
-        $selected.html('')
-        $selected.append(village.elem)
-    }
-
-    /**
-     * Atualiza o elemento com a data do último ataque enviado
-     * Tambem armazena para ser utilizado nas proximas execuções.
-     *
-     * @param {[type]} [varname] [description]
-     */
-    var updateLastAttack = function (lastAttack) {
-        if (!lastAttack) {
-            lastAttack = Farm.getLastAttack()
-
-            if (lastAttack === -1) {
-                return false
-            }
-        }
-
-        $last.html(utils.formatDate(lastAttack))
-    }
-
-    /**
-     * Atualiza a lista de grupos na aba de configurações.
-     */
-    var updateGroupList = function () {
-        for (var type in $groups) {
-            var $selectedOption = $groups[type].find('.custom-select-handler').html('')
-            var $data = $groups[type].find('.custom-select-data').html('')
-
-            appendDisabledOption($data, '0')
-
-            for (var id in groups) {
-                var name = groups[id].name
-                var value = Farm.settings[type]
-
-                if (value === '' || value === '0') {
-                    $selectedOption.html(disabled)
-                    $groups[type][0].dataset.name = disabled
-                    $groups[type][0].dataset.value = ''
-                } else if (value == id) {
-                    $selectedOption.html(name)
-                    $groups[type][0].dataset.name = name
-                    $groups[type][0].dataset.value = id
+                if (_includeIcon) {
+                    item.leftIcon = obj[i].icon
                 }
 
-                appendSelectData($data, {
-                    name: name,
-                    value: id,
-                    icon: groups[id].icon
+                list.push(item)
+            }
+
+            return list
+        }
+
+        var updatePresets = function () {
+            var presetList = modelDataService.getPresetList()
+            $scope.presets = convertListObjects(presetList.getPresets())
+        }
+
+        var updateGroups = function () {
+            var groupList = modelDataService.getGroupList()
+            $scope.groups = convertListObjects(groupList.getGroups(), true)
+            $scope.groupsWithDisabled = angular.copy($scope.groups)
+            $scope.groupsWithDisabled.unshift(disabledOption())
+        }
+
+        var clearLogs = function () {
+            $scope.logs = []
+            $scope.visibleLogs = []
+            farmOverflow.clearLogs()
+        }
+
+        /**
+         * Convert the interface friendly settings data to the internal format
+         * and update the farmOverflow settings property.
+         */
+        var saveSettings = function () {
+            var settings = angular.copy($scope.settings)
+            
+            SELECT_SETTINGS.forEach(function (id) {
+                if (angular.isArray(settings[id])) {
+                    // check if the selected value is not the "disabled" option
+                    if (settings[id].length && settings[id][0].value) {
+                        settings[id] = settings[id].map(function (item) {
+                            return item.value
+                        })
+                    } else {
+                        settings[id] = []
+                    }
+                } else {
+                    settings[id] = settings[id].value ? settings[id].value : false
+                }
+            })
+
+            farmOverflow.updateSettings(settings)
+        }
+
+        /**
+         * Parse the raw settings to be readable by the interface.
+         */
+        var parseSettings = function (rawSettings) {
+            var settings = angular.copy(rawSettings)
+            var groupsObject = {}
+            var presetsObject = {}
+            var groupId
+            var value
+
+            $scope.groups.forEach(function (group) {
+                groupsObject[group.value] = {
+                    name: group.name,
+                    leftIcon: group.leftIcon
+                }
+            })
+
+            $scope.presets.forEach(function (preset) {
+                presetsObject[preset.value] = preset.name
+            })
+
+            SELECT_SETTINGS.forEach(function (item) {
+                value = settings[item]
+
+                if (item === 'presets') {
+                    settings[item] = value.map(function (presetId) {
+                        return {
+                            name: presetsObject[presetId],
+                            value: presetId
+                        }
+                    })
+                } else {
+                    if (angular.isArray(value)) {
+                        settings[item] = value.map(function (groupId) {
+                            return {
+                                name: groupsObject[groupId].name,
+                                value: groupId,
+                                leftIcon: groupsObject[groupId].leftIcon
+                            }
+                        })
+                    } else if (value) {
+                        groupId = settings[item]
+                        settings[item] = {
+                            name: groupsObject[groupId].name,
+                            value: groupId,
+                            leftIcon: groupsObject[groupId].leftIcon
+                        }
+                    }
+                }
+            })
+
+            disabledSelects(settings)
+
+            return settings
+        }
+
+        /**
+         * Used to set the "disabled" option for the select fields.
+         * Without these initial values, when all options are uncheck
+         * the default value of the select will fallback to the first
+         * option of the set.
+         *
+         * The interface is compiled and only after that,
+         * the $scope.settings is populated with the actual values.
+         */
+        var genInitialSelectValues = function () {
+            var obj = {}
+
+            SELECT_SETTINGS.forEach(function (item) {
+                obj[item] = item === 'groupIgnore'
+                    ? disabledOption()
+                    : [disabledOption()]
+            })
+
+            return obj
+        }
+
+        var disabledOption = function () {
+            return {
+                name: $filter('i18n')('disabled', $rootScope.loc.ale, textObject),
+                value: false
+            }
+        }
+
+        var switchFarm = function () {
+            farmOverflow.switch(true)
+        }
+
+        var farmStartHandler = function (event, _manual) {
+            $scope.running = true
+
+            if (_manual) {
+                utils.emitNotif('success', $filter('i18n')('farm_started', $rootScope.loc.ale, textObject))
+            }
+        }
+
+        var farmPauseHandler = function (event, _manual) {
+            $scope.running = false
+
+            if (_manual) {
+                utils.emitNotif('success', $filter('i18n')('farm_started', $rootScope.loc.ale, textObject))
+            }
+        }
+
+        var farmStepCycleEndHandler = function () {
+            var settings = farmOverflow.getSettings()
+            
+            if (settings.stepCycleNotifs) {
+                utils.emitNotif('error', $filter('i18n')('step_cycle_end', $rootScope.loc.ale, textObject))
+            }
+        }
+
+        var farmStepCycleEndNoVillagesHandler = function () {
+            utils.emitNotif('error', $filter('i18n')('step_cycle_end_no_villages', $rootScope.loc.ale, textObject))
+        }
+
+        var farmStepCycleNextHandler = function () {
+            var settings = farmOverflow.getSettings()
+
+            if (settings.stepCycleNotifs) {
+                var next = timeHelper.gameTime() + (settings.stepCycleInterval * 60)
+
+                utils.emitNotif('success', $filter('i18n')('step_cycle_next', $rootScope.loc.ale, textObject, utils.formatDate(next)))
+            }
+        }
+
+        var farmErrorHandler = function (event, args) {
+            var error = args[0]
+            var manual = args[1]
+
+            if (!manual) {
+                return false
+            }
+
+            switch (error) {
+            case ERROR_TYPES.PRESET_FIRST:
+                utils.emitNotif('error', $filter('i18n')('preset_first', $rootScope.loc.ale, textObject))
+                break
+            case ERROR_TYPES.NO_SELECTED_VILLAGE:
+                utils.emitNotif('error',$filter('i18n')('no_selected_village', $rootScope.loc.ale, textObject))
+                break
+            }
+        }
+
+        var updateSelectedVillage = function () {
+            $scope.selectedVillage = farmOverflow.getSelectedVillage()
+        }
+
+        var updateLastAttack = function () {
+            $scope.lastAttack = farmOverflow.getLastAttack()
+        }
+
+        var updateCurrentStatus = function (event, status) {
+            $scope.currentStatus = status
+        }
+
+        var loadVillagesLabel = function () {
+            var load = function (data) {
+                if ($scope.villagesLabel[data.coords]) {
+                    return false
+                }
+
+                var coords = data.coords.split('|')
+                var x = parseInt(coords[0], 10)
+                var y = parseInt(coords[1], 10)
+                
+                mapData.getTownAtAsync(x, y, function (village) {
+                    $scope.villagesLabel[data.coords] = `${village.name} (${data.coords})`
                 })
-
-                $groups[type].append($data)
             }
 
-            if (!Farm.settings[type]) {
-                $selectedOption.html(disabled)
-            }
-        }
-    }
+            $scope.logs.forEach(function (log) {
+                if (log.origin) {
+                    load(log.origin)
+                }
 
-    /**
-     * Atualiza a lista de presets na aba de configurações.
-     */
-    var updatePresetList = function () {
-        var loaded = {}
-        var presets = modelDataService.getPresetList().presets
+                if (log.target) {
+                    load(log.target)
+                }
 
-        var selectedPresetExists = false
-        var selectedPreset = Farm.settings.presetName
-        var $selectedOption = $preset.find('.custom-select-handler').html('')
-        var $data = $preset.find('.custom-select-data').html('')
-
-        appendDisabledOption($data)
-
-        for (var id in presets) {
-            var presetName = presets[id].name.replace(rpreset, '').trim()
-
-            if (presetName in loaded) {
-                continue
-            }
-
-            // presets apenas com descrição sem identificação são ignorados
-            if (!presetName) {
-                continue
-            }
-
-            if (selectedPreset === '') {
-                $selectedOption.html(disabled)
-                $preset[0].dataset.name = disabled
-                $preset[0].dataset.value = ''
-            } else if (selectedPreset === presetName) {
-                $selectedOption.html(presetName)
-                $preset[0].dataset.name = presetName
-                $preset[0].dataset.value = presetName
-
-                selectedPresetExists = true
-            }
-
-            appendSelectData($data, {
-                name: presetName,
-                value: presetName,
-                icon: 'size-26x26 icon-26x26-preset'
+                if (log.village) {
+                    load(log.village)
+                }
             })
-
-            loaded[presetName] = true
         }
 
-        if (!selectedPresetExists) {
-            $selectedOption.html(disabled)
-            $preset[0].dataset.name = disabled
-            $preset[0].dataset.value = ''
-        }
-    }
-
-    /**
-     * Gera uma opção "desativada" padrão em um custom-select
-     *
-     * @param  {jqLite} $data - Elemento que armazenada o <span> com dataset.
-     * @param {String=} _disabledValue - Valor da opção "desativada".
-     */
-    var appendDisabledOption = function ($data, _disabledValue) {
-        var dataElem = document.createElement('span')
-        dataElem.dataset.name = disabled
-        dataElem.dataset.value = _disabledValue || ''
-
-        $data.append(dataElem)
-    }
-
-    /**
-     * Popula o dataset um elemento <span>
-     *
-     * @param  {jqLite} $data - Elemento que armazenada o <span> com dataset.
-     * @param  {[type]} data - Dados a serem adicionados no dataset.
-     */
-    var appendSelectData = function ($data, data) {
-        var dataElem = document.createElement('span')
-
-        for (var key in data) {
-            dataElem.dataset[key] = data[key]
+        var registerEvent = function (id, handler, _root) {
+            if (_root) {
+                listeners.push($rootScope.$on(id, handler))
+            } else {
+                eventQueue.register(id, handler)
+                
+                listeners.push(function () {
+                    eventQueue.unregister(id, handler)
+                })
+            }
         }
 
-        $data.append(dataElem)
-    }
+        var registerEvents = function () {
+            registerEvent(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
+            registerEvent(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
+            registerEvent(eventTypeProvider.GROUPS_UPDATED, updateGroups, true)
+            registerEvent(eventTypeProvider.GROUPS_CREATED, updateGroups, true)
+            registerEvent(eventTypeProvider.GROUPS_DESTROYED, updateGroups, true)
+            registerEvent(eventTypeProvider.FARM_START, farmStartHandler)
+            registerEvent(eventTypeProvider.FARM_PAUSE, farmPauseHandler)
+            registerEvent(eventTypeProvider.FARM_VILLAGES_UPDATE, updateSelectedVillage)
+            registerEvent(eventTypeProvider.FARM_NEXT_VILLAGE, updateSelectedVillage)
+            registerEvent(eventTypeProvider.FARM_SEND_COMMAND, updateLastAttack)
+            registerEvent(eventTypeProvider.FARM_STATUS_CHANGE, updateCurrentStatus)
+            registerEvent(eventTypeProvider.FARM_RESET_LOGS, updateLogs)
+            registerEvent(eventTypeProvider.FARM_LOGS_UPDATED, updateLogs)
+            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END, farmStepCycleEndHandler)
+            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, farmStepCycleEndNoVillagesHandler)
+            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_NEXT, farmStepCycleNextHandler)
+            console.log('registerEvent', eventTypeProvider.FARM_ERROR, farmErrorHandler)
+            registerEvent(eventTypeProvider.FARM_ERROR, farmErrorHandler)
 
-    function FarmInterface () {
-        groups = modelDataService.getGroupList().getGroups()
-        disabled = Locale('farm', 'general.disabled')
-
-        ui = new Interface('FarmOverflow', {
-            activeTab: 'settings',
-            template: '__farm_html_window',
-            replaces: {
-                version: Farm.version,
-                locale: Locale
-            },
-            css: '__farm_css_style'
-        })
-
-        opener = new FrontButton('Farmer', {
-            classHover: false,
-            classBlur: false,
-            onClick: function () {
-                ui.openWindow()
-            }
-        })
-
-        $window = $(ui.$window)
-        $events = $window.find('.events')
-        $last = $window.find('.last')
-        $status = $window.find('.status')
-        $start = $window.find('.start')
-        $settings = $window.find('.settings')
-        $preset = $window.find('.preset')
-        $groups = {
-            groupIgnore: $window.find('.ignore'),
-            groupInclude: $window.find('.include'),
-            groupOnly: $window.find('.only')
+            var windowListener = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, function (event, templateName) {
+                if (templateName === '!twoverflow_farm_window') {
+                    unregisterEvents()
+                    windowListener()
+                }
+            })
         }
 
-        eventQueue.bind('Farm/sendCommand', function (from, to) {
-            $status.html(Locale('farm', 'events.attacking'))
-            updateLastAttack($timeHelper.gameTime())
-
-            if (!Farm.settings.eventAttack) {
-                return false
-            }
-
-            addEvent({
-                links: {
-                    origin: { type: 'village', name: utils.genVillageLabel(from), id: from.id },
-                    target: { type: 'village', name: utils.genVillageLabel(to), id: to.id }
-                },
-                icon: 'attack-small',
-                type: 'sendCommand'
+        var unregisterEvents = function () {
+            listeners.forEach(function (unregister) {
+                unregister()
             })
-        })
-
-        eventQueue.bind('Farm/nextVillage', function (next) {
-            updateSelectedVillage()
-
-            if (!Farm.settings.eventVillageChange) {
-                return false
-            }
-
-            addEvent({
-                links: {
-                    village: { type: 'village', name: utils.genVillageLabel(next), id: next.id }
-                },
-                icon: 'village',
-                type: 'nextVillage'
-            })
-        })
-
-        eventQueue.bind('Farm/ignoredVillage', function (target) {
-            if (!Farm.settings.eventIgnoredVillage) {
-                return false
-            }
-
-            addEvent({
-                links: {
-                    target: { type: 'village', name: utils.genVillageLabel(target), id: target.id }
-                },
-                icon: 'check-negative',
-                type: 'ignoredVillage'
-            })
-        })
-
-        eventQueue.bind('Farm/priorityTargetAdded', function (target) {
-            if (!Farm.settings.eventPriorityAdd) {
-                return false
-            }
-
-            addEvent({
-                links: {
-                    target: { type: 'village', name: utils.genVillageLabel(target), id: target.id }
-                },
-                icon: 'parallel-recruiting',
-                type: 'priorityTargetAdded'
-            })
-        })
-
-        eventQueue.bind('Farm/noPreset', function () {
-            addEvent({
-                icon: 'info',
-                type: 'noPreset'
-            })
-
-            $status.html(Locale('common', 'paused'))
-        })
-
-        eventQueue.bind('Farm/noUnits', function () {
-            if (Farm.isSingleVillage()) {
-                $status.html(Locale('farm', 'events.noUnits'))
-            }
-        })
-
-        eventQueue.bind('Farm/noUnitsNoCommands', function () {
-            $status.html(Locale('farm', 'events.noUnitsNoCommands'))
-        })
-
-        eventQueue.bind('Farm/start', function () {
-            $status.html(Locale('farm', 'events.attacking'))
-        })
-
-        eventQueue.bind('Farm/pause', function () {
-            $status.html(Locale('common', 'paused'))
-        })
-
-        eventQueue.bind('Farm/noVillages', function () {
-            $status.html(Locale('farm', 'events.noVillages'))
-        })
-
-        eventQueue.bind('Farm/stepCycle/end', function () {
-            $status.html(Locale('farm', 'events.stepCycle/nnd'))
-        })
-
-        eventQueue.bind('Farm/stepCycle/next', function () {
-            var next = $timeHelper.gameTime() + Farm.cycle.getInterval()
-
-            $status.html(Locale('farm', 'events.stepCycle/next', {
-                time: utils.formatDate(next)
-            }))
-        })
-
-        eventQueue.bind('Farm/stepCycle/next/noVillages', function () {
-            var next = $timeHelper.gameTime() + Farm.cycle.getInterval()
-
-            $status.html(Locale('farm', 'events.stepCycle/next/noVillages', {
-                time: utils.formatDate(next)
-            }))
-        })
-
-        eventQueue.bind('Farm/villagesUpdate', function () {
-            updateSelectedVillage()
-        })
-
-        eventQueue.bind('Farm/loadingTargets/start', function () {
-            $status.html(Locale('farm', 'events.loadingTargets'))
-        })
-
-        eventQueue.bind('Farm/loadingTargets/end', function () {
-            $status.html(Locale('farm', 'events.analyseTargets'))
-        })
-
-        eventQueue.bind('Farm/attacking', function () {
-            $status.html(Locale('farm', 'events.attacking'))
-        })
-
-        eventQueue.bind('Farm/commandLimit/single', function () {
-            $status.html(Locale('farm', 'events.commandLimit'))
-        })
-
-        eventQueue.bind('Farm/commandLimit/multi', function () {
-            $status.html(Locale('farm', 'events.noVillages'))
-        })
-
-        eventQueue.bind('Farm/resetEvents', function () {
-            eventsCount = 0
-            populateEvents()
-        })
-
-        eventQueue.bind('Farm/groupsChanged', function () {
-            updateGroupList()
-        })
-
-        eventQueue.bind('Farm/presets/loaded', function () {
-            updatePresetList()
-        })
-
-        eventQueue.bind('Farm/presets/change', function () {
-            updatePresetList()
-        })
-
-        eventQueue.bind('Farm/start', function () {
-            $start.html(Locale('common', 'pause'))
-            $start.removeClass('btn-green').addClass('btn-red')
-            opener.$elem.removeClass('btn-green').addClass('btn-red')
-        })
-
-        eventQueue.bind('Farm/pause', function () {
-            $start.html(Locale('common', 'start'))
-            $start.removeClass('btn-red').addClass('btn-green')
-            opener.$elem.removeClass('btn-red').addClass('btn-green')
-        })
-
-        eventQueue.bind('Farm/settingError', function (key, replaces) {
-            var localeKey = 'settingError.' + key
-
-            utils.emitNotif('error', Locale('farm', localeKey, replaces))
-        })
-
-        eventQueue.bind('Farm/fullStorage', function () {
-            $status.html(Locale('farm', 'events.fullStorage'))
-        })
-
-        if (modelDataService.getPresetList().isLoaded()) {
-            updatePresetList()
         }
 
-        populateSettings()
-        bindEvents()
-        updateGroupList()
+        var updateLogs = function () {
+            $scope.logs = angular.copy(farmOverflow.getLogs())
+
+            loadVillagesLabel()
+            updateVisibleLogs()
+        }
+
+        var updateVisibleLogs = function () {
+            var offset = $scope.pagination.offset
+            var limit = $scope.pagination.limit
+
+            $scope.visibleLogs = $scope.logs.slice(offset, offset + limit)
+        }
+
+        $scope = window.$scope = $rootScope.$new()
+        $scope.textObject = textObject
+        $scope.textObjectCommon = textObjectCommon
+        $scope.version = '__farm_version'
+        $scope.presets = []
+        $scope.groups = []
+        $scope.groupsWithDisabled = []
+        $scope.selectedTab = 'settings'
+        $scope.settings = genInitialSelectValues()
+        $scope.selectedVillage = farmOverflow.getSelectedVillage()
+        $scope.lastAttack = farmOverflow.getLastAttack()
+        $scope.running = farmOverflow.isRunning()
+        $scope.currentStatus = farmOverflow.getCurrentStatus()
+        $scope.logs = farmOverflow.getLogs()
+        $scope.villagesLabel = {}
+        $scope.visibleLogs = []
+        $scope.pagination = {
+            count: $scope.logs.length,
+            offset: 0,
+            loader: updateVisibleLogs,
+            limit: storageService.getPaginationLimit()
+        }
+
+        updateVisibleLogs()
+        updatePresets()
+        updateGroups()
+        loadVillagesLabel()
         updateSelectedVillage()
         updateLastAttack()
-        populateEvents()
+        registerEvents()
 
-        return ui
+        // scope functions
+        $scope.selectTab = selectTab
+        $scope.saveSettings = saveSettings
+        $scope.clearLogs = clearLogs
+        $scope.switchFarm = switchFarm
+        $scope.jumpToVillage = mapService.jumpToVillage
+        $scope.openVillageInfo = windowDisplayService.openVillageInfo
+
+        windowManagerService.getScreenWithInjectedScope('!twoverflow_farm_window', $scope)
+        $scope.settings = parseSettings(farmOverflow.getSettings())
     }
 
-    Farm.interface = function () {
-        Farm.interface = FarmInterface()
-    }
+    ui.template('twoverflow_farm_window', `__farm_html_main`)
+    ui.css('__farm_css_style')
+
+    var opener = new FrontButton('Farmer', {
+        classHover: false,
+        classBlur: false,
+        onClick: buildWindow
+    })
 })

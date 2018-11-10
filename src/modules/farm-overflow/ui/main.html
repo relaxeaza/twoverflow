@@ -1,0 +1,301 @@
+<div id="two-farmoverflow" class="win-content">
+    <header class="win-head">
+        <h2>FarmOverflow <span class="small">v{{ version }}</span></h2>
+        <ul class="list-btn">
+            <li><a href="#" class="size-34x34 btn-red icon-26x26-close" ng-click="closeWindow()"></a></li>
+        </ul>
+    </header>
+    <div class="win-main" scrollbar="">
+        <div class="tabs tabs-bg">
+            <div class="tabs-two-col">
+                <div class="tab" ng-click="selectTab('settings')" ng-class="{true:'tab-active', false:''}[selectedTab == 'settings']">
+                    <div class="tab-inner">
+                        <div ng-class="{'box-border-light': selectedTab === 'settings'}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== 'settings'}">{{ 'settings' | i18n:loc.ale:textObjectCommon }}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab" ng-click="selectTab('logs')" ng-class="{true:'tab-active', false:''}[selectedTab == 'logs']">
+                    <div class="tab-inner">
+                        <div ng-class="{'box-border-light': selectedTab === 'logs'}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== 'logs'}">{{ 'logs' | i18n:loc.ale:textObjectCommon }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-paper footer">
+            <div class="scroll-wrap">
+                
+                <!-- settings -->
+
+                <div class="settings" ng-show="selectedTab === 'settings'">
+                    <table class="tbl-border-light tbl-content tbl-medium-height">
+                        <colgroup>
+                            <col>
+                            <col width="200px">
+                        </colgroup>
+                        <tr>
+                            <th colspan="2">{{ 'groups_presets' | i18n:loc.ale:textObject }}</th>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'presets' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div select="" list="presets" selected="settings.presets" drop-down="true"></div></td>
+                        </tr>
+
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'group_ignored' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div select="" list="groupsWithDisabled" selected="settings.groupIgnore" drop-down="true"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'group_include' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div select="" list="groups" selected="settings.groupInclude" drop-down="true"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'group_only' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div select="" list="groups" selected="settings.groupOnly" drop-down="true"></div></td>
+                        </tr>
+                    </table>
+
+                    <table class="tbl-border-light tbl-content tbl-medium-height">
+                        <colgroup>
+                            <col>
+                            <col width="200px">
+                            <col width="60px">
+                        </colgroup>
+                        <tr>
+                            <th colspan="3">{{ 'misc' | i18n:loc.ale:textObject }}</th>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'random_base' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="30" value="settings.randomBase" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.randomBase"></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'commands_per_village' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="50" value="settings.commandsPerVillage" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.commandsPerVillage"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'priority_targets' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings.priorityTargets" vertical="false" size="'56x28'"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'ignore_on_loss' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="settings.groupIgnore.value" border="true" value="settings.ignoreOnLoss" vertical="false" size="'56x28'"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'ignore_full_storage' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings.ignoreFullStorage" vertical="false" size="'56x28'"></div></td>
+                        </tr>
+                    </table>
+
+                    <table class="tbl-border-light tbl-content tbl-medium-height">
+                        <colgroup>
+                            <col>
+                            <col width="200px">
+                            <col width="60px">
+                        </colgroup>
+                        <tr>
+                            <th colspan="3">{{ 'step_cycle_header' | i18n:loc.ale:textObject }}</th>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'step_cycle' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings.stepCycle" vertical="false" size="'56x28'"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'step_cycle_notifs' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="settings.stepCycle" border="true" value="settings.stepCycleNotifs" vertical="false" size="'56x28'"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'step_cycle_interval' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="120" value="settings.stepCycleInterval" enabled="settings.stepCycle"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.stepCycleInterval" ng-disabled="!settings.stepCycle"></td>
+                        </tr>
+                    </table>
+
+                    <table class="tbl-border-light tbl-content tbl-medium-height">
+                        <colgroup>
+                            <col>
+                            <col width="200px">
+                            <col width="60px">
+                        </colgroup>
+                        <tr>
+                            <th colspan="3">{{ 'target_filters' | i18n:loc.ale:textObject }}</th>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'min_distance' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="50" value="settings.minDistance" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.minDistance"></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'max_distance' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="50" value="settings.maxDistance" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.maxDistance"></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'min_points' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="13000" value="settings.minPoints" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.minPoints"></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'max_points' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="13000" value="settings.maxPoints" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.maxPoints"></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'max_travel_time' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="180" value="settings.maxTravelTime" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.maxTravelTime"></td>
+                        </tr>
+                    </table>
+
+                    <table class="tbl-border-light tbl-content tbl-medium-height">
+                        <colgroup>
+                            <col>
+                            <col width="200px">
+                            <col width="60px">
+                        </colgroup>
+                        <tr>
+                            <th colspan="3">{{ 'logs' | i18n:loc.ale:textObjectCommon }}</th>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'logs_limit' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="1000" value="settings.logsLimit" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.logsLimit"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'event_attack' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings.eventAttack" vertical="false" size="'56x28'"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'event_village_change' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings.eventVillageChange" vertical="false" size="'56x28'"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'event_priority_add' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings.eventPriorityAdd" vertical="false" size="'56x28'"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'event_ignored_village' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings.eventIgnoredVillage" vertical="false" size="'56x28'"></div></td>
+                        </tr>
+                    </table>
+
+                    <table class="tbl-border-light tbl-content tbl-medium-height">
+                        <colgroup>
+                            <col>
+                            <col width="200px">
+                        </colgroup>
+                        <tr>
+                            <th colspan="2">{{ 'others' | i18n:loc.ale:textObjectCommon }}</th>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'remote' | i18n:loc.ale:textObject }}</span></td>
+                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings.remoteId"></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'hotkey_switch' | i18n:loc.ale:textObject }}</span></td>
+                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings.hotkeySwitch"></td>
+                        </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'hotkey_window' | i18n:loc.ale:textObject }}</span></td>
+                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings.hotkeyWindow"></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- logs -->
+
+                <div class="logs rich-text" ng-show="selectedTab === 'logs'">
+                    <table class="status tbl-border-light">
+                        <colgroup>
+                            <col width="135px">
+                            <col width="*">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td>{{ 'status' | i18n:loc.ale:textObjectCommon }}</td>
+                                <td>
+                                    <span>{{ currentStatus | i18n:loc.ale:textObject }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'selected_village' | i18n:loc.ale:textObject }}</td>
+                                <td>
+                                    <span ng-show="selectedVillage" class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(selectedVillage.id)">{{ selectedVillage.name }} ({{ selectedVillage.x }}|{{ selectedVillage.y }})</span>
+                                    <span ng-show="!selectedVillage">{{ 'none' | i18n:loc.ale:textObjectCommon }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'last_attack' | i18n:loc.ale:textObject }}</td>
+                                <td>
+                                    <span ng-show="lastAttack !== -1">{{ lastAttack | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
+                                    <span ng-show="lastAttack === -1">{{ 'none' | i18n:loc.ale:textObjectCommon }}</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h5 class="twx-section">{{ 'logs' | i18n:loc.ale:textObjectCommon }}</h5>
+
+                    <div class="page-wrap" pagination="pagination"></div>
+                    <table class="log-list tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col width="180px">
+                            <col width="30px">
+                            <col>
+                        </colgroup>
+                        <tr ng-show="!visibleLogs.length">
+                            <td>{{ 'no_logs' | i18n:loc.ale:textObject }}</td>
+                        </tr>
+                        <tr ng-repeat="log in visibleLogs">
+                            <td>{{ log.time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
+                            <td><span class="icon-bg-black icon-26x26-{{ log.icon }}"></span></td>
+                            
+                            <td ng-if="log.type === 'attack'">
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.origin.id)" tooltip="" tooltip-content="{{ villagesLabel[log.origin.coords] }}">{{ villagesLabel[log.origin.coords] }}</span>
+                                {{ 'attack' | i18n:loc.ale:textObject }}
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.target.id)" tooltip="" tooltip-content="{{ villagesLabel[log.target.coords] }}">{{ villagesLabel[log.target.coords] }}</span>
+                            </td>
+                            <td ng-if="log.type === 'village_switch'">
+                                {{ 'village_switch' | i18n:loc.ale:textObject }}
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.village.id)" tooltip="" tooltip-content="{{ villagesLabel[log.village.coords] }}">{{ villagesLabel[log.village.coords] }}</span>
+                            </td>
+                            <td ng-if="log.type === 'no_preset'">
+                                {{ 'no_preset' | i18n:loc.ale:textObject }}
+                            </td>
+                            <td ng-if="log.type === 'priority_target'">
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.village.id)" tooltip="" tooltip-content="{{ villagesLabel[log.village.coords] }}">{{ villagesLabel[log.village.coords] }}</span>
+                                {{ 'priority_target' | i18n:loc.ale:textObject }}
+                            </td>
+                            <td ng-if="log.type === 'ignored_village'">
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.village.id)" tooltip="" tooltip-content="{{ villagesLabel[log.village.coords] }}">{{ villagesLabel[log.village.coords] }}</span>
+                                {{ 'ignored_village' | i18n:loc.ale:textObject }}
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="page-wrap" pagination="pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="win-foot">
+        <ul class="list-btn list-center">
+            <li ng-show="selectedTab === 'settings'">
+                <a href="#" class="btn-border btn-orange" ng-click="saveSettings()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
+            </li>
+            <li ng-show="selectedTab === 'logs'">
+                <a href="#" class="btn-border btn-orange" ng-click="clearLogs()">{{ 'clear_logs' | i18n:loc.ale:textObject }}</a>
+            </li>
+            <li>
+                <a href="#" ng-class="{false:'btn-green', true:'btn-red'}[running]" class="btn-border" ng-click="switchFarm()">
+                    <span ng-show="running">{{ 'pause' | i18n:loc.ale:textObjectCommon }}</span>
+                    <span ng-show="!running">{{ 'start' | i18n:loc.ale:textObjectCommon }}</span>
+                </a>
+            </li>
+        </ul>
+    </footer>
+</div>
