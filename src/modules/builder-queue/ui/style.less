@@ -21,7 +21,20 @@
         min-width: 70%;
     }
 
-    .settings {
+    .settings,
+    .preset-editor {
+        tr.selected td {
+            background-color: #ada57f;
+        }
+
+        .selected-preset {
+            margin-top: 15px;
+        }
+        
+        .custom-select {
+            width: 200px;
+        }
+    
         .helper {
             font-weight: bold;
             vertical-align: -1px;
@@ -31,10 +44,6 @@
             &:hover {
                 color: #000;
             }
-        }
-
-        .custom-select {
-            width: 200px;
         }
 
         td {

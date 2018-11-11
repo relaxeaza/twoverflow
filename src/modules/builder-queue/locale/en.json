@@ -12,5 +12,13 @@
     "settings.buildingsOrderFinal": "Buildings Level",
     "settings.saved": "Settings saved!",
     "logs.noBuilds": "No builds started",
-    "logs.clear": "Clear logs"
+    "logs.clear": "Clear logs",
+    "presets.move-up": "Move up",
+    "presets.move-down": "Move down",
+    "presets.add-building": "Add building",
+    "presets.select-to-edit": "Select a preset to edit",
+    "presets.edit-preset": "Edit preset",
+    "presets.presets": "— Presets —",
+    "preset.updated": "Building order preset \"%{presetId}\" updated",
+    "preset.added": "Building order preset \"%{presetId}\" added"
 }

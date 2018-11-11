@@ -36,6 +36,7 @@ define('two/builder/ui', [
     var $clearLogs
     var disabled
     var buildingsLevelPoints = {}
+    var activePresetId = null
     var ordenedBuildings = [
         BUILDING_TYPES.HEADQUARTER,
         BUILDING_TYPES.TIMBER_CAMP,
@@ -55,6 +56,15 @@ define('two/builder/ui', [
         BUILDING_TYPES.ACADEMY,
         BUILDING_TYPES.PRECEPTORY
     ]
+
+    var editorActivePreset = null
+    var $editorSelectPreset
+    var $editorSelectedPreset
+    var $editorSelectedPresetOrder
+    var $editorMoveUp
+    var $editorMoveDown
+    var $editorAddBuilding
+    var $editorSave
 
     var init = function () {
         groups = modelDataService.getGroupList().getGroups()
@@ -93,20 +103,95 @@ define('two/builder/ui', [
         $noBuilds = $window.find('.noBuilds')
         $clearLogs = $window.find('.clearLogs')
 
+        $editorSelectPreset = $window.find('.select-preset')
+        $editorSelectedPreset = $window.find('.selected-preset')
+        $editorSelectedPresetOrder = $window.find('.selected-preset-order')
+        $editorMoveUp = $window.find('.move-up')
+        $editorMoveDown = $window.find('.move-down')
+        $editorAddBuilding = $window.find('.add-building')
+        $editorSave = $window.find('.editor-save')
+
         populateSettings()
         updateGroupVillages()
         updateBuildingPresets()
+        updateEditorPresets()
         populateLog()
         bindEvents()
 
         return ui
     }
 
+    var moveArrayIndex = function (arr, from, to) {
+        arr.splice(to, 0, arr.splice(from, 1)[0])
+    }
+
     var bindEvents = function () {
+        $editorMoveUp.on('click', function () {
+            if (!editorActivePreset) {
+                return false
+            }
+
+            var selectedItems = getSelectedPresetItems()
+            var newSelectedItems = []
+            var newIndex
+
+            selectedItems.forEach(function (index) {
+                if (index === 0) {
+                    return false
+                }
+
+                newIndex = index - 1
+                newSelectedItems.push(newIndex)
+                moveArrayIndex(editorActivePreset.value, index, newIndex)
+            })
+
+            populateEditorPresetOrder()
+            editorSelectPresetItems(newSelectedItems)
+        })
+
+        $editorMoveDown.on('click', function () {
+            if (!editorActivePreset) {
+                return false
+            }
+
+            var selectedItems = getSelectedPresetItems()
+            var newSelectedItems = []
+            var newIndex
+
+            selectedItems.reverse().forEach(function (index) {
+                if (index === editorActivePreset.value.length - 1) {
+                    return false
+                }
+
+                newIndex = index + 1
+                newSelectedItems.push(newIndex)
+                moveArrayIndex(editorActivePreset.value, index, newIndex)
+
+            })
+
+            populateEditorPresetOrder()
+            editorSelectPresetItems(newSelectedItems)
+        })
+
+        $editorSave.on('click', function () {
+            if (!editorActivePreset) {
+                return false
+            }
+
+            Builder.updateBuildingOrder(
+                editorActivePreset.id,
+                editorActivePreset.value
+            )
+        })
+
         $buildingPresets.on('selectSelected', function () {
             populateBuildingOrder(this.dataset.value)
             populateBuildingOrderFinal(this.dataset.value)
             updateReachedLevelItems()
+        })
+
+        $editorSelectPreset.on('selectSelected', function () {
+            populateEditorPresetOrder(this.dataset.value)
         })
 
         $save.on('click', function (event) {
@@ -142,6 +227,24 @@ define('two/builder/ui', [
         eventQueue.bind('Builder/jobStarted', insertLog)
         eventQueue.bind('Builder/clearLogs', clearLogs)
 
+        eventQueue.bind('Builder/buildingOrders/updated', function (presetId) {
+            if (activePresetId === presetId) {
+                populateBuildingOrder()
+                populateBuildingOrderFinal()
+                updateReachedLevelItems()
+            }
+
+            utils.emitNotif('success', Locale('builder', 'preset.updated', {
+                presetId: presetId
+            }))
+        })
+
+        eventQueue.bind('Builder/buildingOrders/added', function (presetId) {
+            utils.emitNotif('success', Locale('builder', 'preset.added', {
+                presetId: presetId
+            }))
+        })
+
         rootScope.$on(eventTypeProvider.GROUPS_UPDATED, function () {
             updateGroupVillages()
         })
@@ -166,7 +269,7 @@ define('two/builder/ui', [
         var $data = $buildingPresets.find('.custom-select-data').html('')
         var settings = Builder.getSettings()
 
-        for (var presetName in settings.buildingOrder) {
+        for (var presetName in settings.buildingOrders) {
             var selected = settings.buildingPreset == presetName
 
             if (selected) {
@@ -181,6 +284,33 @@ define('two/builder/ui', [
             })
 
             $buildingPresets.append($data)
+        }
+    }
+
+    /**
+     * Update/populate the list of building presets on presets tab.
+     */
+    var updateEditorPresets = function updateEditorPresets () {
+        var $selectedOption = $editorSelectPreset.find('.custom-select-handler').html('')
+        var $data = $editorSelectPreset.find('.custom-select-data').html('')
+        var presetName
+        var settings = Builder.getSettings()
+        var presetsText = Locale('builder', 'presets.presets')
+
+        // Create a first, non-value option.
+        appendSelectData($data, {
+            name: presetsText,
+            value: 0
+        })
+        $selectedOption.html(presetsText)
+
+        for (presetName in settings.buildingOrders) {
+            appendSelectData($data, {
+                name: presetName,
+                value: presetName
+            })
+
+            $editorSelectPreset.append($data)
         }
     }
 
@@ -334,13 +464,17 @@ define('two/builder/ui', [
     }
 
     /**
-     * @param {String=} preset Use a specific building order preset
+     * @param {String=} _presetId Use a specific building order preset
      *   instead of the selected one.
      */
-    var populateBuildingOrder = function populateBuildingOrder (_preset) {
+    var populateBuildingOrder = function populateBuildingOrder (_presetId) {
         var buildingOrder = {}
         var settings = Builder.getSettings()
-        var presetBuildings = settings.buildingOrder[_preset || settings.buildingPreset]
+
+        _presetId = _presetId || settings.buildingPreset
+        activePresetId = _presetId
+
+        var presetBuildings = settings.buildingOrders[_presetId]
         var buildingData = modelDataService.getGameData().getBuildings()
 
         for (var buildingName in BUILDING_TYPES) {
@@ -381,7 +515,7 @@ define('two/builder/ui', [
     var populateBuildingOrderFinal = function populateBuildingOrderFinal (_preset) {
         var buildingOrderFinal = {}
         var settings = Builder.getSettings()
-        var presetBuildings = settings.buildingOrder[_preset || settings.buildingPreset]        
+        var presetBuildings = settings.buildingOrders[_preset || settings.buildingPreset]        
 
         $buildingOrderFinal.html('')
 
@@ -522,10 +656,18 @@ define('two/builder/ui', [
         })
     }
 
+    /**
+     * Calculate the total of points accumulated ultil the specified level.
+     */
     var getLevelScale = function (factor, base, level) {
         return level ? parseInt(Math.round(factor * Math.pow(base, level - 1)), 10) : 0
     }
 
+    /**
+     * Calculate the points gained by each level of each building.
+     * 
+     * @return {Object<Array>}
+     */
     var getBuildingsLevelPoints = function () {
         var $gameData = modelDataService.getGameData()
         var buildingsLevelPoints = {}
@@ -550,6 +692,132 @@ define('two/builder/ui', [
         }
 
         return buildingsLevelPoints
+    }
+
+    /**
+     * Populate the selected preset in the view to be edited.
+     *
+     * If no _presetId is specified, the current selected preset
+     * will be re-populated.
+     *
+     * @param {String} _presetId
+     */
+    var populateEditorPresetOrder = function populateEditorPresetOrder (_presetId) {
+        if (_presetId === '0') {
+            return clearEditorPresetOrder()
+        }
+
+        if (!editorActivePreset) {
+            enableMoveButtons()
+        } else if (editorActivePreset && _presetId) {
+            editorActivePreset = null
+        }
+
+        var buildingOrder = {}
+        var settings = Builder.getSettings()
+        var presetBuildings
+        var buildingData = modelDataService.getGameData().getBuildings()
+        var orderNum = 0
+        var buildingName
+
+        if (editorActivePreset) {
+            presetBuildings = editorActivePreset.value
+        } else {
+            presetBuildings = settings.buildingOrders[_presetId]
+            editorActivePreset = {
+                id: _presetId,
+                value: angular.copy(presetBuildings)
+            }
+        }
+
+        for (buildingName in BUILDING_TYPES) {
+            buildingOrder[BUILDING_TYPES[buildingName]] = 0
+        }
+
+        $editorSelectedPresetOrder.html('')
+
+        presetBuildings.forEach(function (building) {
+            var level = ++buildingOrder[building]
+            var $item = document.createElement('tr')
+            
+            $item.innerHTML = ejs.render('__builder_html_editor-order-item', {
+                locale: Locale,
+                orderNum: orderNum++,
+                building: building,
+                level: level
+            })
+
+            $item.dataset.building = building
+            $item.dataset.level = level
+            $item.dataset.level = level
+
+            $editorSelectedPresetOrder.append($item)
+        })
+
+        $editorSelectedPresetOrder.find('input').on('change', function () {
+            var $label = this.parentElement
+            var $tr = $label.parentElement.parentElement
+
+            if (this.checked) {
+                $label.classList.add('icon-26x26-checkbox-checked')
+                $tr.classList.add('selected')
+            } else {
+                $label.classList.remove('icon-26x26-checkbox-checked')
+                $tr.classList.remove('selected')
+            }
+        })
+
+        $editorSelectedPreset.show()
+        ui.recalcScrollbar()
+    }
+
+    var enableMoveButtons = function () {
+        $editorMoveUp.removeClass('btn-grey').addClass('btn-green')
+        $editorMoveDown.removeClass('btn-grey').addClass('btn-green')
+    }
+
+    var disableMoveButtons = function () {
+        $editorMoveUp.removeClass('btn-green').addClass('btn-grey')
+        $editorMoveDown.removeClass('btn-green').addClass('btn-grey')
+    }
+
+    var clearEditorPresetOrder = function () {
+        editorActivePreset = null
+        $editorSelectedPreset.hide()
+        $editorSelectedPresetOrder.html('')
+        disableMoveButtons()
+        ui.recalcScrollbar()
+    }
+
+    /**
+     * @return {Array} - Checked input indexes.
+     */
+    var getSelectedPresetItems = function () {
+        if (!editorActivePreset) {
+            return false
+        }
+
+        var selectedItems = []
+
+        $editorSelectedPresetOrder.find('input:checked').forEach(function (elem) {
+            selectedItems.push(parseInt(elem.dataset.ordernum, 10))
+        })
+
+        return selectedItems
+    }
+
+    /**
+     * Check multiple checkbox inputs from the active editing preset.
+     *
+     * @param {Array<Number>} itemsToSelect - List of input index to be checked.
+     */
+    var editorSelectPresetItems = function (itemsToSelect) {
+        var $inputs = $editorSelectedPresetOrder.find('input')
+
+        itemsToSelect.forEach(function (index) {
+            $inputs[index].checked = true
+            $($inputs[index]).trigger('change')
+        })
     }
 
     Builder.interface = function () {

@@ -12,5 +12,13 @@
     "settings.buildingsOrderFinal": "Nível dos Edifícios",
     "settings.saved": "Configurações salvas!",
     "logs.noBuilds": "Nenhuma construção iniciada",
-    "logs.clear": "Limpar registros"
+    "logs.clear": "Limpar registros",
+    "presets.move-up": "Mover acima",
+    "presets.move-down": "Mover abaixo",
+    "presets.add-building": "Adicionar edifício",
+    "presets.select-to-edit": "Selecione uma predefinição para editar",
+    "presets.edit-preset": "Editar predefinição",
+    "presets.presets": "— Predefinições —",
+    "preset.updated": "Predefinição de ordem \"%{presetId}\" atualizada",
+    "preset.added": "Predefinição de ordem \"%{presetId}\" adicionada"
 }

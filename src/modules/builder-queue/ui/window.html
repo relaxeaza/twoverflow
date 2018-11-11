@@ -7,10 +7,15 @@
     </header>
 
     <div class="tabs tabs-bg">
-        <div class="tabs-two-col">
+        <div class="tabs-three-col">
             <div class="tab" tab="settings">
                 <div class="tab-inner">
                     <div><a href="#" class="btn-icon btn-orange"><#= locale("common", "settings") #></a></div>
+                </div>
+            </div>
+            <div class="tab" tab="presets">
+                <div class="tab-inner">
+                    <div><a href="#" class="btn-icon btn-orange"><#= locale("common", "presets") #></a></div>
                 </div>
             </div>
             <div class="tab" tab="log">
@@ -94,6 +99,48 @@
             </form>
         </div>
 
+        <!-- presets tab -->
+        <div class="box-paper footer has-footer-upper twOverflow-content-presets preset-editor">
+            <h5 class="twx-section collapse"><#= locale("builder", "presets.edit-preset") #></h5>
+            <table class="tbl-border-light tbl-striped">
+                <colgroup>
+                    <col width="50%">
+                    <col>
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span class="ff-cell-fix"><#= locale("builder", "presets.select-to-edit") #></span>
+                        </td>
+                        <td>
+                            <select class="select-preset"></select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="selected-preset" style="display:none">
+                <table class="tbl-border-light header-center">
+                    <colgroup>
+                        <col width="7%">
+                        <col width="7%">
+                        <col width="*">
+                        <col width="7%">
+                        <col>
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th><#= locale("common", "building") #></th>
+                            <th></th>
+                            <th><#= locale("common", "building") #></th>
+                            <th><#= locale("common", "level") #></th>
+                        </tr>
+                    </thead>
+                    <tbody class="selected-preset-order"></tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="box-paper footer has-footer-upper twOverflow-content-log">
             <table class="tbl-border-light tbl-striped header-center">
                 <colgroup>
@@ -124,11 +171,34 @@
             <li class="twOverflow-button-settings">
                 <a class="btn-orange btn-border save"><#= locale("common", "save") #></a>
             </li>
+            <li class="twOverflow-button-settings">
+                <a class="btn-green btn-border switch"><#= locale("common", "start") #></a>
+            </li>
+
             <li class="twOverflow-button-log">
                 <a class="btn-orange btn-border clearLogs"><#= locale("builder", "logs.clear") #></a>
             </li>
-            <li class="twOverflow-button">
-                <a class="btn-green btn-border switch"><#= locale("common", "start") #></a>
+
+            <li class="twOverflow-button-presets">
+                <a class="btn-grey btn-border move-up">
+                    <span class="icon-26x26-normal-arrow-up"></span>
+                    <#= locale("builder", "presets.move-up") #>
+                </a>
+            </li>
+            <li class="twOverflow-button-presets">
+                <a class="btn-grey btn-border move-down">
+                    <span class="icon-26x26-normal-arrow-down"></span>
+                    <#= locale("builder", "presets.move-down") #>
+                </a>
+            </li>
+            <li class="twOverflow-button-presets">
+                <a class="btn-green btn-border add-building">
+                    <span class="icon-26x26-rte-building"></span>
+                    <#= locale("builder", "presets.add-building") #>
+                </a>
+            </li>
+            <li class="twOverflow-button-presets">
+                <a class="btn-red btn-border editor-save"><#= locale("common", "save") #></a>
             </li>
         </ul>
     </footer>
