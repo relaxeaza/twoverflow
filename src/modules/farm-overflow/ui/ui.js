@@ -249,6 +249,10 @@ define('two/farm/ui', [
             }
         }
 
+        var resetLogsHandler = function () {
+            utils.emitNotif('success',$filter('i18n')('reseted_logs', $rootScope.loc.ale, textObject))
+        }
+
         var updateSelectedVillage = function () {
             $scope.selectedVillage = farmOverflow.getSelectedVillage()
         }
@@ -316,6 +320,7 @@ define('two/farm/ui', [
             registerEvent(eventTypeProvider.FARM_SEND_COMMAND, updateLastAttack)
             registerEvent(eventTypeProvider.FARM_STATUS_CHANGE, updateCurrentStatus)
             registerEvent(eventTypeProvider.FARM_RESET_LOGS, updateLogs)
+            registerEvent(eventTypeProvider.FARM_LOGS_RESETED, resetLogsHandler)
             registerEvent(eventTypeProvider.FARM_LOGS_UPDATED, updateLogs)
             registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END, stepCycleEndHandler)
             registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, stepCycleEndNoVillagesHandler)

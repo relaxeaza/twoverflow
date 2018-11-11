@@ -1653,6 +1653,7 @@ define('two/farm', [
     var clearLogs = function () {
         logs = []
         Lockr.set(STORAGE_ID.LOGS, logs)
+        eventQueue.trigger(eventTypeProvider.FARM_LOGS_RESETED)
     }
 
     var getSelectedVillage = function () {

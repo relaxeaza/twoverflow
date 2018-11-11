@@ -59,6 +59,7 @@
         "misc": "Diversos",
         "attack": "ataca",
         "no_logs": "Nenhum log registrado",
-        "clear_logs": "Limpar eventos"
+        "clear_logs": "Limpar eventos",
+        "reseted_logs": "Registro de eventos resetado."
     }
 }

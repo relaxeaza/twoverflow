@@ -59,6 +59,7 @@
         "misc": "Miscellaneous",
         "attack": "attack",
         "no_logs": "No logs registered",
-        "clear_logs": "Clear logs"
+        "clear_logs": "Clear logs",
+        "reseted_logs": "Registered logs reseted."
     }
 }

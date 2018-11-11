@@ -17,6 +17,7 @@ define('two/farm/Events', [], function () {
         FARM_PRESETS_CHANGE: 'farmoverflow_presets_change',
         FARM_GROUPS_CHANGED: 'farmoverflow_groups_changed',
         FARM_LOGS_UPDATED: 'farmoverflow_logs_updated',
+        FARM_LOGS_RESETED: 'farmoverflow_logs_reseted',
         FARM_IGNORED_VILLAGE: 'farmoverflow_ignored_village',
         FARM_LOADING_TARGETS_START: 'farmoverflow_loading_targets_start',
         FARM_LOADING_TARGETS_END: 'farmoverflow_loading_targets_end',
