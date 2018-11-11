@@ -320,7 +320,6 @@ define('two/farm/ui', [
             registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END, farmStepCycleEndHandler)
             registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, farmStepCycleEndNoVillagesHandler)
             registerEvent(eventTypeProvider.FARM_STEP_CYCLE_NEXT, farmStepCycleNextHandler)
-            console.log('registerEvent', eventTypeProvider.FARM_ERROR, farmErrorHandler)
             registerEvent(eventTypeProvider.FARM_ERROR, farmErrorHandler)
 
             var windowListener = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, function (event, templateName) {
