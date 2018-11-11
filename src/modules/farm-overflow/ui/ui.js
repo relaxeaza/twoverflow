@@ -253,6 +253,10 @@ define('two/farm/ui', [
             utils.emitNotif('success',$filter('i18n')('reseted_logs', $rootScope.loc.ale, textObject))
         }
 
+        var saveSettingsHandler = function () {
+            utils.emitNotif('success',$filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
+        }
+
         var updateSelectedVillage = function () {
             $scope.selectedVillage = farmOverflow.getSelectedVillage()
         }
@@ -326,6 +330,7 @@ define('two/farm/ui', [
             registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, stepCycleEndNoVillagesHandler)
             registerEvent(eventTypeProvider.FARM_STEP_CYCLE_NEXT, stepCycleNextHandler)
             registerEvent(eventTypeProvider.FARM_ERROR, errorHandler)
+            registerEvent(eventTypeProvider.FARM_SETTINGS_CHANGE, saveSettingsHandler)
 
             var windowListener = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, function (event, templateName) {
                 if (templateName === '!twoverflow_farm_window') {
