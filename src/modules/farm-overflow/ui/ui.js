@@ -193,7 +193,7 @@ define('two/farm/ui', [
             farmOverflow.switch(true)
         }
 
-        var farmStartHandler = function (event, _manual) {
+        var startHandler = function (event, _manual) {
             $scope.running = true
 
             if (_manual) {
@@ -201,15 +201,15 @@ define('two/farm/ui', [
             }
         }
 
-        var farmPauseHandler = function (event, _manual) {
+        var pauseHandler = function (event, _manual) {
             $scope.running = false
 
             if (_manual) {
-                utils.emitNotif('success', $filter('i18n')('farm_started', $rootScope.loc.ale, textObject))
+                utils.emitNotif('success', $filter('i18n')('farm_paused', $rootScope.loc.ale, textObject))
             }
         }
 
-        var farmStepCycleEndHandler = function () {
+        var stepCycleEndHandler = function () {
             var settings = farmOverflow.getSettings()
             
             if (settings.stepCycleNotifs) {
@@ -217,11 +217,11 @@ define('two/farm/ui', [
             }
         }
 
-        var farmStepCycleEndNoVillagesHandler = function () {
+        var stepCycleEndNoVillagesHandler = function () {
             utils.emitNotif('error', $filter('i18n')('step_cycle_end_no_villages', $rootScope.loc.ale, textObject))
         }
 
-        var farmStepCycleNextHandler = function () {
+        var stepCycleNextHandler = function () {
             var settings = farmOverflow.getSettings()
 
             if (settings.stepCycleNotifs) {
@@ -231,7 +231,7 @@ define('two/farm/ui', [
             }
         }
 
-        var farmErrorHandler = function (event, args) {
+        var errorHandler = function (event, args) {
             var error = args[0]
             var manual = args[1]
 
@@ -309,18 +309,18 @@ define('two/farm/ui', [
             registerEvent(eventTypeProvider.GROUPS_UPDATED, updateGroups, true)
             registerEvent(eventTypeProvider.GROUPS_CREATED, updateGroups, true)
             registerEvent(eventTypeProvider.GROUPS_DESTROYED, updateGroups, true)
-            registerEvent(eventTypeProvider.FARM_START, farmStartHandler)
-            registerEvent(eventTypeProvider.FARM_PAUSE, farmPauseHandler)
+            registerEvent(eventTypeProvider.FARM_START, startHandler)
+            registerEvent(eventTypeProvider.FARM_PAUSE, pauseHandler)
             registerEvent(eventTypeProvider.FARM_VILLAGES_UPDATE, updateSelectedVillage)
             registerEvent(eventTypeProvider.FARM_NEXT_VILLAGE, updateSelectedVillage)
             registerEvent(eventTypeProvider.FARM_SEND_COMMAND, updateLastAttack)
             registerEvent(eventTypeProvider.FARM_STATUS_CHANGE, updateCurrentStatus)
             registerEvent(eventTypeProvider.FARM_RESET_LOGS, updateLogs)
             registerEvent(eventTypeProvider.FARM_LOGS_UPDATED, updateLogs)
-            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END, farmStepCycleEndHandler)
-            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, farmStepCycleEndNoVillagesHandler)
-            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_NEXT, farmStepCycleNextHandler)
-            registerEvent(eventTypeProvider.FARM_ERROR, farmErrorHandler)
+            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END, stepCycleEndHandler)
+            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, stepCycleEndNoVillagesHandler)
+            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_NEXT, stepCycleNextHandler)
+            registerEvent(eventTypeProvider.FARM_ERROR, errorHandler)
 
             var windowListener = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, function (event, templateName) {
                 if (templateName === '!twoverflow_farm_window') {
