@@ -1,7 +1,7 @@
 define('two/queue', [
     'two/locale',
     'two/utils',
-    'two/eventQueue',
+    'queues/EventQueue',
     'helper/time',
     'helper/math',
     'struct/MapData',
@@ -425,7 +425,7 @@ define('two/queue', [
         storeSentQueue()
 
         Queue.removeCommand(command, EVENT_CODES.COMMAND_SENT)
-        eventQueue.trigger('Queue/command/send', [command])
+        eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND, [command])
     }
 
     /**
@@ -457,19 +457,19 @@ define('two/queue', [
      */
     Queue.addCommand = function (command) {
         if (!command.origin) {
-            return eventQueue.trigger('Queue/command/add/invalidOrigin', [command])
+            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, [command])
         }
 
         if (!command.target) {
-            return eventQueue.trigger('Queue/command/add/invalidTarget', [command])
+            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, [command])
         }
 
         if (!utils.isValidDateTime(command.date)) {
-            return eventQueue.trigger('Queue/command/add/invalidDate', [command])
+            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, [command])
         }
 
         if (!command.units || angular.equals(command.units, {})) {
-            return eventQueue.trigger('Queue/command/add/noUnits', [command])
+            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, [command])
         }
 
         command.originCoords = command.origin.x + '|' + command.origin.y
@@ -516,7 +516,7 @@ define('two/queue', [
             }
 
             if (isTimeToSend(command.sendTime)) {
-                return eventQueue.trigger('Queue/command/add/alreadySent', [command])
+                return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, [command])
             }
 
             if (command.type === 'attack' && 'supporter' in command.officers) {
@@ -540,16 +540,16 @@ define('two/queue', [
             sortWaitingQueue()
             storeWaitingQueue()
 
-            eventQueue.trigger('Queue/command/add', [command])
+            eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD, [command])
         })
 
         loadVillagesData.catch(function (errorCode) {
             switch (errorCode) {
             case ERROR_CODES.INVALID_ORIGIN:
-                eventQueue.trigger('Queue/command/add/invalidOrigin', [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, [command])
                 break
             case ERROR_CODES.INVALID_TARGET:
-                eventQueue.trigger('Queue/command/add/invalidTarget', [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, [command])
                 break
             }
         })
@@ -580,22 +580,22 @@ define('two/queue', [
         if (removed) {
             switch (eventCode) {
             case EVENT_CODES.TIME_LIMIT:
-                eventQueue.trigger('Queue/command/send/timeLimit', [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_TIME_LIMIT, [command])
                 break
             case EVENT_CODES.NOT_OWN_VILLAGE:
-                eventQueue.trigger('Queue/command/send/notOwnVillage', [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NOT_OWN_VILLAGE, [command])
                 break
             case EVENT_CODES.NOT_ENOUGH_UNITS:
-                eventQueue.trigger('Queue/command/send/noUnitsEnough', [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NO_UNITS_ENOUGH, [command])
                 break
             case EVENT_CODES.COMMAND_REMOVED:
-                eventQueue.trigger('Queue/command/remove', [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_REMOVE, [command])
                 break
             }
 
             return true
         } else {
-            eventQueue.trigger('Queue/command/remove/error', [command])
+            eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_REMOVE_ERROR, [command])
             return false
         }
     }
@@ -617,7 +617,7 @@ define('two/queue', [
      */
     Queue.start = function (disableNotif) {
         running = true
-        eventQueue.trigger('Queue/start', [disableNotif])
+        eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_START, [disableNotif])
     }
 
     /**
@@ -625,7 +625,7 @@ define('two/queue', [
      */
     Queue.stop = function () {
         running = false
-        eventQueue.trigger('Queue/stop')
+        eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_STOP)
     }
 
     /**
