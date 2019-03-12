@@ -411,4 +411,12 @@ define('two/farm/ui', [
         classBlur: false,
         onClick: buildWindow
     })
+
+    eventQueue.register(eventTypeProvider.FARM_START, function () {
+        opener.$elem.removeClass('btn-green').addClass('btn-red')
+    })
+
+    eventQueue.register(eventTypeProvider.FARM_PAUSE, function () {
+        opener.$elem.removeClass('btn-red').addClass('btn-green')
+    })
 })
