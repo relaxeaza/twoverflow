@@ -184,7 +184,7 @@ define('two/farm/ui', [
 
         var disabledOption = function () {
             return {
-                name: $filter('i18n')('disabled', $rootScope.loc.ale, textObject),
+                name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
                 value: false
             }
         }
@@ -360,7 +360,7 @@ define('two/farm/ui', [
             $scope.visibleLogs = $scope.logs.slice(offset, offset + limit)
         }
 
-        $scope = window.$scope = $rootScope.$new()
+        $scope = rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.version = '__farm_version'
