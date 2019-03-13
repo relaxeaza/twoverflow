@@ -5,7 +5,8 @@ define('two/queue/ui', [
     'two/FrontButton',
     'two/utils',
     'queues/EventQueue',
-    'helper/time'
+    'helper/time',
+    'helper/util'
 ], function (
     commandQueue,
     Locale,
@@ -13,7 +14,8 @@ define('two/queue/ui', [
     FrontButton,
     utils,
     eventQueue,
-    $timeHelper
+    $timeHelper,
+    util
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'
@@ -21,8 +23,6 @@ define('two/queue/ui', [
     var $gameData = modelDataService.getGameData()
     var orderedUnitNames = $gameData.getOrderedUnitNames()
     var orderedOfficerNames = $gameData.getOrderedOfficerNames()
-
-    console.log('i18n add_no_village', $filter('i18n')('add_no_village', rootScope.loc.ale, textObject))
 
     /**
      * @type {Object}
@@ -33,6 +33,11 @@ define('two/queue/ui', [
         TIME_LIMIT: 'timeLimit',
         COMMAND_REMOVED: 'commandRemoved',
         COMMAND_SENT: 'commandSent'
+    }
+
+    var DATE_TYPES = {
+        arrive: 'add_arrive',
+        out: 'add_out'
     }
 
     var DEFAULT_TAB = 'add'
@@ -79,13 +84,20 @@ define('two/queue/ui', [
     }
 
     var keyup = function keyup() {
-        console.log($scope.addCommand.units)
-        console.log($scope.addCommand.units.catapult)
         $scope.showCatapultSelect = !!$scope.addCommand.units.catapult
     }
 
     var selectTab = function (tabType) {
         $scope.selectedTab = tabType
+    }
+
+    /**
+     * Returns the translated name of an action.
+     * @param {String} actionType The type of an action ($scope.DATE_TYPES)
+     * @return {String} The translated name.
+     */
+    var getActionName = function (actionType) {
+        return $filter('i18n')(actionType, rootScope.loc.ale, textObject)
     }
 
     var init = function () {
@@ -129,6 +141,12 @@ define('two/queue/ui', [
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.unitNames = 'unit_names'
+
+        $scope.DATE_TYPES = util.toActionList(DATE_TYPES, getActionName)
+        $scope.selectedDateType = {
+            name: getActionName(DATE_TYPES.out),
+            value: DATE_TYPES.out
+        }
 
         $scope.selectedTab = DEFAULT_TAB
         $scope.unitOrder = orderedUnitNames
