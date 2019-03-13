@@ -24,7 +24,6 @@
         "step_cycle_next": "The list of villages is over, next cycle: %{time}.",
         "step_cycle_next_no_villages": "No village available to start the cycle, next cycle: %{time}.",
         "full_storage": "The storage of the village is full.",
-        "disabled": "— Disabled —",
         "farm_paused": "FarmOverflow paused.",
         "farm_started": "FarmOverflow started.",
         "groups_presets": "Groups & presets",

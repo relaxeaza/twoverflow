@@ -24,7 +24,6 @@
         "step_cycle_next": "Lista wiosek się skończyła, następny cykl: %{time}.",
         "step_cycle_next_no_villages": "Brak wioski do rozpoczęcia cyklu, następny cykl: %{time}.",
         "full_storage": "Magazyn w wiosce jest pełny",
-        "disabled": "— Wyłączony —",
         "farm_paused": "Farmer zatrzymany",
         "farm_started": "Farmer uruchomiony",
         "groups_presets": "Groups & presets",

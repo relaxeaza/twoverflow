@@ -73,6 +73,7 @@
         "misc": "Diversos",
         "colors": "Cores",
         "reset": "Resetar",
-        "here": "aqui"
+        "here": "aqui",
+        "disabled": "— Desativado —"
     }
 }

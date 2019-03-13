@@ -73,6 +73,7 @@
         "misc": "Miscellaneous",
         "colors": "Colors",
         "reset": "Reset",
-        "here": "here"
+        "here": "here",
+        "disabled": "— Disabled —"
     }
 }
