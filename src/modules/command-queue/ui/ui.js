@@ -10,7 +10,7 @@ define('two/queue/ui', [
 ], function (
     commandQueue,
     Locale,
-    ui,
+    interfaceOverflow,
     FrontButton,
     utils,
     eventQueue,
@@ -23,6 +23,7 @@ define('two/queue/ui', [
     var $gameData = modelDataService.getGameData()
     var orderedUnitNames = $gameData.getOrderedUnitNames()
     var orderedOfficerNames = $gameData.getOrderedOfficerNames()
+    var listeners
 
     /**
      * @type {Object}
@@ -45,6 +46,13 @@ define('two/queue/ui', [
     var attackableBuildingsList = []
     var unitList = {}
     var officerList = {}
+
+    var disabledOption = function () {
+        return {
+            name: $filter('i18n')('disabled', rootScope.loc.ale, textObjectCommon),
+            value: false
+        }
+    }
 
     /**
      * Obtem a lista de unidades porém com a catapulta como o último item.
@@ -100,6 +108,63 @@ define('two/queue/ui', [
         return $filter('i18n')(actionType, rootScope.loc.ale, textObject)
     }
 
+    var convertListObjects = function (obj, _includeIcon) {
+        var list = []
+        var item
+        var i
+
+        for (i in obj) {
+            item = {
+                name: obj[i].name,
+                value: obj[i].id
+            }
+
+            if (_includeIcon) {
+                item.leftIcon = obj[i].icon
+            }
+
+            list.push(item)
+        }
+
+        return list
+    }
+
+    var updatePresets = function () {
+        var presetList = modelDataService.getPresetList()
+        $scope.presets = convertListObjects(presetList.getPresets())
+        $scope.presets.unshift(disabledOption())
+    }
+
+    var registerEvent = function (id, handler, _root) {
+        if (_root) {
+            listeners.push($rootScope.$on(id, handler))
+        } else {
+            eventQueue.register(id, handler)
+            
+            listeners.push(function () {
+                eventQueue.unregister(id, handler)
+            })
+        }
+    }
+
+    var unregisterEvents = function () {
+        listeners.forEach(function (unregister) {
+            unregister()
+        })
+    }
+
+    var registerEvents = function () {
+        registerEvent(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
+        registerEvent(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
+
+        var windowListener = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, function (event, templateName) {
+            if (templateName === '!twoverflow_queue_window') {
+                unregisterEvents()
+                windowListener()
+            }
+        })
+    }
+
     var init = function () {
         var attackableBuildingsMap = $gameData.getAttackableBuildings()
 
@@ -132,20 +197,28 @@ define('two/queue/ui', [
             opener.$elem.removeClass('btn-red').addClass('btn-green')
         })
 
-        ui.template('twoverflow_queue_window', `__queue_html_main`)
-        ui.css('__queue_css_style')
+        interfaceOverflow.template('twoverflow_queue_window', `__queue_html_main`)
+        interfaceOverflow.css('__queue_css_style')
     }
 
     var buildWindow = function () {
-        $scope = rootScope.$new()
+        listeners = []
+
+        $scope = window.$scope = rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.unitNames = 'unit_names'
 
         $scope.DATE_TYPES = util.toActionList(DATE_TYPES, getActionName)
         $scope.selectedDateType = {
-            name: getActionName(DATE_TYPES.out),
+            name: $filter('i18n')(DATE_TYPES.out, rootScope.loc.ale, textObject),
             value: DATE_TYPES.out
+        }
+
+        $scope.presets = []
+        $scope.selectedInsertPreset = {
+            name: $filter('i18n')('add_insert_preset', rootScope.loc.ale, textObject),
+            value: null
         }
 
         $scope.selectedTab = DEFAULT_TAB
@@ -169,6 +242,9 @@ define('two/queue/ui', [
         $scope.onFocus = onFocus
         $scope.selectTab = selectTab
         $scope.keyup = keyup
+
+        registerEvents()
+        updatePresets()
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_queue_window', $scope)
     }

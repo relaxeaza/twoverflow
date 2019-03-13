@@ -167,8 +167,10 @@
                             <tbody class="add-units">
                                 <tr>
                                     <td colspan="4" class="actions">
-                                        <select class="insert-preset"></select>
-                                        <a class="clear-units btn btn-orange">{{ 'add_clear' | i18n:loc.ale:textObject }}</a>
+                                        <ul class="list-btn list-center">
+                                            <li><div select="" list="presets" selected="selectedInsertPreset" drop-down="true"></div></li>
+                                            <li><a class="clear-units btn btn-orange">{{ 'add_clear' | i18n:loc.ale:textObject }}</a></li>
+                                        </ul>
                                     </td>
                                 </tr>
 
