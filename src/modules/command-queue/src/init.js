@@ -1,21 +1,33 @@
 require([
+    'helper/i18n',
     'two/ready',
     'two/queue',
     'two/queue/ui'
 ], function (
+    i18n,
     ready,
-    Queue
+    commandQueue
 ) {
-    if (Queue.initialized) {
+    if (commandQueue.initialized) {
         return false
     }
 
-    ready(function () {
-        Queue.init()
-        Queue.interface()
+    var updateModuleLang = function () {
+        var langs = __queue_locale
+        var current = $rootScope.loc.ale
+        var data = current in langs
+            ? langs[current]
+            : langs['en_us']
 
-        if (Queue.getWaitingCommands().length > 0) {
-            Queue.start(true)
+        i18n.setJSON(data)
+    }
+
+    ready(function () {
+        updateModuleLang()
+        commandQueue.init()
+
+        if (commandQueue.getWaitingCommands().length > 0) {
+            commandQueue.start(true)
         }
     })
 })

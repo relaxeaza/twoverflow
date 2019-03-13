@@ -509,10 +509,10 @@ define('two/queue', [
 
             if (command.dateType === 'arrive') {
                 command.sendTime = inputTime - command.travelTime
-                command.arriveTime = inputTime
+                command_arriveTime = inputTime
             } else {
                 command.sendTime = inputTime
-                command.arriveTime = inputTime + command.travelTime
+                command_arriveTime = inputTime + command.travelTime
             }
 
             if (isTimeToSend(command.sendTime)) {

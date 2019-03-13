@@ -8,17 +8,17 @@
                 <span class="icon-bg-<#= iconColor #> icon-26x26-<#= type #>" tooltip="<#= locale("common", type) #>"></span>
                 
                 <# if (section === "queue") { #>
-                    <span class="size-26x26 icon-bg-black icon-26x26-time-duration" tooltip="<#= locale("queue", "command.timeLeft") #>"></span>
+                    <span class="size-26x26 icon-bg-black icon-26x26-time-duration" tooltip="<#= locale("queue", "command_time_left") #>"></span>
                     <span class="time-left">00:00:00</span>
                 <# } #>
 
-                <span class="size-26x26 icon-bg-black icon-20x20-units-outgoing" tooltip="<#= locale("queue", "command.out") #>"></span>
+                <span class="size-26x26 icon-bg-black icon-20x20-units-outgoing" tooltip="<#= locale("queue", "command_out") #>"></span>
                 <span class="sent-time"><#= sendTime #></span>
-                <span class="size-26x26 icon-bg-black icon-20x20-time-arrival" tooltip="<#= locale("queue", "command.arrive") #>"></span>
+                <span class="size-26x26 icon-bg-black icon-20x20-time-arrival" tooltip="<#= locale("queue", "command_arrive") #>"></span>
                 <span class="arrive-time"><#= arriveTime #></span>
 
                 <# if (section === "queue") { #>
-                    <a href="#" class="remove-command size-20x20 btn-red icon-20x20-close" tooltip="<#= locale("queue", "queue.remove") #>"></a>
+                    <a href="#" class="remove-command size-20x20 btn-red icon-20x20-close" tooltip="<#= locale("queue", "queue_remove") #>"></a>
                 <# } #>
             </th>
         </tr>
