@@ -25,6 +25,7 @@ define('two/queue/ui', [
     var orderedOfficerNames = $gameData.getOrderedOfficerNames()
     var listeners
     var inventory = modelDataService.getInventory()
+    var mapSelectedVillage = false
 
     /**
      * @type {Object}
@@ -157,6 +158,8 @@ define('two/queue/ui', [
     var registerEvents = function () {
         registerEvent(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
         registerEvent(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
+        registerEvent(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage, true)
+        registerEvent(eventTypeProvider.DESTROY_CONTEXT_MENU, unsetMapSelectedVillage, true)
 
         var windowListener = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, function (event, templateName) {
             if (templateName === '!twoverflow_queue_window') {
@@ -164,6 +167,40 @@ define('two/queue/ui', [
                 windowListener()
             }
         })
+    }
+
+    var addSelected = function () {
+        var village = modelDataService.getSelectedVillage().data
+        
+        $scope.addCommand.origin = {
+            id: village.villageId,
+            x: village.x,
+            y: village.y,
+            name: village.name
+        }
+    }
+
+    var addMapSelected = function () {
+        if (!mapSelectedVillage) {
+            return utils.emitNotif('error', $filter('i18n')('error_no_map_selected_village', rootScope.loc.ale, textObject))
+        }
+
+        commandQueue.getVillageByCoords(mapSelectedVillage.x, mapSelectedVillage.y, function (data) {
+            $scope.addCommand.target = {
+                id: data.id,
+                x: data.x,
+                y: data.y,
+                name: data.name
+            }
+        })
+    }
+
+    var setMapSelectedVillage = function (event, menu) {
+        mapSelectedVillage = menu.data
+    }
+
+    var unsetMapSelectedVillage = function () {
+        mapSelectedVillage = false
     }
 
     var init = function () {
@@ -235,6 +272,8 @@ define('two/queue/ui', [
             value: DEFAULT_CATAPULT_TARGET
         }
         $scope.addCommand = {
+            origin: false,
+            target: false,
             units: angular.copy(unitList),
             officers: angular.copy(officerList),
             catapult_target: DEFAULT_CATAPULT_TARGET
@@ -245,6 +284,8 @@ define('two/queue/ui', [
         $scope.onFocus = onFocus
         $scope.selectTab = selectTab
         $scope.keyup = keyup
+        $scope.addSelected = addSelected
+        $scope.addMapSelected = addMapSelected
 
         registerEvents()
         updatePresets()

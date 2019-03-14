@@ -53,9 +53,10 @@
                                             <input data-setting="origin" type="text" class="textfield-border origin" pattern="\\d{2,3}\\|\\d{2,3}" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" required>
                                         </td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
-                                        <td class="originVillage">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
+                                        <td ng-if="!addCommand.origin">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
+                                        <td ng-if="addCommand.origin">{{ addCommand.origin.name }} ({{ addCommand.origin.x }}|{{ addCommand.origin.y }})</td>
                                         <td class="actions">
-                                            <a class="btn btn-orange addSelected" tooltip="" tooltip-content="{{ 'add_selected' | i18n:loc.ale:textObject }}">{{ 'selected' | i18n:loc.ale:textObjectCommon }}</a>
+                                            <a class="btn btn-orange" ng-click="addSelected()" tooltip="" tooltip-content="{{ 'add_selected' | i18n:loc.ale:textObject }}">{{ 'selected' | i18n:loc.ale:textObjectCommon }}</a>
                                         </td>
                                     </tr>
 
@@ -64,9 +65,10 @@
                                             <input data-setting="target" type="text" class="textfield-border target" pattern="\\d{2,3}\\|\\d{2,3}" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" required>
                                         </td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
-                                        <td class="targetVillage">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
+                                        <td ng-if="!addCommand.target">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
+                                        <td ng-if="addCommand.target">{{ addCommand.target.name }} ({{ addCommand.target.x }}|{{ addCommand.target.y }})</td>
                                         <td class="actions">
-                                            <a class="btn btn-orange addMapSelected" tooltip="" tooltip-content="{{ 'add_map_selected' | i18n:loc.ale:textObject }}">{{ 'selected' | i18n:loc.ale:textObjectCommon }}</a>
+                                            <a class="btn btn-orange" ng-click="addMapSelected()" tooltip="" tooltip-content="{{ 'add_map_selected' | i18n:loc.ale:textObject }}">{{ 'selected' | i18n:loc.ale:textObjectCommon }}</a>
                                         </td>
                                     </tr>
 
@@ -82,7 +84,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <table class="tbl-border-light tbl-units tbl-speed screen-village-info travelTimes" style="display:none">
+                            <table ng-show="addCommand.origin && addCommand.target" class="tbl-border-light tbl-units tbl-speed screen-village-info travelTimes">
                                 <thead>
                                     <tr>
                                         <th colspan="7">{{ 'add_travel_times' | i18n:loc.ale:textObject }}</th>
