@@ -212,14 +212,26 @@
                         </table>
 
                         <h5 class="twx-section collapse">{{ 'officers' | i18n:loc.ale:textObjectCommon }}</h5>
-                        <table class="tbl-border-light tbl-striped officers">
+
+                        <table class="add-officers margin-top tbl-border-light tbl-officers">
                             <tbody>
                                 <tr>
-                                    <td ng-repeat="i in officers">
-                                        <span class="icon-34x34-premium_officer_{{ officers[i] }}"></span>
-                                        <label class="btn-orange icon-26x26-checkbox">
-                                            <input type="checkbox" ng-model="addCommand.officers[ officers[i] ]" class="{{ officers[i] }}">
-                                        </label>
+                                    <td class="cell-officers" ng-repeat="officer in officers">
+                                        <table class="tbl-border-dark tbl-officer">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="cell-space" > <span class="icon-44x44-premium_officer_{{ officer }}"></span> </td>
+                                                    <td class="cell-officer-switch" rowspan="2">
+                                                        <div switch-slider="" enabled="true" value="addCommand.officers[officer]" vertical="true" size="'34x66'"></div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td tooltip="" tooltip-content="{{ 'available_officers' | i18n:loc.ale:'modal_preset_edit' }}">
+                                                        <div class="amount">{{ inventory.getItemAmountByType('premium_officer_' + officer) | number }}</div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </td>
                                 </tr>
                             </tbody>

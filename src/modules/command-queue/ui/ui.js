@@ -24,6 +24,7 @@ define('two/queue/ui', [
     var orderedUnitNames = $gameData.getOrderedUnitNames()
     var orderedOfficerNames = $gameData.getOrderedOfficerNames()
     var listeners
+    var inventory = modelDataService.getInventory()
 
     /**
      * @type {Object}
@@ -209,6 +210,8 @@ define('two/queue/ui', [
         $scope.textObjectCommon = textObjectCommon
         $scope.unitNames = 'unit_names'
 
+        $scope.inventory = inventory
+
         $scope.DATE_TYPES = util.toActionList(DATE_TYPES, getActionName)
         $scope.selectedDateType = {
             name: $filter('i18n')(DATE_TYPES.out, rootScope.loc.ale, textObject),
@@ -233,7 +236,7 @@ define('two/queue/ui', [
         }
         $scope.addCommand = {
             units: angular.copy(unitList),
-            officers: officerList,
+            officers: angular.copy(officerList),
             catapult_target: DEFAULT_CATAPULT_TARGET
         }
 
