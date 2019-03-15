@@ -256,6 +256,17 @@ define('two/queue/ui', [
         return formatedDate(date)
     }
 
+    var cleanUnitInputs = function () {
+        $scope.addCommand.units = angular.copy(unitList)
+        $scope.addCommand.officers = angular.copy(officerList)
+        $scope.addCommand.catapult_target = DEFAULT_CATAPULT_TARGET
+        $scope.catapultTarget = {
+            name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, rootScope.loc.ale, 'building_names'),
+            value: DEFAULT_CATAPULT_TARGET
+        }
+        $scope.showCatapultSelect = false
+    }
+
     var init = function () {
         var attackableBuildingsMap = $gameData.getAttackableBuildings()
 
@@ -343,6 +354,7 @@ define('two/queue/ui', [
         $scope.addCurrentDate = addCurrentDate
         $scope.incrementDate = incrementDate
         $scope.reduceDate = reduceDate
+        $scope.cleanUnitInputs = cleanUnitInputs
 
         registerEvents()
         updatePresets()
