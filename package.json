@@ -27,8 +27,8 @@
     "grunt-replace": "^1.0.1"
   },
   "scripts": {
-    "build": "grunt build --minify",
-    "build-exclude": "grunt build --minify --exclude=attackView,collector,builder,queue,minimap",
+    "build": "grunt build",
+    "build-minify": "grunt build --minify",
     "release": "node scripts/release.js",
     "release-testing": "node scripts/release.js --testing"
   },
