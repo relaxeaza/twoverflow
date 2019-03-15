@@ -203,6 +203,59 @@ define('two/queue/ui', [
         mapSelectedVillage = false
     }
 
+    var addCurrentDate = function () {
+        $scope.addCommand.date = formatedDate()
+    }
+
+    var incrementDate = function () {
+        if (!$scope.addCommand.date) {
+            return false
+        }
+
+        $scope.addCommand.date = addDateDiff($scope.addCommand.date, 100)
+    }
+
+    var reduceDate = function () {
+        if (!$scope.addCommand.date) {
+            return false
+        }
+
+        $scope.addCommand.date = addDateDiff($scope.addCommand.date, -100)
+    }
+
+    /**
+     * Obtem a data atual do jogo fomatada para hh:mm:ss:SSS dd/MM/yyyy
+     *
+     * @param {Number=} _ms - Optional time to be formated instead of the game date.
+     * @return {String}
+     */
+    var formatedDate = function (_ms) {
+        var date = new Date(_ms || ($timeHelper.gameTime() + utils.getTimeOffset()))
+
+        var rawMS = date.getMilliseconds()
+        var ms = $timeHelper.zerofill(rawMS - (rawMS % 100), 3)
+        var sec = $timeHelper.zerofill(date.getSeconds(), 2)
+        var min = $timeHelper.zerofill(date.getMinutes(), 2)
+        var hour = $timeHelper.zerofill(date.getHours(), 2)
+        var day = $timeHelper.zerofill(date.getDate(), 2)
+        var month = $timeHelper.zerofill(date.getMonth() + 1, 2)
+        var year = date.getFullYear()
+
+        return hour + ':' + min + ':' + sec + ':' + ms + ' ' + day + '/' + month + '/' + year
+    }
+
+    var addDateDiff = function (date, diff) {
+        if (!utils.isValidDateTime(date)) {
+            return ''
+        }
+
+        date = utils.fixDate(date)
+        date = utils.getTimeFromString(date)
+        date += diff
+
+        return formatedDate(date)
+    }
+
     var init = function () {
         var attackableBuildingsMap = $gameData.getAttackableBuildings()
 
@@ -274,6 +327,7 @@ define('two/queue/ui', [
         $scope.addCommand = {
             origin: false,
             target: false,
+            date: '',
             units: angular.copy(unitList),
             officers: angular.copy(officerList),
             catapult_target: DEFAULT_CATAPULT_TARGET
@@ -286,6 +340,9 @@ define('two/queue/ui', [
         $scope.keyup = keyup
         $scope.addSelected = addSelected
         $scope.addMapSelected = addMapSelected
+        $scope.addCurrentDate = addCurrentDate
+        $scope.incrementDate = incrementDate
+        $scope.reduceDate = reduceDate
 
         registerEvents()
         updatePresets()
