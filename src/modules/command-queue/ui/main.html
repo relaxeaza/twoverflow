@@ -53,8 +53,8 @@
                                             <input data-setting="origin" type="text" class="textfield-border origin" pattern="\\d{2,3}\\|\\d{2,3}" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" required>
                                         </td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
-                                        <td ng-if="!addCommand.origin">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
-                                        <td ng-if="addCommand.origin">{{ addCommand.origin.name }} ({{ addCommand.origin.x }}|{{ addCommand.origin.y }})</td>
+                                        <td ng-if="!commandData.origin">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
+                                        <td ng-if="commandData.origin">{{ commandData.origin.name }} ({{ commandData.origin.x }}|{{ commandData.origin.y }})</td>
                                         <td class="actions">
                                             <a class="btn btn-orange" ng-click="addSelected()" tooltip="" tooltip-content="{{ 'add_selected' | i18n:loc.ale:textObject }}">{{ 'selected' | i18n:loc.ale:textObjectCommon }}</a>
                                         </td>
@@ -65,8 +65,8 @@
                                             <input data-setting="target" type="text" class="textfield-border target" pattern="\\d{2,3}\\|\\d{2,3}" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" required>
                                         </td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
-                                        <td ng-if="!addCommand.target">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
-                                        <td ng-if="addCommand.target">{{ addCommand.target.name }} ({{ addCommand.target.x }}|{{ addCommand.target.y }})</td>
+                                        <td ng-if="!commandData.target">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
+                                        <td ng-if="commandData.target">{{ commandData.target.name }} ({{ commandData.target.x }}|{{ commandData.target.y }})</td>
                                         <td class="actions">
                                             <a class="btn btn-orange" ng-click="addMapSelected()" tooltip="" tooltip-content="{{ 'add_map_selected' | i18n:loc.ale:textObject }}">{{ 'selected' | i18n:loc.ale:textObjectCommon }}</a>
                                         </td>
@@ -74,84 +74,106 @@
 
                                     <tr>
                                         <td>
-                                            <input ng-model="addCommand.date" type="text" class="textfield-border date" pattern="\\s*\\d{1,2}:\\d{1,2}:\\d{1,2}(:\\d{1,3})? \\d{1,2}\\/\\d{1,2}\\/\\d{4}\\s*" placeholder="{{ 'add_date' | i18n:loc.ale:textObject }}" tooltip="" tooltip-content="00:00:00:000 00/00/0000" required>
+                                            <input ng-model="commandData.date" type="text" class="textfield-border date" pattern="\\s*\\d{1,2}:\\d{1,2}:\\d{1,2}(:\\d{1,3})? \\d{1,2}\\/\\d{1,2}\\/\\d{4}\\s*" placeholder="{{ 'add_date' | i18n:loc.ale:textObject }}" tooltip="" tooltip-content="00:00:00:000 00/00/0000" required>
                                         </td>
                                         <td class="text-center"><span class="icon-26x26-time"></span></td>
-                                        <td><div select="" list="DATE_TYPES" selected="selectedDateType"></div></td>
+                                        <td><div select="" list="dateTypes" selected="selectedDateType"></div></td>
                                         <td class="actions">
                                             <a class="btn btn-orange" ng-click="reduceDate()" tooltip="" tooltip-content="{{ 'add_current_date_minus' | i18n:loc.ale:textObject }}">-</a><a class="btn btn-orange" ng-click="addCurrentDate()" tooltip="" tooltip-content="{{ 'add_current_date' | i18n:loc.ale:textObject }}">{{ 'now' | i18n:loc.ale:textObjectCommon }}</a><a class="btn btn-orange" ng-click="incrementDate()" tooltip="" tooltip-content="{{ 'add_current_date_plus' | i18n:loc.ale:textObject }}">+</a>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
-                            <table ng-show="addCommand.origin && addCommand.target" class="tbl-border-light tbl-units tbl-speed screen-village-info travelTimes">
+                            <table ng-show="commandData.origin && commandData.target" class="tbl-border-light tbl-units tbl-speed screen-village-info">
                                 <thead>
                                     <tr>
-                                        <th colspan="7">{{ 'add_travel_times' | i18n:loc.ale:textObject }}</th>
+                                        <th colspan="7">{{ 'speed_title' | i18n:loc.ale:textObjectVillageInfo }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td class="odd">
                                             <div class="unit-wrap">
-                                                <span class="icon icon-34x34-unit-knight"></span>
-                                                <span class="icon icon-34x34-unit-light_cavalry"></span>
-                                                <span class="icon icon-34x34-unit-mounted_archer"></span>
+                                                <span class="icon icon-34x34-unit-knight" tooltip="" tooltip-content="{{ 'knight' | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                                <span class="icon icon-34x34-unit-light_cavalry" tooltip="" tooltip-content="{{ 'light_cavalry' | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                                <span class="icon icon-34x34-unit-mounted_archer" tooltip="" tooltip-content="{{ 'mounted_archer' | i18n:loc.ale:textObjectUnitNames }}"></span>
                                             </div>
-                                            <div class="travelTime box-time-sub-icon">
-                                                <div class="time-icon icon-20x20-attack"></div>
-                                                <span class="attack" data-unit="knight"></span>
-                                            </div>
-                                            <div class="travelTime box-time-sub-icon">
-                                                <div class="time-icon icon-20x20-support"></div>
-                                                <span class="support" data-unit="knight"></span>
+
+                                            <div>
+                                                <div class="box-time-sub-icon time-support" ng-class="{'text-red': travelTimes.support.light_cavalry.valueType == 'invalid', 'text-green-bright': travelTimes.support.light_cavalry.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_support' | i18n:loc.ale:textObjectMilitaryOperations }}"><div class="time-icon icon-20x20-support-check"></div>{{ travelTimes.support.light_cavalry.value }}</div>
+                                                <div class="box-time-sub-icon time-attack" ng-class="{'text-red': travelTimes.attack.light_cavalry.valueType == 'invalid', 'text-green-bright': travelTimes.attack.light_cavalry.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_attack' | i18n:loc.ale:textObjectMilitaryOperations }}"><div class="time-icon icon-20x20-attack-check"></div>{{ travelTimes.attack.light_cavalry.value }}</div>
+                                                <div class="box-time-sub-icon time-relocate" ng-class="{'text-red': travelTimes.relocate.light_cavalry.valueType == 'invalid', 'text-green-bright': travelTimes.relocate.light_cavalry.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_relocate' | i18n:loc.ale:textObjectMilitaryOperations }}"><div class="time-icon icon-20x20-relocate"></div>{{ travelTimes.relocate.light_cavalry.value }}</div>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="unit-wrap">
-                                                <span class="icon icon-single icon-34x34-unit-heavy_cavalry"></span>
+                                                <span class="icon icon-single icon-34x34-unit-heavy_cavalry" tooltip="" tooltip-content="{{ 'heavy_cavalry' | i18n:loc.ale:textObjectUnitNames }}"></span>
                                             </div>
-                                            <div class="travelTime"><span class="attack" data-unit="heavy_cavalry"></span></div>
-                                            <div class="travelTime"><span class="support" data-unit="heavy_cavalry"></span></div>
+
+                                            <div>
+                                                <div class="box-time-sub time-support" ng-class="{'text-red': travelTimes.support.heavy_cavalry.valueType == 'invalid', 'text-green-bright': travelTimes.support.heavy_cavalry.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_support' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.support.heavy_cavalry.value }}</div>
+                                                <div class="box-time-sub time-attack" ng-class="{'text-red': travelTimes.support.heavy_cavalry.valueType == 'invalid', 'text-green-bright': travelTimes.support.heavy_cavalry.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_attack' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.attack.heavy_cavalry.value }}</div>
+                                                <div class="box-time-sub time-relocate" ng-class="{'text-red': travelTimes.support.heavy_cavalry.valueType == 'invalid', 'text-green-bright': travelTimes.support.heavy_cavalry.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_relocate' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.relocate.heavy_cavalry.value }}</div>
+                                            </div>
                                         </td>
                                         <td class="odd">
                                             <div class="unit-wrap">
-                                                <span class="icon icon-34x34-unit-archer"></span>
-                                                <span class="icon icon-34x34-unit-spear"></span>
-                                                <span class="icon icon-34x34-unit-axe"></span>
-                                                <span class="icon icon-34x34-unit-doppelsoldner"></span>
+                                                <span class="icon icon-34x34-unit-archer" tooltip="" tooltip-content="{{ 'archer' | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                                <span class="icon icon-34x34-unit-spear" tooltip="" tooltip-content="{{ 'spear' | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                                <span class="icon icon-34x34-unit-axe" tooltip="" tooltip-content="{{ 'axe' | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                                <span class="icon icon-34x34-unit-doppelsoldner" tooltip="" tooltip-content="{{ 'doppelsoldner' | i18n:loc.ale:textObjectUnitNames }}"></span>
                                             </div>
-                                            <div class="travelTime"><span class="attack" data-unit="axe"></span></div>
-                                            <div class="travelTime"><span class="support" data-unit="axe"></span></div>
+
+                                            <div>
+                                                <div class="box-time-sub time-support" ng-class="{'text-red': travelTimes.support.archer.valueType == 'invalid', 'text-green-bright': travelTimes.support.archer.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_support' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.support.archer.value }}</div>
+                                                <div class="box-time-sub time-attack" ng-class="{'text-red': travelTimes.support.archer.valueType == 'invalid', 'text-green-bright': travelTimes.support.archer.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_attack' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.attack.archer.value }}</div>
+                                                <div class="box-time-sub time-relocate" ng-class="{'text-red': travelTimes.support.archer.valueType == 'invalid', 'text-green-bright': travelTimes.support.archer.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_relocate' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.relocate.archer.value }}</div>
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="unit-wrap">
-                                                <span class="icon icon-single icon-34x34-unit-sword"></span>
+                                                <span class="icon icon-single icon-34x34-unit-sword" tooltip="" tooltip-content="{{ 'sword' | i18n:loc.ale:textObjectUnitNames }}"></span>
                                             </div>
-                                            <div class="travelTime"><span class="attack" data-unit="sword"></span></div>
-                                            <div class="travelTime"><span class="support" data-unit="sword"></span></div>
+
+                                            <div>
+                                                <div class="box-time-sub time-support" ng-class="{'text-red': travelTimes.support.sword.valueType == 'invalid', 'text-green-bright': travelTimes.support.sword.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_support' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.support.sword.value }}</div>
+                                                <div class="box-time-sub time-attack" ng-class="{'text-red': travelTimes.support.sword.valueType == 'invalid', 'text-green-bright': travelTimes.support.sword.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_attack' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.attack.sword.value }}</div>
+                                                <div class="box-time-sub time-relocate" ng-class="{'text-red': travelTimes.support.sword.valueType == 'invalid', 'text-green-bright': travelTimes.support.sword.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_relocate' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.relocate.sword.value }}</div>
+                                            </div>
                                         </td>
                                         <td class="odd">
                                             <div class="unit-wrap">
-                                                <span class="icon icon-34x34-unit-catapult"></span>
-                                                <span class="icon icon-34x34-unit-ram"></span>
+                                                <span class="icon icon-34x34-unit-catapult" tooltip="" tooltip-content="{{ 'catapult' | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                                <span class="icon icon-34x34-unit-ram" tooltip="" tooltip-content="{{ 'ram' | i18n:loc.ale:textObjectUnitNames }}"></span>
                                             </div>
-                                            <div class="travelTime"><span class="attack" data-unit="ram"></span></div>
-                                            <div class="travelTime"><span class="support" data-unit="ram"></span></div>
+
+                                            <div>
+                                                <div class="box-time-sub time-support" ng-class="{'text-red': travelTimes.support.ram.valueType == 'invalid', 'text-green-bright': travelTimes.support.ram.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_support' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.support.ram.value }}</div>
+                                                <div class="box-time-sub time-attack" ng-class="{'text-red': travelTimes.support.ram.valueType == 'invalid', 'text-green-bright': travelTimes.support.ram.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_attack' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.attack.ram.value }}</div>
+                                                <div class="box-time-sub time-relocate" ng-class="{'text-red': travelTimes.support.ram.valueType == 'invalid', 'text-green-bright': travelTimes.support.ram.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_relocate' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.relocate.ram.value }}</div>
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="unit-wrap">
-                                                <span class="icon icon-single icon-34x34-unit-snob"></span>
+                                                <span class="icon icon-single icon-34x34-unit-snob" tooltip="" tooltip-content="{{ 'snob' | i18n:loc.ale:textObjectUnitNames }}"></span>
                                             </div>
-                                            <div class="travelTime"><span class="attack" data-unit="snob"></span></div>
-                                            <div class="travelTime"><span class="support" data-unit="snob"></span></div>
+
+                                            <div>
+                                                <div class="box-time-sub time-support" ng-class="{'text-red': travelTimes.support.snob.valueType == 'invalid', 'text-green-bright': travelTimes.support.snob.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_support' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.support.snob.value }}</div>
+                                                <div class="box-time-sub time-attack" ng-class="{'text-red': travelTimes.support.snob.valueType == 'invalid', 'text-green-bright': travelTimes.support.snob.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_attack' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.attack.snob.value }}</div>
+                                                <div class="box-time-sub time-relocate" ng-class="{'text-red': travelTimes.support.snob.valueType == 'invalid', 'text-green-bright': travelTimes.support.snob.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'cannot_relocate_snob' | i18n:loc.ale:textObjectMilitaryOperations }}">-</div>
+                                            </div>
                                         </td>
                                         <td class="odd">
                                             <div class="unit-wrap">
-                                                <span class="icon icon-single icon-34x34-unit-trebuchet"></span>
+                                                <span class="icon icon-single icon-34x34-unit-trebuchet" tooltip="" tooltip-content="{{ 'trebuchet' | i18n:loc.ale:textObjectUnitNames }}"></span>
                                             </div>
-                                            <div class="travelTime"><span class="attack" data-unit="trebuchet"></span></div>
-                                            <div class="travelTime"><span class="support" data-unit="trebuchet"></span></div>
+
+                                            <div>
+                                                <div class="box-time-sub time-support" ng-class="{'text-red': travelTimes.support.trebuchet.valueType == 'invalid', 'text-green-bright': travelTimes.support.trebuchet.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_support' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.support.trebuchet.value }}</div>
+                                                <div class="box-time-sub time-attack" ng-class="{'text-red': travelTimes.support.trebuchet.valueType == 'invalid', 'text-green-bright': travelTimes.support.trebuchet.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_attack' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.attack.trebuchet.value }}</div>
+                                                <div class="box-time-sub time-relocate" ng-class="{'text-red': travelTimes.support.trebuchet.valueType == 'invalid', 'text-green-bright': travelTimes.support.trebuchet.valueType == 'valid'}" tooltip="" tooltip-content="{{ 'travel_time_relocate' | i18n:loc.ale:textObjectMilitaryOperations }}">{{ travelTimes.relocate.trebuchet.value }}</div>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -178,27 +200,27 @@
 
                                 <tr ng-repeat="i in [] | range:(unitOrder.length / 4);">
                                     <td class="cell-space-left">
-                                        <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4]" tooltip="" tooltip-content="{{ unitOrder[i * 4] | i18n:loc.ale:unitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="addCommand.units[unitOrder[i * 4]]" maxlength="5" placeholder="{{ addCommand.units[unitOrder[i * 4]] }}" ng-keyup="keyup();" ng-focus="onFocus(unitOrder[i * 4])" ng-blur="onBlur(unitOrder[i * 4])">
+                                        <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4]" tooltip="" tooltip-content="{{ unitOrder[i * 4] | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4]] }}" ng-keyup="onKeyup();" ng-focus="onFocus(unitOrder[i * 4])" ng-blur="onBlur(unitOrder[i * 4])">
                                     </td>
                                     <td class="cell-space-left">
-                                        <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 1]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 1] | i18n:loc.ale:unitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="addCommand.units[unitOrder[i * 4 + 1]]" maxlength="5" placeholder="{{ addCommand.units[unitOrder[i * 4 + 1]] }}" ng-keyup="keyup();" ng-focus="onFocus(unitOrder[i * 4 + 1])" ng-blur="onBlur(unitOrder[i * 4 + 1])">
+                                        <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 1]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 1] | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 1]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 1]] }}" ng-keyup="onKeyup();" ng-focus="onFocus(unitOrder[i * 4 + 1])" ng-blur="onBlur(unitOrder[i * 4 + 1])">
                                     </td>
                                     <td class="cell-space-left">
-                                        <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 2]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 2] | i18n:loc.ale:unitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="addCommand.units[unitOrder[i * 4 + 2]]" maxlength="5" placeholder="{{ addCommand.units[unitOrder[i * 4 + 2]] }}" ng-keyup="keyup();" ng-focus="onFocus(unitOrder[i * 4 + 2])" ng-blur="onBlur(unitOrder[i * 4 + 2])">
+                                        <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 2]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 2] | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 2]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 2]] }}" ng-keyup="onKeyup();" ng-focus="onFocus(unitOrder[i * 4 + 2])" ng-blur="onBlur(unitOrder[i * 4 + 2])">
                                     </td>
                                     <td class="cell-space-left">
-                                        <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 3]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 3] | i18n:loc.ale:unitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="addCommand.units[unitOrder[i * 4 + 3]]" maxlength="5" placeholder="{{ addCommand.units[unitOrder[i * 4 + 3]] }}" ng-keyup="keyup();" ng-focus="onFocus(unitOrder[i * 4 + 3])" ng-blur="onBlur(unitOrder[i * 4 + 3])">
+                                        <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 3]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 3] | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 3]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 3]] }}" ng-keyup="onKeyup();" ng-focus="onFocus(unitOrder[i * 4 + 3])" ng-blur="onBlur(unitOrder[i * 4 + 3])">
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <td class="cell-space-left">
-                                        <span class="icon-bg-black icon-34x34-unit-catapult" tooltip="" tooltip-content="{{ 'catapult' | i18n:loc.ale:unitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="addCommand.units.catapult" maxlength="5" placeholder="{{ addCommand.units.catapult }}" ng-keyup="keyup();" ng-focus="onFocus('catapult')" ng-blur="onBlur('catapult')">
+                                        <span class="icon-bg-black icon-34x34-unit-catapult" tooltip="" tooltip-content="{{ 'catapult' | i18n:loc.ale:textObjectUnitNames }}"></span>
+                                        <input remove-zero="" type="text" ng-model="commandData.units.catapult" maxlength="5" placeholder="{{ commandData.units.catapult }}" ng-keyup="onKeyup();" ng-focus="onFocus('catapult')" ng-blur="onBlur('catapult')">
                                     </td>
                                     <td class="cell-space-left" colspan="3">
                                         <div ng-visible="showCatapultSelect">
@@ -224,7 +246,7 @@
                                                 <tr>
                                                     <td class="cell-space" > <span class="icon-44x44-premium_officer_{{ officer }}"></span> </td>
                                                     <td class="cell-officer-switch" rowspan="2">
-                                                        <div switch-slider="" enabled="true" value="addCommand.officers[officer]" vertical="true" size="'34x66'"></div>
+                                                        <div switch-slider="" enabled="true" value="commandData.officers[officer]" vertical="true" size="'34x66'"></div>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -298,13 +320,13 @@
                 <a class="btn-orange btn-border" ng-click="clearLogs()">{{ 'general_clear' | i18n:loc.ale:textObject }}</a>
             </li>
             <li ng-show="selectedTab === 'add'">
-                <a class="btn-orange btn-border add" ng-click="addCommand('attack')"><span class="icon-26x26-attack-small"></span> {{ 'attack' | i18n:loc.ale:textObjectCommon }}</a>
+                <a class="btn-orange btn-border add" ng-click="commandData('attack')"><span class="icon-26x26-attack-small"></span> {{ 'attack' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
             <li ng-show="selectedTab === 'add'">
-                <a class="btn-orange btn-border add" ng-click="addCommand('support')"><span class="icon-26x26-support"></span> {{ 'support' | i18n:loc.ale:textObjectCommon }}</a>
+                <a class="btn-orange btn-border add" ng-click="commandData('support')"><span class="icon-26x26-support"></span> {{ 'support' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
             <li ng-show="selectedTab === 'add'">
-                <a class="btn-orange btn-border add" ng-click="addCommand('relocate')"><span class="icon-26x26-relocate"></span> {{ 'relocate' | i18n:loc.ale:textObjectCommon }}</a>
+                <a class="btn-orange btn-border add" ng-click="commandData('relocate')"><span class="icon-26x26-relocate"></span> {{ 'relocate' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
 
             <li class="twOverflow-button">

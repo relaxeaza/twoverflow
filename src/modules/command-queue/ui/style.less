@@ -154,28 +154,31 @@
         text-align: center;
     }
 
-    .travelTimes {
+    .tbl-speed {
         margin-top: 10px;
-        font-size: 13px;
 
         th {
             text-align: center;
         }
 
-        .travelTime {
-            display: block;
-            color: #1c4b1c;
+        td {
+            font-size: 12px;
         }
 
-        .travelTime.box-time-sub-icon {
+        .box-time-sub-icon {
             position: relative;
 
             .time-icon {
                 position: absolute;
-                top: -4px;
-                left: 7px;
+                top: -3px;
+                left: 27px;
                 transform: scale(0.7);
             }
+        }
+
+        .box-time-sub-icon.time-relocate .time-icon {
+            top: -6px;
+            left: 26px;
         }
     }
 

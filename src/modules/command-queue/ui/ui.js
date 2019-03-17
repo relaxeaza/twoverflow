@@ -26,6 +26,8 @@ define('two/queue/ui', [
     var listeners
     var inventory = modelDataService.getInventory()
     var mapSelectedVillage = false
+    var travelTimesId
+    var unitOrder
 
     /**
      * @type {Object}
@@ -37,78 +39,30 @@ define('two/queue/ui', [
         COMMAND_REMOVED: 'commandRemoved',
         COMMAND_SENT: 'commandSent'
     }
-
     var DATE_TYPES = {
-        arrive: 'add_arrive',
-        out: 'add_out'
+        ARRIVE: 'add_arrive',
+        OUT: 'add_out'
     }
-
+    var COMMAND_TYPES = ['attack', 'support', 'relocate']
     var DEFAULT_TAB = 'add'
     var DEFAULT_CATAPULT_TARGET = 'wall'
     var attackableBuildingsList = []
     var unitList = {}
     var officerList = {}
-
-    var disabledOption = function () {
-        return {
-            name: $filter('i18n')('disabled', rootScope.loc.ale, textObjectCommon),
-            value: false
-        }
-    }
-
+    var timeOffset = utils.getTimeOffset()
     /**
-     * Obtem a lista de unidades porém com a catapulta como o último item.
-     *
-     * @return {Array}
+     * Name of one unity for each speed category.
+     * Used to generate travel times.
      */
-    var unitNamesCatapultLast = function () {
-        var units = orderedUnitNames.filter(function (unit) {
-            return unit !== 'catapult'
-        })
-
-        units.push('catapult')
-
-        return units
-    }
-
-    /**
-     * Empties out the value of the given unit if it's a 0
-     *
-     * @param {string} unit the unit name to check the value from
-     */
-    var onFocus = function onFocus(unit) {
-        if ($scope.addCommand.units[unit] === 0) {
-            $scope.addCommand.units[unit] = ''
-        }
-    }
-
-    /**
-     * Reverts the value of the unit to 0 if it's an empty character
-     *
-     * @param {string} unit the unit name to check the value from
-     */
-    var onBlur = function onBlur(unit) {
-        if ($scope.addCommand.units[unit] === '') {
-            $scope.addCommand.units[unit] = 0
-        }
-    }
-
-    var keyup = function keyup() {
-        $scope.showCatapultSelect = !!$scope.addCommand.units.catapult
-    }
-
-    var selectTab = function (tabType) {
-        $scope.selectedTab = tabType
-    }
-
-    /**
-     * Returns the translated name of an action.
-     * @param {String} actionType The type of an action ($scope.DATE_TYPES)
-     * @return {String} The translated name.
-     */
-    var getActionName = function (actionType) {
-        return $filter('i18n')(actionType, rootScope.loc.ale, textObject)
-    }
+    var unitsBySpeed = [
+        'light_cavalry',
+        'heavy_cavalry',
+        'archer',
+        'sword',
+        'ram',
+        'snob',
+        'trebuchet'
+    ]
 
     var convertListObjects = function (obj, _includeIcon) {
         var list = []
@@ -134,7 +88,10 @@ define('two/queue/ui', [
     var updatePresets = function () {
         var presetList = modelDataService.getPresetList()
         $scope.presets = convertListObjects(presetList.getPresets())
-        $scope.presets.unshift(disabledOption())
+        $scope.presets.unshift({
+            name: $filter('i18n')('disabled', rootScope.loc.ale, textObjectCommon),
+            value: false
+        })
     }
 
     var registerEvent = function (id, handler, _root) {
@@ -153,6 +110,8 @@ define('two/queue/ui', [
         listeners.forEach(function (unregister) {
             unregister()
         })
+
+        stopTravelTimesWatcher()
     }
 
     var registerEvents = function () {
@@ -169,32 +128,6 @@ define('two/queue/ui', [
         })
     }
 
-    var addSelected = function () {
-        var village = modelDataService.getSelectedVillage().data
-        
-        $scope.addCommand.origin = {
-            id: village.villageId,
-            x: village.x,
-            y: village.y,
-            name: village.name
-        }
-    }
-
-    var addMapSelected = function () {
-        if (!mapSelectedVillage) {
-            return utils.emitNotif('error', $filter('i18n')('error_no_map_selected_village', rootScope.loc.ale, textObject))
-        }
-
-        commandQueue.getVillageByCoords(mapSelectedVillage.x, mapSelectedVillage.y, function (data) {
-            $scope.addCommand.target = {
-                id: data.id,
-                x: data.x,
-                y: data.y,
-                name: data.name
-            }
-        })
-    }
-
     var setMapSelectedVillage = function (event, menu) {
         mapSelectedVillage = menu.data
     }
@@ -203,29 +136,7 @@ define('two/queue/ui', [
         mapSelectedVillage = false
     }
 
-    var addCurrentDate = function () {
-        $scope.addCommand.date = formatedDate()
-    }
-
-    var incrementDate = function () {
-        if (!$scope.addCommand.date) {
-            return false
-        }
-
-        $scope.addCommand.date = addDateDiff($scope.addCommand.date, 100)
-    }
-
-    var reduceDate = function () {
-        if (!$scope.addCommand.date) {
-            return false
-        }
-
-        $scope.addCommand.date = addDateDiff($scope.addCommand.date, -100)
-    }
-
     /**
-     * Obtem a data atual do jogo fomatada para hh:mm:ss:SSS dd/MM/yyyy
-     *
      * @param {Number=} _ms - Optional time to be formated instead of the game date.
      * @return {String}
      */
@@ -256,10 +167,164 @@ define('two/queue/ui', [
         return formatedDate(date)
     }
 
+    var updateTravelTimes = function () {
+        validDate()
+        calcTravelTimes()
+    }
+
+    var calcTravelTimes = function () {
+        if (!$scope.commandData.origin || !$scope.commandData.target) {
+            return false
+        }
+
+        var date
+        var arriveTime
+        var travelTime
+        var sendTime
+        var valueType
+
+        COMMAND_TYPES.forEach(function (commandType) {
+            $scope.travelTimes[commandType] = {}
+
+            unitsBySpeed.forEach(function (unit) {
+                travelTime = commandQueue.getTravelTime(
+                    $scope.commandData.origin,
+                    $scope.commandData.target,
+                    {[unit]: 1},
+                    commandType,
+                    $scope.commandData.officers
+                )
+
+                if ($scope.selectedDateType.value === DATE_TYPES.OUT) {
+                    if ($scope.isValidDate) {
+                        date = utils.fixDate($scope.commandData.date)
+                        outTime = utils.getTimeFromString(date)
+                        valueType = isValidSendTime(outTime) ? 'valid' : 'invalid'
+                    } else {
+                        valueType = 'neutral'
+                    }
+                } else if ($scope.selectedDateType.value === DATE_TYPES.ARRIVE) {
+                    if ($scope.isValidDate) {
+                        date = utils.fixDate($scope.commandData.date)
+                        arriveTime = utils.getTimeFromString(date)
+                        sendTime = arriveTime - travelTime
+                        valueType = isValidSendTime(sendTime) ? 'valid' : 'invalid'
+                    } else {
+                        valueType = 'invalid'
+                    }
+                }
+
+                $scope.travelTimes[commandType][unit] = {
+                    value: $filter('readableMillisecondsFilter')(travelTime),
+                    valueType: valueType
+                }
+            })
+        })
+    }
+
+    var validDate = function () {
+        $scope.isValidDate = utils.isValidDateTime($scope.commandData.date)
+    }
+
+    /**
+     * @param  {Number}  time - Command date input in milliseconds.
+     * @return {Boolean}
+     */
+    var isValidSendTime = function (time) {
+        if (!$scope.isValidDate) {
+            return false
+        }
+
+        return ($timeHelper.gameTime() + timeOffset) < time
+    }
+
+    var updateDateType = function () {
+        $scope.commandData.dateType = $scope.selectedDateType.value
+        updateTravelTimes()
+    }
+
+    var travelTimesWatcher = function () {
+        travelTimesId = setInterval(function () {
+            if ($scope.selectedTab === 'add' && $scope.commandData.origin && $scope.commandData.target) {
+                calcTravelTimes()
+            }
+        }, 2000)
+    }
+
+    var stopTravelTimesWatcher = function () {
+        clearInterval(travelTimesId)
+    }
+
+    var onBlur = function (unit) {
+        if ($scope.commandData.units[unit] === '') {
+            $scope.commandData.units[unit] = 0
+        }
+    }
+
+    var onFocus = function (unit) {
+        if ($scope.commandData.units[unit] === 0) {
+            $scope.commandData.units[unit] = ''
+        }
+    }
+
+    var onKeyup = function onKeyup() {
+        $scope.showCatapultSelect = !!$scope.commandData.units.catapult
+    }
+
+    var selectTab = function (tabType) {
+        $scope.selectedTab = tabType
+    }
+
+    var addSelected = function () {
+        var village = modelDataService.getSelectedVillage().data
+        
+        $scope.commandData.origin = {
+            id: village.villageId,
+            x: village.x,
+            y: village.y,
+            name: village.name
+        }
+    }
+
+    var addMapSelected = function () {
+        if (!mapSelectedVillage) {
+            return utils.emitNotif('error', $filter('i18n')('error_no_map_selected_village', rootScope.loc.ale, textObject))
+        }
+
+        commandQueue.getVillageByCoords(mapSelectedVillage.x, mapSelectedVillage.y, function (data) {
+            $scope.commandData.target = {
+                id: data.id,
+                x: data.x,
+                y: data.y,
+                name: data.name
+            }
+        })
+    }
+
+    var addCurrentDate = function () {
+        $scope.commandData.date = formatedDate()
+    }
+
+    var incrementDate = function () {
+        if (!$scope.commandData.date) {
+            return false
+        }
+
+        $scope.commandData.date = addDateDiff($scope.commandData.date, 100)
+    }
+
+    var reduceDate = function () {
+        if (!$scope.commandData.date) {
+            return false
+        }
+
+        $scope.commandData.date = addDateDiff($scope.commandData.date, -100)
+    }
+
     var cleanUnitInputs = function () {
-        $scope.addCommand.units = angular.copy(unitList)
-        $scope.addCommand.officers = angular.copy(officerList)
-        $scope.addCommand.catapult_target = DEFAULT_CATAPULT_TARGET
+        $scope.commandData.units = angular.copy(unitList)
+        $scope.commandData.officers = angular.copy(officerList)
+        $scope.commandData.catapultTarget = DEFAULT_CATAPULT_TARGET
         $scope.catapultTarget = {
             name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, rootScope.loc.ale, 'building_names'),
             value: DEFAULT_CATAPULT_TARGET
@@ -269,13 +334,17 @@ define('two/queue/ui', [
 
     var init = function () {
         var attackableBuildingsMap = $gameData.getAttackableBuildings()
+        var building
 
-        for (var i in attackableBuildingsMap) {
+        for (building in attackableBuildingsMap) {
             attackableBuildingsList.push({
-                name: $filter('i18n')(i, rootScope.loc.ale, 'building_names'),
-                value: i
+                name: $filter('i18n')(building, rootScope.loc.ale, 'building_names'),
+                value: building
             })
         }
+
+        unitOrder = orderedUnitNames
+        unitOrder.splice(unitOrder.indexOf('catapult'), 1)
 
         orderedUnitNames.forEach(function (unit) {
             unitList[unit] = 0
@@ -305,50 +374,51 @@ define('two/queue/ui', [
 
     var buildWindow = function () {
         listeners = []
-
         $scope = window.$scope = rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
-        $scope.unitNames = 'unit_names'
-
+        $scope.textObjectVillageInfo = 'screen_village_info'
+        $scope.textObjectUnitNames = 'unit_names'
+        $scope.textObjectMilitaryOperations = 'military_operations'
+        $scope.selectedTab = DEFAULT_TAB
         $scope.inventory = inventory
-
-        $scope.DATE_TYPES = util.toActionList(DATE_TYPES, getActionName)
-        $scope.selectedDateType = {
-            name: $filter('i18n')(DATE_TYPES.out, rootScope.loc.ale, textObject),
-            value: DATE_TYPES.out
-        }
-
         $scope.presets = []
+        $scope.travelTimes = {}
+        $scope.unitOrder = unitOrder
+        $scope.officers = $gameData.getOrderedOfficerNames()
+        $scope.isValidDate = false
+        $scope.dateTypes = util.toActionList(DATE_TYPES, function (actionType) {
+            return $filter('i18n')(actionType, rootScope.loc.ale, textObject)
+        })
+        $scope.selectedDateType = {
+            name: $filter('i18n')(DATE_TYPES.OUT, rootScope.loc.ale, textObject),
+            value: DATE_TYPES.OUT
+        }
         $scope.selectedInsertPreset = {
             name: $filter('i18n')('add_insert_preset', rootScope.loc.ale, textObject),
             value: null
         }
-
-        $scope.selectedTab = DEFAULT_TAB
-        $scope.unitOrder = orderedUnitNames
-        $scope.unitOrder.splice($scope.unitOrder.indexOf('catapult'), 1)
-        $scope.officers = $gameData.getOrderedOfficerNames()
-        $scope.showCatapultSelect = false
-        $scope.attackableBuildings = attackableBuildingsList
         $scope.catapultTarget = {
             name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, rootScope.loc.ale, 'building_names'),
             value: DEFAULT_CATAPULT_TARGET
         }
-        $scope.addCommand = {
+        $scope.showCatapultSelect = false
+        $scope.attackableBuildings = attackableBuildingsList
+        $scope.commandData = {
             origin: false,
             target: false,
             date: '',
+            dateType: DATE_TYPES.OUT,
             units: angular.copy(unitList),
             officers: angular.copy(officerList),
-            catapult_target: DEFAULT_CATAPULT_TARGET
+            catapultTarget: DEFAULT_CATAPULT_TARGET
         }
 
         // functions
         $scope.onBlur = onBlur
         $scope.onFocus = onFocus
+        $scope.onKeyup = onKeyup
         $scope.selectTab = selectTab
-        $scope.keyup = keyup
         $scope.addSelected = addSelected
         $scope.addMapSelected = addMapSelected
         $scope.addCurrentDate = addCurrentDate
@@ -356,8 +426,14 @@ define('two/queue/ui', [
         $scope.reduceDate = reduceDate
         $scope.cleanUnitInputs = cleanUnitInputs
 
+        $scope.$watch('commandData.origin', updateTravelTimes)
+        $scope.$watch('commandData.target', updateTravelTimes)
+        $scope.$watch('commandData.date', updateTravelTimes)
+        $scope.$watch('selectedDateType.value', updateDateType)
+
         registerEvents()
         updatePresets()
+        travelTimesWatcher()
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_queue_window', $scope)
     }
