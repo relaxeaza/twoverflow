@@ -28,6 +28,7 @@ define('two/queue/ui', [
     var mapSelectedVillage = false
     var travelTimesId
     var unitOrder
+    var commandData
 
     /**
      * @type {Object}
@@ -352,6 +353,16 @@ define('two/queue/ui', [
             officerList[unit] = false
         })
 
+        commandData = {
+            origin: false,
+            target: false,
+            date: '',
+            dateType: DATE_TYPES.OUT,
+            units: angular.copy(unitList),
+            officers: angular.copy(officerList),
+            catapultTarget: DEFAULT_CATAPULT_TARGET
+        }
+
         opener = new FrontButton('Commander', {
             classHover: false,
             classBlur: false,
@@ -405,15 +416,7 @@ define('two/queue/ui', [
         }
         $scope.showCatapultSelect = false
         $scope.attackableBuildings = attackableBuildingsList
-        $scope.commandData = {
-            origin: false,
-            target: false,
-            date: '',
-            dateType: DATE_TYPES.OUT,
-            units: angular.copy(unitList),
-            officers: angular.copy(officerList),
-            catapultTarget: DEFAULT_CATAPULT_TARGET
-        }
+        $scope.commandData = commandData
 
         // functions
         $scope.onBlur = onBlur
