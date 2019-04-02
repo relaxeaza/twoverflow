@@ -6,7 +6,8 @@ define('two/farm/ui', [
     'struct/MapData',
     'helper/time',
     'two/farm/Events',
-    'two/utils'
+    'two/utils',
+    'two/EventScope'
 ], function (
     farmOverflow,
     ui,
@@ -15,16 +16,17 @@ define('two/farm/ui', [
     mapData,
     timeHelper,
     farmEventTypes,
-    utils
+    utils,
+    EventScope
 ) {
+    var eventScope
+    var $scope
     var textObject = 'farm'
     var textObjectCommon = 'common'
     var SELECT_SETTINGS = ['presets', 'groupIgnore', 'groupInclude' ,'groupOnly']
     var ERROR_TYPES = farmOverflow.ERROR_TYPES
 
     var buildWindow = function () {
-        var listeners = []
-
         var disabledSelects = function (settings) {
             SELECT_SETTINGS.forEach(function (item) {
                 if (angular.isArray(settings[item])) {
@@ -278,53 +280,6 @@ define('two/farm/ui', [
             })
         }
 
-        var registerEvent = function (id, handler, _root) {
-            if (_root) {
-                listeners.push($rootScope.$on(id, handler))
-            } else {
-                eventQueue.register(id, handler)
-                
-                listeners.push(function () {
-                    eventQueue.unregister(id, handler)
-                })
-            }
-        }
-
-        var registerEvents = function () {
-            registerEvent(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
-            registerEvent(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
-            registerEvent(eventTypeProvider.GROUPS_UPDATED, updateGroups, true)
-            registerEvent(eventTypeProvider.GROUPS_CREATED, updateGroups, true)
-            registerEvent(eventTypeProvider.GROUPS_DESTROYED, updateGroups, true)
-            registerEvent(eventTypeProvider.FARM_START, startHandler)
-            registerEvent(eventTypeProvider.FARM_PAUSE, pauseHandler)
-            registerEvent(eventTypeProvider.FARM_VILLAGES_UPDATE, updateSelectedVillage)
-            registerEvent(eventTypeProvider.FARM_NEXT_VILLAGE, updateSelectedVillage)
-            registerEvent(eventTypeProvider.FARM_SEND_COMMAND, updateLastAttack)
-            registerEvent(eventTypeProvider.FARM_STATUS_CHANGE, updateCurrentStatus)
-            registerEvent(eventTypeProvider.FARM_RESET_LOGS, updateLogs)
-            registerEvent(eventTypeProvider.FARM_LOGS_RESETED, resetLogsHandler)
-            registerEvent(eventTypeProvider.FARM_LOGS_UPDATED, updateLogs)
-            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END, stepCycleEndHandler)
-            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, stepCycleEndNoVillagesHandler)
-            registerEvent(eventTypeProvider.FARM_STEP_CYCLE_NEXT, stepCycleNextHandler)
-            registerEvent(eventTypeProvider.FARM_ERROR, errorHandler)
-            registerEvent(eventTypeProvider.FARM_SETTINGS_CHANGE, saveSettingsHandler)
-
-            var windowListener = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, function (event, templateName) {
-                if (templateName === '!twoverflow_farm_window') {
-                    unregisterEvents()
-                    windowListener()
-                }
-            })
-        }
-
-        var unregisterEvents = function () {
-            listeners.forEach(function (unregister) {
-                unregister()
-            })
-        }
-
         var updateLogs = function () {
             $scope.logs = angular.copy(farmOverflow.getLogs())
 
@@ -368,7 +323,6 @@ define('two/farm/ui', [
         loadVillagesLabel()
         updateSelectedVillage()
         updateLastAttack()
-        registerEvents()
 
         // scope functions
         $scope.selectTab = selectTab
@@ -377,6 +331,27 @@ define('two/farm/ui', [
         $scope.switchFarm = switchFarm
         $scope.jumpToVillage = mapService.jumpToVillage
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
+
+        eventScope = new EventScope('twoverflow_farm_window')
+        eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
+        eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
+        eventScope.register(eventTypeProvider.GROUPS_UPDATED, updateGroups, true)
+        eventScope.register(eventTypeProvider.GROUPS_CREATED, updateGroups, true)
+        eventScope.register(eventTypeProvider.GROUPS_DESTROYED, updateGroups, true)
+        eventScope.register(eventTypeProvider.FARM_START, startHandler)
+        eventScope.register(eventTypeProvider.FARM_PAUSE, pauseHandler)
+        eventScope.register(eventTypeProvider.FARM_VILLAGES_UPDATE, updateSelectedVillage)
+        eventScope.register(eventTypeProvider.FARM_NEXT_VILLAGE, updateSelectedVillage)
+        eventScope.register(eventTypeProvider.FARM_SEND_COMMAND, updateLastAttack)
+        eventScope.register(eventTypeProvider.FARM_STATUS_CHANGE, updateCurrentStatus)
+        eventScope.register(eventTypeProvider.FARM_RESET_LOGS, updateLogs)
+        eventScope.register(eventTypeProvider.FARM_LOGS_RESETED, resetLogsHandler)
+        eventScope.register(eventTypeProvider.FARM_LOGS_UPDATED, updateLogs)
+        eventScope.register(eventTypeProvider.FARM_STEP_CYCLE_END, stepCycleEndHandler)
+        eventScope.register(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, stepCycleEndNoVillagesHandler)
+        eventScope.register(eventTypeProvider.FARM_STEP_CYCLE_NEXT, stepCycleNextHandler)
+        eventScope.register(eventTypeProvider.FARM_ERROR, errorHandler)
+        eventScope.register(eventTypeProvider.FARM_SETTINGS_CHANGE, saveSettingsHandler)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_farm_window', $scope)
         $scope.settings = parseSettings(farmOverflow.getSettings())

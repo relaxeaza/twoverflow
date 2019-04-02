@@ -177,6 +177,7 @@ module.exports = function (grunt) {
         'src/libs/ejs.js',
         'src/header.js',
         'src/event-queue.js',
+        'src/event-scope.js',
         'src/utils.js',
         'src/locale.js',
         'src/ready.js',

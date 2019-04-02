@@ -7,7 +7,8 @@ define('two/queue/ui', [
     'queues/EventQueue',
     'helper/time',
     'helper/util',
-    'two/utils'
+    'two/utils',
+    'two/EventScope'
 ], function (
     commandQueue,
     Locale,
@@ -17,10 +18,12 @@ define('two/queue/ui', [
     eventQueue,
     $timeHelper,
     util,
-    utils
+    utils,
+    EventScope
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'
+    var eventScope
     var $scope
     var $gameData = modelDataService.getGameData()
     var orderedUnitNames = $gameData.getOrderedUnitNames()
@@ -73,38 +76,6 @@ define('two/queue/ui', [
         $scope.presets.unshift({
             name: $filter('i18n')('disabled', rootScope.loc.ale, textObjectCommon),
             value: false
-        })
-    }
-
-    var registerEvent = function (id, handler, _root) {
-        if (_root) {
-            listeners.push($rootScope.$on(id, handler))
-        } else {
-            eventQueue.register(id, handler)
-            
-            listeners.push(function () {
-                eventQueue.unregister(id, handler)
-            })
-        }
-    }
-
-    var unregisterEvents = function () {
-        listeners.forEach(function (unregister) {
-            unregister()
-        })
-
-        stopTravelTimesWatcher()
-    }
-
-    var registerEvents = function () {
-        registerEvent(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
-        registerEvent(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
-
-        var windowListener = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, function (event, templateName) {
-            if (templateName === '!twoverflow_queue_window') {
-                unregisterEvents()
-                windowListener()
-            }
         })
     }
 
@@ -366,7 +337,6 @@ define('two/queue/ui', [
     }
 
     var buildWindow = function () {
-        listeners = []
         $scope = window.$scope = rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
@@ -416,7 +386,13 @@ define('two/queue/ui', [
         $scope.$watch('commandData.date', updateTravelTimes)
         $scope.$watch('selectedDateType.value', updateDateType)
 
-        registerEvents()
+        eventScope = new EventScope('twoverflow_queue_window', function () {
+            stopTravelTimesWatcher()
+        })
+
+        eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
+        eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
+
         updatePresets()
         travelTimesWatcher()
 
