@@ -33,11 +33,11 @@ define('two/queue/ui', [
      * @type {Object}
      */
     var EVENT_CODES = {
-        NOT_OWN_VILLAGE: 'notOwnVillage',
-        NOT_ENOUGH_UNITS: 'notEnoughUnits',
-        TIME_LIMIT: 'timeLimit',
-        COMMAND_REMOVED: 'commandRemoved',
-        COMMAND_SENT: 'commandSent'
+        NOT_OWN_VILLAGE: 'not_own_village',
+        NOT_ENOUGH_UNITS: 'not_enough_units',
+        TIME_LIMIT: 'time_limit',
+        COMMAND_REMOVED: 'command_removed',
+        COMMAND_SENT: 'command_ent'
     }
     var DATE_TYPES = {
         ARRIVE: 'add_arrive',
