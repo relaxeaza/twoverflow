@@ -54,7 +54,7 @@ define('two/queue/ui', [
      * Name of one unity for each speed category.
      * Used to generate travel times.
      */
-    var unitsBySpeed = [
+    var UNITS_BY_SPEED = [
         'light_cavalry',
         'heavy_cavalry',
         'archer',
@@ -186,7 +186,7 @@ define('two/queue/ui', [
         COMMAND_TYPES.forEach(function (commandType) {
             $scope.travelTimes[commandType] = {}
 
-            unitsBySpeed.forEach(function (unit) {
+            UNITS_BY_SPEED.forEach(function (unit) {
                 travelTime = commandQueue.getTravelTime(
                     $scope.commandData.origin,
                     $scope.commandData.target,
