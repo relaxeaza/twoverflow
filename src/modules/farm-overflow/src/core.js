@@ -1,5 +1,6 @@
 define('two/farm', [
     'two/farm/Village',
+    'two/farm/errorTypes',
     'two/utils',
     'helper/math',
     'conf/conf',
@@ -11,6 +12,7 @@ define('two/farm', [
     'queues/EventQueue'
 ], function (
     Village,
+    ERROR_TYPES,
     utils,
     math,
     conf,
@@ -73,14 +75,6 @@ define('two/farm', [
         UNITS: 'units',
         COMMANDS: 'commands',
         FULL_STORAGE: 'full_storage'
-    }
-    var ERROR_TYPES = {
-        TIME_LIMIT: 'time_limit',
-        COMMAND_LIMIT: 'command_limit',
-        FULL_STORAGE: 'full_storage',
-        NO_UNITS: 'no_units',
-        PRESET_FIRST: 'preset_first',
-        NO_SELECTED_VILLAGE: 'no_selected_village'
     }
     var currentStatus = FARM_STATES.PAUSED
     var SETTINGS_MAP = {
@@ -2244,7 +2238,6 @@ define('two/farm', [
         'getSelectedVillage': getSelectedVillage,
         'getLastAttack': getLastAttack,
         'getCurrentStatus': getCurrentStatus,
-        'getSettings': getSettings,
-        'ERROR_TYPES': ERROR_TYPES
+        'getSettings': getSettings
     }
 })

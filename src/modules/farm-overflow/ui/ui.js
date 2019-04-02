@@ -1,5 +1,6 @@
 define('two/farm/ui', [
     'two/farm',
+    'two/farm/errorTypes',
     'two/ui2',
     'two/FrontButton',
     'queues/EventQueue',
@@ -10,6 +11,7 @@ define('two/farm/ui', [
     'two/EventScope'
 ], function (
     farmOverflow,
+    ERROR_TYPES,
     interfaceOverflow,
     FrontButton,
     eventQueue,
@@ -24,7 +26,6 @@ define('two/farm/ui', [
     var textObject = 'farm'
     var textObjectCommon = 'common'
     var SELECT_SETTINGS = ['presets', 'groupIgnore', 'groupInclude' ,'groupOnly']
-    var ERROR_TYPES = farmOverflow.ERROR_TYPES
 
     var disabledSelects = function (settings) {
         SELECT_SETTINGS.forEach(function (item) {
