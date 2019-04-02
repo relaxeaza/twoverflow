@@ -117,8 +117,6 @@ define('two/queue/ui', [
     var registerEvents = function () {
         registerEvent(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
         registerEvent(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
-        registerEvent(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage, true)
-        registerEvent(eventTypeProvider.DESTROY_CONTEXT_MENU, unsetMapSelectedVillage, true)
 
         var windowListener = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, function (event, templateName) {
             if (templateName === '!twoverflow_queue_window') {
@@ -367,6 +365,9 @@ define('two/queue/ui', [
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_STOP, function () {
             opener.$elem.removeClass('btn-red').addClass('btn-green')
         })
+
+        $rootScope.$on(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage)
+        $rootScope.$on(eventTypeProvider.DESTROY_CONTEXT_MENU, unsetMapSelectedVillage)
 
         interfaceOverflow.template('twoverflow_queue_window', `__queue_html_main`)
         interfaceOverflow.css('__queue_css_style')
