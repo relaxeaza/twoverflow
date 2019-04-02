@@ -196,5 +196,26 @@ define('two/utils', [
         xhr.send()
     }
 
+    utils.obj2selectOptions = function (obj, _includeIcon) {
+        var list = []
+        var item
+        var i
+
+        for (i in obj) {
+            item = {
+                name: obj[i].name,
+                value: obj[i].id
+            }
+
+            if (_includeIcon) {
+                item.leftIcon = obj[i].icon
+            }
+
+            list.push(item)
+        }
+
+        return list
+    }
+
     return utils
 })

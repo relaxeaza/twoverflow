@@ -6,7 +6,8 @@ define('two/queue/ui', [
     'two/utils',
     'queues/EventQueue',
     'helper/time',
-    'helper/util'
+    'helper/util',
+    'two/utils'
 ], function (
     commandQueue,
     Locale,
@@ -15,7 +16,8 @@ define('two/queue/ui', [
     utils,
     eventQueue,
     $timeHelper,
-    util
+    util,
+    utils
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'
@@ -65,30 +67,9 @@ define('two/queue/ui', [
         'trebuchet'
     ]
 
-    var convertListObjects = function (obj, _includeIcon) {
-        var list = []
-        var item
-        var i
-
-        for (i in obj) {
-            item = {
-                name: obj[i].name,
-                value: obj[i].id
-            }
-
-            if (_includeIcon) {
-                item.leftIcon = obj[i].icon
-            }
-
-            list.push(item)
-        }
-
-        return list
-    }
-
     var updatePresets = function () {
         var presetList = modelDataService.getPresetList()
-        $scope.presets = convertListObjects(presetList.getPresets())
+        $scope.presets = utils.obj2selectOptions(presetList.getPresets())
         $scope.presets.unshift({
             name: $filter('i18n')('disabled', rootScope.loc.ale, textObjectCommon),
             value: false

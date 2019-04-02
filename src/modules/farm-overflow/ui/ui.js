@@ -41,35 +41,14 @@ define('two/farm/ui', [
             $scope.selectedTab = tabType
         }
 
-        var convertListObjects = function (obj, _includeIcon) {
-            var list = []
-            var item
-            var i
-
-            for (i in obj) {
-                item = {
-                    name: obj[i].name,
-                    value: obj[i].id
-                }
-
-                if (_includeIcon) {
-                    item.leftIcon = obj[i].icon
-                }
-
-                list.push(item)
-            }
-
-            return list
-        }
-
         var updatePresets = function () {
             var presetList = modelDataService.getPresetList()
-            $scope.presets = convertListObjects(presetList.getPresets())
+            $scope.presets = utils.obj2selectOptions(presetList.getPresets())
         }
 
         var updateGroups = function () {
             var groupList = modelDataService.getGroupList()
-            $scope.groups = convertListObjects(groupList.getGroups(), true)
+            $scope.groups = utils.obj2selectOptions(groupList.getGroups(), true)
             $scope.groupsWithDisabled = angular.copy($scope.groups)
             $scope.groupsWithDisabled.unshift(disabledOption())
         }
