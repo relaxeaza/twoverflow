@@ -73,10 +73,6 @@ define('two/queue/ui', [
     var updatePresets = function () {
         var presetList = modelDataService.getPresetList()
         $scope.presets = utils.obj2selectOptions(presetList.getPresets())
-        $scope.presets.unshift({
-            name: $filter('i18n')('disabled', rootScope.loc.ale, textObjectCommon),
-            value: false
-        })
     }
 
     var setMapSelectedVillage = function (event, menu) {
@@ -192,6 +188,26 @@ define('two/queue/ui', [
     var updateDateType = function () {
         $scope.commandData.dateType = $scope.selectedDateType.value
         updateTravelTimes()
+    }
+
+    var insertPreset = function () {
+        var selectedPreset = $scope.selectedInsertPreset.value
+
+        if (!selectedPreset) {
+            return false
+        }
+
+        var presets = modelDataService.getPresetList().getPresets()
+        var preset = presets[selectedPreset]
+
+        // reset displayed value
+        $scope.selectedInsertPreset = {
+            name: $filter('i18n')('add_insert_preset', rootScope.loc.ale, textObject),
+            value: null
+        }
+
+        commandData.units = angular.copy(preset.units)
+        commandData.officers = angular.copy(preset.officers)
     }
 
     var travelTimesWatcher = function () {
@@ -385,6 +401,7 @@ define('two/queue/ui', [
         $scope.$watch('commandData.target', updateTravelTimes)
         $scope.$watch('commandData.date', updateTravelTimes)
         $scope.$watch('selectedDateType.value', updateDateType)
+        $scope.$watch('selectedInsertPreset.value', insertPreset)
 
         eventScope = new EventScope('twoverflow_queue_window', function () {
             stopTravelTimesWatcher()
