@@ -208,6 +208,16 @@ define('two/queue/ui', [
 
         commandData.units = angular.copy(preset.units)
         commandData.officers = angular.copy(preset.officers)
+
+        if (preset.catapult_target) {
+            commandData.catapultTarget = preset.catapult_target
+            $scope.catapultTarget = {
+                name: $filter('i18n')(preset.catapult_target, rootScope.loc.ale, 'building_names'),
+                value: preset.catapult_target
+            }
+            $scope.showCatapultSelect = true
+
+        }
     }
 
     var travelTimesWatcher = function () {
@@ -310,7 +320,7 @@ define('two/queue/ui', [
             })
         }
 
-        unitOrder = orderedUnitNames
+        unitOrder = angular.copy(orderedUnitNames)
         unitOrder.splice(unitOrder.indexOf('catapult'), 1)
 
         orderedUnitNames.forEach(function (unit) {
@@ -381,7 +391,7 @@ define('two/queue/ui', [
             name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, rootScope.loc.ale, 'building_names'),
             value: DEFAULT_CATAPULT_TARGET
         }
-        $scope.showCatapultSelect = false
+        $scope.showCatapultSelect = !!commandData.units.catapult
         $scope.attackableBuildings = attackableBuildingsList
         $scope.commandData = commandData
 
