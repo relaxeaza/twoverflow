@@ -116,11 +116,8 @@ define('two/queue/ui', [
     }
 
     var updateTravelTimes = function () {
-        validDate()
-        calcTravelTimes()
-    }
+        $scope.isValidDate = utils.isValidDateTime($scope.commandData.date)
 
-    var calcTravelTimes = function () {
         if (!$scope.commandData.origin || !$scope.commandData.target) {
             return false
         }
@@ -168,10 +165,6 @@ define('two/queue/ui', [
                 }
             })
         })
-    }
-
-    var validDate = function () {
-        $scope.isValidDate = utils.isValidDateTime($scope.commandData.date)
     }
 
     /**
