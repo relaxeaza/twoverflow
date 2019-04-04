@@ -44,10 +44,10 @@ define('two/ui/autoComplete', [
      *
      * @param {Object} data - Data of the selected item.
      */
-    var onSelect = function (data) {
+    var onSelect = function (data, args) {
         autoComplete.hide()
         rootScope.$broadcast(eventTypeProvider.SELECT_HIDE, id)
-        rootScope.$broadcast(eventTypeProvider.SELECT_SELECTED, id, data)
+        rootScope.$broadcast(eventTypeProvider.SELECT_SELECTED, id, data, args)
     }
 
     /**
@@ -91,7 +91,9 @@ define('two/ui/autoComplete', [
             id,
             data,
             null,
-            onSelect,
+            function (data) {
+                onSelect(data, args)
+            },
             $elem,
             true,
             0,
@@ -130,7 +132,8 @@ define('two/ui/autoComplete', [
                     results.push({
                         id: village.id,
                         type: 'village',
-                        name: utils.genVillageLabel(village)
+                        name: utils.genVillageLabel(village),
+                        raw: village
                     })
                 }
 
@@ -147,12 +150,14 @@ define('two/ui/autoComplete', [
         }, function (data) {
             for (var type in data.result) {
                 data.result[type].forEach(function (item, i) {
+                    if (type === 'village') {
+                        item.raw = angular.copy(item)
+                        item.name = utils.genVillageLabel(item)
+                    }
+
                     item.type = type
                     item.leftIcon = 'size-34x34 icon-26x26-rte-' + type
 
-                    if (type === 'village') {
-                        item.name = utils.genVillageLabel(item)
-                    }
 
                     results.push(item)
                 })

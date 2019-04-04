@@ -8,7 +8,8 @@ define('two/queue/ui', [
     'helper/time',
     'helper/util',
     'two/utils',
-    'two/EventScope'
+    'two/EventScope',
+    'two/ui/autoComplete'
 ], function (
     commandQueue,
     Locale,
@@ -19,7 +20,8 @@ define('two/queue/ui', [
     $timeHelper,
     util,
     utils,
-    EventScope
+    EventScope,
+    autoComplete
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'
@@ -309,6 +311,53 @@ define('two/queue/ui', [
         $scope.showCatapultSelect = false
     }
 
+    var searchVillage = function (type) {
+        var $elem
+        var model
+        var type
+
+        switch (type) {
+        case 'origin':
+            $elem = document.querySelector('#two-commandqueue .village-origin')
+            model = 'originQuery'
+
+            break
+        case 'target':
+            $elem = document.querySelector('#two-commandqueue .village-target')
+            model = 'targetQuery'
+
+            break
+        default:
+            return false
+            break
+        }
+
+        if ($scope[model].length < 2) {
+            return autoComplete.hide()
+        }
+
+        autoComplete.search($scope[model], function (data) {
+            if (data.length) {
+                autoComplete.show(data, $elem, 'commandqueue_village_search', type)
+            }
+        }, ['village'])
+    }
+
+    var autoCompleteSelected = function (event, id, data, type) {
+        if (id !== 'commandqueue_village_search') {
+            return false
+        }
+
+        commandData[type] = {
+            id: data.raw.id,
+            x: data.raw.x,
+            y: data.raw.y,
+            name: data.raw.name
+        }
+
+        $scope[type + 'Query'] = ''
+    }
+
     var init = function () {
         var attackableBuildingsMap = $gameData.getAttackableBuildings()
         var building
@@ -375,6 +424,8 @@ define('two/queue/ui', [
         $scope.travelTimes = {}
         $scope.unitOrder = unitOrder
         $scope.officers = $gameData.getOrderedOfficerNames()
+        $scope.originQuery = ''
+        $scope.targetQuery = ''
         $scope.isValidDate = false
         $scope.dateTypes = util.toActionList(DATE_TYPES, function (actionType) {
             return $filter('i18n')(actionType, rootScope.loc.ale, textObject)
@@ -406,6 +457,7 @@ define('two/queue/ui', [
         $scope.incrementDate = incrementDate
         $scope.reduceDate = reduceDate
         $scope.cleanUnitInputs = cleanUnitInputs
+        $scope.searchVillage = searchVillage
 
         $scope.$watch('commandData.origin', updateTravelTimes)
         $scope.$watch('commandData.target', updateTravelTimes)
@@ -419,6 +471,7 @@ define('two/queue/ui', [
 
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
         eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
+        eventScope.register(eventTypeProvider.SELECT_SELECTED, autoCompleteSelected, true)
 
         updatePresets()
         travelTimesWatcher()

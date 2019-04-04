@@ -50,7 +50,7 @@
                                 <tbody>
                                     <tr>
                                         <td>
-                                            <input data-setting="origin" type="text" class="textfield-border origin" pattern="\\d{2,3}\\|\\d{2,3}" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" tooltip="" tooltip-content="{{ 'add_origin' | i18n:loc.ale:textObject }}">
+                                            <input type="text" ng-model="originQuery" class="textfield-border village-origin" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" tooltip="" tooltip-content="{{ 'add_origin' | i18n:loc.ale:textObject }}" ng-keyup="searchVillage('origin')">
                                         </td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
                                         <td ng-if="!commandData.origin">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
@@ -62,7 +62,7 @@
 
                                     <tr>
                                         <td>
-                                            <input data-setting="target" type="text" class="textfield-border target" pattern="\\d{2,3}\\|\\d{2,3}" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" tooltip="" tooltip-content="{{ 'add_target' | i18n:loc.ale:textObject }}">
+                                            <input type="text" ng-model="targetQuery" class="textfield-border village-target" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" tooltip="" tooltip-content="{{ 'add_target' | i18n:loc.ale:textObject }}" ng-keyup="searchVillage('target')">
                                         </td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
                                         <td ng-if="!commandData.target">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
