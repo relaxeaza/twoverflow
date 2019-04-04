@@ -46,8 +46,8 @@ define('two/ui/autoComplete', [
      */
     var onSelect = function (data, args) {
         autoComplete.hide()
-        rootScope.$broadcast(eventTypeProvider.SELECT_HIDE, id)
-        rootScope.$broadcast(eventTypeProvider.SELECT_SELECTED, id, data, args)
+        $rootScope.$broadcast(eventTypeProvider.SELECT_HIDE, id)
+        $rootScope.$broadcast(eventTypeProvider.SELECT_SELECTED, id, data, args)
     }
 
     /**
@@ -61,7 +61,7 @@ define('two/ui/autoComplete', [
      * Hide Auto-complete select element.
      */
     autoComplete.hide = function () {
-        rootScope.$broadcast(eventTypeProvider.SELECT_HIDE, id)
+        $rootScope.$broadcast(eventTypeProvider.SELECT_HIDE, id)
 
         $(window).off('click', hideClick)
         $('.win-main').off('mousewheel', autoComplete.hide)
@@ -86,7 +86,7 @@ define('two/ui/autoComplete', [
             return false
         }
 
-        rootScope.$broadcast(
+        $rootScope.$broadcast(
             eventTypeProvider.SELECT_SHOW,
             id,
             data,

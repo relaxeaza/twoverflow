@@ -548,8 +548,8 @@ define('two/farm', [
             }
         }
 
-        rootScope.$on(eventTypeProvider.REPORT_NEW, reportHandler)
-        rootScope.$on(eventTypeProvider.WINDOW_CLOSED, delayedReportHandler)
+        $rootScope.$on(eventTypeProvider.REPORT_NEW, reportHandler)
+        $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, delayedReportHandler)
     }
 
     var messageListener = function () {
@@ -598,7 +598,7 @@ define('two/farm', [
             return false
         }
 
-        rootScope.$on(eventTypeProvider.MESSAGE_SENT, remoteHandler)
+        $rootScope.$on(eventTypeProvider.MESSAGE_SENT, remoteHandler)
     }
 
     var presetListener = function () {
@@ -621,8 +621,8 @@ define('two/farm', [
             }
         }
 
-        rootScope.$on(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresetsHandler)
-        rootScope.$on(eventTypeProvider.ARMY_PRESET_DELETED, updatePresetsHandler)
+        $rootScope.$on(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresetsHandler)
+        $rootScope.$on(eventTypeProvider.ARMY_PRESET_DELETED, updatePresetsHandler)
     }
 
     var groupListener = function () {
@@ -649,11 +649,11 @@ define('two/farm', [
             }
         }
 
-        rootScope.$on(eventTypeProvider.GROUPS_UPDATED, groupChangeHandler)
-        rootScope.$on(eventTypeProvider.GROUPS_CREATED, groupChangeHandler)
-        rootScope.$on(eventTypeProvider.GROUPS_DESTROYED, groupChangeHandler)
-        rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_LINKED, groupLinkHandler)
-        rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_UNLINKED, groupLinkHandler)
+        $rootScope.$on(eventTypeProvider.GROUPS_UPDATED, groupChangeHandler)
+        $rootScope.$on(eventTypeProvider.GROUPS_CREATED, groupChangeHandler)
+        $rootScope.$on(eventTypeProvider.GROUPS_DESTROYED, groupChangeHandler)
+        $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_LINKED, groupLinkHandler)
+        $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_UNLINKED, groupLinkHandler)
     }
 
     var villageListener = function () {
@@ -713,8 +713,8 @@ define('two/farm', [
             }
         }
 
-        rootScope.$on(eventTypeProvider.VILLAGE_ARMY_CHANGED, armyChangeHandler)
-        rootScope.$on(eventTypeProvider.VILLAGE_RESOURCES_CHANGED, resourceChangeHandler)
+        $rootScope.$on(eventTypeProvider.VILLAGE_ARMY_CHANGED, armyChangeHandler)
+        $rootScope.$on(eventTypeProvider.VILLAGE_RESOURCES_CHANGED, resourceChangeHandler)
     }
 
     var generalListeners = function () {
@@ -734,7 +734,7 @@ define('two/farm', [
             socketService.emit(routeProvider.MAP_GETVILLAGES, args)
         })
 
-        rootScope.$on(eventTypeProvider.RECONNECT, reconnectHandler)
+        $rootScope.$on(eventTypeProvider.RECONNECT, reconnectHandler)
     }
 
     var addEventLog = function (data) {
@@ -1506,7 +1506,7 @@ define('two/farm', [
         }
 
         if (!$gameState.getGameState(GAME_STATES.ALL_VILLAGES_READY)) {
-            var unbind = rootScope.$on(eventTypeProvider.GAME_STATE_ALL_VILLAGES_READY, function () {
+            var unbind = $rootScope.$on(eventTypeProvider.GAME_STATE_ALL_VILLAGES_READY, function () {
                 unbind()
                 start(_manual)
             })
@@ -2024,7 +2024,7 @@ define('two/farm', [
             var before = angular.copy(selectedVillage.units)
             var now
             var equals
-            var unbind = rootScope.$on(eventTypeProvider.VILLAGE_UNIT_INFO, function (event, data) {
+            var unbind = $rootScope.$on(eventTypeProvider.VILLAGE_UNIT_INFO, function (event, data) {
                 if (selectedVillage.id !== data.village_id) {
                     return false
                 }
@@ -2052,7 +2052,7 @@ define('two/farm', [
          * Called after an error when trying to send a command.
          */
         Commander.prototype.onCommandError = function (callback) {
-            var unbind = rootScope.$on(eventTypeProvider.MESSAGE_ERROR, function (event, data) {
+            var unbind = $rootScope.$on(eventTypeProvider.MESSAGE_ERROR, function (event, data) {
                 if (!data.cause || !data.code) {
                     return false
                 }

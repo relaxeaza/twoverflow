@@ -203,7 +203,7 @@ define('two/queue/ui', [
 
         // reset displayed value
         $scope.selectedInsertPreset = {
-            name: $filter('i18n')('add_insert_preset', rootScope.loc.ale, textObject),
+            name: $filter('i18n')('add_insert_preset', $rootScope.loc.ale, textObject),
             value: null
         }
 
@@ -213,7 +213,7 @@ define('two/queue/ui', [
         if (preset.catapult_target) {
             commandData.catapultTarget = preset.catapult_target
             $scope.catapultTarget = {
-                name: $filter('i18n')(preset.catapult_target, rootScope.loc.ale, 'building_names'),
+                name: $filter('i18n')(preset.catapult_target, $rootScope.loc.ale, 'building_names'),
                 value: preset.catapult_target
             }
             $scope.showCatapultSelect = true
@@ -254,7 +254,7 @@ define('two/queue/ui', [
 
     var addMapSelected = function () {
         if (!mapSelectedVillage) {
-            return utils.emitNotif('error', $filter('i18n')('error_no_map_selected_village', rootScope.loc.ale, textObject))
+            return utils.emitNotif('error', $filter('i18n')('error_no_map_selected_village', $rootScope.loc.ale, textObject))
         }
 
         commandQueue.getVillageByCoords(mapSelectedVillage.x, mapSelectedVillage.y, function (data) {
@@ -292,7 +292,7 @@ define('two/queue/ui', [
         $scope.commandData.officers = angular.copy(officerList)
         $scope.commandData.catapultTarget = DEFAULT_CATAPULT_TARGET
         $scope.catapultTarget = {
-            name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, rootScope.loc.ale, 'building_names'),
+            name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, $rootScope.loc.ale, 'building_names'),
             value: DEFAULT_CATAPULT_TARGET
         }
         $scope.showCatapultSelect = false
@@ -351,7 +351,7 @@ define('two/queue/ui', [
 
         for (building in attackableBuildingsMap) {
             attackableBuildingsList.push({
-                name: $filter('i18n')(building, rootScope.loc.ale, 'building_names'),
+                name: $filter('i18n')(building, $rootScope.loc.ale, 'building_names'),
                 value: building
             })
         }
@@ -399,7 +399,7 @@ define('two/queue/ui', [
     }
 
     var buildWindow = function () {
-        $scope = window.$scope = rootScope.$new()
+        $scope = window.$scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.textObjectVillageInfo = 'screen_village_info'
@@ -415,18 +415,18 @@ define('two/queue/ui', [
         $scope.targetQuery = ''
         $scope.isValidDate = false
         $scope.dateTypes = util.toActionList(DATE_TYPES, function (actionType) {
-            return $filter('i18n')(actionType, rootScope.loc.ale, textObject)
+            return $filter('i18n')(actionType, $rootScope.loc.ale, textObject)
         })
         $scope.selectedDateType = {
-            name: $filter('i18n')(DATE_TYPES.OUT, rootScope.loc.ale, textObject),
+            name: $filter('i18n')(DATE_TYPES.OUT, $rootScope.loc.ale, textObject),
             value: DATE_TYPES.OUT
         }
         $scope.selectedInsertPreset = {
-            name: $filter('i18n')('add_insert_preset', rootScope.loc.ale, textObject),
+            name: $filter('i18n')('add_insert_preset', $rootScope.loc.ale, textObject),
             value: null
         }
         $scope.catapultTarget = {
-            name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, rootScope.loc.ale, 'building_names'),
+            name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, $rootScope.loc.ale, 'building_names'),
             value: DEFAULT_CATAPULT_TARGET
         }
         $scope.showCatapultSelect = !!commandData.units.catapult

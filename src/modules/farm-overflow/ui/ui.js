@@ -314,7 +314,7 @@ define('two/farm/ui', [
     }
 
     var buildWindow = function () {
-        $scope = rootScope.$new()
+        $scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.version = '__farm_version'

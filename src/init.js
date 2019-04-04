@@ -7,7 +7,7 @@ require([
 ) {
     var updateModuleLang = function () {
         var langs = __overflow_locales
-        var current = rootScope.loc.ale
+        var current = $rootScope.loc.ale
         var data = current in langs
             ? langs[current]
             : langs['en_us']

@@ -24,7 +24,7 @@ define('two/ready', [
                     return readyStep('map')
                 }
 
-                rootScope.$on(eventTypeProvider.MAP_INITIALIZED, function () {
+                $rootScope.$on(eventTypeProvider.MAP_INITIALIZED, function () {
                     readyStep('map')
                 })
             },
@@ -39,7 +39,7 @@ define('two/ready', [
                     }
                 }
 
-                var unbind = rootScope.$on(eventTypeProvider.TRIBE_RELATION_LIST, function () {
+                var unbind = $rootScope.$on(eventTypeProvider.TRIBE_RELATION_LIST, function () {
                     unbind()
                     readyStep('tribe_relations')
                 })
@@ -51,7 +51,7 @@ define('two/ready', [
                     return readyStep('initial_village')
                 }
 
-                rootScope.$on(eventTypeProvider.GAME_STATE_INITIAL_VILLAGE_READY, function () {
+                $rootScope.$on(eventTypeProvider.GAME_STATE_INITIAL_VILLAGE_READY, function () {
                     readyStep('initial_village')
                 })
             },
@@ -62,7 +62,7 @@ define('two/ready', [
                     return readyStep('all_villages_ready')
                 }
 
-                rootScope.$on(eventTypeProvider.GAME_STATE_ALL_VILLAGES_READY, function () {
+                $rootScope.$on(eventTypeProvider.GAME_STATE_ALL_VILLAGES_READY, function () {
                     readyStep('all_villages_ready')
                 })
             }

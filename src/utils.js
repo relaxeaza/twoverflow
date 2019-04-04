@@ -45,7 +45,7 @@ define('two/utils', [
             ? eventTypeProvider.MESSAGE_SUCCESS
             : eventTypeProvider.MESSAGE_ERROR
 
-        rootScope.$broadcast(eventType, {
+        $rootScope.$broadcast(eventType, {
             message: message
         })
     }
@@ -157,8 +157,8 @@ define('two/utils', [
         return $filter('readableDateFilter')(
             ms,
             null,
-            rootScope.GAME_TIMEZONE,
-            rootScope.GAME_TIME_OFFSET,
+            $rootScope.GAME_TIMEZONE,
+            $rootScope.GAME_TIME_OFFSET,
             format || 'HH:mm:ss dd/MM/yyyy'
         )
     }
@@ -171,7 +171,7 @@ define('two/utils', [
     utils.getTimeOffset = function () {
         var localDate = $timeHelper.gameDate()
         var localOffset = localDate.getTimezoneOffset() * 1000 * 60
-        var serverOffset = rootScope.GAME_TIME_OFFSET
+        var serverOffset = $rootScope.GAME_TIME_OFFSET
 
         return localOffset + serverOffset
     }

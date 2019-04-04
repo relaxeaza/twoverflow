@@ -41,7 +41,7 @@ define('two/FrontButton', [
 
         if (options.tooltip) {
             $elem.on('mouseenter', function (event) {
-                rootScope.$broadcast(
+                $rootScope.$broadcast(
                     eventTypeProvider.TOOLTIP_SHOW,
                     'twoverflow-tooltip',
                     options.tooltip,
@@ -51,7 +51,7 @@ define('two/FrontButton', [
             })
 
             $elem.on('mouseleave', function () {
-                rootScope.$broadcast(eventTypeProvider.TOOLTIP_HIDE, 'twoverflow-tooltip')
+                $rootScope.$broadcast(eventTypeProvider.TOOLTIP_HIDE, 'twoverflow-tooltip')
             })
         }
 

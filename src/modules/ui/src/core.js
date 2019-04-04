@@ -21,8 +21,8 @@ define('two/ui2', [
                     onSuccess(data, status, headers, config)
                 }
 
-                if (!rootScope.$$phase) {
-                    rootScope.$apply()
+                if (!$rootScope.$$phase) {
+                    $rootScope.$apply()
                 }
             },
             error = function error(data, status, headers, config) {

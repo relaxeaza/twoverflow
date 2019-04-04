@@ -141,7 +141,7 @@ define('two/autoCollector', [
     autoCollector.init = function () {
         initialized = true
 
-        rootScope.$on(eventTypeProvider.RESOURCE_DEPOSIT_JOB_COLLECTIBLE, function () {
+        $rootScope.$on(eventTypeProvider.RESOURCE_DEPOSIT_JOB_COLLECTIBLE, function () {
             if (!recall || !running) {
                 return false
             }
@@ -154,9 +154,9 @@ define('two/autoCollector', [
             }, 1500)
         })
 
-        rootScope.$on(eventTypeProvider.RESOURCE_DEPOSIT_JOBS_REROLLED, analyse)
-        rootScope.$on(eventTypeProvider.RESOURCE_DEPOSIT_JOB_COLLECTED, analyse)
-        rootScope.$on(eventTypeProvider.RESOURCE_DEPOSIT_INFO, function (event, data) {
+        $rootScope.$on(eventTypeProvider.RESOURCE_DEPOSIT_JOBS_REROLLED, analyse)
+        $rootScope.$on(eventTypeProvider.RESOURCE_DEPOSIT_JOB_COLLECTED, analyse)
+        $rootScope.$on(eventTypeProvider.RESOURCE_DEPOSIT_INFO, function (event, data) {
             analyse()
             rerollUpdater(data)
         })
