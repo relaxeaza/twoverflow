@@ -33,7 +33,6 @@ define('two/queue/ui', [
     var listeners
     var inventory = modelDataService.getInventory()
     var mapSelectedVillage = false
-    var travelTimesId
     var unitOrder
     var commandData
 
@@ -220,18 +219,6 @@ define('two/queue/ui', [
             $scope.showCatapultSelect = true
 
         }
-    }
-
-    var travelTimesWatcher = function () {
-        travelTimesId = setInterval(function () {
-            if ($scope.selectedTab === 'add' && $scope.commandData.origin && $scope.commandData.target) {
-                calcTravelTimes()
-            }
-        }, 2000)
-    }
-
-    var stopTravelTimesWatcher = function () {
-        clearInterval(travelTimesId)
     }
 
     var onBlur = function (unit) {
@@ -465,8 +452,8 @@ define('two/queue/ui', [
         $scope.$watch('selectedDateType.value', updateDateType)
         $scope.$watch('selectedInsertPreset.value', insertPreset)
 
-        eventScope = new EventScope('twoverflow_queue_window', function () {
-            stopTravelTimesWatcher()
+        eventScope = new EventScope('twoverflow_queue_window', function onCloseWindow() {
+            // keep here for future reference
         })
 
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
@@ -474,7 +461,6 @@ define('two/queue/ui', [
         eventScope.register(eventTypeProvider.SELECT_SELECTED, autoCompleteSelected, true)
 
         updatePresets()
-        travelTimesWatcher()
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_queue_window', $scope)
     }
