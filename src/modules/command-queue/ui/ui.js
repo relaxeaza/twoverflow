@@ -214,19 +214,19 @@ define('two/queue/ui', [
         }
     }
 
-    var onBlur = function (unit) {
-        if ($scope.commandData.units[unit] === '') {
-            $scope.commandData.units[unit] = 0
-        }
-    }
-
-    var onFocus = function (unit) {
+    var onUnitInputFocus = function (unit) {
         if ($scope.commandData.units[unit] === 0) {
             $scope.commandData.units[unit] = ''
         }
     }
 
-    var onKeyup = function onKeyup() {
+    var onUnitInputBlur = function (unit) {
+        if ($scope.commandData.units[unit] === '') {
+            $scope.commandData.units[unit] = 0
+        }
+    }
+
+    var catapultTargetVisibility = function () {
         $scope.showCatapultSelect = !!$scope.commandData.units.catapult
     }
 
@@ -427,9 +427,9 @@ define('two/queue/ui', [
         $scope.commandData = commandData
 
         // functions
-        $scope.onBlur = onBlur
-        $scope.onFocus = onFocus
-        $scope.onKeyup = onKeyup
+        $scope.onUnitInputFocus = onUnitInputFocus
+        $scope.onUnitInputBlur = onUnitInputBlur
+        $scope.catapultTargetVisibility = catapultTargetVisibility
         $scope.selectTab = selectTab
         $scope.addSelected = addSelected
         $scope.addMapSelected = addMapSelected

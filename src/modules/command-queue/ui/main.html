@@ -201,26 +201,26 @@
                                 <tr ng-repeat="i in [] | range:(unitOrder.length / 4);">
                                     <td class="cell-space-left">
                                         <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4]" tooltip="" tooltip-content="{{ unitOrder[i * 4] | i18n:loc.ale:textObjectUnitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4]] }}" ng-keyup="onKeyup();" ng-focus="onFocus(unitOrder[i * 4])" ng-blur="onBlur(unitOrder[i * 4])">
+                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4]] }}" ng-focus="onUnitInputFocus(unitOrder[i * 4])" ng-blur="onUnitInputBlur(unitOrder[i * 4])">
                                     </td>
                                     <td class="cell-space-left">
                                         <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 1]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 1] | i18n:loc.ale:textObjectUnitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 1]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 1]] }}" ng-keyup="onKeyup();" ng-focus="onFocus(unitOrder[i * 4 + 1])" ng-blur="onBlur(unitOrder[i * 4 + 1])">
+                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 1]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 1]] }}" ng-focus="onUnitInputFocus(unitOrder[i * 4 + 1])" ng-blur="onUnitInputBlur(unitOrder[i * 4 + 1])">
                                     </td>
                                     <td class="cell-space-left">
                                         <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 2]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 2] | i18n:loc.ale:textObjectUnitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 2]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 2]] }}" ng-keyup="onKeyup();" ng-focus="onFocus(unitOrder[i * 4 + 2])" ng-blur="onBlur(unitOrder[i * 4 + 2])">
+                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 2]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 2]] }}" ng-focus="onUnitInputFocus(unitOrder[i * 4 + 2])" ng-blur="onUnitInputBlur(unitOrder[i * 4 + 2])">
                                     </td>
                                     <td class="cell-space-left">
                                         <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 3]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 3] | i18n:loc.ale:textObjectUnitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 3]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 3]] }}" ng-keyup="onKeyup();" ng-focus="onFocus(unitOrder[i * 4 + 3])" ng-blur="onBlur(unitOrder[i * 4 + 3])">
+                                        <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 3]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 3]] }}" ng-focus="onUnitInputFocus(unitOrder[i * 4 + 3])" ng-blur="onUnitInputBlur(unitOrder[i * 4 + 3])">
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <td class="cell-space-left">
                                         <span class="icon-bg-black icon-34x34-unit-catapult" tooltip="" tooltip-content="{{ 'catapult' | i18n:loc.ale:textObjectUnitNames }}"></span>
-                                        <input remove-zero="" type="text" ng-model="commandData.units.catapult" maxlength="5" placeholder="{{ commandData.units.catapult }}" ng-keyup="onKeyup();" ng-focus="onFocus('catapult')" ng-blur="onBlur('catapult')">
+                                        <input remove-zero="" type="text" ng-model="commandData.units.catapult" maxlength="5" placeholder="{{ commandData.units.catapult }}" ng-keyup="catapultTargetVisibility()" ng-focus="onUnitInputFocus('catapult')" ng-blur="onUnitInputBlur('catapult')">
                                     </td>
                                     <td class="cell-space-left" colspan="3">
                                         <div ng-visible="showCatapultSelect">
