@@ -9,7 +9,9 @@ define('two/queue/ui', [
     'helper/util',
     'two/utils',
     'two/EventScope',
-    'two/ui/autoComplete'
+    'two/ui/autoComplete',
+    'two/queue/dateTypes',
+    'two/queue/eventCodes'
 ], function (
     commandQueue,
     Locale,
@@ -21,7 +23,8 @@ define('two/queue/ui', [
     util,
     utils,
     EventScope,
-    autoComplete
+    autoComplete,
+    DATE_TYPES
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'
@@ -35,21 +38,6 @@ define('two/queue/ui', [
     var mapSelectedVillage = false
     var unitOrder
     var commandData
-
-    /**
-     * @type {Object}
-     */
-    var EVENT_CODES = {
-        NOT_OWN_VILLAGE: 'not_own_village',
-        NOT_ENOUGH_UNITS: 'not_enough_units',
-        TIME_LIMIT: 'time_limit',
-        COMMAND_REMOVED: 'command_removed',
-        COMMAND_SENT: 'command_ent'
-    }
-    var DATE_TYPES = {
-        ARRIVE: 'add_arrive',
-        OUT: 'add_out'
-    }
     var COMMAND_TYPES = ['attack', 'support', 'relocate']
     var DEFAULT_TAB = 'add'
     var DEFAULT_CATAPULT_TARGET = 'wall'
@@ -116,9 +104,9 @@ define('two/queue/ui', [
     }
 
     var updateTravelTimes = function () {
-        $scope.isValidDate = utils.isValidDateTime($scope.commandData.date)
+        $scope.isValidDate = utils.isValidDateTime(commandData.date)
 
-        if (!$scope.commandData.origin || !$scope.commandData.target) {
+        if (!commandData.origin || !commandData.target) {
             return false
         }
 
@@ -133,16 +121,16 @@ define('two/queue/ui', [
 
             UNITS_BY_SPEED.forEach(function (unit) {
                 travelTime = commandQueue.getTravelTime(
-                    $scope.commandData.origin,
-                    $scope.commandData.target,
+                    commandData.origin,
+                    commandData.target,
                     {[unit]: 1},
                     commandType,
-                    $scope.commandData.officers
+                    commandData.officers
                 )
 
                 if ($scope.selectedDateType.value === DATE_TYPES.OUT) {
                     if ($scope.isValidDate) {
-                        date = utils.fixDate($scope.commandData.date)
+                        date = utils.fixDate(commandData.date)
                         outTime = utils.getTimeFromString(date)
                         valueType = isValidSendTime(outTime) ? 'valid' : 'invalid'
                     } else {
@@ -150,7 +138,7 @@ define('two/queue/ui', [
                     }
                 } else if ($scope.selectedDateType.value === DATE_TYPES.ARRIVE) {
                     if ($scope.isValidDate) {
-                        date = utils.fixDate($scope.commandData.date)
+                        date = utils.fixDate(commandData.date)
                         arriveTime = utils.getTimeFromString(date)
                         sendTime = arriveTime - travelTime
                         valueType = isValidSendTime(sendTime) ? 'valid' : 'invalid'
@@ -180,7 +168,7 @@ define('two/queue/ui', [
     }
 
     var updateDateType = function () {
-        $scope.commandData.dateType = $scope.selectedDateType.value
+        commandData.dateType = $scope.selectedDateType.value
         updateTravelTimes()
     }
 
@@ -215,19 +203,19 @@ define('two/queue/ui', [
     }
 
     var onUnitInputFocus = function (unit) {
-        if ($scope.commandData.units[unit] === 0) {
-            $scope.commandData.units[unit] = ''
+        if (commandData.units[unit] === 0) {
+            commandData.units[unit] = ''
         }
     }
 
     var onUnitInputBlur = function (unit) {
-        if ($scope.commandData.units[unit] === '') {
-            $scope.commandData.units[unit] = 0
+        if (commandData.units[unit] === '') {
+            commandData.units[unit] = 0
         }
     }
 
     var catapultTargetVisibility = function () {
-        $scope.showCatapultSelect = !!$scope.commandData.units.catapult
+        $scope.showCatapultSelect = !!commandData.units.catapult
     }
 
     var selectTab = function (tabType) {
@@ -237,7 +225,7 @@ define('two/queue/ui', [
     var addSelected = function () {
         var village = modelDataService.getSelectedVillage().data
         
-        $scope.commandData.origin = {
+        commandData.origin = {
             id: village.villageId,
             x: village.x,
             y: village.y,
@@ -251,7 +239,7 @@ define('two/queue/ui', [
         }
 
         commandQueue.getVillageByCoords(mapSelectedVillage.x, mapSelectedVillage.y, function (data) {
-            $scope.commandData.target = {
+            commandData.target = {
                 id: data.id,
                 x: data.x,
                 y: data.y,
@@ -261,29 +249,29 @@ define('two/queue/ui', [
     }
 
     var addCurrentDate = function () {
-        $scope.commandData.date = formatedDate()
+        commandData.date = formatedDate()
     }
 
     var incrementDate = function () {
-        if (!$scope.commandData.date) {
+        if (!commandData.date) {
             return false
         }
 
-        $scope.commandData.date = addDateDiff($scope.commandData.date, 100)
+        commandData.date = addDateDiff(commandData.date, 100)
     }
 
     var reduceDate = function () {
-        if (!$scope.commandData.date) {
+        if (!commandData.date) {
             return false
         }
 
-        $scope.commandData.date = addDateDiff($scope.commandData.date, -100)
+        commandData.date = addDateDiff(commandData.date, -100)
     }
 
     var cleanUnitInputs = function () {
-        $scope.commandData.units = angular.copy(unitList)
-        $scope.commandData.officers = angular.copy(officerList)
-        $scope.commandData.catapultTarget = DEFAULT_CATAPULT_TARGET
+        commandData.units = angular.copy(unitList)
+        commandData.officers = angular.copy(officerList)
+        commandData.catapultTarget = DEFAULT_CATAPULT_TARGET
         $scope.catapultTarget = {
             name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, $rootScope.loc.ale, 'building_names'),
             value: DEFAULT_CATAPULT_TARGET
@@ -339,8 +327,10 @@ define('two/queue/ui', [
     }
 
     var addCommand = function (type) {
-        commandData.type = type
-        commandQueue.addCommand(commandData)
+        var copy = angular.copy(commandData)
+        copy.type = type
+
+        commandQueue.addCommand(copy)
     }
 
     var switchCommandQueue = function () {
@@ -529,10 +519,10 @@ define('two/queue/ui', [
         $scope.targetQuery = ''
         $scope.isValidDate = false
         $scope.dateTypes = util.toActionList(DATE_TYPES, function (actionType) {
-            return $filter('i18n')(actionType, $rootScope.loc.ale, textObject)
+            return $filter('i18n')('add_' + actionType, $rootScope.loc.ale, textObject)
         })
         $scope.selectedDateType = {
-            name: $filter('i18n')(DATE_TYPES.OUT, $rootScope.loc.ale, textObject),
+            name: $filter('i18n')('add_out', $rootScope.loc.ale, textObject),
             value: DATE_TYPES.OUT
         }
         $scope.selectedInsertPreset = {

@@ -6,7 +6,9 @@ define('two/queue', [
     'helper/math',
     'struct/MapData',
     'conf/conf',
-    'Lockr'
+    'Lockr',
+    'two/queue/dateTypes',
+    'two/queue/eventCodes'
 ], function (
     Locale,
     utils,
@@ -15,7 +17,9 @@ define('two/queue', [
     $math,
     $mapData,
     $conf,
-    Lockr
+    Lockr,
+    DATE_TYPES,
+    EVENT_CODES
 ) {
     /**
      * Taxa de verificação se há comandos a serem enviados por segundo.
@@ -23,17 +27,6 @@ define('two/queue', [
      * @type {Number}
      */
     var CHECKS_PER_SECOND = 10
-
-    /**
-     * @type {Object}
-     */
-    var EVENT_CODES = {
-        NOT_OWN_VILLAGE: 'notOwnVillage',
-        NOT_ENOUGH_UNITS: 'notEnoughUnits',
-        TIME_LIMIT: 'timeLimit',
-        COMMAND_REMOVED: 'commandRemoved',
-        COMMAND_SENT: 'commandSent'
-    }
 
     /**
      * @type {Object}
