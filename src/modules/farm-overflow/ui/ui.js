@@ -377,5 +377,5 @@ define('two/farm/ui', [
         $scope.settings = parseSettings(farmOverflow.getSettings())
     }
 
-    init()
+    return init
 })

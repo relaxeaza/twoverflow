@@ -7,7 +7,8 @@ require([
 ], function (
     i18n,
     ready,
-    farmOverflow
+    farmOverflow,
+    farmOverflowInterface
 ) {
     if (farmOverflow.isInitialized()) {
         return false
@@ -26,5 +27,6 @@ require([
     ready(function () {
         updateModuleLang()
         farmOverflow.init()
-    })
+        farmOverflowInterface()
+    }, ['map'])
 })

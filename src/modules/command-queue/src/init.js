@@ -7,7 +7,8 @@ require([
 ], function (
     i18n,
     ready,
-    commandQueue
+    commandQueue,
+    commandQueueInterface
 ) {
     if (commandQueue.initialized) {
         return false
@@ -30,5 +31,7 @@ require([
         if (commandQueue.getWaitingCommands().length > 0) {
             commandQueue.start(true)
         }
-    })
+
+        commandQueueInterface()
+    }, ['map'])
 })

@@ -590,5 +590,5 @@ define('two/queue/ui', [
         windowManagerService.getScreenWithInjectedScope('!twoverflow_queue_window', $scope)
     }
 
-    init()
+    return init
 })
