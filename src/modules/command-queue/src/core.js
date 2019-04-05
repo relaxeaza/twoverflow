@@ -485,6 +485,14 @@ define('two/queue', [
             getTargetVillage
         ])
 
+        for (var officer in command.officers) {
+            if (command.officers[officer]) {
+                command.officers[officer] = 1
+            } else {
+                delete command.officers[officer]
+            }
+        }
+
         loadVillagesData.then(function (villages) {
             command.origin = villages[0]
             command.target = villages[1]
@@ -502,10 +510,10 @@ define('two/queue', [
 
             if (command.dateType === 'arrive') {
                 command.sendTime = inputTime - command.travelTime
-                command_arriveTime = inputTime
+                command.arriveTime = inputTime
             } else {
                 command.sendTime = inputTime
-                command_arriveTime = inputTime + command.travelTime
+                command.arriveTime = inputTime + command.travelTime
             }
 
             if (isTimeToSend(command.sendTime)) {
@@ -516,9 +524,6 @@ define('two/queue', [
                 delete command.officers.supporter
             }
 
-            for (var officer in command.officers) {
-                command.officers[officer] = 1
-            }
 
             if (command.type === 'attack' && command.units.catapult) {
                 command.catapultTarget = command.catapultTarget || 'headquarter'
