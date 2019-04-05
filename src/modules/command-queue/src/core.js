@@ -418,7 +418,7 @@ define('two/queue', [
         storeSentQueue()
 
         Queue.removeCommand(command, EVENT_CODES.COMMAND_SENT)
-        eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND, [command])
+        eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND, command)
     }
 
     /**
@@ -450,19 +450,19 @@ define('two/queue', [
      */
     Queue.addCommand = function (command) {
         if (!command.origin) {
-            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, [command])
+            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, command)
         }
 
         if (!command.target) {
-            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, [command])
+            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, command)
         }
 
         if (!utils.isValidDateTime(command.date)) {
-            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, [command])
+            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, command)
         }
 
         if (!command.units || angular.equals(command.units, {})) {
-            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, [command])
+            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, command)
         }
 
         command.originCoords = command.origin.x + '|' + command.origin.y
@@ -517,7 +517,7 @@ define('two/queue', [
             }
 
             if (isTimeToSend(command.sendTime)) {
-                return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, [command])
+                return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, command)
             }
 
             if (command.type === 'attack' && 'supporter' in command.officers) {
@@ -538,16 +538,16 @@ define('two/queue', [
             sortWaitingQueue()
             storeWaitingQueue()
 
-            eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD, [command])
+            eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD, command)
         })
 
         loadVillagesData.catch(function (errorCode) {
             switch (errorCode) {
             case ERROR_CODES.INVALID_ORIGIN:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, command)
                 break
             case ERROR_CODES.INVALID_TARGET:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, command)
                 break
             }
         })
@@ -578,22 +578,22 @@ define('two/queue', [
         if (removed) {
             switch (eventCode) {
             case EVENT_CODES.TIME_LIMIT:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_TIME_LIMIT, [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_TIME_LIMIT, command)
                 break
             case EVENT_CODES.NOT_OWN_VILLAGE:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NOT_OWN_VILLAGE, [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NOT_OWN_VILLAGE, command)
                 break
             case EVENT_CODES.NOT_ENOUGH_UNITS:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NO_UNITS_ENOUGH, [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NO_UNITS_ENOUGH, command)
                 break
             case EVENT_CODES.COMMAND_REMOVED:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_REMOVE, [command])
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_REMOVE, command)
                 break
             }
 
             return true
         } else {
-            eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_REMOVE_ERROR, [command])
+            eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_REMOVE_ERROR, command)
             return false
         }
     }

@@ -425,6 +425,7 @@ define('two/queue/ui', [
 
     var onAddCommand = function (event, command) {
         updateWaitingCommands()
+
         utils.emitNotif('success', genNotifText(command.type, 'added'))
     }
 
