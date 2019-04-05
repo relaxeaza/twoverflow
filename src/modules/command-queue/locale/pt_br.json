@@ -51,7 +51,7 @@
         "error_target": "Aldeia alvo inválida!",
         "error_no_units": "Nenhuma unidade especificada!",
         "error_invalid_date": "Data inválida",
-        "error_already_sent": "Esse %{type} deveria ter saído %{date}",
+        "error_already_sent": "Esse %d deveria ter saído %d",
         "error_no_map_selected_village": "Nenhuma aldeia selecionada no mapa.",
         "error_remove_error": "Erro ao remover comando.",
         "tab_add": "Adicionar comando",

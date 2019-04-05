@@ -2,7 +2,8 @@ require([
     'helper/i18n',
     'two/ready',
     'two/queue',
-    'two/queue/ui'
+    'two/queue/ui',
+    'two/queue/Events'
 ], function (
     i18n,
     ready,

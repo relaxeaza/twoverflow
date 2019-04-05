@@ -338,6 +338,126 @@ define('two/queue/ui', [
         $scope[type + 'Query'] = ''
     }
 
+    var addCommand = function (type) {
+        commandData.type = type
+        commandQueue.addCommand(commandData)
+    }
+
+    var switchCommandQueue = function () {
+        if (commandQueue.isRunning()) {
+            commandQueue.stop()
+        } else {
+            commandQueue.start()
+        }
+    }
+
+    var updateWaitingCommands = function () {
+        $scope.waitingCommands = commandQueue.getWaitingCommands()
+    }
+
+    var updateSentCommands = function () {
+        $scope.sentCommands = commandQueue.getSentCommands()
+    }
+
+    var updateExpiredCommands = function () {
+        $scope.expiredCommands = commandQueue.getExpiredCommands()
+    }
+
+    /**
+     * Gera um texto de notificação com as traduções.
+     *
+     * @param  {String} key
+     * @param  {String} key2
+     * @param  {String=} prefix
+     * @return {String}
+     */
+    var genNotifText = function (key, key2, prefix) {
+        if (prefix) {
+            key = prefix + '.' + key
+        }
+
+        var a = $filter('i18n')(key, $rootScope.loc.ale, textObject)
+        var b = $filter('i18n')(key2, $rootScope.loc.ale, textObject)
+
+        return a + ' ' + b
+    }
+
+    var onAddInvalidOrigin = function (event) {
+        utils.emitNotif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, textObject))
+    }
+
+    var onAddInvalidTarget = function (event) {
+        utils.emitNotif('error', $filter('i18n')('error_target', $rootScope.loc.ale, textObject))
+    }
+
+    var onAddInvalidDate = function (event) {
+        utils.emitNotif('error', $filter('i18n')('error_invalid_date', $rootScope.loc.ale, textObject))
+    }
+
+    var onAddNoUnits = function (event) {
+        utils.emitNotif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, textObject))
+    }
+
+    var onAddAlreadySent = function (event, command) {
+        var commandType = $filter('i18n')(command.type, $rootScope.loc.ale, textObjectCommon)
+        var date = utils.formatDate(command.sendTime)
+
+        utils.emitNotif('error', $filter('i18n')('error_already_sent', $rootScope.loc.ale, textObject, commandType, date))
+    }
+
+    var onRemoveCommand = function (event, command) {
+        updateWaitingCommands()
+        $rootScope.$broadcast(eventTypeProvider.TOOLTIP_HIDE, 'twoverflow-tooltip')
+        utils.emitNotif('success', genNotifText(command.type, 'removed'))
+    }
+
+    var onRemoveError = function (event, command) {
+        utils.emitNotif('error', $filter('i18n')('error_remove_error', $rootScope.loc.ale, textObject))
+    }
+
+    var onSendTimeLimit = function (event, command) {
+        updateSentCommands()
+        updateExpiredCommands()
+        utils.emitNotif('error', genNotifText(command.type, 'expired'))
+    }
+
+    var onSendNotOwnVillage = function (event, command) {
+        updateSentCommands()
+        updateExpiredCommands()
+        utils.emitNotif('error', $filter('i18n')('error_not_own_village', $rootScope.loc.ale, textObject))
+    }
+
+    var onSendNoUnitsEnough = function (event, command) {
+        updateSentCommands()
+        updateExpiredCommands()
+        utils.emitNotif('error', $filter('i18n')('error_no_units_enough', $rootScope.loc.ale, textObject))
+    }
+
+    var onAddCommand = function (event, command) {
+        updateWaitingCommands()
+        utils.emitNotif('success', genNotifText(command.type, 'added'))
+    }
+
+    var onSendCommand = function (event, command) {
+        updateSentCommands()
+        utils.emitNotif('success', genNotifText(command.type, 'sent'))
+    }
+
+    var onStart = function (event, data) {
+        $scope.running = commandQueue.isRunning()
+
+        if (data.disableNotif) {
+            return false
+        }
+
+        utils.emitNotif('success', genNotifText('title', 'activated'))
+    }
+
+    var onStop = function (event) {
+        $scope.running = commandQueue.isRunning()
+        utils.emitNotif('success', genNotifText('title', 'deactivated'))
+    }
+
     var init = function () {
         var attackableBuildingsMap = $gameData.getAttackableBuildings()
         var building
@@ -367,7 +487,8 @@ define('two/queue/ui', [
             dateType: DATE_TYPES.OUT,
             units: angular.copy(unitList),
             officers: angular.copy(officerList),
-            catapultTarget: DEFAULT_CATAPULT_TARGET
+            catapultTarget: DEFAULT_CATAPULT_TARGET,
+            type: null
         }
 
         opener = new FrontButton('Commander', {
@@ -425,6 +546,7 @@ define('two/queue/ui', [
         $scope.showCatapultSelect = !!commandData.units.catapult
         $scope.attackableBuildings = attackableBuildingsList
         $scope.commandData = commandData
+        $scope.running = commandQueue.isRunning()
 
         // functions
         $scope.onUnitInputFocus = onUnitInputFocus
@@ -438,6 +560,8 @@ define('two/queue/ui', [
         $scope.reduceDate = reduceDate
         $scope.cleanUnitInputs = cleanUnitInputs
         $scope.searchVillage = searchVillage
+        $scope.addCommand = addCommand
+        $scope.switchCommandQueue = switchCommandQueue
 
         $scope.$watch('commandData.origin', updateTravelTimes)
         $scope.$watch('commandData.target', updateTravelTimes)
@@ -446,14 +570,31 @@ define('two/queue/ui', [
         $scope.$watch('selectedInsertPreset.value', insertPreset)
 
         eventScope = new EventScope('twoverflow_queue_window', function onCloseWindow() {
-            // keep here for future reference
+            // keep it here for future reference
         })
 
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, updatePresets, true)
         eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, updatePresets, true)
         eventScope.register(eventTypeProvider.SELECT_SELECTED, autoCompleteSelected, true)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, onAddInvalidOrigin)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, onAddInvalidTarget)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, onAddInvalidDate)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, onAddNoUnits)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, onAddAlreadySent)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_REMOVE, onRemoveCommand)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_REMOVE_ERROR, onRemoveError)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND_TIME_LIMIT, onSendTimeLimit)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND_NOT_OWN_VILLAGE, onSendNotOwnVillage)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND_NO_UNITS_ENOUGH, onSendNoUnitsEnough)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD, onAddCommand)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND, onSendCommand)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_START, onStart)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_STOP, onStop)
 
         updatePresets()
+        updateWaitingCommands()
+        updateSentCommands()
+        updateExpiredCommands()
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_queue_window', $scope)
     }

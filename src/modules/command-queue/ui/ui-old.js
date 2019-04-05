@@ -625,28 +625,28 @@ define('two/queue/ui/old', [
          * Configura todos eventos dos elementos da interface.
          */
         var bindEvents = function () {
-            eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, function (command) {
-                utils.emitNotif('error', Locale('queue', 'error_origin'))
-            })
+            // eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, function (command) {
+            //     utils.emitNotif('error', Locale('queue', 'error_origin'))
+            // })
 
-            eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, function (command) {
-                utils.emitNotif('error', Locale('queue', 'error_target'))
-            })
+            // eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, function (command) {
+            //     utils.emitNotif('error', Locale('queue', 'error_target'))
+            // })
             
-            eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, function (command) {
-                utils.emitNotif('error', Locale('queue', 'error_invalid_date'))
-            })
+            // eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, function (command) {
+            //     utils.emitNotif('error', Locale('queue', 'error_invalid_date'))
+            // })
 
-            eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, function (command) {
-                utils.emitNotif('error', Locale('queue', 'error_no_units'))
-            })
+            // eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, function (command) {
+            //     utils.emitNotif('error', Locale('queue', 'error_no_units'))
+            // })
 
-            eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, function (command) {
-                utils.emitNotif('error', Locale('queue', 'error_already_sent', {
-                    date: utils.formatDate(command.sendTime),
-                    type: Locale('common', command.type)
-                }))
-            })
+            // eventQueue.register(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, function (command) {
+            //     utils.emitNotif('error', Locale('queue', 'error_already_sent', {
+            //         date: utils.formatDate(command.sendTime),
+            //         type: Locale('common', command.type)
+            //     }))
+            // })
 
             eventQueue.register(eventTypeProvider.COMMAND_QUEUE_REMOVE, function (command) {
                 removeCommand(command, 'queue')

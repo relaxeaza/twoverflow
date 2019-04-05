@@ -320,17 +320,20 @@
                 <a class="btn-orange btn-border" ng-click="clearLogs()">{{ 'general_clear' | i18n:loc.ale:textObject }}</a>
             </li>
             <li ng-show="selectedTab === 'add'">
-                <a class="btn-orange btn-border add" ng-click="commandData('attack')"><span class="icon-26x26-attack-small"></span> {{ 'attack' | i18n:loc.ale:textObjectCommon }}</a>
+                <a class="btn-orange btn-border add" ng-click="addCommand('attack')"><span class="icon-26x26-attack-small"></span> {{ 'attack' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
             <li ng-show="selectedTab === 'add'">
-                <a class="btn-orange btn-border add" ng-click="commandData('support')"><span class="icon-26x26-support"></span> {{ 'support' | i18n:loc.ale:textObjectCommon }}</a>
+                <a class="btn-orange btn-border add" ng-click="addCommand('support')"><span class="icon-26x26-support"></span> {{ 'support' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
             <li ng-show="selectedTab === 'add'">
-                <a class="btn-orange btn-border add" ng-click="commandData('relocate')"><span class="icon-26x26-relocate"></span> {{ 'relocate' | i18n:loc.ale:textObjectCommon }}</a>
+                <a class="btn-orange btn-border add" ng-click="addCommand('relocate')"><span class="icon-26x26-relocate"></span> {{ 'relocate' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
 
-            <li class="twOverflow-button">
-                <a class="btn-green btn-border switch">{{ 'activate' | i18n:loc.ale:textObjectCommon }}</a>
+            <li>
+                <a href="#" ng-class="{false:'btn-green', true:'btn-red'}[running]" class="btn-border" ng-click="switchCommandQueue()">
+                    <span ng-show="running">{{ 'deactivate' | i18n:loc.ale:textObjectCommon }}</span>
+                    <span ng-show="!running">{{ 'activate' | i18n:loc.ale:textObjectCommon }}</span>
+                </a>
             </li>
         </ul>
     </footer>

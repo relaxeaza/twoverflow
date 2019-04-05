@@ -617,7 +617,9 @@ define('two/queue', [
      */
     Queue.start = function (disableNotif) {
         running = true
-        eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_START, [disableNotif])
+        eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_START, {
+            disableNotif: !!disableNotif
+        })
     }
 
     /**
