@@ -1,13 +1,11 @@
 define('two/autoCollector/ui', [
     'two/autoCollector',
     'two/FrontButton',
-    'two/locale',
     'two/utils',
     'two/eventQueue'
 ], function (
     autoCollector,
     FrontButton,
-    Locale,
     utils,
     eventQueue
 ) {

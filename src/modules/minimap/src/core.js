@@ -1,5 +1,4 @@
 define('two/minimap', [
-    'two/locale',
     'two/eventQueue',
     'two/ready',
     'Lockr',
@@ -9,7 +8,6 @@ define('two/minimap', [
     'helper/mapconvert',
     'cdn'
 ], function (
-    Locale,
     eventQueue,
     ready,
     Lockr,

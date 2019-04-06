@@ -1,6 +1,5 @@
 define('two/builder/ui', [
     'two/builder',
-    'two/locale',
     'two/ui',
     'two/FrontButton',
     'two/eventQueue',
@@ -11,7 +10,6 @@ define('two/builder/ui', [
     'two/ready'
 ], function (
     Builder,
-    Locale,
     Interface,
     FrontButton,
     eventQueue,

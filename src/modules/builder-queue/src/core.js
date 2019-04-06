@@ -1,6 +1,5 @@
 define('two/builder', [
     'two/builder/defaultOrders',
-    'two/locale',
     'two/utils',
     'two/eventQueue',
     'two/ready',
@@ -10,7 +9,6 @@ define('two/builder', [
     'conf/locationTypes'
 ], function (
     defaultBuildingOrders,
-    Locale,
     utils,
     eventQueue,
     ready,

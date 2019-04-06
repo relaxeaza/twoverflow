@@ -1,7 +1,6 @@
 define('two/attackView/ui', [
     'two/attackView',
     'two/queue',
-    'two/locale',
     'two/ui',
     'two/FrontButton',
     'two/utils',
@@ -12,7 +11,6 @@ define('two/attackView/ui', [
 ], function (
     attackView,
     Queue,
-    Locale,
     Interface,
     FrontButton,
     utils,

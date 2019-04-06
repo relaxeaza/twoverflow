@@ -1,6 +1,5 @@
 define('two/queue/ui', [
     'two/queue',
-    'two/locale',
     'two/ui2',
     'two/FrontButton',
     'two/utils',
@@ -14,7 +13,6 @@ define('two/queue/ui', [
     'two/queue/eventCodes'
 ], function (
     commandQueue,
-    Locale,
     interfaceOverflow,
     FrontButton,
     utils,

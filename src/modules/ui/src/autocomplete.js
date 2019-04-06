@@ -1,11 +1,9 @@
 define('two/ui/autoComplete', [
     'two/utils',
-    'two/locale',
     'helper/dom',
     'struct/MapData'
 ], function (
     utils,
-    Locale,
     domHelper,
     $mapData
 ) {
@@ -97,7 +95,7 @@ define('two/ui/autoComplete', [
             $elem,
             true,
             0,
-            Locale('common', 'no-results')
+            $filter('i18n')('no-results', $rootScope.loc.ale, 'common')
         )
 
         if (!visible) {

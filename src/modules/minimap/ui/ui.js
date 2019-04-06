@@ -1,7 +1,6 @@
 define('two/minimap/ui', [
     'two/minimap',
     'two/minimap/colorPicker',
-    'two/locale',
     'two/ui',
     'two/ui/autoComplete',
     'two/FrontButton',
@@ -13,7 +12,6 @@ define('two/minimap/ui', [
 ], function (
     Minimap,
     colorPicker,
-    Locale,
     Interface,
     autoComplete,
     FrontButton,

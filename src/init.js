@@ -1,8 +1,6 @@
 require([
-    'two/locale',
     'helper/i18n'
 ], function (
-    Locale,
     i18n
 ) {
     var updateModuleLang = function () {

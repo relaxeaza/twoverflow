@@ -1,6 +1,5 @@
 define('two/queue/ui/old', [
     'two/queue',
-    'two/locale',
     'two/ui2',
     'two/ui/buttonLink',
     'two/ui/autoComplete',
@@ -11,7 +10,6 @@ define('two/queue/ui/old', [
     'ejs'
 ], function (
     Queue,
-    Locale,
     Interface,
     buttonLink,
     autoComplete,

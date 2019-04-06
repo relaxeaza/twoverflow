@@ -1,5 +1,4 @@
 define('two/queue', [
-    'two/locale',
     'two/utils',
     'queues/EventQueue',
     'helper/time',
@@ -10,7 +9,6 @@ define('two/queue', [
     'two/queue/dateTypes',
     'two/queue/eventCodes'
 ], function (
-    Locale,
     utils,
     eventQueue,
     $timeHelper,
@@ -380,8 +378,6 @@ define('two/queue', [
      * Adiciona/expira comandos salvos em execuções anteriores.
      */
     Queue.init = function () {
-        Locale.create('queue', __queue_locale, 'en')
-
         timeOffset = utils.getTimeOffset()
         $player = modelDataService.getSelectedCharacter()
 
