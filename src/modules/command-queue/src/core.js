@@ -261,10 +261,21 @@ define('two/queue', [
                 if ($timeHelper.gameTime() > command.sendTime) {
                     Queue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
                 } else {
+                    waitingCommandHelpers(command)
                     pushWaitingCommand(command)
                     pushCommandObject(command)
                 }
             }
+        }
+    }
+
+    var waitingCommandHelpers = function (command) {
+        if (command.hasOwnProperty('countdown')) {
+            return false
+        }
+
+        command.countdown = function () {
+            return $timeHelper.readableMilliseconds(Date.now() - command.sendTime)
         }
     }
 
@@ -533,6 +544,7 @@ define('two/queue', [
 
             command.id = utils.guid()
 
+            waitingCommandHelpers(command)
             pushWaitingCommand(command)
             pushCommandObject(command)
             sortWaitingQueue()

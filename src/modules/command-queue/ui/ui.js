@@ -538,9 +538,9 @@ define('two/queue/ui', [
         $scope.attackableBuildings = attackableBuildingsList
         $scope.commandData = commandData
         $scope.running = commandQueue.isRunning()
-        $scope.waitingCommands = []
-        $scope.sentCommands = []
-        $scope.expiredCommands = []
+        $scope.waitingCommands = commandQueue.getWaitingCommands()
+        $scope.sentCommands = commandQueue.getSentCommands()
+        $scope.expiredCommands = commandQueue.getExpiredCommands()
         $scope.EVENT_CODES = EVENT_CODES
 
         // functions

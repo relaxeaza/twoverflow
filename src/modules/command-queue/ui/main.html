@@ -307,7 +307,7 @@
                                     <th colspan="2">
                                         <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === 'attack']" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
                                         <span class="size-26x26 icon-bg-black icon-26x26-time-duration" tooltip="" tooltip-content="{{ 'command_time_left' | i18n:loc.ale:textObject }}"></span>
-                                        <span class="time-left">00:00:00</span>
+                                        <span class="time-left">{{ command.countdown() }}</span>
 
                                         <span class="size-26x26 icon-bg-black icon-20x20-units-outgoing" tooltip="" tooltip-content="{{ 'command_out' | i18n:loc.ale:textObject }}"></span>
                                         <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
