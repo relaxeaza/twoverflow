@@ -292,12 +292,10 @@ define('two/queue/ui', [
         switch (type) {
         case 'origin':
             $elem = document.querySelector('#two-commandqueue .village-origin')
-            model = 'originQuery'
 
             break
         case 'target':
             $elem = document.querySelector('#two-commandqueue .village-target')
-            model = 'targetQuery'
 
             break
         default:
@@ -305,11 +303,11 @@ define('two/queue/ui', [
             break
         }
 
-        if ($scope[model].length < 2) {
+        if ($scope.searchQuery[type].length < 2) {
             return autoComplete.hide()
         }
 
-        autoComplete.search($scope[model], function (data) {
+        autoComplete.search($scope.searchQuery[type], function (data) {
             if (data.length) {
                 autoComplete.show(data, $elem, 'commandqueue_village_search', type)
             }
@@ -366,7 +364,7 @@ define('two/queue/ui', [
                 name: data.raw.name
             }
 
-            $scope[type + 'Query'] = ''
+            $scope.searchQuery[type] = ''
         },
         addInvalidOrigin: function (event) {
             utils.emitNotif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, textObject))
@@ -501,8 +499,10 @@ define('two/queue/ui', [
         $scope.travelTimes = {}
         $scope.unitOrder = unitOrder
         $scope.officers = $gameData.getOrderedOfficerNames()
-        $scope.originQuery = ''
-        $scope.targetQuery = ''
+        $scope.searchQuery = {
+            origin: '',
+            target: ''
+        }
         $scope.isValidDate = false
         $scope.dateTypes = util.toActionList(DATE_TYPES, function (actionType) {
             return $filter('i18n')('add_' + actionType, $rootScope.loc.ale, textObject)
