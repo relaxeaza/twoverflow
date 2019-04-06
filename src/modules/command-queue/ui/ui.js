@@ -33,7 +33,6 @@ define('two/queue/ui', [
     var orderedUnitNames = $gameData.getOrderedUnitNames()
     var orderedOfficerNames = $gameData.getOrderedOfficerNames()
     var presetList = modelDataService.getPresetList()
-    var inventory = modelDataService.getInventory()
     var mapSelectedVillage = false
     var unitOrder
     var commandData
@@ -43,7 +42,7 @@ define('two/queue/ui', [
     var attackableBuildingsList = []
     var unitList = {}
     var officerList = {}
-    var timeOffset = utils.getTimeOffset()
+    var timeOffset
     /**
      * Name of one unity for each speed category.
      * Used to generate travel times.
@@ -448,6 +447,7 @@ define('two/queue/ui', [
     }
 
     var init = function () {
+        timeOffset = utils.getTimeOffset()
         var attackableBuildingsMap = $gameData.getAttackableBuildings()
         var building
 
@@ -509,7 +509,7 @@ define('two/queue/ui', [
         $scope.textObjectUnitNames = 'unit_names'
         $scope.textObjectMilitaryOperations = 'military_operations'
         $scope.selectedTab = DEFAULT_TAB
-        $scope.inventory = inventory
+        $scope.inventory = modelDataService.getInventory()
         $scope.presets = utils.obj2selectOptions(presetList.getPresets())
         $scope.travelTimes = {}
         $scope.unitOrder = unitOrder

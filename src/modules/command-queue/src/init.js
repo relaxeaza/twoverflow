@@ -34,5 +34,5 @@ require([
         }
 
         commandQueueInterface()
-    }, ['map'])
+    })
 })
