@@ -12,23 +12,21 @@ define('two/autoCollector/ui', [
     var opener
 
     function CollectorInterface () {
-        Locale.create('collector', __collector_locale, 'en')
-        
         opener = new FrontButton('Collector', {
             classHover: false,
             classBlur: false,
-            tooltip: Locale('collector', 'description')
+            tooltip: $filter('i18n')('description', $rootScope.loc.ale, 'collector')
         })
 
         opener.click(function () {
             if (autoCollector.isRunning()) {
                 autoCollector.stop()
                 autoCollector.secondVillage.stop()
-                utils.emitNotif('success', Locale('collector', 'deactivated'))
+                utils.emitNotif('success', $filter('i18n')('deactivated', $rootScope.loc.ale, 'collector'))
             } else {
                 autoCollector.start()
                 autoCollector.secondVillage.start()
-                utils.emitNotif('success', Locale('collector', 'activated'))
+                utils.emitNotif('success', $filter('i18n')('activated', $rootScope.loc.ale, 'collector'))
             }
         })
 

@@ -1,6 +1,4 @@
-define('two/FrontButton', [
-    'ejs'
-], function (ejs) {
+define('two/FrontButton', [], function () {
     function FrontButton (label, options) {
         this.options = options = angular.merge({
             label: label,
@@ -87,13 +85,8 @@ define('two/FrontButton', [
     }
 
     FrontButton.prototype.appendButton = function () {
-        var html = ejs.render('__interface_html_button', {
-            className: this.options.className,
-            label: this.options.label
-        })
-
         var $container = document.createElement('div')
-        $container.innerHTML = html
+        $container.innerHTML = '<div class="btn-border btn-green button ' + this.options.className + '"><div class="top-left"></div><div class="top-right"></div><div class="middle-top"></div><div class="middle-bottom"></div><div class="middle-left"></div><div class="middle-right"></div><div class="bottom-left"></div><div class="bottom-right"></div><div class="label">' + this.options.label + '</div><div class="quickview"></div></div>'
         var $elem = $container.children[0]
 
         this.$wrapper.appendChild($elem)
