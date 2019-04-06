@@ -24,7 +24,8 @@ define('two/queue/ui', [
     utils,
     EventScope,
     autoComplete,
-    DATE_TYPES
+    DATE_TYPES,
+    EVENT_CODES
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'
@@ -33,7 +34,7 @@ define('two/queue/ui', [
     var $gameData = modelDataService.getGameData()
     var orderedUnitNames = $gameData.getOrderedUnitNames()
     var orderedOfficerNames = $gameData.getOrderedOfficerNames()
-    var listeners
+    var presetList = modelDataService.getPresetList()
     var inventory = modelDataService.getInventory()
     var mapSelectedVillage = false
     var unitOrder
@@ -60,7 +61,6 @@ define('two/queue/ui', [
     ]
 
     var updatePresets = function () {
-        var presetList = modelDataService.getPresetList()
         $scope.presets = utils.obj2selectOptions(presetList.getPresets())
     }
 
@@ -512,7 +512,7 @@ define('two/queue/ui', [
         $scope.textObjectMilitaryOperations = 'military_operations'
         $scope.selectedTab = DEFAULT_TAB
         $scope.inventory = inventory
-        $scope.presets = []
+        $scope.presets = utils.obj2selectOptions(presetList.getPresets())
         $scope.travelTimes = {}
         $scope.unitOrder = unitOrder
         $scope.officers = $gameData.getOrderedOfficerNames()
@@ -538,6 +538,10 @@ define('two/queue/ui', [
         $scope.attackableBuildings = attackableBuildingsList
         $scope.commandData = commandData
         $scope.running = commandQueue.isRunning()
+        $scope.waitingCommands = []
+        $scope.sentCommands = []
+        $scope.expiredCommands = []
+        $scope.EVENT_CODES = EVENT_CODES
 
         // functions
         $scope.onUnitInputFocus = onUnitInputFocus
@@ -553,6 +557,8 @@ define('two/queue/ui', [
         $scope.searchVillage = searchVillage
         $scope.addCommand = addCommand
         $scope.switchCommandQueue = switchCommandQueue
+        $scope.removeCommand = commandQueue.removeCommand
+        $scope.openVillageInfo = windowDisplayService.openVillageInfo
 
         $scope.$watch('commandData.origin', updateTravelTimes)
         $scope.$watch('commandData.target', updateTravelTimes)
@@ -581,11 +587,6 @@ define('two/queue/ui', [
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND, onSendCommand)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_START, onStart)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_STOP, onStop)
-
-        updatePresets()
-        updateWaitingCommands()
-        updateSentCommands()
-        updateExpiredCommands()
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_queue_window', $scope)
     }

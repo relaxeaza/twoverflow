@@ -263,7 +263,7 @@
                     </form>
                 </div>
                 
-                <div class="waiting" ng-show="selectedTab === 'waiting'">
+                <div class="waiting rich-text" ng-show="selectedTab === 'waiting'">
                     <div class="filters">
                         <table class="tbl-border-light">
                             <tbody>
@@ -294,8 +294,53 @@
                     </div>
 
                     <h5 class="twx-section collapse">{{ 'queue_waiting' | i18n:loc.ale:textObject }}</h5>
+
                     <div class="queue">
-                        <p class="center nothing">{{ 'queue_none_added' | i18n:loc.ale:textObject }}</p>
+                        <p class="text-center" ng-show="!waitingCommands.length">{{ 'queue_none_added' | i18n:loc.ale:textObject }}</p>
+
+                        <table class="tbl-border-light" ng-repeat="command in waitingCommands">
+                            <colgroup>
+                                <col width="100px">
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <th colspan="2">
+                                        <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === 'attack']" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
+                                        <span class="size-26x26 icon-bg-black icon-26x26-time-duration" tooltip="" tooltip-content="{{ 'command_time_left' | i18n:loc.ale:textObject }}"></span>
+                                        <span class="time-left">00:00:00</span>
+
+                                        <span class="size-26x26 icon-bg-black icon-20x20-units-outgoing" tooltip="" tooltip-content="{{ 'command_out' | i18n:loc.ale:textObject }}"></span>
+                                        <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
+                                        <span class="size-26x26 icon-bg-black icon-20x20-time-arrival" tooltip="" tooltip-content="{{ 'command_arrive' | i18n:loc.ale:textObject }}"></span>
+                                        <span class="arrive-time">{{ command.arriveTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
+
+                                        <a href="#" class="remove-command size-20x20 btn-red icon-20x20-close" ng-click="removeCommand(command, EVENT_CODES.COMMAND_REMOVED)" tooltip="" tooltip-content="{{ 'queue_remove' | i18n:loc.ale:textObject }}"></a>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td>{{ 'villages' | i18n:loc.ale:textObjectCommon }}</td>
+                                    <td>
+                                        <a class="origin"><span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(command.origin.id)">{{ command.origin.name }} ({{ command.origin.x }}|{{ command.origin.y }})</span></a>
+                                        <span class="size-20x20 icon-26x26-{{ command.type }}"></span>
+                                        <a class="target"><span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(command.target.id)">{{ command.target.name }} ({{ command.target.x }}|{{ command.target.y }})</span></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ 'units' | i18n:loc.ale:textObjectCommon }}</td>
+                                    <td class="units">
+                                        <div class="unit" ng-repeat="(unit, amount) in command.units">
+                                            <span class="icon-34x34-unit-{{ unit }} icon"></span>
+                                            <span class="amount">{{ amount }}</span>
+                                            <span ng-if="unit === 'catapult' && command.type === 'attack'">({{ command.catapultTarget | i18n:loc.ale:textObjectCommon }})</span>
+                                        </div>
+
+                                        <div class="officer" ng-repeat="(officer, enabled) in command.officers">
+                                            <span class="icon-34x34-premium_officer_{{ officer }}"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 
