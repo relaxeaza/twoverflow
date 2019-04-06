@@ -26,6 +26,7 @@ require([
 
     ready(function () {
         updateModuleLang()
+
         commandQueue.init()
 
         if (commandQueue.getWaitingCommands().length > 0) {
