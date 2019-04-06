@@ -19,75 +19,19 @@ define('two/queue', [
     DATE_TYPES,
     EVENT_CODES
 ) {
-    /**
-     * Taxa de verificação se há comandos a serem enviados por segundo.
-     *
-     * @type {Number}
-     */
     var CHECKS_PER_SECOND = 10
-
-    /**
-     * @type {Object}
-     */
     var ERROR_CODES = {
         INVALID_ORIGIN: 'invalidOrigin',
         INVALID_TARGET: 'invalidTarget'
     }
-
-    /**
-     * Lista de comandos em espera (ordenado por tempo restante).
-     *
-     * @type {Array}
-     */
     var waitingCommands = []
-
-    /**
-     * Lista de comandos em espera.
-     *
-     * @type {Object}
-     */
     var waitingCommandsObject = {}
-
-    /**
-     * Lista de comandos que já foram enviados.
-     *
-     * @type {Array}
-     */
     var sentCommands = []
-
-    /**
-     * Lista de comandos que se expiraram.
-     *
-     * @type {Array}
-     */
     var expiredCommands = []
-
-    /**
-     * Indica se o CommandQueue está ativado.
-     *
-     * @type {Boolean}
-     */
     var running = false
-
-    /**
-     * Dados do jogador.
-     *
-     * @type {Object}
-     */
     var $player
-
-    /**
-     * Tipos de comandos usados pelo jogo (tipo que usam tropas apenas).
-     *
-     * @type {Array}
-     */
     var commandTypes = ['attack', 'support', 'relocate']
-
-    /**
-     * Lista de filtros para comandos.
-     *
-     * @type {Object}
-     */
+    var timeOffset
     var commandFilters = {
         selectedVillage: function (command) {
             return command.origin.id === modelDataService.getSelectedVillage().getId()
@@ -136,19 +80,6 @@ define('two/queue', [
         }
     }
 
-    /**
-     * Diferença entre o timezone local e do servidor.
-     *
-     * @type {Number}
-     */
-    var timeOffset
-
-    /**
-     * Verifica se tem um intervalo entre a horario do envio e o horario do jogo.
-     *
-     * @param  {Number} - sendTime
-     * @return {Boolean}
-     */
     var isTimeToSend = function (sendTime) {
         return sendTime < ($timeHelper.gameTime() + timeOffset)
     }
@@ -177,78 +108,40 @@ define('two/queue', [
         return cleanUnits
     }
 
-    /**
-     * Ordenada a lista de comandos em espera por tempo de saída.
-     */
     var sortWaitingQueue = function () {
         waitingCommands = waitingCommands.sort(function (a, b) {
             return a.sendTime - b.sendTime
         })
     }
 
-    /**
-     * Adiciona um comando a lista ordenada de comandos em espera.
-     *
-     * @param  {Object} command - Comando a ser adicionado
-     */
     var pushWaitingCommand = function (command) {
         waitingCommands.push(command)
     }
 
-    /**
-     * Adiciona um comando a lista de comandos em espera.
-     *
-     * @param  {Object} command - Comando a ser adicionado
-     */
     var pushCommandObject = function (command) {
         waitingCommandsObject[command.id] = command
     }
 
-    /**
-     * Adiciona um comando a lista de comandos enviados.
-     *
-     * @param  {Object} command - Comando a ser adicionado
-     */
     var pushSentCommand = function (command) {
         sentCommands.push(command)
     }
 
-    /**
-     * Adiciona um comando a lista de comandos expirados.
-     *
-     * @param  {Object} command - Comando a ser adicionado
-     */
     var pushExpiredCommand = function (command) {
         expiredCommands.push(command)
     }
 
-    /**
-     * Salva a lista de comandos em espera no localStorage.
-     */
     var storeWaitingQueue = function () {
         Lockr.set('queue-commands', waitingCommands)
     }
 
-    /**
-     * Salva a lista de comandos enviados no localStorage.
-     */
     var storeSentQueue = function () {
         Lockr.set('queue-sent', sentCommands)
     }
 
-    /**
-     * Salva a lista de comandos expirados no localStorage.
-     */
     var storeExpiredQueue = function () {
         Lockr.set('queue-expired', expiredCommands)
     }
 
-    /**
-     * Carrega a lista de comandos em espera salvos no localStorage
-     * e os adiciona ao CommandQueue;
-     * Commandos que já deveriam ter saído são movidos para a lista de
-     * expirados.
-     */
     var loadStoredCommands = function () {
         var storedQueue = Lockr.get('queue-commands', [], true)
 
@@ -257,7 +150,7 @@ define('two/queue', [
                 var command = storedQueue[i]
 
                 if ($timeHelper.gameTime() > command.sendTime) {
-                    Queue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
+                    commandQueue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
                 } else {
                     waitingCommandHelpers(command)
                     pushWaitingCommand(command)
@@ -277,16 +170,6 @@ define('two/queue', [
         }
     }
 
-    /**
-     * Transforma valores curingas das unidades.
-     * - Asteriscos são convetidos para o núrero total de unidades
-     *    que se encontram na aldeia.
-     * - Números negativos são convertidos núrero total de unidades
-     *    menos a quantidade específicada.
-     *
-     * @param  {Object} command - Dados do comando
-     * @return {Object|Number} Parsed units or error code.
-     */
     var parseDynamicUnits = function (command) {
         var playerVillages = modelDataService.getVillages()
         var village = playerVillages[command.origin.id]
@@ -329,9 +212,6 @@ define('two/queue', [
         return parsedUnits
     }
 
-    /**
-     * Inicia a verificação de comandos a serem enviados.
-     */
     var listenCommands = function () {
         setInterval(function () {
             if (!waitingCommands.length) {
@@ -341,9 +221,9 @@ define('two/queue', [
             waitingCommands.some(function (command) {
                 if (isTimeToSend(command.sendTime)) {
                     if (running) {
-                        Queue.sendCommand(command)
+                        commandQueue.sendCommand(command)
                     } else {
-                        Queue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
+                        commandQueue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
                     }
                 } else {
                     return true
@@ -352,36 +232,15 @@ define('two/queue', [
         }, 1000 / CHECKS_PER_SECOND)
     }
 
-    /**
-     * Métodos e propriedades publicas do CommandQueue.
-     *
-     * @type {Object}
-     */
-    var Queue = {}
+    var commandQueue = {
+        initialized: false
+    }
 
-    /**
-     * Indica se o CommandQueue já foi inicializado.
-     *
-     * @type {Boolean}
-     */
-    Queue.initialized = false
-
-    /**
-     * Versão atual do CommandQueue
-     *
-     * @type {String}
-     */
-    Queue.version = '__queue_version'
-
-    /**
-     * Inicializa o CommandQueue.
-     * Adiciona/expira comandos salvos em execuções anteriores.
-     */
-    Queue.init = function () {
+    commandQueue.init = function () {
         timeOffset = utils.getTimeOffset()
         $player = modelDataService.getSelectedCharacter()
 
-        Queue.initialized = true
+        commandQueue.initialized = true
 
         sentCommands = Lockr.get('queue-sent', [], true)
         expiredCommands = Lockr.get('queue-expired', [], true)
@@ -396,17 +255,12 @@ define('two/queue', [
         })
     }
 
-    /**
-     * Envia um comando.
-     *
-     * @param {Object} command - Dados do comando que será enviado.
-     */
-    Queue.sendCommand = function (command) {
+    commandQueue.sendCommand = function (command) {
         var units = parseDynamicUnits(command)
 
         // units === EVENT_CODES.*
         if (typeof units === 'string') {
-            return Queue.expireCommand(command, units)
+            return commandQueue.expireCommand(command, units)
         }
 
         command.units = units
@@ -424,27 +278,21 @@ define('two/queue', [
         pushSentCommand(command)
         storeSentQueue()
 
-        Queue.removeCommand(command, EVENT_CODES.COMMAND_SENT)
+        commandQueue.removeCommand(command, EVENT_CODES.COMMAND_SENT)
         eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND, command)
     }
 
-    /**
-     * Expira um comando.
-     *
-     * @param {Object} command - Dados do comando que será expirado.
-     * @param {Number} eventCode - Code indicating the reason of the expiration.
-     */
-    Queue.expireCommand = function (command, eventCode) {
+    commandQueue.expireCommand = function (command, eventCode) {
         pushExpiredCommand(command)
         storeExpiredQueue()
 
-        Queue.removeCommand(command, eventCode)
+        commandQueue.removeCommand(command, eventCode)
     }
 
     /**
-     * Adiciona um comando a lista de espera.
+     * UPDATE THIS SHIT BELOW
      *
-     * @param {Object} command - Dados do comando que será adicionado.
+     * @param {Object} command
      * @param {String} command.origin - Coordenadas da aldeia de origem.
      * @param {String} command.target - Coordenadas da aldeia alvo.
      * @param {String} command.date - Data e hora que o comando deve chegar.
@@ -455,7 +303,7 @@ define('two/queue', [
      * @param {String} command.type - Tipo de comando.
      * @param {String=} command.catapultTarget - Alvo da catapulta, caso o comando seja um ataque.
      */
-    Queue.addCommand = function (command) {
+    commandQueue.addCommand = function (command) {
         if (!command.origin) {
             return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, command)
         }
@@ -476,13 +324,13 @@ define('two/queue', [
         command.targetCoords = command.target.y + '|' + command.target.y
 
         var getOriginVillage = new Promise(function (resolve, reject) {
-            Queue.getVillageByCoords(command.origin.x, command.origin.y, function (data) {
+            commandQueue.getVillageByCoords(command.origin.x, command.origin.y, function (data) {
                 data ? resolve(data) : reject(ERROR_CODES.INVALID_ORIGIN)
             })
         })
 
         var getTargetVillage = new Promise(function (resolve, reject) {
-            Queue.getVillageByCoords(command.target.x, command.target.y, function (data) {
+            commandQueue.getVillageByCoords(command.target.x, command.target.y, function (data) {
                 data ? resolve(data) : reject(ERROR_CODES.INVALID_TARGET)
             })
         })
@@ -505,7 +353,7 @@ define('two/queue', [
             command.target = villages[1]
             command.units = cleanZeroUnits(command.units)
             command.date = utils.fixDate(command.date)
-            command.travelTime = Queue.getTravelTime(
+            command.travelTime = commandQueue.getTravelTime(
                 command.origin,
                 command.target,
                 command.units,
@@ -562,14 +410,12 @@ define('two/queue', [
     }
 
     /**
-     * Remove um comando da lista de espera.
-     *
      * @param  {Object} command - Dados do comando a ser removido.
      * @param {Number} eventCode - Code indicating the reason of the remotion.
      *
      * @return {Boolean} If the command was successfully removed.
      */
-    Queue.removeCommand = function (command, eventCode) {
+    commandQueue.removeCommand = function (command, eventCode) {
         var removed = false
         delete waitingCommandsObject[command.id]
 
@@ -606,84 +452,46 @@ define('two/queue', [
         }
     }
 
-    /**
-     * Remove todos os comandos já enviados e expirados da lista
-     * e do localStorage.
-     */
-    Queue.clearRegisters = function () {
+    commandQueue.clearRegisters = function () {
         Lockr.set('queue-expired', [])
         Lockr.set('queue-sent', [])
         expiredCommands = []
         sentCommands = []
     }
 
-    /**
-     * Ativa o CommandQueue. Qualquer comando que chegar no horário
-     * de envio, será enviado.
-     */
-    Queue.start = function (disableNotif) {
+    commandQueue.start = function (disableNotif) {
         running = true
         eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_START, {
             disableNotif: !!disableNotif
         })
     }
 
-    /**
-     * Desativa o CommandQueue
-     */
-    Queue.stop = function () {
+    commandQueue.stop = function () {
         running = false
         eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_STOP)
     }
 
-    /**
-     * Verifica se o CommandQueue está ativado.
-     *
-     * @return {Boolean}
-     */
-    Queue.isRunning = function () {
+    commandQueue.isRunning = function () {
         return running
     }
 
-    /**
-     * Obtem lista de comandos ordenados na lista de espera.
-     *
-     * @return {Array}
-     */
-    Queue.getWaitingCommands = function () {
+    commandQueue.getWaitingCommands = function () {
         return waitingCommands
     }
 
-    /**
-     * Obtem lista de comandos em espera.
-     *
-     * @return {Object}
-     */
-    Queue.getWaitingCommandsObject = function () {
+    commandQueue.getWaitingCommandsObject = function () {
         return waitingCommandsObject
     }
 
-    /**
-     * Obtem lista de comandos enviados;
-     *
-     * @return {Array}
-     */
-    Queue.getSentCommands = function () {
+    commandQueue.getSentCommands = function () {
         return sentCommands
     }
 
-    /**
-     * Obtem lista de comandos expirados;
-     *
-     * @return {Array}
-     */
-    Queue.getExpiredCommands = function () {
+    commandQueue.getExpiredCommands = function () {
         return expiredCommands
     }
 
     /**
-     * Calcula o tempo de viagem de uma aldeia a outra
-     *
      * @param {Object} origin - Objeto da aldeia origem.
      * @param {Object} target - Objeto da aldeia alvo.
      * @param {Object} units - Exercito usado no ataque como referência
@@ -693,7 +501,7 @@ define('two/queue', [
      *
      * @return {Number} Tempo de viagem
      */
-    Queue.getTravelTime = function (origin, target, units, type, officers) {
+    commandQueue.getTravelTime = function (origin, target, units, type, officers) {
         var useEffects = false
         var targetIsBarbarian = target.character_id === null
         var targetIsSameTribe = target.character_id && target.tribe_id &&
@@ -741,26 +549,18 @@ define('two/queue', [
         return totalTravelTime * 1000
     }
 
-    /**
-     * Carrega os dados de uma aldeia pelas coordenadas.
-     *
-     * @param  {String} coords - Coordendas da aldeia.
-     * @param  {Function} callback
-     */
-    Queue.getVillageByCoords = function (x, y, callback) {
+    commandQueue.getVillageByCoords = function (x, y, callback) {
         $mapData.loadTownDataAsync(x, y, 1, 1, callback)
     }
 
     /**
-     * Filtra os comandos de acordo com o filtro especificado.
-     *
      * @param  {String} filterId - Identificação do filtro.
      * @param {Array=} _options - Valores a serem passados para os filtros.
      * @param {Array=} _commandsDeepFilter - Usa os comandos passados
      * pelo parâmetro ao invés da lista de comandos completa.
      * @return {Array} Comandos filtrados.
      */
-    Queue.filterCommands = function (filterId, _options, _commandsDeepFilter) {
+    commandQueue.filterCommands = function (filterId, _options, _commandsDeepFilter) {
         var filterHandler = commandFilters[filterId]
         var commands = _commandsDeepFilter || waitingCommands
 
@@ -769,5 +569,5 @@ define('two/queue', [
         })
     }
 
-    return Queue
+    return commandQueue
 })
