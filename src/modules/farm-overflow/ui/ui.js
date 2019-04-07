@@ -161,7 +161,7 @@ define('two/farm/ui', [
     }
 
     var switchFarm = function () {
-        farmOverflow.switch(true)
+        farmOverflow.switchState(true)
     }
 
     var loadVillagesLabel = function () {

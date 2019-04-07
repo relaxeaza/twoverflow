@@ -571,7 +571,7 @@ define('two/farm', [
             case 'start':
             case 'init':
             case 'begin':
-                restart()
+                farmOverflow.restart()
 
                 sendMessageReply(data.message_id, genStatusReply())
                 eventQueue.trigger(eventTypeProvider.FARM_REMOTE_COMMAND, ['on'])
@@ -581,7 +581,7 @@ define('two/farm', [
             case 'stop':
             case 'pause':
             case 'end':
-                pause()
+                farmOverflow.pause()
 
                 sendMessageReply(data.message_id, genStatusReply())
                 eventQueue.trigger(eventTypeProvider.FARM_REMOTE_COMMAND, ['off'])
@@ -612,11 +612,11 @@ define('two/farm', [
                 if (hasPresets) {
                     if (globalWaiting) {
                         resetWaitingVillages()
-                        restart()
+                        farmOverflow.restart()
                     }
                 } else {
                     eventQueue.trigger(eventTypeProvider.FARM_NO_PRESET)
-                    pause()
+                    farmOverflow.pause()
                 }
             }
         }
@@ -721,7 +721,7 @@ define('two/farm', [
         var reconnectHandler = function () {
             if (commander.running) {
                 setTimeout(function () {
-                    restart()
+                    farmOverflow.restart()
                 }, 5000)
             }
         }
@@ -952,8 +952,8 @@ define('two/farm', [
                 }
 
                 if (passedTime > toleranceTime) {
-                    pause()
-                    start()
+                    farmOverflow.pause()
+                    farmOverflow.start()
                 }
             }
         }, PERSISTENT_INTERVAL)
@@ -1410,7 +1410,7 @@ define('two/farm', [
 
     var checkPresets = function (callback) {
         if (!selectedPresets.length) {
-            pause()
+            farmOverflow.pause()
             eventQueue.trigger(eventTypeProvider.FARM_NO_PRESET)
 
             return false
@@ -1467,205 +1467,6 @@ define('two/farm', [
         return true
     }
 
-    // public functions
-
-    var init = function () {
-        initialized = true
-        $player = modelDataService.getSelectedCharacter()
-        $gameState = modelDataService.getGameState()
-        logs = Lockr.get(STORAGE_ID.LOGS, [], true)
-        lastActivity = Lockr.get(STORAGE_ID.LAST_ACTIVITY, timeHelper.gameTime(), true)
-        lastAttack = Lockr.get(STORAGE_ID.LAST_ATTACK, -1, true)
-        targetIndexes = Lockr.get(STORAGE_ID.INDEXES, {}, true)
-        commander = new Commander()
-        loadSettings()
-        updateExceptionGroups()
-        updateExceptionVillages()
-        updatePlayerVillages()
-        updatePresets()
-        reportListener()
-        messageListener()
-        groupListener()
-        presetListener()
-        villageListener()
-        generalListeners()
-        bindEvents()
-        initPersistentRunning()
-        initTargetsProof()
-    }
-
-    var start = function (_manual) {
-        if (!selectedPresets.length) {
-            eventQueue.trigger(eventTypeProvider.FARM_ERROR, [ERROR_TYPES.PRESET_FIRST, _manual])
-            return ERROR_TYPES.PRESET_FIRST
-        }
-
-        if (!selectedVillage) {
-            eventQueue.trigger(eventTypeProvider.FARM_ERROR, ERROR_TYPES.NO_SELECTED_VILLAGE, _manual)
-            return ERROR_TYPES.NO_SELECTED_VILLAGE
-        }
-
-        if (!$gameState.getGameState(GAME_STATES.ALL_VILLAGES_READY)) {
-            var unbind = $rootScope.$on(eventTypeProvider.GAME_STATE_ALL_VILLAGES_READY, function () {
-                unbind()
-                start(_manual)
-            })
-
-            return false
-        }
-
-        if (isExpiredData()) {
-            priorityTargets = {}
-            targetIndexes = {}
-        }
-
-        if (settings.stepCycle) {
-            cycle.startStep(_manual)
-        } else {
-            cycle.startContinuous(_manual)
-        }
-
-        updateActivity()
-
-        return true
-    }
-
-    var pause = function (_manual) {
-        breakCommander()
-
-        eventQueue.trigger(eventTypeProvider.FARM_PAUSE, _manual)
-        clearTimeout(cycle.getTimeoutId())
-
-        return true
-    }
-
-    var restart = function (_manual) {
-        pause(_manual)
-        start(_manual)
-    }
-
-    var switchState = function (_manual) {
-        if (commander.running) {
-            pause(_manual)
-        } else {
-            start(_manual)
-        }
-    }
-
-    /**
-     * Update the internal settings and reload the necessary
-     * information.
-     *
-     * @param {Object} changes
-     */
-    var updateSettings = function (changes) {
-        var modify = {}
-        var settingMap
-        var newValue
-        var vid
-        var key
-
-        for (key in changes) {
-            settingMap = SETTINGS_MAP[key]
-            newValue = changes[key]
-
-            if (!settingMap || newValue === settings[key]) {
-                continue
-            }
-
-            settingMap.updates.forEach(function (modifier) {
-                modify[modifier] = true
-            })
-
-            settings[key] = newValue
-        }
-
-        Lockr.set(STORAGE_ID.SETTINGS, settings)
-
-        if (modify[UPADTE_SETTINGS.GROUPS]) {
-            updateExceptionGroups()
-            updateExceptionVillages()
-        }
-
-        if (modify[UPADTE_SETTINGS.VILLAGES]) {
-            updatePlayerVillages()
-        }
-
-        if (modify[UPADTE_SETTINGS.PRESET]) {
-            updatePresets()
-            resetWaitingVillages()
-        }
-
-        if (modify[UPADTE_SETTINGS.TARGETS]) {
-            villagesTargets = {}
-        }
-
-        if (modify[UPADTE_SETTINGS.LOGS]) {
-            // used to slice the event list in case the limit of logs
-            // have been reduced.
-            setLogs(logs)
-            eventQueue.trigger(eventTypeProvider.FARM_RESET_LOGS)
-        }
-
-        if (modify[UPADTE_SETTINGS.FULL_STORAGE]) {
-            for (vid in waitingVillages) {
-                if (waitingVillages[vid] === WAITING_STATES.FULL_STORAGE) {
-                    delete waitingVillages[vid]
-                }
-            }
-        }
-
-        if (modify[UPADTE_SETTINGS.WAITING_VILLAGES]) {
-            for (vid in waitingVillages) {
-                if (waitingVillages[vid] === WAITING_STATES.COMMANDS) {
-                    delete waitingVillages[vid]
-                }
-            }
-        }
-
-        if (commander.running) {
-            restart()
-        }
-
-        eventQueue.trigger(eventTypeProvider.FARM_SETTINGS_CHANGE, [modify])
-
-        return true
-    }
-
-    var isInitialized = function () {
-        return initialized
-    }
-
-    var isRunning = function () {
-        return !!commander.running
-    }
-
-    var getLogs = function () {
-        return logs
-    }
-
-    var clearLogs = function () {
-        logs = []
-        Lockr.set(STORAGE_ID.LOGS, logs)
-        eventQueue.trigger(eventTypeProvider.FARM_LOGS_RESETED)
-    }
-
-    var getSelectedVillage = function () {
-        return selectedVillage
-    }
-
-    var getLastAttack = function () {
-        return lastAttack
-    }
-
-    var getCurrentStatus = function () {
-        return currentStatus
-    }
-
-    var getSettings = function () {
-        return settings
-    }
-
     var Commander = (function () {
         var lastCommand = false
 
@@ -1707,7 +1508,7 @@ define('two/farm', [
             }
 
             if (!selectedPresets.length) {
-                pause()
+                farmOverflow.pause()
                 eventQueue.trigger(eventTypeProvider.FARM_NO_PRESET)
 
                 return
@@ -2161,7 +1962,7 @@ define('two/farm', [
                 if (cycle.intervalEnabled()) {
                     cycle.setNextCycle()
                 } else {
-                    pause(_manual)
+                    farmOverflow.pause(_manual)
                 }
 
                 return
@@ -2182,7 +1983,7 @@ define('two/farm', [
                 cycle.setNextCycle()
             } else {
                 eventQueue.trigger(eventTypeProvider.FARM_STEP_CYCLE_END)
-                pause()
+                farmOverflow.pause()
             }
 
             return false
@@ -2223,21 +2024,204 @@ define('two/farm', [
         return cycle
     })()
 
-    return {
-        'init': init,
-        'version': '__farm_version',
-        'start': start,
-        'pause': pause,
-        'restart': restart,
-        'switch': switchState, 
-        'updateSettings': updateSettings,
-        'isInitialized': isInitialized,
-        'isRunning': isRunning,
-        'getLogs': getLogs,
-        'clearLogs': clearLogs,
-        'getSelectedVillage': getSelectedVillage,
-        'getLastAttack': getLastAttack,
-        'getCurrentStatus': getCurrentStatus,
-        'getSettings': getSettings
+    var farmOverflow = {}
+
+    farmOverflow.init = function () {
+        initialized = true
+        $player = modelDataService.getSelectedCharacter()
+        $gameState = modelDataService.getGameState()
+        logs = Lockr.get(STORAGE_ID.LOGS, [], true)
+        lastActivity = Lockr.get(STORAGE_ID.LAST_ACTIVITY, timeHelper.gameTime(), true)
+        lastAttack = Lockr.get(STORAGE_ID.LAST_ATTACK, -1, true)
+        targetIndexes = Lockr.get(STORAGE_ID.INDEXES, {}, true)
+        commander = new Commander()
+        loadSettings()
+        updateExceptionGroups()
+        updateExceptionVillages()
+        updatePlayerVillages()
+        updatePresets()
+        reportListener()
+        messageListener()
+        groupListener()
+        presetListener()
+        villageListener()
+        generalListeners()
+        bindEvents()
+        initPersistentRunning()
+        initTargetsProof()
     }
+
+    farmOverflow.start = function (_manual) {
+        if (!selectedPresets.length) {
+            eventQueue.trigger(eventTypeProvider.FARM_ERROR, [ERROR_TYPES.PRESET_FIRST, _manual])
+            return ERROR_TYPES.PRESET_FIRST
+        }
+
+        if (!selectedVillage) {
+            eventQueue.trigger(eventTypeProvider.FARM_ERROR, ERROR_TYPES.NO_SELECTED_VILLAGE, _manual)
+            return ERROR_TYPES.NO_SELECTED_VILLAGE
+        }
+
+        if (!$gameState.getGameState(GAME_STATES.ALL_VILLAGES_READY)) {
+            var unbind = $rootScope.$on(eventTypeProvider.GAME_STATE_ALL_VILLAGES_READY, function () {
+                unbind()
+                farmOverflow.start(_manual)
+            })
+
+            return false
+        }
+
+        if (isExpiredData()) {
+            priorityTargets = {}
+            targetIndexes = {}
+        }
+
+        if (settings.stepCycle) {
+            cycle.startStep(_manual)
+        } else {
+            cycle.startContinuous(_manual)
+        }
+
+        updateActivity()
+
+        return true
+    }
+
+    farmOverflow.pause = function (_manual) {
+        breakCommander()
+
+        eventQueue.trigger(eventTypeProvider.FARM_PAUSE, _manual)
+        clearTimeout(cycle.getTimeoutId())
+
+        return true
+    }
+
+    farmOverflow.restart = function (_manual) {
+        farmOverflow.pause(_manual)
+        farmOverflow.start(_manual)
+    }
+
+    farmOverflow.switchState = function (_manual) {
+        if (commander.running) {
+            farmOverflow.pause(_manual)
+        } else {
+            farmOverflow.start(_manual)
+        }
+    }
+
+    /**
+     * Update the internal settings and reload the necessary
+     * information.
+     *
+     * @param {Object} changes
+     */
+    farmOverflow.updateSettings = function (changes) {
+        var modify = {}
+        var settingMap
+        var newValue
+        var vid
+        var key
+
+        for (key in changes) {
+            settingMap = SETTINGS_MAP[key]
+            newValue = changes[key]
+
+            if (!settingMap || newValue === settings[key]) {
+                continue
+            }
+
+            settingMap.updates.forEach(function (modifier) {
+                modify[modifier] = true
+            })
+
+            settings[key] = newValue
+        }
+
+        Lockr.set(STORAGE_ID.SETTINGS, settings)
+
+        if (modify[UPADTE_SETTINGS.GROUPS]) {
+            updateExceptionGroups()
+            updateExceptionVillages()
+        }
+
+        if (modify[UPADTE_SETTINGS.VILLAGES]) {
+            updatePlayerVillages()
+        }
+
+        if (modify[UPADTE_SETTINGS.PRESET]) {
+            updatePresets()
+            resetWaitingVillages()
+        }
+
+        if (modify[UPADTE_SETTINGS.TARGETS]) {
+            villagesTargets = {}
+        }
+
+        if (modify[UPADTE_SETTINGS.LOGS]) {
+            // used to slice the event list in case the limit of logs
+            // have been reduced.
+            setLogs(logs)
+            eventQueue.trigger(eventTypeProvider.FARM_RESET_LOGS)
+        }
+
+        if (modify[UPADTE_SETTINGS.FULL_STORAGE]) {
+            for (vid in waitingVillages) {
+                if (waitingVillages[vid] === WAITING_STATES.FULL_STORAGE) {
+                    delete waitingVillages[vid]
+                }
+            }
+        }
+
+        if (modify[UPADTE_SETTINGS.WAITING_VILLAGES]) {
+            for (vid in waitingVillages) {
+                if (waitingVillages[vid] === WAITING_STATES.COMMANDS) {
+                    delete waitingVillages[vid]
+                }
+            }
+        }
+
+        if (commander.running) {
+            farmOverflow.restart()
+        }
+
+        eventQueue.trigger(eventTypeProvider.FARM_SETTINGS_CHANGE, [modify])
+
+        return true
+    }
+
+    farmOverflow.isInitialized = function () {
+        return initialized
+    }
+
+    farmOverflow.isRunning = function () {
+        return !!commander.running
+    }
+
+    farmOverflow.getLogs = function () {
+        return logs
+    }
+
+    farmOverflow.clearLogs = function () {
+        logs = []
+        Lockr.set(STORAGE_ID.LOGS, logs)
+        eventQueue.trigger(eventTypeProvider.FARM_LOGS_RESETED)
+    }
+
+    farmOverflow.getSelectedVillage = function () {
+        return selectedVillage
+    }
+
+    farmOverflow.getLastAttack = function () {
+        return lastAttack
+    }
+
+    farmOverflow.getCurrentStatus = function () {
+        return currentStatus
+    }
+
+    farmOverflow.getSettings = function () {
+        return settings
+    }
+
+    return farmOverflow
 })
