@@ -343,6 +343,12 @@ define('two/queue/ui', [
         commandQueue.addCommand(copy)
     }
 
+    var clearRegisters = function () {
+        commandQueue.clearRegisters()
+        updateSentCommands()
+        updateExpiredCommands()
+    }
+
     var switchCommandQueue = function () {
         if (commandQueue.isRunning()) {
             commandQueue.stop()
@@ -608,6 +614,7 @@ define('two/queue/ui', [
         $scope.cleanUnitInputs = cleanUnitInputs
         $scope.searchVillage = searchVillage
         $scope.addCommand = addCommand
+        $scope.clearRegisters = clearRegisters
         $scope.switchCommandQueue = switchCommandQueue
         $scope.removeCommand = commandQueue.removeCommand
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
