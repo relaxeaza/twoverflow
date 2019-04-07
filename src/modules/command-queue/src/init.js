@@ -28,11 +28,10 @@ require([
         updateModuleLang()
 
         commandQueue.init()
+        commandQueueInterface()
 
         if (commandQueue.getWaitingCommands().length > 0) {
             commandQueue.start(true)
         }
-
-        commandQueueInterface()
     })
 })
