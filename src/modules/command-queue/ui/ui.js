@@ -627,10 +627,7 @@ define('two/queue/ui', [
         $scope.$watch('selectedInsertPreset.value', insertPreset)
         $scope.$watch('filtersData[FILTER_TYPES.TEXT_MATCH]', textMatchFilter)
 
-        eventScope = new EventScope('twoverflow_queue_window', function onCloseWindow() {
-            // keep it here for future reference
-        })
-
+        eventScope = new EventScope('twoverflow_queue_window')
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.SELECT_SELECTED, eventHandlers.autoCompleteSelected, true)
