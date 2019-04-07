@@ -218,7 +218,7 @@ define('two/queue/ui', [
     }
 
     var updateVisibleCommands = function () {
-        var commands = commandQueue.getWaitingCommands()
+        var commands = $scope.waitingCommands
 
         FILTER_ORDER.forEach(function (filter) {
             if ($scope.activeFilters[filter]) {
@@ -433,16 +433,22 @@ define('two/queue/ui', [
         sendTimeLimit: function (event, command) {
             updateSentCommands()
             updateExpiredCommands()
+            updateWaitingCommands()
+            updateVisibleCommands()
             utils.emitNotif('error', genNotifText(command.type, 'expired'))
         },
         sendNotOwnVillage: function (event, command) {
             updateSentCommands()
             updateExpiredCommands()
+            updateWaitingCommands()
+            updateVisibleCommands()
             utils.emitNotif('error', $filter('i18n')('error_not_own_village', $rootScope.loc.ale, textObject))
         },
         sendNoUnitsEnough: function (event, command) {
             updateSentCommands()
             updateExpiredCommands()
+            updateWaitingCommands()
+            updateVisibleCommands()
             utils.emitNotif('error', $filter('i18n')('error_no_units_enough', $rootScope.loc.ale, textObject))
         },
         addCommand: function (event, command) {
@@ -452,6 +458,8 @@ define('two/queue/ui', [
         },
         sendCommand: function (event, command) {
             updateSentCommands()
+            updateWaitingCommands()
+            updateVisibleCommands()
             utils.emitNotif('success', genNotifText(command.type, 'sent'))
         },
         start: function (event, data) {
