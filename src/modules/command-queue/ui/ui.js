@@ -10,7 +10,8 @@ define('two/queue/ui', [
     'two/EventScope',
     'two/ui/autoComplete',
     'two/queue/dateTypes',
-    'two/queue/eventCodes'
+    'two/queue/eventCodes',
+    'two/queue/filterTypes'
 ], function (
     commandQueue,
     interfaceOverflow,
@@ -23,7 +24,8 @@ define('two/queue/ui', [
     EventScope,
     autoComplete,
     DATE_TYPES,
-    EVENT_CODES
+    EVENT_CODES,
+    FILTER_TYPES
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'
@@ -43,6 +45,8 @@ define('two/queue/ui', [
     var unitList = {}
     var officerList = {}
     var timeOffset
+    var activeFilters
+    var filtersData
     /**
      * Name of one unity for each speed category.
      * Used to generate travel times.
@@ -55,6 +59,12 @@ define('two/queue/ui', [
         'ram',
         'snob',
         'trebuchet'
+    ]
+    var FILTER_ORDER = [
+        FILTER_TYPES.SELECTED_VILLAGE,
+        FILTER_TYPES.BARBARIAN_TARGET,
+        FILTER_TYPES.ALLOWED_TYPES,
+        FILTER_TYPES.TEXT_MATCH
     ]
 
     var setMapSelectedVillage = function (event, menu) {
@@ -207,6 +217,18 @@ define('two/queue/ui', [
         $scope.expiredCommands = commandQueue.getExpiredCommands()
     }
 
+    var updateVisibleCommands = function () {
+        var commands = commandQueue.getWaitingCommands()
+
+        FILTER_ORDER.forEach(function (filter) {
+            if ($scope.activeFilters[filter]) {
+                commands = commandQueue.filterCommands(filter, $scope.filtersData, commands)
+            }
+        })
+
+        $scope.visibleWaitingCommands = commands
+    }
+
     var onUnitInputFocus = function (unit) {
         if (commandData.units[unit] === 0) {
             commandData.units[unit] = ''
@@ -348,6 +370,21 @@ define('two/queue/ui', [
         return a + ' ' + b
     }
 
+    var toggleFilter = function (filter, allowedTypes) {
+        $scope.activeFilters[filter] = !$scope.activeFilters[filter]
+
+        if (allowedTypes) {
+            $scope.filtersData[FILTER_TYPES.ALLOWED_TYPES][filter] = !$scope.filtersData[FILTER_TYPES.ALLOWED_TYPES][filter]
+        }
+
+        updateVisibleCommands()
+    }
+
+    var textMatchFilter = function () {
+        $scope.activeFilters[FILTER_TYPES.TEXT_MATCH] = $scope.filtersData[FILTER_TYPES.TEXT_MATCH].length > 0
+        updateVisibleCommands()
+    }
+
     var eventHandlers = {
         updatePresets: function () {
             $scope.presets = utils.obj2selectOptions(presetList.getPresets())
@@ -464,6 +501,23 @@ define('two/queue/ui', [
             catapultTarget: DEFAULT_CATAPULT_TARGET,
             type: null
         }
+        activeFilters = {
+            [FILTER_TYPES.SELECTED_VILLAGE]: false,
+            [FILTER_TYPES.BARBARIAN_TARGET]: false,
+            [FILTER_TYPES.ALLOWED_TYPES]: true,
+            [FILTER_TYPES.ATTACK]: true,
+            [FILTER_TYPES.SUPPORT]: true,
+            [FILTER_TYPES.RELOCATE]: true,
+            [FILTER_TYPES.TEXT_MATCH]: false
+        }
+        filtersData = {
+            [FILTER_TYPES.ALLOWED_TYPES]: {
+                [FILTER_TYPES.ATTACK]: true,
+                [FILTER_TYPES.SUPPORT]: true,
+                [FILTER_TYPES.RELOCATE]: true,
+            },
+            [FILTER_TYPES.TEXT_MATCH]: ''
+        }
 
         opener = new FrontButton('Commander', {
             classHover: false,
@@ -522,11 +576,15 @@ define('two/queue/ui', [
         $scope.showCatapultSelect = !!commandData.units.catapult
         $scope.attackableBuildings = attackableBuildingsList
         $scope.commandData = commandData
+        $scope.activeFilters = activeFilters
+        $scope.filtersData = filtersData
         $scope.running = commandQueue.isRunning()
         $scope.waitingCommands = commandQueue.getWaitingCommands()
+        $scope.visibleWaitingCommands = commandQueue.getWaitingCommands()
         $scope.sentCommands = commandQueue.getSentCommands()
         $scope.expiredCommands = commandQueue.getExpiredCommands()
         $scope.EVENT_CODES = EVENT_CODES
+        $scope.FILTER_TYPES = FILTER_TYPES
 
         // functions
         $scope.onUnitInputFocus = onUnitInputFocus
@@ -544,12 +602,14 @@ define('two/queue/ui', [
         $scope.switchCommandQueue = switchCommandQueue
         $scope.removeCommand = commandQueue.removeCommand
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
+        $scope.toggleFilter = toggleFilter
 
         $scope.$watch('commandData.origin', updateTravelTimes)
         $scope.$watch('commandData.target', updateTravelTimes)
         $scope.$watch('commandData.date', updateTravelTimes)
         $scope.$watch('selectedDateType.value', updateDateType)
         $scope.$watch('selectedInsertPreset.value', insertPreset)
+        $scope.$watch('filtersData[FILTER_TYPES.TEXT_MATCH]', textMatchFilter)
 
         eventScope = new EventScope('twoverflow_queue_window', function onCloseWindow() {
             // keep it here for future reference

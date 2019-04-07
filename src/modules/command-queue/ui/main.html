@@ -269,23 +269,23 @@
                             <tbody>
                                 <tr>
                                     <td>
-                                        <div data-filter="selectedVillage" class="box-border-dark icon selectedVillage" tooltip="" tooltip-content="{{ 'filters_selected_village' | i18n:loc.ale:textObject }}">
+                                        <div ng-class="{'active': activeFilters[FILTER_TYPES.SELECTED_VILLAGE]}" ng-click="toggleFilter(FILTER_TYPES.SELECTED_VILLAGE)" class="box-border-dark icon selectedVillage" tooltip="" tooltip-content="{{ 'filters_selected_village' | i18n:loc.ale:textObject }}">
                                             <span class="icon-34x34-village-info icon-bg-black"></span>
                                         </div>
-                                        <div data-filter="barbarianTarget" class="box-border-dark icon barbarianTarget" tooltip="" tooltip-content="{{ 'filters_barbarian_target' | i18n:loc.ale:textObject }}">
+                                        <div ng-class="{'active': activeFilters[FILTER_TYPES.BARBARIAN_TARGET]}" ng-click="toggleFilter(FILTER_TYPES.BARBARIAN_TARGET)" class="box-border-dark icon barbarianTarget" tooltip="" tooltip-content="{{ 'filters_barbarian_target' | i18n:loc.ale:textObject }}">
                                             <span class="icon-34x34-barbarian-village icon-bg-black"></span>
                                         </div>
-                                        <div data-filter="attack" class="box-border-dark icon allowedTypes active" tooltip="" tooltip-content="{{ 'filters_attack' | i18n:loc.ale:textObject }}">
+                                        <div ng-class="{'active': activeFilters[FILTER_TYPES.ATTACK]}" ng-click="toggleFilter(FILTER_TYPES.ATTACK, true)" class="box-border-dark icon allowedTypes" tooltip="" tooltip-content="{{ 'filters_attack' | i18n:loc.ale:textObject }}">
                                             <span class="icon-34x34-attack icon-bg-black"></span>
                                         </div>
-                                        <div data-filter="support" class="box-border-dark icon allowedTypes active" tooltip="" tooltip-content="{{ 'filters_support' | i18n:loc.ale:textObject }}">
+                                        <div ng-class="{'active': activeFilters[FILTER_TYPES.SUPPORT]}" ng-click="toggleFilter(FILTER_TYPES.SUPPORT, true)" class="box-border-dark icon allowedTypes" tooltip="" tooltip-content="{{ 'filters_support' | i18n:loc.ale:textObject }}">
                                             <span class="icon-34x34-support icon-bg-black"></span>
                                         </div>
-                                        <div data-filter="relocate" class="box-border-dark icon allowedTypes active" tooltip="" tooltip-content="{{ 'filters_relocate' | i18n:loc.ale:textObject }}">
+                                        <div ng-class="{'active': activeFilters[FILTER_TYPES.RELOCATE]}" ng-click="toggleFilter(FILTER_TYPES.RELOCATE, true)" class="box-border-dark icon allowedTypes" tooltip="" tooltip-content="{{ 'filters_relocate' | i18n:loc.ale:textObject }}">
                                             <span class="icon-34x34-relocate icon-bg-black"></span>
                                         </div>
                                         <div class="text">
-                                            <input data-filter="textMatch" type="text" class="box-border-dark textMatch" placeholder="{{ 'filters_text_match' | i18n:loc.ale:textObject }}">
+                                            <input ng-model="filtersData[FILTER_TYPES.TEXT_MATCH]" type="text" class="box-border-dark" placeholder="{{ 'filters_text_match' | i18n:loc.ale:textObject }}">
                                         </div>
                                     </td>
                                 </tr>
@@ -296,9 +296,9 @@
                     <h5 class="twx-section collapse">{{ 'queue_waiting' | i18n:loc.ale:textObject }}</h5>
 
                     <div class="queue">
-                        <p class="text-center" ng-show="!waitingCommands.length">{{ 'queue_none_added' | i18n:loc.ale:textObject }}</p>
+                        <p class="text-center" ng-show="!visibleWaitingCommands.length">{{ 'queue_none_added' | i18n:loc.ale:textObject }}</p>
 
-                        <table class="tbl-border-light" ng-repeat="command in waitingCommands">
+                        <table class="tbl-border-light" ng-repeat="command in visibleWaitingCommands">
                             <colgroup>
                                 <col width="100px">
                             </colgroup>

@@ -7,7 +7,8 @@ define('two/queue', [
     'conf/conf',
     'Lockr',
     'two/queue/dateTypes',
-    'two/queue/eventCodes'
+    'two/queue/eventCodes',
+    'two/queue/filterTypes'
 ], function (
     utils,
     eventQueue,
@@ -17,7 +18,8 @@ define('two/queue', [
     $conf,
     Lockr,
     DATE_TYPES,
-    EVENT_CODES
+    EVENT_CODES,
+    FILTER_TYPES
 ) {
     var CHECKS_PER_SECOND = 10
     var ERROR_CODES = {
@@ -32,36 +34,36 @@ define('two/queue', [
     var $player
     var commandTypes = ['attack', 'support', 'relocate']
     var timeOffset
+
     var commandFilters = {
-        selectedVillage: function (command) {
+        [FILTER_TYPES.SELECTED_VILLAGE]: function (command) {
             return command.origin.id === modelDataService.getSelectedVillage().getId()
         },
-        barbarianTarget: function (command) {
+        [FILTER_TYPES.BARBARIAN_TARGET]: function (command) {
             return !command.target.character_id
         },
-        allowedTypes: function (command, options) {
-            return options.allowedTypes[command.type]
+        [FILTER_TYPES.ALLOWED_TYPES]: function (command, options) {
+            return options[FILTER_TYPES.ALLOWED_TYPES][command.type]
         },
-        attack: function (command) {
+        [FILTER_TYPES.ATTACK]: function (command) {
             return command.type !== 'attack'
         },
-        support: function (command) {
+        [FILTER_TYPES.SUPPORT]: function (command) {
             return command.type !== 'support'
         },
-        relocate: function (command) {
+        [FILTER_TYPES.RELOCATE]: function (command) {
             return command.type !== 'relocate'
         },
-        textMatch: function (command, options) {
+        [FILTER_TYPES.TEXT_MATCH]: function (command, options) {
             var show = true
-            var keywords = options.textMatch.toLowerCase().split(/\W/)
+            var keywords = options[FILTER_TYPES.TEXT_MATCH].toLowerCase().split(/\W/)
 
             var searchString = [
                 command.origin.name,
-                command.originCoords,
-                command.originCoords,
+                command.origin.x + '|' + command.origin.y,
                 command.origin.character_name || '',
                 command.target.name,
-                command.targetCoords,
+                command.target.x + '|' + command.target.y,
                 command.target.character_name || '',
                 command.target.tribe_name || '',
                 command.target.tribe_tag || ''
@@ -319,9 +321,6 @@ define('two/queue', [
         if (!command.units || angular.equals(command.units, {})) {
             return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, command)
         }
-
-        command.originCoords = command.origin.x + '|' + command.origin.y
-        command.targetCoords = command.target.y + '|' + command.target.y
 
         var getOriginVillage = new Promise(function (resolve, reject) {
             commandQueue.getVillageByCoords(command.origin.x, command.origin.y, function (data) {
