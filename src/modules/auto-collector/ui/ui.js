@@ -12,6 +12,7 @@ define('two/autoCollector/ui', [
     var opener
 
     function CollectorInterface () {
+        console.log('$filter("i18n")("description", $rootScope.loc.ale, "collector")', $filter('i18n')('description', $rootScope.loc.ale, 'collector'))
         opener = new FrontButton('Collector', {
             classHover: false,
             classBlur: false,

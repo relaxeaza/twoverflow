@@ -1,0 +1,8 @@
+{
+    "collector": {
+		"title": "Kolekcjoner",
+		"description": "Automatyczny kolekcjoner depozytu/drugiej wioski.",
+		"activated": "Kolekcjoner aktywowany",
+		"deactivated": "Kolekcjoner deaktywowany"
+	}
+}
