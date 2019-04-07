@@ -284,9 +284,6 @@ define('two/farm/ui', [
     }
 
     var init = function () {
-        interfaceOverflow.template('twoverflow_farm_window', `__farm_html_main`)
-        interfaceOverflow.css('__farm_css_style')
-
         var opener = new FrontButton('Farmer', {
             classHover: false,
             classBlur: false,
@@ -300,13 +297,15 @@ define('two/farm/ui', [
         eventQueue.register(eventTypeProvider.FARM_PAUSE, function () {
             opener.$elem.removeClass('btn-red').addClass('btn-green')
         })
+
+        interfaceOverflow.template('twoverflow_farm_window', `__farm_html_main`)
+        interfaceOverflow.css('__farm_css_style')
     }
 
     var buildWindow = function () {
         $scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
-        $scope.version = '__farm_version'
         $scope.presets = []
         $scope.groups = []
         $scope.groupsWithDisabled = []
