@@ -423,6 +423,7 @@ define('two/queue/ui', [
         },
         removeCommand: function (event, command) {
             updateWaitingCommands()
+            updateVisibleCommands()
             $rootScope.$broadcast(eventTypeProvider.TOOLTIP_HIDE, 'twoverflow-tooltip')
             utils.emitNotif('success', genNotifText(command.type, 'removed'))
         },
@@ -446,7 +447,7 @@ define('two/queue/ui', [
         },
         addCommand: function (event, command) {
             updateWaitingCommands()
-
+            updateVisibleCommands()
             utils.emitNotif('success', genNotifText(command.type, 'added'))
         },
         sendCommand: function (event, command) {
