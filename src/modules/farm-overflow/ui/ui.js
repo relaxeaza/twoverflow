@@ -1,6 +1,7 @@
 define('two/farm/ui', [
     'two/farm',
     'two/farm/errorTypes',
+    'two/farm/settingTypes',
     'two/ui2',
     'two/FrontButton',
     'queues/EventQueue',
@@ -12,6 +13,7 @@ define('two/farm/ui', [
 ], function (
     farmOverflow,
     ERROR_TYPES,
+    SETTING_TYPES,
     interfaceOverflow,
     FrontButton,
     eventQueue,
@@ -25,7 +27,12 @@ define('two/farm/ui', [
     var $scope
     var textObject = 'farm'
     var textObjectCommon = 'common'
-    var SELECT_SETTINGS = ['presets', 'groupIgnore', 'groupInclude' ,'groupOnly']
+    var SELECT_SETTINGS = [
+        SETTING_TYPES.PRESETS,
+        SETTING_TYPES.GROUP_IGNORE,
+        SETTING_TYPES.GROUP_INCLUDE,
+        SETTING_TYPES.GROUP_ONLY
+    ]
     var presetList = modelDataService.getPresetList()
     var groupList = modelDataService.getGroupList()
 
@@ -57,7 +64,7 @@ define('two/farm/ui', [
      */
     var saveSettings = function () {
         var settings = angular.copy($scope.settings)
-        
+
         SELECT_SETTINGS.forEach(function (id) {
             if (angular.isArray(settings[id])) {
                 // check if the selected value is not the "disabled" option
@@ -245,7 +252,7 @@ define('two/farm/ui', [
         stepCycleEndHandler: function () {
             var settings = farmOverflow.getSettings()
             
-            if (settings.stepCycleNotifs) {
+            if (settings[SETTING_TYPES.STEP_CYCLE_NOTIFS]) {
                 utils.emitNotif('error', $filter('i18n')('step_cycle_end', $rootScope.loc.ale, textObject))
             }
         },
@@ -255,8 +262,8 @@ define('two/farm/ui', [
         stepCycleNextHandler: function () {
             var settings = farmOverflow.getSettings()
 
-            if (settings.stepCycleNotifs) {
-                var next = timeHelper.gameTime() + (settings.stepCycleInterval * 60)
+            if (settings[SETTING_TYPES.STEP_CYCLE_NOTIFS]) {
+                var next = timeHelper.gameTime() + (settings[SETTING_TYPES.STEP_CYCLE_INTERVAL] * 60)
 
                 utils.emitNotif('success', $filter('i18n')('step_cycle_next', $rootScope.loc.ale, textObject, utils.formatDate(next)))
             }
@@ -306,6 +313,7 @@ define('two/farm/ui', [
         $scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
+        $scope.SETTING_TYPES = SETTING_TYPES
         $scope.presets = []
         $scope.groups = []
         $scope.groupsWithDisabled = []

@@ -1,6 +1,7 @@
 define('two/farm', [
     'two/farm/Village',
     'two/farm/errorTypes',
+    'two/farm/settingTypes',
     'two/utils',
     'helper/math',
     'conf/conf',
@@ -13,6 +14,7 @@ define('two/farm', [
 ], function (
     Village,
     ERROR_TYPES,
+    SETTING_TYPES,
     utils,
     math,
     conf,
@@ -78,103 +80,103 @@ define('two/farm', [
     }
     var currentStatus = FARM_STATES.PAUSED
     var SETTINGS_MAP = {
-        presets: {
+        [SETTING_TYPES.PRESETS]: {
             default: [],
             updates: [UPADTE_SETTINGS.PRESET]
         },
-        groupIgnore: {
+        [SETTING_TYPES.GROUP_IGNORE]: {
             default: false,
             updates: [UPADTE_SETTINGS.GROUPS]
         },
-        groupInclude: {
+        [SETTING_TYPES.GROUP_INCLUDE]: {
             default: [],
             updates: [UPADTE_SETTINGS.GROUPS, UPADTE_SETTINGS.TARGETS]
         },
-        groupOnly: {
+        [SETTING_TYPES.GROUP_ONLY]: {
             default: [],
             updates: [UPADTE_SETTINGS.GROUPS, UPADTE_SETTINGS.VILLAGES, UPADTE_SETTINGS.TARGETS]
         },
-        randomBase: {
+        [SETTING_TYPES.RANDOM_BASE]: {
             default: 3,
             updates: []
         },
-        commandsPerVillage: {
+        [SETTING_TYPES.COMMANDS_PER_VILLAGE]: {
             default: 48,
             updates: [UPADTE_SETTINGS.WAITING_VILLAGES]
         },
-        priorityTargets: {
+        [SETTING_TYPES.PRIORITY_TARGETS]: {
             default: true,
             updates: []
         },
-        ignoreOnLoss: {
+        [SETTING_TYPES.IGNORE_ON_LOSS]: {
             default: true,
             updates: []
         },
-        ignoreFullStorage: {
+        [SETTING_TYPES.IGNORE_FULL_STORAGE]: {
             default: true,
             updates: [UPADTE_SETTINGS.FULL_STORAGE]
         },
-        stepCycle: {
+        [SETTING_TYPES.STEP_CYCLE]: {
             default: false,
             updates: [UPADTE_SETTINGS.VILLAGES]
         },
-        stepCycleNotifs: {
+        [SETTING_TYPES.STEP_CYCLE_NOTIFS]: {
             default: false,
             updates: []
         },
-        stepCycleInterval: {
+        [SETTING_TYPES.STEP_CYCLE_INTERVAL]: {
             default: 0,
             updates: []
         },
-        maxDistance: {
+        [SETTING_TYPES.MAX_DISTANCE]: {
             default: 10,
             updates: [UPADTE_SETTINGS.TARGETS]
         },
-        minDistance: {
+        [SETTING_TYPES.MIN_DISTANCE]: {
             default: 0,
             updates: [UPADTE_SETTINGS.TARGETS]
         },
-        minPoints: {
+        [SETTING_TYPES.MIN_POINTS]: {
             default: 0,
             updates: [UPADTE_SETTINGS.TARGETS]
         },
-        maxPoints: {
+        [SETTING_TYPES.MAX_POINTS]: {
             default: 12500,
             updates: [UPADTE_SETTINGS.TARGETS]
         },
-        maxTravelTime: {
+        [SETTING_TYPES.MAX_TRAVEL_TIME]: {
             default: 60,
             updates: []
         },
-        logsLimit: {
+        [SETTING_TYPES.LOGS_LIMIT]: {
             default: 500,
             updates: [UPADTE_SETTINGS.LOGS]
         },
-        eventAttack: {
+        [SETTING_TYPES.EVENT_ATTACK]: {
             default: true,
             updates: [UPADTE_SETTINGS.LOGS]
         },
-        eventVillageChange: {
+        [SETTING_TYPES.EVENT_VILLAGE_CHANGE]: {
             default: true,
             updates: [UPADTE_SETTINGS.LOGS]
         },
-        eventPriorityAdd: {
+        [SETTING_TYPES.EVENT_PRIORITY_ADD]: {
             default: true,
             updates: [UPADTE_SETTINGS.LOGS]
         },
-        eventIgnoredVillage: {
+        [SETTING_TYPES.EVENT_IGNORED_VILLAGE]: {
             default: true,
             updates: [UPADTE_SETTINGS.LOGS]
         },
-        remoteId: {
+        [SETTING_TYPES.REMOTE_ID]: {
             default: 'remote',
             updates: []
         },
-        hotkeySwitch: {
+        [SETTING_TYPES.HOTKEY_SWITCH]: {
             default: 'shift+z',
             updates: []
         },
-        hotkeyWindow: {
+        [SETTING_TYPES.HOTKEY_WINDOW]: {
             default: 'z',
             updates: []
         }
@@ -290,11 +292,11 @@ define('two/farm', [
             return target.character_id && !includedVillages.includes(target.id)
         },
         function villagePoints (target) {
-            return target.points < settings.minPoints || target.points > settings.maxPoints
+            return target.points < settings[SETTING_TYPES.MIN_POINTS] || target.points > settings[SETTING_TYPES.MAX_POINTS]
         },
         function villageDistance (target) {
             var distance = math.actualDistance(selectedVillage.position, target)
-            return distance < settings.minDistance || distance > settings.maxDistance
+            return distance < settings[SETTING_TYPES.MIN_DISTANCE] || distance > settings[SETTING_TYPES.MAX_DISTANCE]
         }
     ]
 
@@ -317,19 +319,19 @@ define('two/farm', [
     }
 
     var updateExceptionGroups = function () {
-        if (!angular.isArray(settings.groupInclude)) {
+        if (!angular.isArray(settings[SETTING_TYPES.GROUP_INCLUDE])) {
             console.error('groupInclude must be an Array')
             return false
         }
 
-        if (!angular.isArray(settings.groupOnly)) {
+        if (!angular.isArray(settings[SETTING_TYPES.GROUP_ONLY])) {
             console.error('groupOnly must be an Array')
             return false
         }
 
-        groupIgnore = settings.groupIgnore
-        groupInclude = settings.groupInclude
-        groupOnly = settings.groupOnly
+        groupIgnore = settings[SETTING_TYPES.GROUP_IGNORE]
+        groupInclude = settings[SETTING_TYPES.GROUP_INCLUDE]
+        groupOnly = settings[SETTING_TYPES.GROUP_ONLY]
     }
 
     var updateExceptionVillages = function () {
@@ -417,7 +419,7 @@ define('two/farm', [
         var update = function (presetsObj) {
             selectedPresets = []
 
-            if (!settings.presets.length) {
+            if (!settings[SETTING_TYPES.PRESETS].length) {
                 if (callback) {
                     callback()
                 }
@@ -425,7 +427,7 @@ define('two/farm', [
                 return
             }
 
-            settings.presets.forEach(function (presetId) {
+            settings[SETTING_TYPES.PRESETS].forEach(function (presetId) {
                 selectedPresets.push({
                     id: presetId,
                     units: cleanPresetUnits(presetsObj[presetId].units)
@@ -522,11 +524,11 @@ define('two/farm', [
             }
 
             // data.result === 1 === 'nocasualties'
-            if (settings.ignoreOnLoss && data.result !== 1) {
+            if (settings[SETTING_TYPES.IGNORE_ON_LOSS] && data.result !== 1) {
                 ignoredTargetHandler(data)
             }
 
-            if (settings.priorityTargets && data.haul === 'full') {
+            if (settings[SETTING_TYPES.PRIORITY_TARGETS] && data.haul === 'full') {
                 if (windowManagerService.isTemplateOpen('report')) {
                     reportQueue.push(data)
                 } else {
@@ -557,7 +559,7 @@ define('two/farm', [
          * Check messages related to the remote controller.
          */
         var remoteHandler = function (event, data) {
-            var id = settings.remoteId
+            var id = settings[SETTING_TYPES.REMOTE_ID]
             var userMessage
 
             if (data.participants.length !== 1 || data.title !== id) {
@@ -667,7 +669,7 @@ define('two/farm', [
             if (globalWaiting) {
                 globalWaiting = false
 
-                if (settings.stepCycle) {
+                if (settings[SETTING_TYPES.STEP_CYCLE]) {
                     return false
                 }
 
@@ -947,8 +949,8 @@ define('two/farm', [
                 // If the step cycle setting is enabled, increase
                 // the tolerance time with the interval time between
                 // the cycles.
-                if (settings.stepCycle && cycle.intervalEnabled()) {
-                    toleranceTime += (settings.stepCycleInterval * 60) + (1000 * 60)
+                if (settings[SETTING_TYPES.STEP_CYCLE] && cycle.intervalEnabled()) {
+                    toleranceTime += (settings[SETTING_TYPES.STEP_CYCLE_INTERVAL] * 60) + (1000 * 60)
                 }
 
                 if (passedTime > toleranceTime) {
@@ -1000,7 +1002,7 @@ define('two/farm', [
         var message = []
 
         if (currentStatus === FARM_STATES.STEP_CYCLE_NEXT) {
-            next = timeHelper.gameTime() + (settings.stepCycleInterval * 60)
+            next = timeHelper.gameTime() + (settings[SETTING_TYPES.STEP_CYCLE_INTERVAL] * 60)
             statusReplace = utils.formatDate(next)
         }
 
@@ -1021,9 +1023,9 @@ define('two/farm', [
      */
     var isExpiredData = function () {
         var now = timeHelper.gameTime()
-        var cycleInterval = settings.stepCycleInterval * 60
+        var cycleInterval = settings[SETTING_TYPES.STEP_CYCLE_INTERVAL] * 60
 
-        if (settings.stepCycle && cycle.intervalEnabled()) {
+        if (settings[SETTING_TYPES.STEP_CYCLE] && cycle.intervalEnabled()) {
             if (now > (lastActivity + cycleInterval + (60 * 1000))) {
                 return true
             }
@@ -1159,7 +1161,7 @@ define('two/farm', [
         return playerVillages.filter(function (village) {
             if (waitingVillages[village.id]) {
                 return false
-            } else if (settings.ignoreFullStorage) {
+            } else if (settings[SETTING_TYPES.IGNORE_FULL_STORAGE]) {
                 if (isFullStorage(village)) {
                     waitingVillages[village.id] = WAITING_STATES.FULL_STORAGE
                     return false
@@ -1175,8 +1177,8 @@ define('two/farm', [
     }
 
     var setLogs = function (newLogs) {
-        if (newLogs.length > settings.logsLimit) {
-            newLogs = newLogs.slice(0, settings.logsLimit)
+        if (newLogs.length > settings[SETTING_TYPES.LOGS_LIMIT]) {
+            newLogs = newLogs.slice(0, settings[SETTING_TYPES.LOGS_LIMIT])
         }
 
         logs = newLogs
@@ -1239,7 +1241,7 @@ define('two/farm', [
 
         villageTargets = villagesTargets[sid]
 
-        if (settings.priorityTargets && priorityTargets[sid]) {
+        if (settings[SETTING_TYPES.PRIORITY_TARGETS] && priorityTargets[sid]) {
             priorityId
 
             while (priorityId = priorityTargets[sid].shift()) {
@@ -1373,7 +1375,7 @@ define('two/farm', [
             return false
         }
 
-        if (settings.stepCycle) {
+        if (settings[SETTING_TYPES.STEP_CYCLE]) {
             return cycle.nextVillage()
         }
 
@@ -1536,7 +1538,7 @@ define('two/farm', [
                 return
             }
 
-            if (settings.ignoreFullStorage && isFullStorage()) {
+            if (settings[SETTING_TYPES.IGNORE_FULL_STORAGE] && isFullStorage()) {
                 if (nextVillage()) {
                     this.analyse()
                 } else {
@@ -1565,7 +1567,7 @@ define('two/farm', [
             }
 
             checkPresets(() => {
-                if (selectedVillage.countCommands() >= settings.commandsPerVillage) {
+                if (selectedVillage.countCommands() >= settings[SETTING_TYPES.COMMANDS_PER_VILLAGE]) {
                     return this.handleError(ERROR_TYPES.COMMAND_LIMIT)
                 }
 
@@ -1608,7 +1610,7 @@ define('two/farm', [
                     } else {
                         globalWaiting = true
 
-                        if (settings.stepCycle) {
+                        if (settings[SETTING_TYPES.STEP_CYCLE]) {
                             cycle.endStep()
                         }
                     }
@@ -1636,7 +1638,7 @@ define('two/farm', [
                     eventQueue.trigger(eventType, [selectedVillage])
                     globalWaiting = true
 
-                    if (settings.stepCycle) {
+                    if (settings[SETTING_TYPES.STEP_CYCLE]) {
                         return cycle.endStep()
                     }
                 }
@@ -1651,7 +1653,7 @@ define('two/farm', [
                 if (singleVillage) {
                     globalWaiting = true
 
-                    if (settings.stepCycle) {
+                    if (settings[SETTING_TYPES.STEP_CYCLE]) {
                         return cycle.endStep()
                     }
 
@@ -1738,7 +1740,7 @@ define('two/farm', [
          * @param {Object} preset
          */
         Commander.prototype.checkPresetTime = function (preset) {
-            var limitTime = settings.maxTravelTime * 60
+            var limitTime = settings[SETTING_TYPES.MAX_TRAVEL_TIME] * 60
             var villagePosition = selectedVillage.position
             var distance = math.actualDistance(villagePosition, selectedTarget)
             var travelTime = armyService.calculateTravelTime(preset, {
@@ -1794,7 +1796,7 @@ define('two/farm', [
                 nextTarget()
 
                 // Minimum of 1 second to allow the interval values get updated.
-                interval = utils.randomSeconds(settings.randomBase)
+                interval = utils.randomSeconds(settings[SETTING_TYPES.RANDOM_BASE])
                 interval = 100 + (interval * 1000)
 
                 this.timeoutId = setTimeout(() => {
@@ -1915,7 +1917,7 @@ define('two/farm', [
         var cycle = {}
 
         cycle.intervalEnabled = function () {
-            return !!settings.stepCycleInterval
+            return !!settings[SETTING_TYPES.STEP_CYCLE_INTERVAL]
         }
 
         cycle.startContinuous = function (_manual) {
@@ -1992,7 +1994,7 @@ define('two/farm', [
         cycle.setNextCycle = function () {
             timeoutId = setTimeout(function () {
                 cycle.startStep()
-            }, settings.stepCycleInterval * 60)
+            }, settings[SETTING_TYPES.STEP_CYCLE_INTERVAL] * 60)
         }
 
         cycle.nextVillage = function () {
@@ -2076,7 +2078,7 @@ define('two/farm', [
             targetIndexes = {}
         }
 
-        if (settings.stepCycle) {
+        if (settings[SETTING_TYPES.STEP_CYCLE]) {
             cycle.startStep(_manual)
         } else {
             cycle.startContinuous(_manual)

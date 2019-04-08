@@ -41,20 +41,20 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'presets' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div select="" list="presets" selected="settings.presets" drop-down="true"></div></td>
+                            <td><div select="" list="presets" selected="settings[SETTING_TYPES.PRESETS]" drop-down="true"></div></td>
                         </tr>
 
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'group_ignored' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div select="" list="groupsWithDisabled" selected="settings.groupIgnore" drop-down="true"></div></td>
+                            <td><div select="" list="groupsWithDisabled" selected="settings[SETTING_TYPES.GROUP_IGNORE]" drop-down="true"></div></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'group_include' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div select="" list="groups" selected="settings.groupInclude" drop-down="true"></div></td>
+                            <td><div select="" list="groups" selected="settings[SETTING_TYPES.GROUP_INCLUDE]" drop-down="true"></div></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'group_only' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div select="" list="groups" selected="settings.groupOnly" drop-down="true"></div></td>
+                            <td><div select="" list="groups" selected="settings[SETTING_TYPES.GROUP_ONLY]" drop-down="true"></div></td>
                         </tr>
                     </table>
 
@@ -69,25 +69,25 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'random_base' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="30" value="settings.randomBase" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.randomBase"></td>
+                            <td><div range-slider="" min="0" max="30" value="settings[SETTING_TYPES.RANDOM_BASE]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.RANDOM_BASE]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'commands_per_village' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="50" value="settings.commandsPerVillage" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.commandsPerVillage"></td>
+                            <td><div range-slider="" min="0" max="50" value="settings[SETTING_TYPES.COMMANDS_PER_VILLAGE]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.COMMANDS_PER_VILLAGE]"></td>
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'priority_targets' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings.priorityTargets" vertical="false" size="'56x28'"></div></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTING_TYPES.PRIORITY_TARGETS]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'ignore_on_loss' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="settings.groupIgnore.value" border="true" value="settings.ignoreOnLoss" vertical="false" size="'56x28'"></div></td>
+                            <td><div switch-slider="" enabled="settings[SETTING_TYPES.GROUP_IGNORE].value" border="true" value="settings[SETTING_TYPES.IGNORE_ON_LOSS]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'ignore_full_storage' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings.ignoreFullStorage" vertical="false" size="'56x28'"></div></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTING_TYPES.IGNORE_FULL_STORAGE]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                     </table>
 
@@ -102,16 +102,16 @@
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'step_cycle' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings.stepCycle" vertical="false" size="'56x28'"></div></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTING_TYPES.STEP_CYCLE]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'step_cycle_notifs' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="settings.stepCycle" border="true" value="settings.stepCycleNotifs" vertical="false" size="'56x28'"></div></td>
+                            <td><div switch-slider="" enabled="settings[SETTING_TYPES.STEP_CYCLE]" border="true" value="settings[SETTING_TYPES.STEP_CYCLE_NOTIFS]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'step_cycle_interval' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="120" value="settings.stepCycleInterval" enabled="settings.stepCycle"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.stepCycleInterval" ng-disabled="!settings.stepCycle"></td>
+                            <td><div range-slider="" min="0" max="120" value="settings[SETTING_TYPES.STEP_CYCLE_INTERVAL]" enabled="settings[SETTING_TYPES.STEP_CYCLE]"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.STEP_CYCLE_INTERVAL]" ng-disabled="!settings[SETTING_TYPES.STEP_CYCLE]"></td>
                         </tr>
                     </table>
 
@@ -126,28 +126,28 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'min_distance' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="50" value="settings.minDistance" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.minDistance"></td>
+                            <td><div range-slider="" min="0" max="50" value="settings[SETTING_TYPES.MIN_DISTANCE]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.MIN_DISTANCE]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'max_distance' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="50" value="settings.maxDistance" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.maxDistance"></td>
+                            <td><div range-slider="" min="0" max="50" value="settings[SETTING_TYPES.MAX_DISTANCE]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.MAX_DISTANCE]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'min_points' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="13000" value="settings.minPoints" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.minPoints"></td>
+                            <td><div range-slider="" min="0" max="13000" value="settings[SETTING_TYPES.MIN_POINTS]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.MIN_POINTS]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'max_points' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="13000" value="settings.maxPoints" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.maxPoints"></td>
+                            <td><div range-slider="" min="0" max="13000" value="settings[SETTING_TYPES.MAX_POINTS]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.MAX_POINTS]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'max_travel_time' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="180" value="settings.maxTravelTime" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.maxTravelTime"></td>
+                            <td><div range-slider="" min="0" max="180" value="settings[SETTING_TYPES.MAX_TRAVEL_TIME]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.MAX_TRAVEL_TIME]"></td>
                         </tr>
                     </table>
 
@@ -162,24 +162,24 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'logs_limit' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="1000" value="settings.logsLimit" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings.logsLimit"></td>
+                            <td><div range-slider="" min="0" max="1000" value="settings[SETTING_TYPES.LOGS_LIMIT]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.LOGS_LIMIT]"></td>
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'event_attack' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings.eventAttack" vertical="false" size="'56x28'"></div></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTING_TYPES.EVENT_ATTACK]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'event_village_change' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings.eventVillageChange" vertical="false" size="'56x28'"></div></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTING_TYPES.EVENT_VILLAGE_CHANGE]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'event_priority_add' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings.eventPriorityAdd" vertical="false" size="'56x28'"></div></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTING_TYPES.EVENT_PRIORITY_ADD]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'event_ignored_village' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings.eventIgnoredVillage" vertical="false" size="'56x28'"></div></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTING_TYPES.EVENT_IGNORED_VILLAGE]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                     </table>
 
@@ -193,15 +193,15 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'remote' | i18n:loc.ale:textObject }}</span></td>
-                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings.remoteId"></td>
+                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.REMOTE_ID]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'hotkey_switch' | i18n:loc.ale:textObject }}</span></td>
-                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings.hotkeySwitch"></td>
+                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.HOTKEY_SWITCH]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'hotkey_window' | i18n:loc.ale:textObject }}</span></td>
-                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings.hotkeyWindow"></td>
+                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTING_TYPES.HOTKEY_WINDOW]"></td>
                         </tr>
                     </table>
                 </div>
