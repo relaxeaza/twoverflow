@@ -3,7 +3,8 @@ require([
     'two/ready',
     'two/minimap',
     'two/minimap/ui',
-    'two/minimap/data'
+    'two/minimap/data',
+    'two/minimap/Events'
 ], function (
     i18n,
     ready,

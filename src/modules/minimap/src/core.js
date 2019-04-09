@@ -1,5 +1,5 @@
 define('two/minimap', [
-    'two/eventQueue',
+    'queues/EventQueue',
     'two/ready',
     'Lockr',
     'struct/MapData',
@@ -163,6 +163,12 @@ define('two/minimap', [
      */
     var settings = {}
 
+    var STORAGE_ID = {
+        CACHE_VILLAGES: 'minimap_cache_villages',
+        SETTINGS: 'minimap_settings',
+        HIGHLIGHTS: 'minimap_highlights'
+    }
+
     /**
      * Calcule the coords from clicked position in the canvas.
      *
@@ -245,7 +251,7 @@ define('two/minimap', [
             }
 
             if (hoverVillage) {
-                eventQueue.trigger('minimap/villageClick', [hoverVillage, event])
+                eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_CLICK, [hoverVillage, event])
 
                 // right click
                 if (event.which === 3) {
@@ -259,7 +265,7 @@ define('two/minimap', [
             dragStart = {}
 
             if (!allowJump) {
-                eventQueue.trigger('minimap/stop-move')
+                eventQueue.trigger(eventTypeProvider.MINIMAP_STOP_MOVE)
             }
         })
 
@@ -273,7 +279,7 @@ define('two/minimap', [
             if (allowMove) {
                 currentPosition.x = dragStart.x - event.pageX
                 currentPosition.y = dragStart.y - event.pageY
-                eventQueue.trigger('minimap/start-move')
+                eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
             }
 
             coords = getCoords(event)
@@ -316,7 +322,7 @@ define('two/minimap', [
                 onBlurVillage()
             }
 
-            eventQueue.trigger('minimap/mouseLeave')
+            eventQueue.trigger(eventTypeProvider.MINIMAP_MOUSE_LEAVE)
         })
 
         $cross.addEventListener('click', function (event) {
@@ -678,7 +684,7 @@ define('two/minimap', [
             }
         }
 
-        Lockr.set('minimap-cacheVillages', cachedVillages)
+        Lockr.set(STORAGE_ID.CACHE_VILLAGES, cachedVillages)
     }
 
     /**
@@ -695,7 +701,7 @@ define('two/minimap', [
             }
         }
 
-        eventQueue.trigger('minimap/villageHover', [
+        eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_HOVER, [
             $mapData.getTownAt(coords.x, coords.y),
             event
         ])
@@ -731,7 +737,7 @@ define('two/minimap', [
         }
 
         hoverVillage = false
-        eventQueue.trigger('minimap/villageBlur')
+        eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_BLUR)
     }
 
     /**
@@ -1031,13 +1037,13 @@ define('two/minimap', [
     Minimap.addHighlight = function (data, color) {
         var update = false
 
-        if (!data.type || !data.id) {
-            eventQueue.trigger('minimap/highlight/add/error/no-entry')
+        if (!data || !data.type || !data.id) {
+            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY)
             return false
         }
 
         if (!rhex.test(color)) {
-            eventQueue.trigger('minimap/highlight/add/error/invalid-color')
+            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_INVALID_COLOR)
             return false
         }
 
@@ -1053,12 +1059,12 @@ define('two/minimap', [
         }
 
         highlights[data.type][data.id] = _data
-        Lockr.set('minimap-highlights', highlights)
+        Lockr.set(STORAGE_ID.HIGHLIGHTS, highlights)
 
         if (update) {
-            eventQueue.trigger('minimap/highlight/update', [data, color])
+            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_UPDATE, [data, color])
         } else {
-            eventQueue.trigger('minimap/highlight/add', [data, color])
+            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD, [data, color])
         }
 
         drawLoadedVillages()
@@ -1076,8 +1082,8 @@ define('two/minimap', [
     Minimap.removeHighlight = function (data) {
         if (highlights[data.type][data.id]) {
             delete highlights[data.type][data.id]
-            Lockr.set('minimap-highlights', highlights)
-            eventQueue.trigger('minimap/highlight/remove', [data])
+            Lockr.set(STORAGE_ID.HIGHLIGHTS, highlights)
+            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_REMOVE, [data])
 
             drawLoadedVillages()
 
@@ -1193,7 +1199,7 @@ define('two/minimap', [
             settings[key] = newValue
         }
 
-        Lockr.set('minimap-settings', settings)
+        Lockr.set(STORAGE_ID.SETTINGS, settings)
 
         if (updateMinimap) {
             Minimap.update()
@@ -1213,12 +1219,12 @@ define('two/minimap', [
             tribe: {}
         }
 
-        Lockr.set('minimap-settings', settings)
-        Lockr.set('minimap-highlights', highlights)
+        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        Lockr.set(STORAGE_ID.HIGHLIGHTS, highlights)
 
         Minimap.update()
 
-        eventQueue.trigger('minimap/settings/reset')
+        eventQueue.trigger(eventTypeProvider.MINIMAP_SETTINGS_RESET)
     }
 
     /**
@@ -1264,7 +1270,7 @@ define('two/minimap', [
 
         $viewportCache = document.createElement('canvas')
         $viewportCacheContext = $viewportCache.getContext('2d')
-        var localSettings = Lockr.get('minimap-settings', {}, true)
+        var localSettings = Lockr.get(STORAGE_ID.SETTINGS, {}, true)
 
         for (var key in Minimap.settingsMap) {
             var defaultValue = Minimap.settingsMap[key].default
@@ -1274,7 +1280,7 @@ define('two/minimap', [
                 : defaultValue
         }
 
-        highlights = Lockr.get('minimap-highlights', {
+        highlights = Lockr.get(STORAGE_ID.HIGHLIGHTS, {
             village: {},
             character: {},
             tribe: {}
@@ -1289,7 +1295,7 @@ define('two/minimap', [
             $map = document.getElementById('main-canvas')
             $player = modelDataService.getSelectedCharacter()
             $tribeRelations = $player.getTribeRelations()
-            cachedVillages = Lockr.get('minimap-cacheVillages', {}, true)
+            cachedVillages = Lockr.get(STORAGE_ID.CACHE_VILLAGES, {}, true)
             
             var villageBlock = Minimap.getVillageBlock()
 

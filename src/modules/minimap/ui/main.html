@@ -41,6 +41,23 @@
                 </div>
 
                 <div ng-show="selectedTab === 'highlights'">
+                    <h5 class="twx-section">{{ 'add' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col width="30%">
+                            <col>
+                            <col width="4%">
+                            <col width="4%">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td><div auto-complete="autoComplete"></div></td>
+                                <td class="text-center"><span ng-show="selectedHighlight" class="icon-26x26-rte-{{ selectedHighlight.type }}"></span> {{ selectedHighlight.name }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette()" ng-style="{'background-color': selectedColor }" tooltip="" tooltip-content="{{ 'color-picker' | i18n:loc.ale:textObject }}"></div></td>
+                                <td><span class="btn-orange icon-26x26-plus" ng-click="addHighlight()" tooltip="" tooltip-content="{{ 'add' | i18n:loc.ale:textObject }}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div ng-show="selectedTab === 'settings'">
