@@ -18,151 +18,39 @@ define('two/minimap', [
     $cdn
 ) {
     var enableRendering = false
-
-    /**
-     * All villages/players/tribes highlights.
-     *
-     * @type {Object}
-     */
     var highlights
-
-    /**
-     * Size of a village icon in pixels.
-     *
-     * @type {Number}
-     */
     var villageSize = 5
-
-    /**
-     * Margin between village icons in pixels.
-     *
-     * @type {Object}
-     */
     var villageMargin = 1
-
-    /**
-     * Hex color regex validator.
-     *
-     * @type {RegExp}
-     */
     var rhex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
-
-    /**
-     * Store loaded villages and it's respective owners/tribes in
-     * a easy access mode.
-     *
-     * @type {Object}
-     */
     var cache = {
         village: {},
         character: {},
         tribe: {}
     }
-
-    /**
-     * Cached villages from previous loaded maps.
-     * Used to draw the "ghost" villages on the map.
-     *
-     * @type {Object}
-     */
+    // Cached villages from previous loaded maps.
+    // Used to draw the "ghost" villages on the map.
     var cachedVillages = {}
-
-    /**
-     * Data of the village that the user is hovering on the minimap.
-     *
-     * @type {Object}
-     */
+    // Data of the village that the user is hovering on the minimap.
     var hoverVillage = null
-
-    /**
-     * Main canvas element.
-     *
-     * @type {Element}
-     */
     var $viewport
     var $viewportContext
-
-    /**
-     * Main canvas cache element.
-     * All village are draw here and applied to the main canvas by the render.
-     * 
-     * @type {Element}
-     */
     var $viewportCache
     var $viewportCacheContext
-
-    /**
-     * Cross canvas element.
-     * Current position on map is draw here.
-     *
-     * @type {Element}
-     */
     var $cross
     var $crossContext
-
-    /**
-     * Game main canvas map.
-     * Used to calculate the position cross position based on canvas size.
-     *
-     * @type {Element}
-     */
+    // Game main canvas map.
+    // Used to calculate the position cross position based on canvas size.
     var $map
-
-    /**
-     * Player data.
-     *
-     * @type {Object}
-     */
     var $player
-
-    /**
-     * Tribe diplomacy helper.
-     *
-     * @type {Object}
-     */
     var $tribeRelations
-
-    /**
-     * Current selected village by the player.
-     */
     var selectedVillage
-
-    /**
-     * Current position in the minimap in pixels.
-     *
-     * @type {Object}
-     */
     var currentPosition = {}
-
-    /**
-     * Main canvas size.
-     *
-     * @type {Object}
-     */
     var frameSize = {}
-
-    /**
-     * Used to block the jump-to-position when the minimap
-     * is dragged and not just clicked.
-     *
-     * @type {Boolean}
-     */
+    // Used to block the jump-to-position when the minimap
+    // is dragged and not just clicked.
     var allowJump = true
-
-    /**
-     * Map data structure buffer.
-     *
-     * @type {ArrayBuffer}
-     */
     var dataView
-
-    /**
-     * Minimap settings.
-     * 
-     * @type {Object}
-     */
     var settings = {}
-
     var STORAGE_ID = {
         CACHE_VILLAGES: 'minimap_cache_villages',
         SETTINGS: 'minimap_settings',
@@ -342,8 +230,6 @@ define('two/minimap', [
     }
 
     /**
-     * Draw a village set on canvas.
-     *
      * @param {Array} villages
      * @param {String=} _color - Force the village to use the
      *   specified color.
@@ -462,9 +348,6 @@ define('two/minimap', [
         xhr.send()
     }
 
-    /**
-     * Draw the map grid.
-     */
     var drawGrid = function () {
         var villageBlock = Minimap.getVillageBlock()
         var villageOffsetX = Math.round(villageBlock / 2)
@@ -496,16 +379,10 @@ define('two/minimap', [
         })
     }
 
-    /**
-     * Draw all villages loaded befored the Minimap execution.
-     */
     var drawLoadedVillages = function () {
         drawVillages($mapData.getTowns())
     }
 
-    /**
-     * Draw all villages previously loaded in other runs.
-     */
     var drawCachedVillages = function () {
         var x
         var y
@@ -534,8 +411,6 @@ define('two/minimap', [
     }
 
     /**
-     * Draw the viewport cache to the main canvas.
-     *
      * @param {Object} pos - Minimap current position plus center of canvas.
      */
     var drawViewport = function (pos) {
@@ -543,8 +418,6 @@ define('two/minimap', [
     }
 
     /**
-     * Clear the main canvas.
-     *
      * @return {[type]} [description]
      */
     var clearViewport = function () {
@@ -552,8 +425,6 @@ define('two/minimap', [
     }
 
     /**
-     * Draw the temporation items on cross canvas.
-     *
      * @param {Object} pos - Minimap current position plus center of canvas.
      */
     var drawCross = function (pos) {
@@ -569,18 +440,10 @@ define('two/minimap', [
         $crossContext.fillRect(0, y | 0, lineSize, 1)
     }
 
-    /**
-     * Clean the cross canvas.
-     *
-     * @return {[type]} [description]
-     */
     var clearCross = function () {
         $crossContext.clearRect(0, 0, $cross.width, $cross.height)
     }
 
-    /**
-     * Update the current selected village on cache canvas.
-     */
     var updateSelectedVillage = function () {
         var old = {
             id: selectedVillage.getId(),
@@ -603,9 +466,6 @@ define('two/minimap', [
         }])
     }
 
-    /**
-     * Main and cross canvas render loop.
-     */
     var renderStep = function () {
         if(enableRendering) {
             var pos =  {
@@ -627,8 +487,6 @@ define('two/minimap', [
     }
 
     /**
-     * Load some sectors of villages on map.
-     *
      * @param {Number} sectors - Amount of sectors to be loaded,
      *   each sector has a size of 25x25 fields.
      * @param {Number=} x Optional load center X
@@ -642,11 +500,6 @@ define('two/minimap', [
         $mapData.loadTownDataAsync(x, y, size, size, function () {})
     }
 
-    /**
-     * Parse the loaded villages to a quick access object.
-     *
-     * @param {Array} villages
-     */
     var cacheVillages = function (villages) {
         for (var i = 0; i < villages.length; i++) {
             var v = villages[i]
@@ -687,11 +540,6 @@ define('two/minimap', [
         Lockr.set(STORAGE_ID.CACHE_VILLAGES, cachedVillages)
     }
 
-    /**
-     * Executed when a village is hovered on minimap.
-     *
-     * @param {Object} coords - hovered village X and Y.
-     */
     var onHoverVillage = function (coords, event) {
         if (hoverVillage) {
             if (hoverVillage.x === coords.x && hoverVillage.y === coords.y) {
@@ -720,9 +568,6 @@ define('two/minimap', [
         }
     }
 
-    /**
-     * Executed when the mouse leave a village on minimap.
-     */
     var onBlurVillage = function () {
         if (!hoverVillage) {
             return false
@@ -740,20 +585,10 @@ define('two/minimap', [
         eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_BLUR)
     }
 
-    /**
-     * Temporally highlight all villages from the hovered players.
-     *
-     * @param {Array} villages - Array of villages to be highlighted.
-     */
     var highlightVillages = function (villages) {
         drawVillages(villages, settings.colorQuickHighlight)
     }
 
-    /**
-     * Unhighlight the temporally highlighted villages.
-     *
-     * @param {Array} villages - Array of villages to be highlighted.
-     */
     var unhighlightVillages = function (villages) {
         var _villages = []
 
@@ -806,25 +641,8 @@ define('two/minimap', [
         }, Minimap.colorPalette.random())
     }
 
-    /**
-     * Minimap
-     *
-     * @type {Object}
-     */
     var Minimap = {}
 
-    /**
-     * Minimap version
-     *
-     * @type {String}
-     */
-    Minimap.version = '__minimap_version'
-
-    /**
-     * Pre-loaded palette colors.
-     * 
-     * @type {Array}
-     */
     Minimap.colorPalette = [
         '#000000', '#FFFFFF', '#969696', '#F0C800', '#0000DB', '#00A0F4', '#ED1212', '#BF4DA4', '#A96534', '#3E551C', '#436213', '#CCCCCC',
         '#868900', '#5100AF', '#7CC600', '#CC4DFF', '#DEC701', '#0120B0', '#98AB00', '#D512D7', '#01C46F', '#FF63FB', '#009132', '#190086', 
@@ -834,9 +652,6 @@ define('two/minimap', [
         '#EEB3EF', '#4A1F00', '#F8B5BC', '#43152D', '#FFAE82', '#6C004C', '#DEC2A0', '#990066', '#E6B9A8', '#8D0025', '#9B7892', '#FF745C'
     ]
 
-    /**
-     * @type {Object}
-     */
     Minimap.settingsMap = {
         rightClickAction: {
             default: 'highlight-player',
@@ -960,39 +775,18 @@ define('two/minimap', [
         }
     }
 
-    /**
-     * Set the size of a village on minimap in pixels.
-     * Recomened to be a even number.
-     *
-     * @type {Number} value
-     */
     Minimap.setVillageSize = function (value) {
         villageSize = value
     }
 
-    /**
-     * Get the village size on minimap.
-     *
-     * @return {Number}
-     */
     Minimap.getVillageSize = function () {
         return villageSize
     }
 
-    /**
-     * Set the margin between the villages on minimap in pixels.
-     *
-     * @type {Number} value
-     */
     Minimap.setVillageMargin = function (value) {
         villageMargin = value
     }
 
-    /**
-     * Get the margin between the villages on minimap.
-     *
-     * @return {Number}
-     */
     Minimap.getVillageMargin = function () {
         return villageMargin
     }
@@ -1006,11 +800,6 @@ define('two/minimap', [
         return villageSize + villageMargin
     }
 
-    /**
-     * Get the size of the minimap based on villages size.
-     *
-     * @return {Number}
-     */
     Minimap.getLineSize = function () {
         return 1000 * (villageSize + villageMargin)
     }
@@ -1072,13 +861,6 @@ define('two/minimap', [
         return true
     }
 
-    /**
-     * @param {Object} data - Highlight data.
-     * @param {String} data.type - village, player or tribe
-     * @param {String} data.id - village/player/tribe id
-     *
-     * @return {Boolean} true if successfully removed
-     */
     Minimap.removeHighlight = function (data) {
         if (highlights[data.type][data.id]) {
             delete highlights[data.type][data.id]
@@ -1093,11 +875,6 @@ define('two/minimap', [
         return false
     }
 
-    /**
-     * @param {String} type - village, player or tribe
-     * @param {String} item - village id, player name or tribe tag
-     * @return {Object}
-     */
     Minimap.getHighlight = function (type, item) {
         if (highlights[type].hasOwnProperty(item)) {
             return highlights[type][item]
@@ -1106,16 +883,10 @@ define('two/minimap', [
         }
     }
 
-    /**
-     * @return {Object}
-     */
     Minimap.getHighlights = function () {
         return highlights
     }
 
-    /**
-     * @param {Function} callback
-     */
     Minimap.eachHighlight = function (callback) {
         for (var type in highlights) {
             for (var id in highlights[type]) {
@@ -1124,33 +895,17 @@ define('two/minimap', [
         }
     }
 
-    /**
-     * Set the viewport canvas element (main canvas);
-     *
-     * @param {Element} element - The canvas.
-     */
     Minimap.setViewport = function (element) {
         $viewport = element
         $viewport.style.background = settings.colorBackground
         $viewportContext = $viewport.getContext('2d')
     }
 
-    /**
-     * Set the cross canvas element;
-     *
-     * @param {Element} element - The canvas.
-     */
     Minimap.setCross = function (element) {
         $cross = element
         $crossContext = $cross.getContext('2d')
     }
 
-    /**
-     * Set the current position of the minimap view.
-     *
-     * @param {Number} x
-     * @param {Number} y
-     */
     Minimap.setCurrentPosition = function (x, y) {
         var block = Minimap.getVillageBlock()
 
@@ -1159,8 +914,6 @@ define('two/minimap', [
     }
 
     /**
-     * Calculate the coords of the current position of the map.
-     *
      * @return {Array}
      */
     Minimap.getMapPosition = function () {
@@ -1227,16 +980,10 @@ define('two/minimap', [
         eventQueue.trigger(eventTypeProvider.MINIMAP_SETTINGS_RESET)
     }
 
-    /**
-     * Minimap settings.
-     */
     Minimap.getSettings = function () {
         return settings
     }
 
-    /**
-     * Clear the viewport cache and redraw with the current settings.
-     */
     Minimap.update = function () {
         var villageBlock = Minimap.getVillageBlock()
 
@@ -1262,9 +1009,6 @@ define('two/minimap', [
         enableRendering = false
     }
 
-    /**
-     * Init the Minimap.
-     */
     Minimap.init = function () {
         Minimap.initialized = true
 
@@ -1287,9 +1031,6 @@ define('two/minimap', [
         }, true)
     }
 
-    /**
-     * Run the Minimap after the interface is loaded.
-     */
     Minimap.run = function () {
         ready(function () {
             $map = document.getElementById('main-canvas')
