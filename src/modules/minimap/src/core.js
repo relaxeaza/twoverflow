@@ -17,6 +17,8 @@ define('two/minimap', [
     $mapconvert,
     $cdn
 ) {
+    var enableRendering = false
+
     /**
      * All villages/players/tribes highlights.
      *
@@ -323,7 +325,7 @@ define('two/minimap', [
             }
 
             var coords = getCoords(event)
-            rootScope.$broadcast(eventTypeProvider.MAP_CENTER_ON_POSITION, coords.x, coords.y, true)
+            $rootScope.$broadcast(eventTypeProvider.MAP_CENTER_ON_POSITION, coords.x, coords.y, true)
             preloadSectors(2, coords.x, coords.y)
         })
 
@@ -599,7 +601,7 @@ define('two/minimap', [
      * Main and cross canvas render loop.
      */
     var renderStep = function () {
-        if(Minimap.interface.isVisible('minimap')) {
+        if(enableRendering) {
             var pos =  {
                 x: currentPosition.x - (frameSize.x / 2),
                 y: currentPosition.y - (frameSize.y / 2)
@@ -1246,12 +1248,18 @@ define('two/minimap', [
         drawLoadedVillages()
     }
 
+    Minimap.enableRendering = function () {
+        enableRendering = true
+    }
+
+    Minimap.disableRendering = function () {
+        enableRendering = false
+    }
+
     /**
      * Init the Minimap.
      */
     Minimap.init = function () {
-        Locale.create('minimap', __minimap_locale, 'en')
-
         Minimap.initialized = true
 
         $viewportCache = document.createElement('canvas')
@@ -1277,10 +1285,6 @@ define('two/minimap', [
      * Run the Minimap after the interface is loaded.
      */
     Minimap.run = function () {
-        if (!Minimap.interfaceInitialized) {
-            throw new Error('Minimap interface not initialized')
-        }
-
         ready(function () {
             $map = document.getElementById('main-canvas')
             $player = modelDataService.getSelectedCharacter()
@@ -1325,16 +1329,16 @@ define('two/minimap', [
             preloadSectors(2)
             renderStep()
 
-            rootScope.$on(eventTypeProvider.MAP_VILLAGE_DATA, function (event, data) {
+            $rootScope.$on(eventTypeProvider.MAP_VILLAGE_DATA, function (event, data) {
                 drawVillages(data.villages)
                 cacheVillages(data.villages)
             })
 
-            rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, function () {
+            $rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, function () {
                 updateSelectedVillage()
             })
 
-            rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, function (event, data) {
+            $rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, function (event, data) {
                 drawLoadedVillages()
             })
         }, ['initial_village', 'tribe_relations'])

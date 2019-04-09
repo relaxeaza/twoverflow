@@ -1,0 +1,51 @@
+<div id="two-minimap" class="win-content">
+    <header class="win-head">
+        <h2>Minimap</h2>
+        <ul class="list-btn">
+            <li><a href="#" class="size-34x34 btn-red icon-26x26-close" ng-click="closeWindow()"></a></li>
+        </ul>
+    </header>
+
+    <div class="win-main" scrollbar="">
+        <div class="tabs tabs-bg">
+            <div class="tabs-three-col">
+                <div class="tab" ng-click="selectTab('minimap')" ng-class="{true:'tab-active', false:''}[selectedTab == 'minimap']">
+                    <div class="tab-inner">
+                        <div ng-class="{'box-border-light': selectedTab === 'minimap'}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== 'minimap'}">{{ 'minimap' | i18n:loc.ale:textObject }}</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab" ng-click="selectTab('highlights')" ng-class="{true:'tab-active', false:''}[selectedTab == 'highlights']">
+                    <div class="tab-inner">
+                        <div ng-class="{'box-border-light': selectedTab === 'highlights'}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== 'highlights'}">{{ 'highlights' | i18n:loc.ale:textObject }}</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab" ng-click="selectTab('settings')" ng-class="{true:'tab-active', false:''}[selectedTab == 'settings']">
+                    <div class="tab-inner">
+                        <div ng-class="{'box-border-light': selectedTab === 'settings'}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== 'settings'}">{{ 'settings' | i18n:loc.ale:textObjectCommon }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="box-paper">
+            <div class="scroll-wrap">
+                <div ng-show="selectedTab === 'minimap'" class="minimap-container">
+                </div>
+
+                <div ng-show="selectedTab === 'highlights'">
+                </div>
+
+                <div ng-show="selectedTab === 'settings'">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

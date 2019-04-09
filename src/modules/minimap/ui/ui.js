@@ -22,6 +22,19 @@ define('two/minimap/ui', [
     var $scope
     var textObject = 'minimap'
     var textObjectCommon = 'common'
+    var DEFAULT_TAB = 'minimap'
+    var $minimapCanvas
+    var $crossCanvas
+
+    var selectTab = function (tabType) {
+        $scope.selectedTab = tabType
+
+        if (tabType === 'minimap') {
+            minimap.enableRendering()
+        } else {
+            minimap.disableRendering()
+        }
+    }
 
     var getTribeData = function (id, callback) {
         socketService.emit(routeProvider.TRIBE_GET_PROFILE, {
@@ -40,6 +53,12 @@ define('two/minimap/ui', [
     }
 
     var init = function () {
+        $minimapCanvas = document.createElement('canvas')
+        $crossCanvas = document.createElement('canvas')
+
+        minimap.setViewport($minimapCanvas)
+        minimap.setCross($crossCanvas)
+
         var opener = new FrontButton('Minimap', {
             classHover: false,
             classBlur: false,
@@ -58,9 +77,20 @@ define('two/minimap/ui', [
         $scope = window.$scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
-
+        $scope.selectedTab = DEFAULT_TAB
         $scope.selectedHighlight = {}
+        $scope.highlights = minimap.getHighlights()
+        
+        // functions
+        $scope.selectTab = selectTab
 
+        windowManagerService.getScreenWithInjectedScope('!twoverflow_minimap_window', $scope)
+
+        var $minimapContainer = document.querySelector('#two-minimap .minimap-container')
+        $minimapContainer.appendChild($minimapCanvas)
+        $minimapContainer.appendChild($crossCanvas)
+
+        minimap.enableRendering()
     }
 
     return init
