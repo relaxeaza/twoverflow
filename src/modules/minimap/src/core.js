@@ -6,7 +6,8 @@ define('two/minimap', [
     'conf/conf',
     'helper/time',
     'helper/mapconvert',
-    'cdn'
+    'cdn',
+    'conf/colors'
 ], function (
     eventQueue,
     ready,
@@ -15,7 +16,8 @@ define('two/minimap', [
     $conf,
     $timeHelper,
     $mapconvert,
-    $cdn
+    $cdn,
+    colors
 ) {
     var enableRendering = false
     var highlights
@@ -638,19 +640,10 @@ define('two/minimap', [
         Minimap.addHighlight({
             type: type,
             id: id
-        }, Minimap.colorPalette.random())
+        }, colors.palette.random().random())
     }
 
     var Minimap = {}
-
-    Minimap.colorPalette = [
-        '#000000', '#FFFFFF', '#969696', '#F0C800', '#0000DB', '#00A0F4', '#ED1212', '#BF4DA4', '#A96534', '#3E551C', '#436213', '#CCCCCC',
-        '#868900', '#5100AF', '#7CC600', '#CC4DFF', '#DEC701', '#0120B0', '#98AB00', '#D512D7', '#01C46F', '#FF63FB', '#009132', '#190086', 
-        '#95D86F', '#0045CF', '#C7CD53', '#6C75FF', '#CC8F00', '#008FFA', '#DF0004', '#22CBFF', '#FF3F28', '#00B184', '#99009F', '#96D68E',
-        '#DD0080', '#0E5200', '#FF77E8', '#00602D', '#FF477C', '#01ACA2', '#C80030', '#01AFB8', '#BD3100', '#006AC3', '#DC5B00', '#031A70',
-        '#EAC162', '#381058', '#FF9949', '#98B1FF', '#9A6B00', '#FAABFE', '#5F5500', '#FF78C3', '#94D3B9', '#BA004C', '#CAC0F0', '#6B2E00',
-        '#EEB3EF', '#4A1F00', '#F8B5BC', '#43152D', '#FFAE82', '#6C004C', '#DEC2A0', '#990066', '#E6B9A8', '#8D0025', '#9B7892', '#FF745C'
-    ]
 
     Minimap.settingsMap = {
         rightClickAction: {
