@@ -1,4 +1,7 @@
 define('two/minimap', [
+    'two/minimap/rightClickActionTypes',
+    'two/minimap/settings',
+    'two/minimap/settingsMap',
     'queues/EventQueue',
     'two/ready',
     'Lockr',
@@ -9,6 +12,9 @@ define('two/minimap', [
     'cdn',
     'conf/colors'
 ], function (
+    RIGHT_CLICK_ACTION_TYPES,
+    SETTINGS,
+    SETTINGS_MAP,
     eventQueue,
     ready,
     Lockr,
@@ -179,12 +185,12 @@ define('two/minimap', [
                     village = $mapData.getTownAt(coords.x, coords.y)
 
                     // ignore barbarian villages
-                    if (!settings.showBarbarians && !village.character_id) {
+                    if (!settings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
                         return false
                     }
 
                     // check if the village is custom highlighted
-                    if (settings.showOnlyCustomHighlights) {
+                    if (settings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
                         highlighted = false
 
                         if (village.id in highlights.village) {
@@ -272,7 +278,7 @@ define('two/minimap', [
                     x += villageOffsetX
                 }
 
-                if (settings.showOnlyCustomHighlights) {
+                if (settings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
                     if (v.id in highlights.village) {
                         color = highlights.village[v.id].color
                     } else if (v.character_id in highlights.character) {
@@ -284,25 +290,25 @@ define('two/minimap', [
                     }
                 } else {
                     if (v.character_id === null) {
-                        if (!settings.showBarbarians) {
+                        if (!settings[SETTINGS.SHOW_BARBARIANS]) {
                             continue
                         }
 
                         if (v.id in highlights.village) {
                             color = highlights.village[v.id].color
                         } else {
-                            color = settings.colorBarbarian
+                            color = settings[SETTINGS.COLOR_BARBARIAN]
                         }
                     } else {
                         if (v.character_id === pid) {
-                            if (v.id === selectedVillage.getId() && settings.highlightSelected) {
-                                color = settings.colorSelected
+                            if (v.id === selectedVillage.getId() && settings[SETTINGS.HIGHLIGHT_SELECTED]) {
+                                color = settings[SETTINGS.COLOR_SELECTED]
                             } else if (v.character_id in highlights.character) {
                                 color = highlights.character[v.character_id].color
-                            } else if (settings.highlightOwn) {
-                                color = settings.colorPlayer
+                            } else if (settings[SETTINGS.HIGHLIGHT_OWN]) {
+                                color = settings[SETTINGS.COLOR_PLAYER]
                             } else {
-                                color = settings.colorUgly
+                                color = settings[SETTINGS.COLOR_UGLY]
                             }
                         } else {
                             if (v.id in highlights.village) {
@@ -311,20 +317,20 @@ define('two/minimap', [
                                 color = highlights.character[v.character_id].color
                             } else if (v.tribe_id in highlights.tribe) {
                                 color = highlights.tribe[v.tribe_id].color
-                            } else if (tid && tid === v.tribe_id && settings.highlightDiplomacy) {
-                                color = settings.colorTribe
-                            } else if ($tribeRelations && settings.highlightDiplomacy) {
+                            } else if (tid && tid === v.tribe_id && settings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
+                                color = settings[SETTINGS.COLOR_TRIBE]
+                            } else if ($tribeRelations && settings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
                                 if ($tribeRelations.isAlly(v.tribe_id)) {
-                                    color = settings.colorAlly
+                                    color = settings[SETTINGS.COLOR_ALLY]
                                 } else if ($tribeRelations.isEnemy(v.tribe_id)) {
-                                    color = settings.colorEnemy
+                                    color = settings[SETTINGS.COLOR_ENEMY]
                                 } else if ($tribeRelations.isNAP(v.tribe_id)) {
-                                    color = settings.colorFriendly
+                                    color = settings[SETTINGS.COLOR_FRIENDLY]
                                 } else {
-                                    color = settings.colorUgly
+                                    color = settings[SETTINGS.COLOR_UGLY]
                                 }
                             } else {
-                                color = settings.colorUgly
+                                color = settings[SETTINGS.COLOR_UGLY]
                             }
                         }
                     }
@@ -368,11 +374,11 @@ define('two/minimap', [
                     if (tile.key.b) {
                         // is continental border
                         if (tile.key.c) {
-                            $viewportCacheContext.fillStyle = settings.colorContinent
+                            $viewportCacheContext.fillStyle = settings[SETTINGS.COLOR_CONTINENT]
                             $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX - 1, y * villageBlock + villageOffsetX - 1, 3, 1)
                             $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 2, 1, 3)
                         } else {
-                            $viewportCacheContext.fillStyle = settings.colorProvince
+                            $viewportCacheContext.fillStyle = settings[SETTINGS.COLOR_PROVINCE]
                             $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 1, 1, 1)
                         }
                     }
@@ -406,7 +412,7 @@ define('two/minimap', [
                     xx += villageOffsetX
                 }
 
-                $viewportCacheContext.fillStyle = settings.colorGhost
+                $viewportCacheContext.fillStyle = settings[SETTINGS.COLOR_GHOST]
                 $viewportCacheContext.fillRect(xx, yy, villageSize, villageSize)
             }
         }
@@ -437,7 +443,7 @@ define('two/minimap', [
         var x = ((mapPosition[0] + mapPosition[2] - 2) * villageBlock) - pos.x
         var y = ((mapPosition[1] + mapPosition[3] - 2) * villageBlock) - pos.y
 
-        $crossContext.fillStyle = settings.colorCross
+        $crossContext.fillStyle = settings[SETTINGS.COLOR_CROSS]
         $crossContext.fillRect(x | 0, 0, 1, lineSize)
         $crossContext.fillRect(0, y | 0, lineSize, 1)
     }
@@ -480,7 +486,7 @@ define('two/minimap', [
 
             drawViewport(pos)
 
-            if (settings.showCross) {
+            if (settings[SETTINGS.SHOW_CROSS]) {
                 drawCross(pos)
             }
         }
@@ -588,7 +594,7 @@ define('two/minimap', [
     }
 
     var highlightVillages = function (villages) {
-        drawVillages(villages, settings.colorQuickHighlight)
+        drawVillages(villages, settings[SETTINGS.COLOR_QUICK_HIGHLIGHT])
     }
 
     var unhighlightVillages = function (villages) {
@@ -603,7 +609,7 @@ define('two/minimap', [
 
     var easyHighlight = function (coords) {
         var village = $mapData.getTownAt(coords.x, coords.y)
-        var action = settings.rightClickAction
+        var action = settings[SETTINGS.RIGHT_CLICK_ACTION]
         var type
         var id
 
@@ -611,8 +617,13 @@ define('two/minimap', [
             return false
         }
 
-        switch (settings.rightClickAction) {
-        case 'highlight-player':
+        switch (settings[SETTINGS.RIGHT_CLICK_ACTION]) {
+        case RIGHT_CLICK_ACTION_TYPES.HIGHLIGHT_VILLAGE:
+            type = 'village'
+            id = village.id
+
+            break
+        case RIGHT_CLICK_ACTION_TYPES.HIGHLIGHT_PLAYER:
             if (!village.character_id) {
                 return false
             }
@@ -621,18 +632,13 @@ define('two/minimap', [
             id = village.character_id
 
             break
-        case 'highlight-tribe':
+        case RIGHT_CLICK_ACTION_TYPES.HIGHLIGHT_TRIBE:
             if (!village.tribe_id) {
                 return false
             }
 
             type = 'tribe'
             id = village.tribe_id
-
-            break
-        case 'highlight-village':
-            type = 'village'
-            id = village.id
 
             break
         }
@@ -645,128 +651,8 @@ define('two/minimap', [
 
     var Minimap = {}
 
-    Minimap.settingsMap = {
-        rightClickAction: {
-            default: 'highlight-player',
-            inputType: 'select',
-            update: false
-        },
-        floatingMinimap: {
-            default: false,
-            inputType: 'checkbox',
-            update: false
-        },
-        showCross: {
-            default: true,
-            inputType: 'checkbox',
-            update: true
-        },
-        showDemarcations: {
-            default: true,
-            inputType: 'checkbox',
-            update: true
-        },
-        showBarbarians: {
-            default: true,
-            inputType: 'checkbox',
-            update: true
-        },
-        showGhostVillages: {
-            default: true,
-            inputType: 'checkbox',
-            update: true
-        },
-        showOnlyCustomHighlights: {
-            default: false,
-            inputType: 'checkbox',
-            update: true
-        },
-        highlightOwn: {
-            default: true,
-            inputType: 'checkbox',
-            update: true
-        },
-        highlightSelected: {
-            default: true,
-            inputType: 'checkbox',
-            update: true
-        },
-        highlightDiplomacy: {
-            default: true,
-            inputType: 'checkbox',
-            update: true
-        },
-        colorSelected: {
-            default: '#ffffff',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorBarbarian: {
-            default: '#969696',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorPlayer: {
-            default: '#f0c800',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorTribe: {
-            default: '#0000DB',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorAlly: {
-            default: '#00a0f4',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorEnemy: {
-            default: '#ED1212',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorFriendly: {
-            default: '#BF4DA4',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorUgly: {
-            default: '#A96534',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorGhost: {
-            default: '#3E551C',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorQuickHighlight: {
-            default: '#ffffff',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorBackground: {
-            default: '#436213',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorProvince: {
-            default: '#ffffff',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorContinent: {
-            default: '#cccccc',
-            inputType: 'colorPicker',
-            update: true
-        },
-        colorCross: {
-            default: '#999999',
-            inputType: 'colorPicker',
-            update: true
-        }
-    }
+    Minimap.SETTINGS_MAP = SETTINGS_MAP
+    Minimap.RIGHT_CLICK_ACTION_TYPES = RIGHT_CLICK_ACTION_TYPES
 
     Minimap.setVillageSize = function (value) {
         villageSize = value
@@ -890,7 +776,7 @@ define('two/minimap', [
 
     Minimap.setViewport = function (element) {
         $viewport = element
-        $viewport.style.background = settings.colorBackground
+        $viewport.style.background = settings[SETTINGS.COLOR_BACKGROUND]
         $viewportContext = $viewport.getContext('2d')
     }
 
@@ -931,7 +817,7 @@ define('two/minimap', [
         var updateMinimap = false
 
         for (key in changes) {
-            settingMap = Minimap.settingsMap[key]
+            settingMap = SETTINGS_MAP[key]
             newValue = changes[key]
 
             if (!settingMap || angular.equals(settings[key], newValue)) {
@@ -955,8 +841,8 @@ define('two/minimap', [
     }
 
     Minimap.resetSettings = function () {
-        for (var key in Minimap.settingsMap) {
-            settings[key] = Minimap.settingsMap[key].default
+        for (var key in SETTINGS_MAP) {
+            settings[key] = SETTINGS_MAP[key].default
         }
 
         highlights = {
@@ -980,14 +866,14 @@ define('two/minimap', [
     Minimap.update = function () {
         var villageBlock = Minimap.getVillageBlock()
 
-        $viewport.style.background = settings.colorBackground
+        $viewport.style.background = settings[SETTINGS.COLOR_BACKGROUND]
         $viewportCacheContext.clearRect(0, 0, $viewportCache.width, $viewportCache.height)
 
-        if (settings.showDemarcations) {
+        if (settings[SETTINGS.SHOW_DEMARCATIONS]) {
             drawGrid()
         }
 
-        if (settings.showGhostVillages) {
+        if (settings[SETTINGS.SHOW_GHOST_VILLAGES]) {
             drawCachedVillages()
         }
 
@@ -1009,8 +895,8 @@ define('two/minimap', [
         $viewportCacheContext = $viewportCache.getContext('2d')
         var localSettings = Lockr.get(STORAGE_ID.SETTINGS, {}, true)
 
-        for (var key in Minimap.settingsMap) {
-            var defaultValue = Minimap.settingsMap[key].default
+        for (var key in SETTINGS_MAP) {
+            var defaultValue = SETTINGS_MAP[key].default
 
             settings[key] = localSettings.hasOwnProperty(key)
                 ? localSettings[key]
@@ -1055,11 +941,11 @@ define('two/minimap', [
             currentPosition.x = selectedVillage.getX() * villageBlock
             currentPosition.y = selectedVillage.getY() * villageBlock
 
-            if (settings.showDemarcations) {
+            if (settings[SETTINGS.SHOW_DEMARCATIONS]) {
                 drawGrid()
             }
 
-            if (settings.showGhostVillages) {
+            if (settings[SETTINGS.SHOW_GHOST_VILLAGES]) {
                 drawCachedVillages()
             }
 

@@ -4,7 +4,10 @@ require([
     'two/minimap',
     'two/minimap/ui',
     'two/minimap/data',
-    'two/minimap/Events'
+    'two/minimap/Events',
+    'two/minimap/rightClickActionTypes',
+    'two/minimap/settings',
+    'two/minimap/settingsMap',
 ], function (
     i18n,
     ready,

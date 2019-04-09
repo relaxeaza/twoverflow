@@ -1,5 +1,7 @@
 define('two/minimap/ui', [
     'two/minimap',
+    'two/minimap/rightClickActionTypes',
+    'two/minimap/settingsMap',
     'two/ui2',
     'two/ui/autoComplete',
     'two/FrontButton',
@@ -9,9 +11,11 @@ define('two/minimap/ui', [
     'struct/MapData',
     'cdn',
     'two/EventScope',
-    'conf/colors'
+    'conf/colors',
 ], function (
     minimap,
+    RIGHT_CLICK_ACTION_TYPES,
+    SETTINGS_MAP,
     interfaceOverflow,
     autoComplete,
     FrontButton,
