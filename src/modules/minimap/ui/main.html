@@ -58,6 +58,36 @@
                             </tr>
                         </tbody>
                     </table>
+
+                    <h5 class="twx-section">{{ 'highlights' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col width="4%">
+                            <col>
+                            <col width="4%">
+                            <col width="4%">
+                        </colgroup>
+                        <tbody>
+                            <tr ng-repeat="(color, village) in highlights.village">
+                                <td><span class="icon-26x26-rte-village"></span></td>
+                                <td>{{ village.name }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': color }"></div></td>
+                                <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight(village)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
+                            </tr>
+                            <tr ng-repeat="(color, character) in highlights.character">
+                                <td><span class="icon-26x26-rte-character"></span></td>
+                                <td>{{ character.name }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': color }"></div></td>
+                                <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight(character)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
+                            </tr>
+                            <tr ng-repeat="(color, tribe) in highlights.tribe">
+                                <td><span class="icon-26x26-rte-tribe"></span></td>
+                                <td>{{ tribe.name }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': color }"></div></td>
+                                <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight(tribe)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div ng-show="selectedTab === 'settings'">

@@ -47,24 +47,9 @@ define('two/minimap/ui', [
         }
     }
 
-    var getTribeData = function (id, callback) {
-        socketService.emit(routeProvider.TRIBE_GET_PROFILE, {
-            tribe_id: id
-        }, callback)
-    }
-
-    var getPlayerData = function (id, callback) {
-        socketService.emit(routeProvider.CHAR_GET_PROFILE, {
-            character_id: id
-        }, callback)
-    }
-
-    var getVillageData = function (x, y, callback) {
-        $mapData.loadTownDataAsync(x, y, 1, 1, callback)
-    }
-
     var updateHighlights = function () {
         $scope.highlights = minimap.getHighlights()
+        loadHighlightData()
     }
 
     var disableScrollbar = function () {
@@ -81,6 +66,88 @@ define('two/minimap/ui', [
         }, function () {
             $scope.directives.scrollbar.scrollbar.enable()
         })
+    }
+
+    var getData = {
+        tribe: function (data, callback) {
+            socketService.emit(routeProvider.TRIBE_GET_PROFILE, {
+                tribe_id: data.id
+            }, function (tribeData) {
+                callback(tribeData, data)
+            })
+        },
+        character: function (data, callback) {
+            socketService.emit(routeProvider.CHAR_GET_PROFILE, {
+                character_id: data.id
+            }, function (characterData) {
+                callback(characterData, data)
+            })
+        },
+        village: function (data, callback) {
+            $mapData.loadTownDataAsync(data.x, data.y, 1, 1, function (villageData) {
+                callback(villageData, data)
+            })
+        }
+    }
+
+    var loadHighlightData = function (_type, _data) {
+        var id
+
+        if (_type && _type in getData) {
+            getData[_type](_data, function (data) {
+                if ($scope.highlights[_type][data.id].name) {
+                    return
+                }
+
+                if (_type === 'village') {
+                    $scope.highlights[_type][data.id].name = utils.genVillageLabel(data)
+                    $scope.highlights[_type][data.id].x = data.x
+                    $scope.highlights[_type][data.id].y = data.y
+                } else {
+                    $scope.highlights[_type][data.id].name = data.name
+                }
+            })
+
+            return
+        }
+
+        for (id in $scope.highlights.village) {
+            if ($scope.highlights.village[id].name) {
+                continue
+            }
+
+            getData.village({
+                id: id,
+                x: $scope.highlights.village[id].x,
+                y: $scope.highlights.village[id].y
+            }, function (data, _data) {
+                $scope.highlights.village[_data.id].name = utils.genVillageLabel(data)
+            })
+        }
+
+        for (id in $scope.highlights.character) {
+            if ($scope.highlights.character[id].name) {
+                continue
+            }
+
+            getData.character({
+                id: id
+            }, function (data, _data) {
+                $scope.highlights.character[_data.id].name = data.name
+            })
+        }
+
+        for (id in $scope.highlights.tribe) {
+            if ($scope.highlights.tribe[id].name) {
+                continue
+            }
+
+            getData.tribe({
+                id: id
+            }, function (data, _data) {
+                $scope.highlights.tribe[_data.id].name = data.name
+            })
+        }
     }
 
     var openColorPalette = function () {
@@ -194,6 +261,9 @@ define('two/minimap/ui', [
         $scope.selectTab = selectTab
         $scope.openColorPalette = openColorPalette
         $scope.addHighlight = addHighlight
+        $scope.removeHighlight = minimap.removeHighlight
+
+        loadHighlightData()
 
         eventScope = new EventScope('twoverflow_queue_window')
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_RESET, eventHandlers.settingsReset)
