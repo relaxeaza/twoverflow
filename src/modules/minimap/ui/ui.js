@@ -237,24 +237,24 @@ define('two/minimap/ui', [
         highlightAdd: function (event, data) {
             $scope.highlights[data.item.type][data.item.id] = { color: data.color }
             loadHighlightsName()
-            utils.emitNotif('success', $filter('i18n')('highlight/add/success', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('highlight_add_success', $rootScope.loc.ale, textObject))
         },
         highlightUpdate: function (event, data, color) {
             $scope.highlights[data.item.type][data.item.id].color = data.color
-            utils.emitNotif('success', $filter('i18n')('highlight/update/success', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('highlight_update_success', $rootScope.loc.ale, textObject))
         },
         highlightRemove: function (event, data) {
             delete $scope.highlights[data.item.type][data.item.id]
-            utils.emitNotif('success', $filter('i18n')('highlight/remove/success', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('highlight_remove_success', $rootScope.loc.ale, textObject))
         },
         highlightAddErrorExists: function (event) {
-            utils.emitNotif('error', $filter('i18n')('highlight/add/error/exists', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('highlight_add_error_exists', $rootScope.loc.ale, textObject))
         },
         highlightAddErrorNoEntry: function (event) {
-            utils.emitNotif('error', $filter('i18n')('highlight/add/error/no-entry', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('highlight_add_error_no_entry', $rootScope.loc.ale, textObject))
         },
         highlightAddErrorInvalidColor: function (event) {
-            utils.emitNotif('error', $filter('i18n')('highlight/add/error/invalid-color', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('highlight_add_error_invalid_color', $rootScope.loc.ale, textObject))
         },
         onMouseLeaveMinimap: function (event) {
             var event = new MouseEvent('mouseup', {
@@ -322,7 +322,7 @@ define('two/minimap/ui', [
         $scope.actionTypes = actionTypes
         $scope.autoComplete = {
             type: ['character', 'tribe', 'village'],
-            placeholder: $filter('i18n')('entry/id', $rootScope.loc.ale, textObject),
+            placeholder: $filter('i18n')('placeholder_search', $rootScope.loc.ale, textObject),
             keepSelected: true,
             focus: true,
             onEnter: eventHandlers.addHighlightAutoCompleteSelect
