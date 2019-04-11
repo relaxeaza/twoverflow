@@ -1,6 +1,6 @@
 define('two/minimap/settingsMap', [
     'two/minimap/settings',
-    'two/minimap/rightClickActionTypes'
+    'two/minimap/actionTypes'
 ], function (
     SETTINGS,
     RIGHT_CLICK_ACTION_TYPES

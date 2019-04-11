@@ -1,5 +1,5 @@
 define('two/minimap', [
-    'two/minimap/rightClickActionTypes',
+    'two/minimap/actionTypes',
     'two/minimap/settings',
     'two/minimap/settingsMap',
     'queues/EventQueue',
@@ -693,19 +693,19 @@ define('two/minimap', [
     }
 
     /**
-     * @param {Object} data - Highlight data.
-     * @param {String} data.type - village, player or tribe
-     * @param {String} data.id - village/player/tribe id
-     * @param {Number=} data.x - village X coord.
-     * @param {Number=} data.y - village Y coord.
+     * @param {Object} item - Highlight item.
+     * @param {String} item.type - village, player or tribe
+     * @param {String} item.id - village/player/tribe id
+     * @param {Number=} item.x - village X coord.
+     * @param {Number=} item.y - village Y coord.
      * @param {String} color - Hex color
      *
      * @return {Boolean} true if successfully added
      */
-    minimap.addHighlight = function (data, color) {
+    minimap.addHighlight = function (item, color) {
         var update = false
 
-        if (!data || !data.type || !data.id) {
+        if (!item || !item.type || !item.id) {
             eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY)
             return false
         }
@@ -715,26 +715,32 @@ define('two/minimap', [
             return false
         }
 
-        if (highlights[data.type].hasOwnProperty(data.id)) {
+        if (highlights[item.type].hasOwnProperty(item.id)) {
             update = true
         }
 
-        var _data = { color: color}
-
-        if (data.type === 'village') {
-            _data.x = data.x
-            _data.y = data.y
-        }
-
-        highlights[data.type][data.id] = _data
-        Lockr.set(STORAGE_ID.HIGHLIGHTS, highlights)
-
         if (update) {
-            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_UPDATE, [data, color])
+            highlights[item.type][item.id].color = color
+
+            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_UPDATE, {
+                item: item,
+                color: color
+            })
         } else {
-            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD, [data, color])
+            highlights[item.type][item.id] = { color: color }
+
+            if (item.type === 'village') {
+                highlights[item.type][item.id].x = item.x
+                highlights[item.type][item.id].y = item.y
+            }
+
+            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD, {
+                item: item,
+                color: color
+            })
         }
 
+        Lockr.set(STORAGE_ID.HIGHLIGHTS, highlights)
         drawLoadedVillages()
 
         return true
@@ -744,7 +750,9 @@ define('two/minimap', [
         if (highlights[data.type][data.id]) {
             delete highlights[data.type][data.id]
             Lockr.set(STORAGE_ID.HIGHLIGHTS, highlights)
-            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_REMOVE, [data])
+            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_REMOVE, {
+                item: data
+            })
 
             drawLoadedVillages()
 

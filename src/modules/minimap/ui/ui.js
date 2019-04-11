@@ -1,6 +1,6 @@
 define('two/minimap/ui', [
     'two/minimap',
-    'two/minimap/rightClickActionTypes',
+    'two/minimap/actionTypes',
     'two/minimap/settingsMap',
     'two/ui2',
     'two/ui/autoComplete',
@@ -47,11 +47,6 @@ define('two/minimap/ui', [
         }
     }
 
-    var updateHighlights = function () {
-        $scope.highlights = minimap.getHighlights()
-        loadHighlightData()
-    }
-
     var disableScrollbar = function () {
         util.checkFunc(function () {
             return $scope.directives
@@ -68,86 +63,66 @@ define('two/minimap/ui', [
         })
     }
 
+    var appendCanvas = function () {
+        $minimapContainer = document.querySelector('#two-minimap .minimap-container')
+        $minimapContainer.appendChild($minimapCanvas)
+        $minimapContainer.appendChild($crossCanvas)
+    }
+
     var getData = {
         tribe: function (data, callback) {
             socketService.emit(routeProvider.TRIBE_GET_PROFILE, {
                 tribe_id: data.id
-            }, function (tribeData) {
-                callback(tribeData, data)
-            })
+            }, callback)
         },
         character: function (data, callback) {
             socketService.emit(routeProvider.CHAR_GET_PROFILE, {
                 character_id: data.id
-            }, function (characterData) {
-                callback(characterData, data)
-            })
+            }, callback)
         },
         village: function (data, callback) {
-            $mapData.loadTownDataAsync(data.x, data.y, 1, 1, function (villageData) {
-                callback(villageData, data)
-            })
+            $mapData.loadTownDataAsync(data.x, data.y, 1, 1, callback)
         }
     }
 
-    var loadHighlightData = function (_type, _data) {
-        var id
-
-        if (_type && _type in getData) {
-            getData[_type](_data, function (data) {
-                if ($scope.highlights[_type][data.id].name) {
-                    return
-                }
-
-                if (_type === 'village') {
-                    $scope.highlights[_type][data.id].name = utils.genVillageLabel(data)
-                    $scope.highlights[_type][data.id].x = data.x
-                    $scope.highlights[_type][data.id].y = data.y
-                } else {
-                    $scope.highlights[_type][data.id].name = data.name
-                }
-            })
-
-            return
-        }
-
-        for (id in $scope.highlights.village) {
+    var loadHighlightsName = function () {
+        Object.keys($scope.highlights.village).forEach(function (id) {
             if ($scope.highlights.village[id].name) {
-                continue
+                return
             }
 
             getData.village({
                 id: id,
                 x: $scope.highlights.village[id].x,
                 y: $scope.highlights.village[id].y
-            }, function (data, _data) {
-                $scope.highlights.village[_data.id].name = utils.genVillageLabel(data)
+            }, function (data) {
+                $scope.highlights.village[id].name = utils.genVillageLabel(data)
             })
-        }
+        })
 
-        for (id in $scope.highlights.character) {
+        Object.keys($scope.highlights.character).forEach(function (id) {
             if ($scope.highlights.character[id].name) {
-                continue
+                return
             }
 
             getData.character({
                 id: id
-            }, function (data, _data) {
-                $scope.highlights.character[_data.id].name = data.name
+            }, function (data) {
+                $scope.highlights.character[id].name = data.character_name
             })
-        }
+        })
 
-        for (id in $scope.highlights.tribe) {
+        Object.keys($scope.highlights.tribe).forEach(function (id) {
             if ($scope.highlights.tribe[id].name) {
-                continue
+                return
             }
 
             getData.tribe({
                 id: id
-            }, function (data, _data) {
-                $scope.highlights.tribe[_data.id].name = data.name
+            }, function (data) {
+                $scope.highlights.tribe[id].name = data.name
             })
-        }
+        })
     }
 
     var openColorPalette = function () {
@@ -160,7 +135,7 @@ define('two/minimap/ui', [
 
         modalScope.colorPalettes = colors.palette
         modalScope.selectedColor = $scope.selectedColor
-        modalScope.customColors = false
+        modalScope.customColors = true
         modalScope.hideReset = true
 
         modalScope.finishAction = function ($event, color) {
@@ -175,26 +150,32 @@ define('two/minimap/ui', [
     }
 
     var eventHandlers = {
-        autoCompleteSelect: function (data) {
+        addHighlightAutoCompleteSelect: function (item) {
             $scope.selectedHighlight = {
-                id: data.id,
-                type: data.type,
-                name: data.name
+                id: item.id,
+                type: item.type,
+                name: item.name
+            }
+
+            if (item.x) {
+                $scope.selectedHighlight.x = item.x
+                $scope.selectedHighlight.y = item.y
             }
         },
         settingsReset: function () {
             // resetSettings()
         },
-        highlightAdd: function (event) {
-            updateHighlights()
+        highlightAdd: function (event, data) {
+            $scope.highlights[data.item.type][data.item.id] = { color: data.color }
+            loadHighlightsName()
             utils.emitNotif('success', $filter('i18n')('highlight/add/success', $rootScope.loc.ale, textObject))
         },
-        highlightUpdate: function (event) {
-            updateHighlights()
+        highlightUpdate: function (event, data, color) {
+            $scope.highlights[data.item.type][data.item.id].color = data.color
             utils.emitNotif('success', $filter('i18n')('highlight/update/success', $rootScope.loc.ale, textObject))
         },
-        highlightRemove: function (event) {
-            updateHighlights()
+        highlightRemove: function (event, data) {
+            delete $scope.highlights[data.item.type][data.item.id]
             utils.emitNotif('success', $filter('i18n')('highlight/remove/success', $rootScope.loc.ale, textObject))
         },
         highlightAddErrorExists: function (event) {
@@ -247,14 +228,14 @@ define('two/minimap/ui', [
         $scope.selectedTab = DEFAULT_TAB
         $scope.selectedHighlight = false
         $scope.selectedColor = '#000000'
-        $scope.highlights = minimap.getHighlights()
+        $scope.highlights = angular.copy(minimap.getHighlights())
         $scope.settings = minimap.getSettings()
         $scope.autoComplete = {
             type: ['character', 'tribe', 'village'],
             placeholder: $filter('i18n')('entry/id', $rootScope.loc.ale, textObject),
             keepSelected: true,
             focus: true,
-            onEnter: eventHandlers.autoCompleteSelect
+            onEnter: eventHandlers.addHighlightAutoCompleteSelect
         }
         
         // functions
@@ -262,8 +243,6 @@ define('two/minimap/ui', [
         $scope.openColorPalette = openColorPalette
         $scope.addHighlight = addHighlight
         $scope.removeHighlight = minimap.removeHighlight
-
-        loadHighlightData()
 
         eventScope = new EventScope('twoverflow_queue_window')
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_RESET, eventHandlers.settingsReset)
@@ -281,9 +260,8 @@ define('two/minimap/ui', [
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_minimap_window', $scope)
         disableScrollbar()
-        $minimapContainer = document.querySelector('#two-minimap .minimap-container')
-        $minimapContainer.appendChild($minimapCanvas)
-        $minimapContainer.appendChild($crossCanvas)
+        loadHighlightsName()
+        appendCanvas()
         minimap.enableRendering()
     }
 

@@ -5,7 +5,7 @@ require([
     'two/minimap/ui',
     'two/minimap/data',
     'two/minimap/Events',
-    'two/minimap/rightClickActionTypes',
+    'two/minimap/actionTypes',
     'two/minimap/settings',
     'two/minimap/settingsMap',
 ], function (

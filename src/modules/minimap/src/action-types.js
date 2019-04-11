@@ -1,4 +1,4 @@
-define('two/minimap/rightClickActionTypes', [], function () {
+define('two/minimap/actionTypes', [], function () {
     return {
         HIGHLIGHT_VILLAGE: 'highlight_village',
         HIGHLIGHT_PLAYER: 'highlight_player',
