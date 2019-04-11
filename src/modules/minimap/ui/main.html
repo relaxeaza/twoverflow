@@ -53,7 +53,7 @@
                             <tr>
                                 <td><div auto-complete="autoComplete"></div></td>
                                 <td class="text-center"><span ng-show="selectedHighlight" class="icon-26x26-rte-{{ selectedHighlight.type }}"></span> {{ selectedHighlight.name }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="openColorPalette()" ng-style="{'background-color': selectedColor }" tooltip="" tooltip-content="{{ 'tooltip_pick_color' | i18n:loc.ale:textObject }}"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('add_highlight')" ng-style="{'background-color': addHighlightColor }" tooltip="" tooltip-content="{{ 'tooltip_pick_color' | i18n:loc.ale:textObject }}"></div></td>
                                 <td><span class="btn-orange icon-26x26-plus" ng-click="addHighlight()" tooltip="" tooltip-content="{{ 'add' | i18n:loc.ale:textObject }}"></span></td>
                             </tr>
                         </tbody>
@@ -71,19 +71,19 @@
                             <tr ng-repeat="village in highlights.village">
                                 <td><span class="icon-26x26-rte-village"></span></td>
                                 <td>{{ village.name }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': village.color }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('custom_highlight', village)" ng-style="{'background-color': village.color }"></div></td>
                                 <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight(village)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
                             </tr>
                             <tr ng-repeat="character in highlights.character">
                                 <td><span class="icon-26x26-rte-character"></span></td>
                                 <td>{{ character.name }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': character.color }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('custom_highlight', character)" ng-style="{'background-color': character.color }"></div></td>
                                 <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight(character)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
                             </tr>
                             <tr ng-repeat="tribe in highlights.tribe">
                                 <td><span class="icon-26x26-rte-tribe"></span></td>
                                 <td>{{ tribe.name }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': tribe.color }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('custom_highlight', tribe)" ng-style="{'background-color': tribe.color }"></div></td>
                                 <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight(tribe)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
                             </tr>
                         </tbody>
@@ -147,35 +147,35 @@
                         <tbody>
                             <tr>
                                 <td>{{ 'settings_colors_background' | i18n:loc.ale:textObject }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_BACKGROUND] }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('settings', SETTINGS.COLOR_BACKGROUND)" ng-style="{'background-color': settings[SETTINGS.COLOR_BACKGROUND] }"></div></td>
                             </tr>
                             <tr>
                                 <td>{{ 'settings_colors_province' | i18n:loc.ale:textObject }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_PROVINCE] }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('settings', SETTINGS.COLOR_PROVINCE)" ng-style="{'background-color': settings[SETTINGS.COLOR_PROVINCE] }"></div></td>
                             </tr>
                             <tr>
                                 <td>{{ 'settings_colors_continent' | i18n:loc.ale:textObject }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_CONTINENT] }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('settings', SETTINGS.COLOR_CONTINENT)" ng-style="{'background-color': settings[SETTINGS.COLOR_CONTINENT] }"></div></td>
                             </tr>
                             <tr>
                                 <td>{{ 'settings_colors_cross' | i18n:loc.ale:textObject }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_CROSS] }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('settings', SETTINGS.COLOR_CROSS)" ng-style="{'background-color': settings[SETTINGS.COLOR_CROSS] }"></div></td>
                             </tr>
                             <tr>
                                 <td>{{ 'settings_colors_quick_highlight' | i18n:loc.ale:textObject }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_QUICK_HIGHLIGHT] }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('settings', SETTINGS.COLOR_QUICK_HIGHLIGHT)" ng-style="{'background-color': settings[SETTINGS.COLOR_QUICK_HIGHLIGHT] }"></div></td>
                             </tr>
                             <tr>
                                 <td>{{ 'settings_colors_player' | i18n:loc.ale:textObject }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_PLAYER] }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('settings', SETTINGS.COLOR_PLAYER)" ng-style="{'background-color': settings[SETTINGS.COLOR_PLAYER] }"></div></td>
                             </tr>
                             <tr>
                                 <td>{{ 'settings_colors_selected' | i18n:loc.ale:textObject }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_SELECTED] }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('settings', SETTINGS.COLOR_SELECTED)" ng-style="{'background-color': settings[SETTINGS.COLOR_SELECTED] }"></div></td>
                             </tr>
                             <tr>
                                 <td>{{ 'settings_colors_ghost' | i18n:loc.ale:textObject }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_GHOST] }"></div></td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('settings', SETTINGS.COLOR_GHOST)" ng-style="{'background-color': settings[SETTINGS.COLOR_GHOST] }"></div></td>
                             </tr>
                         </tbody>
                     </table>

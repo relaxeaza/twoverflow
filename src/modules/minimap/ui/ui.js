@@ -134,18 +134,51 @@ define('two/minimap/ui', [
         })
     }
 
-    var openColorPalette = function () {
+    var openColorPalette = function (colorType, data) {
         var modalScope = $rootScope.$new()
+        var selectedColor
+        var hideReset = true
+
+        switch (colorType) {
+        case 'settings':
+            selectedColor = $scope.settings[data]
+            hideReset = false
+            break
+        case 'add_highlight':
+            selectedColor = $scope.addHighlightColor
+            break
+        case 'custom_highlight':
+            selectedColor = data.color
+            break
+        }
 
         modalScope.submit = function () {
-            $scope.selectedColor = '#' + modalScope.selectedColor
+            switch (colorType) {
+            case 'settings':
+                $scope.settings[data] = '#' + modalScope.selectedColor
+                break
+            case 'add_highlight':
+                $scope.addHighlightColor = '#' + modalScope.selectedColor
+                break
+            case 'custom_highlight':
+                data.color = '#' + modalScope.selectedColor
+                break
+            }
+
             modalScope.closeWindow()
         }
 
+        if (!hideReset) {
+            modalScope.reset = function () {
+                $scope.settings[data] = SETTINGS_MAP[data].default
+                modalScope.closeWindow()
+            }
+        }
+
         modalScope.colorPalettes = colors.palette
-        modalScope.selectedColor = $scope.selectedColor
-        modalScope.customColors = true
-        modalScope.hideReset = true
+        modalScope.selectedColor = selectedColor.split('#')[1]
+        modalScope.hasCustomColors = true
+        modalScope.hideReset = hideReset
 
         modalScope.finishAction = function ($event, color) {
             modalScope.selectedColor = color
@@ -155,7 +188,7 @@ define('two/minimap/ui', [
     }
 
     var addHighlight = function () {
-        minimap.addHighlight($scope.selectedHighlight, $scope.selectedColor)
+        minimap.addHighlight($scope.selectedHighlight, $scope.addHighlightColor)
     }
 
     var saveSettings = function () {
@@ -321,7 +354,7 @@ define('two/minimap/ui', [
         $scope.SETTINGS = SETTINGS
         $scope.selectedTab = DEFAULT_TAB
         $scope.selectedHighlight = false
-        $scope.selectedColor = '#000000'
+        $scope.addHighlightColor = '#000000'
         $scope.highlights = angular.copy(minimap.getHighlights())
         $scope.settings = parseSettings(minimap.getSettings())
         $scope.actionTypes = actionTypes
