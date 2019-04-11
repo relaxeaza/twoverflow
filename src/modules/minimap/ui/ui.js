@@ -207,21 +207,29 @@ define('two/minimap/ui', [
             utils.emitNotif('error', $filter('i18n')('highlight/add/error/invalid-color', $rootScope.loc.ale, textObject))
         },
         onMouseLeaveMinimap: function (event) {
+            var event = new MouseEvent('mouseup', {
+                view: window,
+                bubbles: true,
+                cancelable: true
+            })
+
             // hideTooltip()
-            $crossCanvas.trigger('mouseup')
+            $crossCanvas.dispatchEvent(event)
         },
         onMouseMoveMinimap: function (event) {
             // hideTooltip()
-            $crossCanvas.css('cursor', 'url(' + cdn.getPath('/img/cursor/grab_pushed.png') + '), move')
+            $crossCanvas.style.cursor = 'url(' + cdn.getPath('/img/cursor/grab_pushed.png') + '), move'
         },
         onMouseStopMoveMinimap: function (event) {
-            $crossCanvas.css('cursor', '') 
+            $crossCanvas.style.cursor = ''
         }
     }
 
     var init = function () {
         $minimapCanvas = document.createElement('canvas')
+        $minimapCanvas.className = 'minimap'
         $crossCanvas = document.createElement('canvas')
+        $crossCanvas.className = 'cross'
 
         minimap.setViewport($minimapCanvas)
         minimap.setCross($crossCanvas)

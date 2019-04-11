@@ -54,9 +54,6 @@ define('two/minimap', [
     var selectedVillage
     var currentPosition = {}
     var frameSize = {}
-    // Used to block the jump-to-position when the minimap
-    // is dragged and not just clicked.
-    var allowJump = true
     var dataView
     var settings = {}
     var STORAGE_ID = {
@@ -133,6 +130,7 @@ define('two/minimap', [
      * - Handle minimap clicks.
      */
     var canvasListeners = function () {
+        var allowJump = true
         var allowMove = false
         var dragStart = {}
 
