@@ -3,7 +3,6 @@ require([
     'two/ready',
     'two/minimap',
     'two/minimap/ui',
-    'two/minimap/data',
     'two/minimap/Events',
     'two/minimap/actionTypes',
     'two/minimap/settings',
