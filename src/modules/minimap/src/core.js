@@ -555,10 +555,10 @@ define('two/minimap', [
             }
         }
 
-        eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_HOVER, [
-            $mapData.getTownAt(coords.x, coords.y),
-            event
-        ])
+        eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_HOVER, {
+            village: $mapData.getTownAt(coords.x, coords.y),
+            event: event
+        })
 
         hoverVillage = {
             x: coords.x,
