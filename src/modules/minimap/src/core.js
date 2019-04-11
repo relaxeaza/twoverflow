@@ -725,7 +725,11 @@ define('two/minimap', [
                 color: color
             })
         } else {
-            highlights[item.type][item.id] = { color: color }
+            highlights[item.type][item.id] = {
+                id: item.id,
+                type: item.type,
+                color: color
+            }
 
             if (item.type === 'village') {
                 highlights[item.type][item.id].x = item.x

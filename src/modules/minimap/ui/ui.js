@@ -134,48 +134,43 @@ define('two/minimap/ui', [
         })
     }
 
-    var openColorPalette = function (colorType, data) {
+    var openColorPalette = function (inputType, data) {
         var modalScope = $rootScope.$new()
         var selectedColor
         var hideReset = true
 
-        switch (colorType) {
-        case 'settings':
+        modalScope.colorPalettes = colors.palette
+
+        if (inputType === 'setting') {
             selectedColor = $scope.settings[data]
             hideReset = false
-            break
-        case 'add_highlight':
-            selectedColor = $scope.addHighlightColor
-            break
-        case 'custom_highlight':
-            selectedColor = data.color
-            break
-        }
 
-        modalScope.submit = function () {
-            switch (colorType) {
-            case 'settings':
+            modalScope.submit = function () {
                 $scope.settings[data] = '#' + modalScope.selectedColor
-                break
-            case 'add_highlight':
-                $scope.addHighlightColor = '#' + modalScope.selectedColor
-                break
-            case 'custom_highlight':
-                data.color = '#' + modalScope.selectedColor
-                break
+                modalScope.closeWindow()
             }
 
-            modalScope.closeWindow()
-        }
-
-        if (!hideReset) {
             modalScope.reset = function () {
                 $scope.settings[data] = SETTINGS_MAP[data].default
                 modalScope.closeWindow()
             }
+        } else if (inputType === 'add_custom_highlight') {
+            selectedColor = $scope.addHighlightColor
+
+            modalScope.submit = function () {
+                $scope.addHighlightColor = '#' + modalScope.selectedColor
+                modalScope.closeWindow()
+            }
+        } else if (inputType === 'edit_custom_highlight') {
+            selectedColor = data.color
+
+            modalScope.submit = function () {
+                data.color = '#' + modalScope.selectedColor
+                minimap.addHighlight(data, data.color)
+                modalScope.closeWindow()
+            }
         }
 
-        modalScope.colorPalettes = colors.palette
         modalScope.selectedColor = selectedColor.split('#')[1]
         modalScope.hasCustomColors = true
         modalScope.hideReset = hideReset
@@ -187,7 +182,7 @@ define('two/minimap/ui', [
         windowManagerService.getModal('modal_color_palette', modalScope)
     }
 
-    var addHighlight = function () {
+    var addCustomHighlight = function () {
         minimap.addHighlight($scope.selectedHighlight, $scope.addHighlightColor)
     }
 
@@ -272,11 +267,17 @@ define('two/minimap/ui', [
             // resetSettings()
         },
         highlightAdd: function (event, data) {
-            $scope.highlights[data.item.type][data.item.id] = { color: data.color }
+            $scope.highlights[data.item.type][data.item.id] = {
+                id: data.item.id,
+                type: data.item.type,
+                color: data.color
+            }
+
             loadHighlightsName()
+
             utils.emitNotif('success', $filter('i18n')('highlight_add_success', $rootScope.loc.ale, textObject))
         },
-        highlightUpdate: function (event, data, color) {
+        highlightUpdate: function (event, data) {
             $scope.highlights[data.item.type][data.item.id].color = data.color
             utils.emitNotif('success', $filter('i18n')('highlight_update_success', $rootScope.loc.ale, textObject))
         },
@@ -367,7 +368,7 @@ define('two/minimap/ui', [
         // functions
         $scope.selectTab = selectTab
         $scope.openColorPalette = openColorPalette
-        $scope.addHighlight = addHighlight
+        $scope.addCustomHighlight = addCustomHighlight
         $scope.removeHighlight = minimap.removeHighlight
         $scope.saveSettings = saveSettings
         $scope.resetSettings = resetSettings
