@@ -217,4 +217,15 @@
             </div>
         </div>
     </div>
+
+    <footer class="win-foot" ng-show="selectedTab === 'settings'">
+        <ul class="list-btn list-center">
+            <li>
+                <a href="#" class="btn-border btn-orange" ng-click="resetSettings()">{{ 'reset' | i18n:loc.ale:textObjectCommon }}</a>
+            </li>
+            <li>
+                <a href="#" class="btn-border btn-orange" ng-click="saveSettings()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
+            </li>
+        </ul>
+    </footer>
 </div>

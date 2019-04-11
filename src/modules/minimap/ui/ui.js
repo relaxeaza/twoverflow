@@ -173,6 +173,10 @@ define('two/minimap/ui', [
         return settings
     }
 
+    var resetSettings = function () {
+
+    }
+
     var moveTooltip = function (to) {
         if (to === 'minimap') {
             windowWrapper.appendChild(tooltipWrapper)
@@ -329,12 +333,13 @@ define('two/minimap/ui', [
             onEnter: eventHandlers.addHighlightAutoCompleteSelect
         }
 
-        
         // functions
         $scope.selectTab = selectTab
         $scope.openColorPalette = openColorPalette
         $scope.addHighlight = addHighlight
         $scope.removeHighlight = minimap.removeHighlight
+        $scope.saveSettings = saveSettings
+        $scope.resetSettings = resetSettings
 
         eventScope = new EventScope('twoverflow_minimap_window')
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_RESET, eventHandlers.settingsReset)
