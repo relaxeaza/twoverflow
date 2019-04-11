@@ -12,7 +12,7 @@ define('two/minimap', [
     'cdn',
     'conf/colors'
 ], function (
-    RIGHT_CLICK_ACTION_TYPES,
+    ACTION_TYPES,
     SETTINGS,
     SETTINGS_MAP,
     eventQueue,
@@ -618,12 +618,12 @@ define('two/minimap', [
         }
 
         switch (settings[SETTINGS.RIGHT_CLICK_ACTION]) {
-        case RIGHT_CLICK_ACTION_TYPES.HIGHLIGHT_VILLAGE:
+        case ACTION_TYPES.HIGHLIGHT_VILLAGE:
             type = 'village'
             id = village.id
 
             break
-        case RIGHT_CLICK_ACTION_TYPES.HIGHLIGHT_PLAYER:
+        case ACTION_TYPES.HIGHLIGHT_PLAYER:
             if (!village.character_id) {
                 return false
             }
@@ -632,7 +632,7 @@ define('two/minimap', [
             id = village.character_id
 
             break
-        case RIGHT_CLICK_ACTION_TYPES.HIGHLIGHT_TRIBE:
+        case ACTION_TYPES.HIGHLIGHT_TRIBE:
             if (!village.tribe_id) {
                 return false
             }
@@ -649,10 +649,10 @@ define('two/minimap', [
         }, colors.palette.random().random())
     }
 
-    var minimap = {}
-
-    minimap.SETTINGS_MAP = SETTINGS_MAP
-    minimap.RIGHT_CLICK_ACTION_TYPES = RIGHT_CLICK_ACTION_TYPES
+    var minimap = {
+        SETTINGS_MAP: SETTINGS_MAP,
+        ACTION_TYPES: ACTION_TYPES
+    }
 
     minimap.setVillageSize = function (value) {
         villageSize = value

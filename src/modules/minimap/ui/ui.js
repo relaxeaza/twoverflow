@@ -2,6 +2,7 @@ define('two/minimap/ui', [
     'two/minimap',
     'two/minimap/actionTypes',
     'two/minimap/settingsMap',
+    'two/minimap/settings',
     'two/ui2',
     'two/ui/autoComplete',
     'two/FrontButton',
@@ -14,8 +15,9 @@ define('two/minimap/ui', [
     'conf/colors',
 ], function (
     minimap,
-    RIGHT_CLICK_ACTION_TYPES,
+    ACTION_TYPES,
     SETTINGS_MAP,
+    SETTINGS,
     interfaceOverflow,
     autoComplete,
     FrontButton,
@@ -34,6 +36,8 @@ define('two/minimap/ui', [
     var $minimapCanvas
     var $crossCanvas
     var $minimapContainer
+    var actionTypes = []
+    var selectedActionType = {}
 
     var selectTab = function (tabType) {
         $scope.selectedTab = tabType
@@ -149,6 +153,21 @@ define('two/minimap/ui', [
         minimap.addHighlight($scope.selectedHighlight, $scope.selectedColor)
     }
 
+    var saveSettings = function () {
+
+    }
+
+    var parseSettings = function (rawSettings) {
+        var settings = angular.copy(rawSettings)
+
+        settings[SETTINGS.RIGHT_CLICK_ACTION] = {
+            value: settings[SETTINGS.RIGHT_CLICK_ACTION],
+            name: $filter('i18n')(settings[SETTINGS.RIGHT_CLICK_ACTION], $rootScope.loc.ale, textObject)
+        }
+
+        return settings
+    }
+
     var eventHandlers = {
         addHighlightAutoCompleteSelect: function (item) {
             $scope.selectedHighlight = {
@@ -207,6 +226,13 @@ define('two/minimap/ui', [
         minimap.setViewport($minimapCanvas)
         minimap.setCross($crossCanvas)
 
+        for (var id in ACTION_TYPES) {
+            actionTypes.push({
+                value: id,
+                name: $filter('i18n')(ACTION_TYPES[id], $rootScope.loc.ale, textObject)
+            })
+        }
+
         var opener = new FrontButton('Minimap', {
             classHover: false,
             classBlur: false,
@@ -225,11 +251,13 @@ define('two/minimap/ui', [
         $scope = window.$scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
+        $scope.SETTINGS = SETTINGS
         $scope.selectedTab = DEFAULT_TAB
         $scope.selectedHighlight = false
         $scope.selectedColor = '#000000'
         $scope.highlights = angular.copy(minimap.getHighlights())
-        $scope.settings = minimap.getSettings()
+        $scope.settings = parseSettings(minimap.getSettings())
+        $scope.actionTypes = actionTypes
         $scope.autoComplete = {
             type: ['character', 'tribe', 'village'],
             placeholder: $filter('i18n')('entry/id', $rootScope.loc.ale, textObject),
@@ -237,6 +265,7 @@ define('two/minimap/ui', [
             focus: true,
             onEnter: eventHandlers.addHighlightAutoCompleteSelect
         }
+
         
         // functions
         $scope.selectTab = selectTab

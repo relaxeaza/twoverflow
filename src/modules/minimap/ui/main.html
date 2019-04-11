@@ -1,4 +1,4 @@
-<div id="two-minimap" class="win-content">
+<div id="two-minimap" class="win-content two-window">
     <header class="win-head">
         <h2>Minimap</h2>
         <ul class="list-btn">
@@ -38,7 +38,7 @@
         <div ng-show="selectedTab === 'minimap'" class="minimap-container">
         </div>
         
-        <div class="box-paper">
+        <div class="box-paper footer">
             <div class="scroll-wrap">
                 <div ng-show="selectedTab === 'highlights'">
                     <h5 class="twx-section">{{ 'add' | i18n:loc.ale:textObject }}</h5>
@@ -91,6 +91,128 @@
                 </div>
 
                 <div ng-show="selectedTab === 'settings'">
+                    <h5 class="twx-section">{{ 'misc' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col width="60%">
+                            <col>
+                            <col width="56px">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td>{{ 'settings.right-click-action' | i18n:loc.ale:textObject }}</td>
+                                <td colspan="3"><div select="" list="actionTypes" selected="settings[SETTINGS.RIGHT_CLICK_ACTION]" drop-down="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings.show-cross' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_CROSS]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings.show-demarcations' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_DEMARCATIONS]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings.show-barbarians' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_BARBARIANS]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings.show-ghost-villages' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_GHOST_VILLAGES]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings.show-only-custom-highlights' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings.highlight-own' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.HIGHLIGHT_OWN]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings.highlight-selected' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.HIGHLIGHT_SELECTED]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings.highlight-diplomacy' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.HIGHLIGHT_DIPLOMACY]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h5 class="twx-section">{{ 'colors_misc' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col>
+                            <col width="29px">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td>{{ 'settings.colors.background' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_BACKGROUND] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.province' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_PROVINCE] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.continent' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_CONTINENT] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.cross' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_CROSS] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.quick-highlight' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_QUICK_HIGHLIGHT] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.player' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_PLAYER] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.selected' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_SELECTED] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.ghost' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_GHOST] }"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h5 class="twx-section">{{ 'colors_diplomacy' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col>
+                            <col width="29px">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td>{{ 'settings.colors.tribe' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_TRIBE] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.ally' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_ALLY] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.pna' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_FRIENDLY] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.enemy' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_ENEMY] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.other' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_UGLY] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings.colors.barbarian' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="" ng-style="{'background-color': settings[SETTINGS.COLOR_BARBARIAN] }"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
