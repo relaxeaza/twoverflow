@@ -34,12 +34,12 @@
                 </div>
             </div>
         </div>
+
+        <div ng-show="selectedTab === 'minimap'" class="minimap-container">
+        </div>
         
         <div class="box-paper">
             <div class="scroll-wrap">
-                <div ng-show="selectedTab === 'minimap'" class="minimap-container">
-                </div>
-
                 <div ng-show="selectedTab === 'highlights'">
                     <h5 class="twx-section">{{ 'add' | i18n:loc.ale:textObject }}</h5>
                     <table class="tbl-border-light tbl-striped">
