@@ -78,20 +78,20 @@ define('two/minimap/ui', [
         $minimapContainer.appendChild($crossCanvas)
     }
 
-    var getData = {
-        tribe: function (data, callback) {
-            socketService.emit(routeProvider.TRIBE_GET_PROFILE, {
-                tribe_id: data.id
-            }, callback)
-        },
-        character: function (data, callback) {
-            socketService.emit(routeProvider.CHAR_GET_PROFILE, {
-                character_id: data.id
-            }, callback)
-        },
-        village: function (data, callback) {
-            $mapData.loadTownDataAsync(data.x, data.y, 1, 1, callback)
-        }
+    var getTribeData = function (data, callback) {
+        socketService.emit(routeProvider.TRIBE_GET_PROFILE, {
+            tribe_id: data.id
+        }, callback)
+    }
+    
+    var getCharacterData = function (data, callback) {
+        socketService.emit(routeProvider.CHAR_GET_PROFILE, {
+            character_id: data.id
+        }, callback)
+    }
+
+    var getVillageData = function (data, callback) {
+        $mapData.loadTownDataAsync(data.x, data.y, 1, 1, callback)
     }
 
     var loadHighlightsName = function () {
@@ -100,7 +100,7 @@ define('two/minimap/ui', [
                 return
             }
 
-            getData.village({
+            getVillageData({
                 id: id,
                 x: $scope.highlights.village[id].x,
                 y: $scope.highlights.village[id].y
@@ -114,7 +114,7 @@ define('two/minimap/ui', [
                 return
             }
 
-            getData.character({
+            getCharacterData({
                 id: id
             }, function (data) {
                 $scope.highlights.character[id].name = data.character_name
@@ -126,7 +126,7 @@ define('two/minimap/ui', [
                 return
             }
 
-            getData.tribe({
+            getTribeData({
                 id: id
             }, function (data) {
                 $scope.highlights.tribe[id].name = data.name
