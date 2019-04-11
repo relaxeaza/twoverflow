@@ -38,7 +38,7 @@ define('two/minimap/ui', [
     var $minimapContainer
     var actionTypes = []
     var selectedActionType = {}
-    var MapController = transferredSharedDataService.getSharedData('MapController')
+    var MapController
     var tooltipWrapper
     var windowWrapper
     var mapWrapper
@@ -276,6 +276,7 @@ define('two/minimap/ui', [
     }
 
     var init = function () {
+        MapController = transferredSharedDataService.getSharedData('MapController')
         $minimapCanvas = document.createElement('canvas')
         $minimapCanvas.className = 'minimap'
         $crossCanvas = document.createElement('canvas')
