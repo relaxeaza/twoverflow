@@ -187,7 +187,9 @@ define('two/minimap/ui', [
     }
 
     var saveSettings = function () {
-
+        var settingsCopy = angular.copy($scope.settings)
+        settingsCopy[SETTINGS.RIGHT_CLICK_ACTION] = settingsCopy[SETTINGS.RIGHT_CLICK_ACTION].value
+        minimap.updateSettings(settingsCopy)
     }
 
     var parseSettings = function (rawSettings) {
@@ -202,7 +204,9 @@ define('two/minimap/ui', [
     }
 
     var resetSettings = function () {
-
+        minimap.resetSettings()
+        $scope.settings = parseSettings(minimap.getSettings())
+        $scope.highlights = angular.copy(minimap.getHighlights())
     }
 
     var moveTooltip = function (to) {
