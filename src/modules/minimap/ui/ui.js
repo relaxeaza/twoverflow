@@ -318,6 +318,9 @@ define('two/minimap/ui', [
     }
 
     var init = function () {
+        var id
+        var opener
+
         MapController = transferredSharedDataService.getSharedData('MapController')
         $minimapCanvas = document.createElement('canvas')
         $minimapCanvas.className = 'minimap'
@@ -331,14 +334,14 @@ define('two/minimap/ui', [
         windowWrapper = document.querySelector('#wrapper')
         mapWrapper = document.querySelector('#map')
 
-        for (var id in ACTION_TYPES) {
+        for (id in ACTION_TYPES) {
             actionTypes.push({
-                value: id,
+                value: ACTION_TYPES[id],
                 name: $filter('i18n')(ACTION_TYPES[id], $rootScope.loc.ale, textObject)
             })
         }
 
-        var opener = new FrontButton('Minimap', {
+        opener = new FrontButton('Minimap', {
             classHover: false,
             classBlur: false,
             onClick: function () {
