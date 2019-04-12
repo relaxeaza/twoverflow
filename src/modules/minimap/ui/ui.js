@@ -137,6 +137,8 @@ define('two/minimap/ui', [
     var showTooltip = function (_, data) {
         var windowOffset
         var tooltipOffset
+        var onTop
+        var onLeft
 
         windowWrapper.appendChild(tooltipWrapper)
         tooltipWrapper.classList.remove('ng-hide')
@@ -161,8 +163,16 @@ define('two/minimap/ui', [
         windowOffset = windowWrapper.getBoundingClientRect()
         tooltipWrapperSpacer.x = tooltipOffset.width + 50
         tooltipWrapperSpacer.y = tooltipOffset.height + 50
-        tooltipWrapper.classList.toggle('left', MapController.tt.position.x + tooltipWrapperSpacer.x > windowOffset.width)
-        tooltipWrapper.classList.toggle('top', MapController.tt.position.y + tooltipWrapperSpacer.y > windowOffset.top + windowOffset.height)
+
+        onTop = MapController.tt.position.y + tooltipWrapperSpacer.y > windowOffset.top + windowOffset.height
+        onLeft = MapController.tt.position.x + tooltipWrapperSpacer.x > windowOffset.width
+
+        if (onTop) {
+            MapController.tt.position.y -= 50
+        }
+
+        tooltipWrapper.classList.toggle('left', onLeft)
+        tooltipWrapper.classList.toggle('top', onTop)
     }
 
     var hideTooltip = function () {
