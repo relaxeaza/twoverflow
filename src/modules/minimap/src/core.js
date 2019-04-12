@@ -644,7 +644,7 @@ define('two/minimap', [
         minimap.addHighlight({
             type: type,
             id: id
-        }, colors.palette.random().random())
+        }, '#' + colors.palette.random().random())
     }
 
     var minimap = {
