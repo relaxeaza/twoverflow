@@ -205,8 +205,6 @@ define('two/minimap/ui', [
 
     var resetSettings = function () {
         minimap.resetSettings()
-        $scope.settings = parseSettings(minimap.getSettings())
-        $scope.highlights = angular.copy(minimap.getHighlights())
     }
 
     var highlightsCount = function () {
@@ -276,7 +274,8 @@ define('two/minimap/ui', [
             }
         },
         settingsReset: function () {
-            // resetSettings()
+            $scope.settings = parseSettings(minimap.getSettings())
+            $scope.highlights = angular.copy(minimap.getHighlights())
         },
         highlightAdd: function (event, data) {
             $scope.highlights[data.item.type][data.item.id] = {
