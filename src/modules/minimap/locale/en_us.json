@@ -59,6 +59,9 @@
         "tooltip_tribe": "Tribe",
         "tooltip_tribe_points": "Tribe points",
         "tooltip_province": "Province name",
-        "no_highlights": "No highlights created"
+        "no_highlights": "No highlights created",
+        "reset_confirm_title": "Reset settings",
+        "reset_confirm_text": "All settings gonna be reseted to the default settings.",
+        "reset_confirm_highlights_text": "Also, all highlights are going to be deleted."
     }
 }

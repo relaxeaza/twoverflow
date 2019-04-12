@@ -251,7 +251,26 @@ define('two/minimap/ui', [
     }
 
     var resetSettings = function () {
-        minimap.resetSettings()
+        var modalScope = $rootScope.$new()
+
+        modalScope.title = $filter('i18n')('reset_confirm_title', $rootScope.loc.ale, textObject)
+        modalScope.text = $filter('i18n')('reset_confirm_text', $rootScope.loc.ale, textObject)
+        modalScope.boxText = $filter('i18n')('reset_confirm_highlights_text', $rootScope.loc.ale, textObject)
+        modalScope.submitText = $filter('i18n')('reset', $rootScope.loc.ale, textObjectCommon)
+        modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, textObjectCommon)
+        modalScope.showQuestionMarkIcon = true
+        modalScope.switchColors = true
+
+        modalScope.submit = function submit() {
+            minimap.resetSettings()
+            modalScope.closeWindow()
+        }
+
+        modalScope.cancel = function cancel() {
+            modalScope.closeWindow()
+        }
+
+        windowManagerService.getModal('modal_attention', modalScope)
     }
 
     var highlightsCount = function () {

@@ -74,6 +74,7 @@
         "colors": "Cores",
         "reset": "Resetar",
         "here": "aqui",
-        "disabled": "— Desativado —"
+        "disabled": "— Desativado —",
+        "cancel": "Cancelar"
     }
 }

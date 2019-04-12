@@ -59,6 +59,9 @@
         "tooltip_tribe": "Nome da Tribo",
         "tooltip_tribe_points": "Pontos da tribo",
         "tooltip_province": "Nome da província",
-        "no_highlights": "Nenhuma marcação criada"
+        "no_highlights": "Nenhuma marcação criada",
+        "reset_confirm_title": "Resetar configurações",
+        "reset_confirm_text": "Todas as configurações serão resetas para as configurações padrões.",
+        "reset_confirm_highlights_text": "Todas marcações também serão deletadas"
     }
 }

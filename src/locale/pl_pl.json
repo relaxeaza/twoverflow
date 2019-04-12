@@ -74,6 +74,7 @@
         "colors": "Kolory",
         "reset": "Reset",
         "here": "here",
-        "disabled": "— Wyłączony —"
+        "disabled": "— Wyłączony —",
+        "cancel": "Cancel"
     }
 }
