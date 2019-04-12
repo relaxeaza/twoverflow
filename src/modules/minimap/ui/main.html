@@ -60,7 +60,8 @@
                     </table>
 
                     <h5 class="twx-section">{{ 'highlights' | i18n:loc.ale:textObject }}</h5>
-                    <table class="tbl-border-light tbl-striped">
+                    <p class="text-center" ng-show="!highlightsCount()">{{ 'no_highlights' | i18n:loc.ale:textObject }}</p>
+                    <table class="tbl-border-light tbl-striped" ng-show="highlightsCount()">
                         <colgroup>
                             <col width="4%">
                             <col>

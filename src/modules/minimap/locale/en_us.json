@@ -58,6 +58,7 @@
         "tooltip_player_points": "Player points",
         "tooltip_tribe": "Tribe",
         "tooltip_tribe_points": "Tribe points",
-        "tooltip_province": "Province name"
+        "tooltip_province": "Province name",
+        "no_highlights": "No highlights created"
     }
 }

@@ -209,6 +209,14 @@ define('two/minimap/ui', [
         $scope.highlights = angular.copy(minimap.getHighlights())
     }
 
+    var highlightsCount = function () {
+        var villages = Object.keys($scope.highlights.village).length
+        var characters = Object.keys($scope.highlights.character).length
+        var tribes = Object.keys($scope.highlights.tribe).length
+        
+        return villages + characters + tribes
+    }
+
     var moveTooltip = function (to) {
         if (to === 'minimap') {
             windowWrapper.appendChild(tooltipWrapper)
@@ -379,6 +387,7 @@ define('two/minimap/ui', [
         $scope.removeHighlight = minimap.removeHighlight
         $scope.saveSettings = saveSettings
         $scope.resetSettings = resetSettings
+        $scope.highlightsCount = highlightsCount
 
         eventScope = new EventScope('twoverflow_minimap_window')
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_RESET, eventHandlers.settingsReset)

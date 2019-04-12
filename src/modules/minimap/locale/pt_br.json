@@ -58,6 +58,7 @@
         "tooltip_player_points": "Pontos do jogador",
         "tooltip_tribe": "Nome da Tribo",
         "tooltip_tribe_points": "Pontos da tribo",
-        "tooltip_province": "Nome da província"
+        "tooltip_province": "Nome da província",
+        "no_highlights": "Nenhuma marcação criada"
     }
 }
