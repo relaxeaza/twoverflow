@@ -27,12 +27,12 @@ define('two/minimap/settingsMap', [
             update: true
         },
         [SETTINGS.SHOW_BARBARIANS]: {
-            default: true,
+            default: false,
             inputType: 'checkbox',
             update: true
         },
         [SETTINGS.SHOW_GHOST_VILLAGES]: {
-            default: true,
+            default: false,
             inputType: 'checkbox',
             update: true
         },
