@@ -276,6 +276,11 @@ define('two/minimap/ui', [
         settingsReset: function () {
             $scope.settings = parseSettings(minimap.getSettings())
             $scope.highlights = angular.copy(minimap.getHighlights())
+
+            utils.emitNotif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, textObject))
+        },
+        settingsSave: function () {
+            utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
         },
         highlightAdd: function (event, data) {
             $scope.highlights[data.item.type][data.item.id] = {
@@ -390,6 +395,7 @@ define('two/minimap/ui', [
 
         eventScope = new EventScope('twoverflow_minimap_window')
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_RESET, eventHandlers.settingsReset)
+        eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_SAVE, eventHandlers.settingsSave)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD, eventHandlers.highlightAdd)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_UPDATE, eventHandlers.highlightUpdate)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_REMOVE, eventHandlers.highlightRemove)

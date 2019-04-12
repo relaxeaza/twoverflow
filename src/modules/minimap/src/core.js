@@ -847,6 +847,8 @@ define('two/minimap', [
             minimap.update()
         }
 
+        eventQueue.trigger(eventTypeProvider.MINIMAP_SETTINGS_SAVE)
+
         return true
     }
 

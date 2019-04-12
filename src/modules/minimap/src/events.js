@@ -1,6 +1,7 @@
 define('two/minimap/Events', [], function () {
     angular.extend(eventTypeProvider, {
         MINIMAP_SETTINGS_RESET: 'minimap_settings_reset',
+        MINIMAP_SETTINGS_SAVE: 'minimap_settings_save',
         MINIMAP_HIGHLIGHT_ADD: 'minimap_highlight_add',
         MINIMAP_HIGHLIGHT_UPDATE: 'minimap_highlight_update',
         MINIMAP_HIGHLIGHT_REMOVE: 'minimap_highlight_remove',
