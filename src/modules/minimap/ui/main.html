@@ -97,12 +97,11 @@
             </div>
         </div>
 
-        <div class="box-paper footer" ng-show="selectedTab == TAB_TYPES.SETTINGS">
+        <div class="box-paper footer settings" ng-show="selectedTab == TAB_TYPES.SETTINGS">
             <div class="box-outer">
                 <div class="scrollbar" scrollbar="" scrollbar-name="minimap-settings">
                     <div class="outer-scroll-wrap">
                         <div class="scroll-wrap">
-                            <h5 class="twx-section">{{ 'misc' | i18n:loc.ale:textObject }}</h5>
                             <table class="tbl-border-light tbl-striped">
                                 <colgroup>
                                     <col width="60%">
@@ -110,6 +109,9 @@
                                     <col width="56px">
                                 </colgroup>
                                 <tbody>
+                                    <tr>
+                                        <th colspan="3">{{ 'misc' | i18n:loc.ale:textObject }}</th>
+                                    </tr>
                                     <tr>
                                         <td>{{ 'settings_right_click_action' | i18n:loc.ale:textObject }}</td>
                                         <td colspan="3"><div select="" list="actionTypes" selected="settings[SETTINGS.RIGHT_CLICK_ACTION]" drop-down="true"></div></td>
@@ -149,13 +151,15 @@
                                 </tbody>
                             </table>
 
-                            <h5 class="twx-section">{{ 'colors_misc' | i18n:loc.ale:textObject }}</h5>
                             <table class="tbl-border-light tbl-striped">
                                 <colgroup>
                                     <col>
                                     <col width="29px">
                                 </colgroup>
                                 <tbody>
+                                    <tr>
+                                        <th colspan="2">{{ 'colors_misc' | i18n:loc.ale:textObject }}</th>
+                                    </tr>
                                     <tr>
                                         <td>{{ 'settings_colors_background' | i18n:loc.ale:textObject }}</td>
                                         <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_BACKGROUND)" ng-style="{'background-color': settings[SETTINGS.COLOR_BACKGROUND] }"></div></td>
@@ -191,13 +195,15 @@
                                 </tbody>
                             </table>
 
-                            <h5 class="twx-section">{{ 'colors_diplomacy' | i18n:loc.ale:textObject }}</h5>
                             <table class="tbl-border-light tbl-striped">
                                 <colgroup>
                                     <col>
                                     <col width="29px">
                                 </colgroup>
                                 <tbody>
+                                    <tr>
+                                        <th colspan="2">{{ 'colors_diplomacy' | i18n:loc.ale:textObject }}</th>
+                                    </tr>
                                     <tr>
                                         <td>{{ 'settings_colors_tribe' | i18n:loc.ale:textObject }}</td>
                                         <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_TRIBE)" ng-style="{'background-color': settings[SETTINGS.COLOR_TRIBE] }"></div></td>
