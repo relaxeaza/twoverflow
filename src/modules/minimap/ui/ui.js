@@ -52,13 +52,13 @@ define('two/minimap/ui', [
     var selectTab = function (tab) {
         $scope.selectedTab = tab
 
-        if (tab === 'minimap') {
+        if (tab === TAB_TYPES.MINIMAP) {
             minimap.enableRendering()
         } else {
             minimap.disableRendering()
         }
 
-        if (tab === 'highlights') {
+        if (tab === TAB_TYPES.HIGHLIGHTS) {
             util.checkFunc(function () {
                 return $scope.directives
             }, function () {
