@@ -10,7 +10,8 @@ define('two/minimap', [
     'helper/time',
     'helper/mapconvert',
     'cdn',
-    'conf/colors'
+    'conf/colors',
+    'conf/colorGroups'
 ], function (
     ACTION_TYPES,
     SETTINGS,
@@ -23,10 +24,11 @@ define('two/minimap', [
     $timeHelper,
     $mapconvert,
     $cdn,
-    colors
+    colors,
+    colorGroups
 ) {
     var enableRendering = false
-    var highlights
+    var highlights = {}
     var villageSize = 5
     var villageMargin = 1
     var rhex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
@@ -58,9 +60,9 @@ define('two/minimap', [
     var settings = {}
     var STORAGE_ID = {
         CACHE_VILLAGES: 'minimap_cache_villages',
-        SETTINGS: 'minimap_settings',
-        HIGHLIGHTS: 'minimap_highlights'
+        SETTINGS: 'minimap_settings'
     }
+    var colorService = injector.get('colorService')
 
     /**
      * Calcule the coords from clicked position in the canvas.
@@ -191,9 +193,7 @@ define('two/minimap', [
                     if (settings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
                         highlighted = false
 
-                        if (village.id in highlights.village) {
-                            highlighted = true
-                        } else if (village.character_id in highlights.character) {
+                        if (village.character_id in highlights.character) {
                             highlighted = true
                         } else if (village.tribe_id in highlights.tribe) {
                             highlighted = true
@@ -277,12 +277,10 @@ define('two/minimap', [
                 }
 
                 if (settings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-                    if (v.id in highlights.village) {
-                        color = highlights.village[v.id].color
-                    } else if (v.character_id in highlights.character) {
-                        color = highlights.character[v.character_id].color
+                    if (v.character_id in highlights.character) {
+                        color = highlights.character[v.character_id]
                     } else if (v.tribe_id in highlights.tribe) {
-                        color = highlights.tribe[v.tribe_id].color
+                        color = highlights.tribe[v.tribe_id]
                     } else {
                         continue
                     }
@@ -292,29 +290,23 @@ define('two/minimap', [
                             continue
                         }
 
-                        if (v.id in highlights.village) {
-                            color = highlights.village[v.id].color
-                        } else {
-                            color = settings[SETTINGS.COLOR_BARBARIAN]
-                        }
+                        color = settings[SETTINGS.COLOR_BARBARIAN]
                     } else {
                         if (v.character_id === pid) {
                             if (v.id === selectedVillage.getId() && settings[SETTINGS.HIGHLIGHT_SELECTED]) {
                                 color = settings[SETTINGS.COLOR_SELECTED]
                             } else if (v.character_id in highlights.character) {
-                                color = highlights.character[v.character_id].color
+                                color = highlights.character[v.character_id]
                             } else if (settings[SETTINGS.HIGHLIGHT_OWN]) {
                                 color = settings[SETTINGS.COLOR_PLAYER]
                             } else {
                                 color = settings[SETTINGS.COLOR_UGLY]
                             }
                         } else {
-                            if (v.id in highlights.village) {
-                                color = highlights.village[v.id].color
-                            } else if (v.character_id in highlights.character) {
-                                color = highlights.character[v.character_id].color
+                            if (v.character_id in highlights.character) {
+                                color = highlights.character[v.character_id]
                             } else if (v.tribe_id in highlights.tribe) {
-                                color = highlights.tribe[v.tribe_id].color
+                                color = highlights.tribe[v.tribe_id]
                             } else if (tid && tid === v.tribe_id && settings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
                                 color = settings[SETTINGS.COLOR_TRIBE]
                             } else if ($tribeRelations && settings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
@@ -617,13 +609,6 @@ define('two/minimap', [
         }
 
         switch (settings[SETTINGS.RIGHT_CLICK_ACTION]) {
-        case ACTION_TYPES.HIGHLIGHT_VILLAGE:
-            data.type = 'village'
-            data.id = village.id
-            data.x = village.x
-            data.y = village.y
-
-            break
         case ACTION_TYPES.HIGHLIGHT_PLAYER:
             if (!village.character_id) {
                 return false
@@ -701,9 +686,9 @@ define('two/minimap', [
      * @return {Boolean} true if successfully added
      */
     minimap.addHighlight = function (item, color) {
-        var update = false
+        var colorGroup
 
-        if (!item || !item.type || !item.id || (item.type === 'village' && (!item.x || !item.y))) {
+        if (!item || !item.type || !item.id) {
             eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY)
             return false
         }
@@ -713,48 +698,23 @@ define('two/minimap', [
             return false
         }
 
-        if (highlights[item.type].hasOwnProperty(item.id)) {
-            update = true
-        }
+        highlights[item.type][item.id] = color
+        colorGroup = item.type === 'character' ? colorGroups.PLAYER_COLORS : colorGroups.TRIBE_COLORS
+        colorService.setCustomColorsByGroup(colorGroup, highlights[item.type])
+        $rootScope.$broadcast(eventTypeProvider.GROUPS_VILLAGES_CHANGED)
 
-        if (update) {
-            highlights[item.type][item.id].color = color
-
-            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_UPDATE, {
-                item: item,
-                color: color
-            })
-        } else {
-            highlights[item.type][item.id] = {
-                id: item.id,
-                type: item.type,
-                color: color
-            }
-
-            if (item.type === 'village') {
-                highlights[item.type][item.id].x = item.x
-                highlights[item.type][item.id].y = item.y
-            }
-
-            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD, {
-                item: item,
-                color: color
-            })
-        }
-
-        Lockr.set(STORAGE_ID.HIGHLIGHTS, highlights)
         drawLoadedVillages()
 
         return true
     }
 
-    minimap.removeHighlight = function (data) {
-        if (highlights[data.type][data.id]) {
-            delete highlights[data.type][data.id]
-            Lockr.set(STORAGE_ID.HIGHLIGHTS, highlights)
-            eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_REMOVE, {
-                item: data
-            })
+    minimap.removeHighlight = function (type, itemId) {
+        var colorGroup = type === 'character' ? colorGroups.PLAYER_COLORS : colorGroups.TRIBE_COLORS
+
+        if (highlights[type][itemId]) {
+            delete highlights[type][itemId]
+            colorService.setCustomColorsByGroup(colorGroup, highlights[type])
+            $rootScope.$broadcast(eventTypeProvider.GROUPS_VILLAGES_CHANGED)
 
             drawLoadedVillages()
 
@@ -857,17 +817,8 @@ define('two/minimap', [
             settings[key] = SETTINGS_MAP[key].default
         }
 
-        highlights = {
-            village: {},
-            character: {},
-            tribe: {}
-        }
-
         Lockr.set(STORAGE_ID.SETTINGS, settings)
-        Lockr.set(STORAGE_ID.HIGHLIGHTS, highlights)
-
         minimap.update()
-
         eventQueue.trigger(eventTypeProvider.MINIMAP_SETTINGS_RESET)
     }
 
@@ -915,11 +866,8 @@ define('two/minimap', [
                 : defaultValue
         }
 
-        highlights = Lockr.get(STORAGE_ID.HIGHLIGHTS, {
-            village: {},
-            character: {},
-            tribe: {}
-        }, true)
+        highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS)
+        highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS)
     }
 
     minimap.run = function () {
@@ -977,6 +925,13 @@ define('two/minimap', [
             })
 
             $rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, function (event, data) {
+                drawLoadedVillages()
+            })
+
+            $rootScope.$on(eventTypeProvider.GROUPS_VILLAGES_CHANGED, function () {
+                highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS)
+                highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS)
+
                 drawLoadedVillages()
             })
         }, ['initial_village', 'tribe_relations'])

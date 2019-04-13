@@ -49,6 +49,10 @@ define('two/minimap/ui', [
     var mapWrapper
     var tooltipWrapperSpacer = {}
     var tooltipTimeout
+    var highlightNames = {
+        character: {},
+        tribe: {}
+    }
 
     var selectTab = function (tab) {
         $scope.selectedTab = tab
@@ -92,42 +96,28 @@ define('two/minimap/ui', [
         $mapData.loadTownDataAsync(data.x, data.y, 1, 1, callback)
     }
 
-    var loadHighlightsName = function () {
-        Object.keys($scope.highlights.village).forEach(function (id) {
-            if ($scope.highlights.village[id].name) {
-                return
-            }
-
-            getVillageData({
-                id: id,
-                x: $scope.highlights.village[id].x,
-                y: $scope.highlights.village[id].y
-            }, function (data) {
-                $scope.highlights.village[id].name = utils.genVillageLabel(data)
-            })
-        })
-
+    var updateHighlightNames = function () {
         Object.keys($scope.highlights.character).forEach(function (id) {
-            if ($scope.highlights.character[id].name) {
+            if (id in highlightNames.character) {
                 return
             }
 
             getCharacterData({
                 id: id
             }, function (data) {
-                $scope.highlights.character[id].name = data.character_name
+                highlightNames.character[id] = data.character_name
             })
         })
 
         Object.keys($scope.highlights.tribe).forEach(function (id) {
-            if ($scope.highlights.tribe[id].name) {
+            if (id in highlightNames.tribe) {
                 return
             }
 
             getTribeData({
                 id: id
             }, function (data) {
-                $scope.highlights.tribe[id].name = data.name
+                highlightNames.tribe[id] = data.name
             })
         })
     }
@@ -182,24 +172,26 @@ define('two/minimap/ui', [
         mapWrapper.appendChild(tooltipWrapper)
     }
 
-    var openColorPalette = function (inputType, data) {
+    var openColorPalette = function (inputType, colorGroup, itemId, itemColor) {
         var modalScope = $rootScope.$new()
         var selectedColor
         var hideReset = true
+        var settingId
 
         modalScope.colorPalettes = colors.palette
 
         if (inputType === 'setting') {
-            selectedColor = $scope.settings[data]
+            settingId = colorGroup
+            selectedColor = $scope.settings[settingId]
             hideReset = false
 
             modalScope.submit = function () {
-                $scope.settings[data] = '#' + modalScope.selectedColor
+                $scope.settings[settingId] = '#' + modalScope.selectedColor
                 modalScope.closeWindow()
             }
 
             modalScope.reset = function () {
-                $scope.settings[data] = SETTINGS_MAP[data].default
+                $scope.settings[settingId] = SETTINGS_MAP[settingId].default
                 modalScope.closeWindow()
             }
         } else if (inputType === 'add_custom_highlight') {
@@ -210,16 +202,18 @@ define('two/minimap/ui', [
                 modalScope.closeWindow()
             }
         } else if (inputType === 'edit_custom_highlight') {
-            selectedColor = data.color
+            selectedColor = $scope.highlights[colorGroup][itemId]
 
             modalScope.submit = function () {
-                data.color = '#' + modalScope.selectedColor
-                minimap.addHighlight(data, data.color)
+                minimap.addHighlight({
+                    id: itemId,
+                    type: colorGroup
+                }, '#' + modalScope.selectedColor)
                 modalScope.closeWindow()
             }
         }
 
-        modalScope.selectedColor = selectedColor.split('#')[1]
+        modalScope.selectedColor = selectedColor.replace('#', '')
         modalScope.hasCustomColors = true
         modalScope.hideReset = hideReset
 
@@ -275,11 +269,10 @@ define('two/minimap/ui', [
     }
 
     var highlightsCount = function () {
-        var villages = Object.keys($scope.highlights.village).length
-        var characters = Object.keys($scope.highlights.character).length
-        var tribes = Object.keys($scope.highlights.tribe).length
+        var character = Object.keys($scope.highlights.character).length
+        var tribe = Object.keys($scope.highlights.tribe).length
         
-        return villages + characters + tribes
+        return character + tribe
     }
 
     var eventHandlers = {
@@ -289,37 +282,17 @@ define('two/minimap/ui', [
                 type: item.type,
                 name: item.name
             }
-
-            if (item.x) {
-                $scope.selectedHighlight.x = item.x
-                $scope.selectedHighlight.y = item.y
-            }
         },
         settingsReset: function () {
             $scope.settings = parseSettings(minimap.getSettings())
-            $scope.highlights = angular.copy(minimap.getHighlights())
 
             utils.emitNotif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, textObject))
         },
         settingsSave: function () {
             utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
         },
-        highlightAdd: function (event, data) {
-            $scope.highlights[data.item.type][data.item.id] = angular.extend(data.item, {
-                color: data.color
-            })
-
-            loadHighlightsName()
-
-            // utils.emitNotif('success', $filter('i18n')('highlight_add_success', $rootScope.loc.ale, textObject))
-        },
-        highlightUpdate: function (event, data) {
-            $scope.highlights[data.item.type][data.item.id].color = data.color
-            // utils.emitNotif('success', $filter('i18n')('highlight_update_success', $rootScope.loc.ale, textObject))
-        },
-        highlightRemove: function (event, data) {
-            delete $scope.highlights[data.item.type][data.item.id]
-            // utils.emitNotif('success', $filter('i18n')('highlight_remove_success', $rootScope.loc.ale, textObject))
+        highlightUpdate: function (event) {
+            updateHighlightNames()
         },
         highlightAddErrorExists: function (event) {
             utils.emitNotif('error', $filter('i18n')('highlight_add_error_exists', $rootScope.loc.ale, textObject))
@@ -396,7 +369,8 @@ define('two/minimap/ui', [
         $scope.selectedTab = DEFAULT_TAB
         $scope.selectedHighlight = false
         $scope.addHighlightColor = '#000000'
-        $scope.highlights = angular.copy(minimap.getHighlights())
+        $scope.highlights = minimap.getHighlights()
+        $scope.highlightNames = highlightNames
         $scope.settings = parseSettings(minimap.getSettings())
         $scope.actionTypes = actionTypes
         $scope.autoComplete = {
@@ -417,9 +391,9 @@ define('two/minimap/ui', [
         eventScope = new EventScope('twoverflow_minimap_window')
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_RESET, eventHandlers.settingsReset)
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_SAVE, eventHandlers.settingsSave)
-        eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD, eventHandlers.highlightAdd)
-        eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_UPDATE, eventHandlers.highlightUpdate)
-        eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_REMOVE, eventHandlers.highlightRemove)
+        // eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD, eventHandlers.highlightAdd)
+        eventScope.register(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.highlightUpdate)
+        // eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_REMOVE, eventHandlers.highlightRemove)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_EXISTS, eventHandlers.highlightAddErrorExists)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY, eventHandlers.highlightAddErrorNoEntry)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_INVALID_COLOR, eventHandlers.highlightAddErrorInvalidColor)
@@ -430,7 +404,7 @@ define('two/minimap/ui', [
         eventScope.register(eventTypeProvider.MINIMAP_STOP_MOVE, eventHandlers.onMouseStopMoveMinimap)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_minimap_window', $scope)
-        loadHighlightsName()
+        updateHighlightNames()
         appendCanvas()
         minimap.enableRendering()
     }
