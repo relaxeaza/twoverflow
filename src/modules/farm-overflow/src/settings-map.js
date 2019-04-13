@@ -1,5 +1,5 @@
 define('two/farm/settingsMap', [
-    'two/minimap/settings',
+    'two/farm/settings',
     'two/farm/settingsUpdate'
 ], function (
     SETTINGS,
