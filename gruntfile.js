@@ -320,7 +320,7 @@ module.exports = function (grunt) {
             options: {
                 sourceMap: true,
                 sourceMapName: `dist/${pkg.name}.map`,
-                banner: `/*! ${pkg.name}.min.js@${pkg.version} | Licence ${pkg.license} */`
+                banner: `/*! ${pkg.name}.min.js@${pkg.version} | Licence: ${pkg.license} */`
             },
             build: {
                 files: {

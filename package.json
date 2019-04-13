@@ -8,6 +8,7 @@
   },
   "private": true,
   "version": "1.0.7",
+  "license": "WTFPL",
   "repository": {
     "type": "git",
     "url": "https://gitlab.com/relaxeaza/twoverflow"
