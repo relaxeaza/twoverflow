@@ -241,15 +241,13 @@
                     <h5 class="twx-section">{{ 'logs' | i18n:loc.ale:textObjectCommon }}</h5>
 
                     <div class="page-wrap" pagination="pagination"></div>
-                    <table class="log-list tbl-border-light tbl-striped">
+                    <p class="text-center" ng-show="!visibleLogs.length">{{ 'no_logs' | i18n:loc.ale:textObject }}</p>
+                    <table class="log-list tbl-border-light tbl-striped" ng-show="visibleLogs.length">
                         <colgroup>
                             <col width="180px">
                             <col width="30px">
                             <col>
                         </colgroup>
-                        <tr ng-show="!visibleLogs.length">
-                            <td>{{ 'no_logs' | i18n:loc.ale:textObject }}</td>
-                        </tr>
                         <tr ng-repeat="log in visibleLogs">
                             <td>{{ log.time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
                             <td><span class="icon-bg-black icon-26x26-{{ log.icon }}"></span></td>
