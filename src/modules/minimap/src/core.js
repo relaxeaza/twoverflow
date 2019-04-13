@@ -934,7 +934,7 @@ define('two/minimap', [
             currentPosition.x = 500 * villageBlock
             currentPosition.y = 500 * villageBlock
 
-            frameSize.x = 686
+            frameSize.x = 701
             frameSize.y = 2000
 
             $viewport.setAttribute('width', frameSize.x)

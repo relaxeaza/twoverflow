@@ -49,27 +49,9 @@ define('two/minimap/ui', [
 
         if (tabType === 'minimap') {
             minimap.enableRendering()
-            disableScrollbar()
         } else {
             minimap.disableRendering()
-            enableScrollbar()
         }
-    }
-
-    var disableScrollbar = function () {
-        util.checkFunc(function () {
-            return $scope.directives
-        }, function () {
-            $scope.directives.scrollbar.scrollbar.disable()
-        })
-    }
-
-    var enableScrollbar = function () {
-        util.checkFunc(function () {
-            return $scope.directives
-        }, function () {
-            $scope.directives.scrollbar.scrollbar.enable()
-        })
     }
 
     var appendCanvas = function () {
@@ -430,7 +412,6 @@ define('two/minimap/ui', [
         eventScope.register(eventTypeProvider.MINIMAP_STOP_MOVE, eventHandlers.onMouseStopMoveMinimap)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_minimap_window', $scope)
-        disableScrollbar()
         loadHighlightsName()
         appendCanvas()
         minimap.enableRendering()
