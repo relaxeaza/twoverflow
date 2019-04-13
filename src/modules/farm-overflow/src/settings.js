@@ -1,4 +1,4 @@
-define('two/farm/settingTypes', [], function () {
+define('two/farm/settings', [], function () {
     return {
         PRESETS: 'presets',
         GROUP_IGNORE: 'group_ignore',
