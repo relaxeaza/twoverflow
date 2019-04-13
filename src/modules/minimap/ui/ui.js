@@ -250,7 +250,6 @@ define('two/minimap/ui', [
 
         modalScope.title = $filter('i18n')('reset_confirm_title', $rootScope.loc.ale, textObject)
         modalScope.text = $filter('i18n')('reset_confirm_text', $rootScope.loc.ale, textObject)
-        modalScope.boxText = $filter('i18n')('reset_confirm_highlights_text', $rootScope.loc.ale, textObject)
         modalScope.submitText = $filter('i18n')('reset', $rootScope.loc.ale, textObjectCommon)
         modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, textObjectCommon)
         modalScope.showQuestionMarkIcon = true
@@ -391,9 +390,7 @@ define('two/minimap/ui', [
         eventScope = new EventScope('twoverflow_minimap_window')
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_RESET, eventHandlers.settingsReset)
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_SAVE, eventHandlers.settingsSave)
-        // eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD, eventHandlers.highlightAdd)
         eventScope.register(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.highlightUpdate, true)
-        // eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_REMOVE, eventHandlers.highlightRemove)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_EXISTS, eventHandlers.highlightAddErrorExists)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY, eventHandlers.highlightAddErrorNoEntry)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_INVALID_COLOR, eventHandlers.highlightAddErrorInvalidColor)
