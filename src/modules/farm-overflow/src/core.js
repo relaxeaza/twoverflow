@@ -2,6 +2,8 @@ define('two/farm', [
     'two/farm/Village',
     'two/farm/errorTypes',
     'two/farm/settings',
+    'two/farm/settingsMap',
+    'two/farm/settingsUpdate',
     'two/utils',
     'helper/math',
     'conf/conf',
@@ -15,6 +17,8 @@ define('two/farm', [
     Village,
     ERROR_TYPES,
     SETTINGS,
+    SETTINGS_MAP,
+    SETTINGS_UPDATE,
     utils,
     math,
     conf,
@@ -48,15 +52,6 @@ define('two/farm', [
         LAST_ACTIVITY: 'farmoverflow_last_activity',
         SETTINGS: 'farmoverflow_settings'
     }
-    var UPADTE_SETTINGS = {
-        PRESET: 'preset',
-        GROUPS: 'groups',
-        TARGETS: 'targets',
-        VILLAGES: 'villages',
-        WAITING_VILLAGES: 'waiting_villages',
-        FULL_STORAGE: 'full_storage',
-        LOGS: 'logs'
-    }
     var FARM_STATES = {
         ATTACKING: 'attacking',
         PAUSED: 'paused',
@@ -79,108 +74,6 @@ define('two/farm', [
         FULL_STORAGE: 'full_storage'
     }
     var currentStatus = FARM_STATES.PAUSED
-    var SETTINGS_MAP = {
-        [SETTINGS.PRESETS]: {
-            default: [],
-            updates: [UPADTE_SETTINGS.PRESET]
-        },
-        [SETTINGS.GROUP_IGNORE]: {
-            default: false,
-            updates: [UPADTE_SETTINGS.GROUPS]
-        },
-        [SETTINGS.GROUP_INCLUDE]: {
-            default: [],
-            updates: [UPADTE_SETTINGS.GROUPS, UPADTE_SETTINGS.TARGETS]
-        },
-        [SETTINGS.GROUP_ONLY]: {
-            default: [],
-            updates: [UPADTE_SETTINGS.GROUPS, UPADTE_SETTINGS.VILLAGES, UPADTE_SETTINGS.TARGETS]
-        },
-        [SETTINGS.RANDOM_BASE]: {
-            default: 3,
-            updates: []
-        },
-        [SETTINGS.COMMANDS_PER_VILLAGE]: {
-            default: 48,
-            updates: [UPADTE_SETTINGS.WAITING_VILLAGES]
-        },
-        [SETTINGS.PRIORITY_TARGETS]: {
-            default: true,
-            updates: []
-        },
-        [SETTINGS.IGNORE_ON_LOSS]: {
-            default: true,
-            updates: []
-        },
-        [SETTINGS.IGNORE_FULL_STORAGE]: {
-            default: true,
-            updates: [UPADTE_SETTINGS.FULL_STORAGE]
-        },
-        [SETTINGS.STEP_CYCLE]: {
-            default: false,
-            updates: [UPADTE_SETTINGS.VILLAGES]
-        },
-        [SETTINGS.STEP_CYCLE_NOTIFS]: {
-            default: false,
-            updates: []
-        },
-        [SETTINGS.STEP_CYCLE_INTERVAL]: {
-            default: 0,
-            updates: []
-        },
-        [SETTINGS.MAX_DISTANCE]: {
-            default: 10,
-            updates: [UPADTE_SETTINGS.TARGETS]
-        },
-        [SETTINGS.MIN_DISTANCE]: {
-            default: 0,
-            updates: [UPADTE_SETTINGS.TARGETS]
-        },
-        [SETTINGS.MIN_POINTS]: {
-            default: 0,
-            updates: [UPADTE_SETTINGS.TARGETS]
-        },
-        [SETTINGS.MAX_POINTS]: {
-            default: 12500,
-            updates: [UPADTE_SETTINGS.TARGETS]
-        },
-        [SETTINGS.MAX_TRAVEL_TIME]: {
-            default: 60,
-            updates: []
-        },
-        [SETTINGS.LOGS_LIMIT]: {
-            default: 500,
-            updates: [UPADTE_SETTINGS.LOGS]
-        },
-        [SETTINGS.EVENT_ATTACK]: {
-            default: true,
-            updates: [UPADTE_SETTINGS.LOGS]
-        },
-        [SETTINGS.EVENT_VILLAGE_CHANGE]: {
-            default: true,
-            updates: [UPADTE_SETTINGS.LOGS]
-        },
-        [SETTINGS.EVENT_PRIORITY_ADD]: {
-            default: true,
-            updates: [UPADTE_SETTINGS.LOGS]
-        },
-        [SETTINGS.EVENT_IGNORED_VILLAGE]: {
-            default: true,
-            updates: [UPADTE_SETTINGS.LOGS]
-        },
-        [SETTINGS.REMOTE_ID]: {
-            default: 'remote',
-            updates: []
-        },
-        [SETTINGS.HOTKEY_SWITCH]: {
-            default: 'shift+z',
-            updates: []
-        },
-        [SETTINGS.HOTKEY_WINDOW]: {
-            default: 'z',
-            updates: []
-        }
-    }
 
     /**
      * Expiration time for temporary data like: targets, priority list..
@@ -2141,32 +2034,32 @@ define('two/farm', [
 
         Lockr.set(STORAGE_ID.SETTINGS, settings)
 
-        if (modify[UPADTE_SETTINGS.GROUPS]) {
+        if (modify[SETTINGS_UPDATE.GROUPS]) {
             updateExceptionGroups()
             updateExceptionVillages()
         }
 
-        if (modify[UPADTE_SETTINGS.VILLAGES]) {
+        if (modify[SETTINGS_UPDATE.VILLAGES]) {
             updatePlayerVillages()
         }
 
-        if (modify[UPADTE_SETTINGS.PRESET]) {
+        if (modify[SETTINGS_UPDATE.PRESET]) {
             updatePresets()
             resetWaitingVillages()
         }
 
-        if (modify[UPADTE_SETTINGS.TARGETS]) {
+        if (modify[SETTINGS_UPDATE.TARGETS]) {
             villagesTargets = {}
         }
 
-        if (modify[UPADTE_SETTINGS.LOGS]) {
+        if (modify[SETTINGS_UPDATE.LOGS]) {
             // used to slice the event list in case the limit of logs
             // have been reduced.
             setLogs(logs)
             eventQueue.trigger(eventTypeProvider.FARM_RESET_LOGS)
         }
 
-        if (modify[UPADTE_SETTINGS.FULL_STORAGE]) {
+        if (modify[SETTINGS_UPDATE.FULL_STORAGE]) {
             for (vid in waitingVillages) {
                 if (waitingVillages[vid] === WAITING_STATES.FULL_STORAGE) {
                     delete waitingVillages[vid]
@@ -2174,7 +2067,7 @@ define('two/farm', [
             }
         }
 
-        if (modify[UPADTE_SETTINGS.WAITING_VILLAGES]) {
+        if (modify[SETTINGS_UPDATE.WAITING_VILLAGES]) {
             for (vid in waitingVillages) {
                 if (waitingVillages[vid] === WAITING_STATES.COMMANDS) {
                     delete waitingVillages[vid]
