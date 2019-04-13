@@ -1,6 +1,7 @@
 define('two/farm/ui', [
     'two/farm',
     'two/farm/errorTypes',
+    'two/farm/logTypes',
     'two/farm/settings',
     'two/ui2',
     'two/FrontButton',
@@ -13,6 +14,7 @@ define('two/farm/ui', [
 ], function (
     farmOverflow,
     ERROR_TYPES,
+    LOG_TYPES,
     SETTINGS,
     interfaceOverflow,
     FrontButton,
@@ -320,6 +322,7 @@ define('two/farm/ui', [
         $scope.textObjectCommon = textObjectCommon
         $scope.SETTINGS = SETTINGS
         $scope.TAB_TYPES = TAB_TYPES
+        $scope.LOG_TYPES = LOG_TYPES
         $scope.presets = []
         $scope.groups = []
         $scope.groupsWithDisabled = []

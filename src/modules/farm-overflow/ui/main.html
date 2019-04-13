@@ -252,23 +252,23 @@
                             <td>{{ log.time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
                             <td><span class="icon-bg-black icon-26x26-{{ log.icon }}"></span></td>
                             
-                            <td ng-if="log.type === 'attack'">
+                            <td ng-if="log.type === LOG_TYPES.ATTACK">
                                 <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.origin.id)" tooltip="" tooltip-content="{{ villagesLabel[log.origin.coords] }}">{{ villagesLabel[log.origin.coords] }}</span>
                                 {{ 'attack' | i18n:loc.ale:textObject }}
                                 <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.target.id)" tooltip="" tooltip-content="{{ villagesLabel[log.target.coords] }}">{{ villagesLabel[log.target.coords] }}</span>
                             </td>
-                            <td ng-if="log.type === 'village_switch'">
+                            <td ng-if="log.type === LOG_TYPES.VILLAGE_SWITCH">
                                 {{ 'village_switch' | i18n:loc.ale:textObject }}
                                 <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.village.id)" tooltip="" tooltip-content="{{ villagesLabel[log.village.coords] }}">{{ villagesLabel[log.village.coords] }}</span>
                             </td>
-                            <td ng-if="log.type === 'no_preset'">
+                            <td ng-if="log.type === LOG_TYPES.NO_PRESET">
                                 {{ 'no_preset' | i18n:loc.ale:textObject }}
                             </td>
-                            <td ng-if="log.type === 'priority_target'">
+                            <td ng-if="log.type === LOG_TYPES.PRIORITY_TARGET">
                                 <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.village.id)" tooltip="" tooltip-content="{{ villagesLabel[log.village.coords] }}">{{ villagesLabel[log.village.coords] }}</span>
                                 {{ 'priority_target' | i18n:loc.ale:textObject }}
                             </td>
-                            <td ng-if="log.type === 'ignored_village'">
+                            <td ng-if="log.type === LOG_TYPES.IGNORED_VILLAGE">
                                 <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.village.id)" tooltip="" tooltip-content="{{ villagesLabel[log.village.coords] }}">{{ villagesLabel[log.village.coords] }}</span>
                                 {{ 'ignored_village' | i18n:loc.ale:textObject }}
                             </td>

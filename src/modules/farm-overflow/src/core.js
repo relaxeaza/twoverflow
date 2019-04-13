@@ -4,6 +4,7 @@ define('two/farm', [
     'two/farm/settings',
     'two/farm/settingsMap',
     'two/farm/settingsUpdate',
+    'two/farm/logTypes',
     'two/utils',
     'helper/math',
     'conf/conf',
@@ -19,6 +20,7 @@ define('two/farm', [
     SETTINGS,
     SETTINGS_MAP,
     SETTINGS_UPDATE,
+    LOG_TYPES,
     utils,
     math,
     conf,
@@ -654,7 +656,7 @@ define('two/farm', [
                 icon: 'attack-small',
                 origin: {id: origin.id, coords: `${origin.x}|${origin.y}`},
                 target: {id: target.id, coords: `${target.x}|${target.y}`},
-                type: 'attack',
+                type: LOG_TYPES.ATTACK,
                 time: timeHelper.gameTime()
             })
         })
@@ -663,7 +665,7 @@ define('two/farm', [
             addEventLog({
                 icon: 'village',
                 village: {id: village.id, coords: `${village.x}|${village.y}`},
-                type: 'village_switch',
+                type: LOG_TYPES.VILLAGE_SWITCH,
                 time: timeHelper.gameTime()
             })
         })
@@ -671,7 +673,7 @@ define('two/farm', [
         eventQueue.register(eventTypeProvider.FARM_PRIORITY_TARGET_ADDED, function (event, village) {
             addEventLog({
                 icon: 'parallel-recruiting',
-                type: 'priority_target',
+                type: LOG_TYPES.PRIORITY_TARGET,
                 village: {id: village.id, coords: `${village.x}|${village.y}`},
                 time: timeHelper.gameTime()
             })
@@ -680,7 +682,7 @@ define('two/farm', [
         eventQueue.register(eventTypeProvider.FARM_IGNORED_VILLAGE, function (event, village) {
             addEventLog({
                 icon: 'check-negative',
-                type: 'ignored_village',
+                type: LOG_TYPES.IGNORED_VILLAGE,
                 village: {id: village.id, coords: `${village.x}|${village.y}`},
                 time: timeHelper.gameTime()
             })
@@ -691,7 +693,7 @@ define('two/farm', [
 
             addEventLog({
                 icon: 'village',
-                type: 'no_preset',
+                type: LOG_TYPES.NO_PRESET,
                 time: timeHelper.gameTime()
             })
         })
