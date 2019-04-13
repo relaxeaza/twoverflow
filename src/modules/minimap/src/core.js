@@ -610,6 +610,7 @@ define('two/minimap', [
         var action = settings[SETTINGS.RIGHT_CLICK_ACTION]
         var type
         var id
+        var data = {}
 
         if (!village) {
             return false
@@ -617,8 +618,10 @@ define('two/minimap', [
 
         switch (settings[SETTINGS.RIGHT_CLICK_ACTION]) {
         case ACTION_TYPES.HIGHLIGHT_VILLAGE:
-            type = 'village'
-            id = village.id
+            data.type = 'village'
+            data.id = village.id
+            data.x = village.x
+            data.y = village.y
 
             break
         case ACTION_TYPES.HIGHLIGHT_PLAYER:
@@ -626,8 +629,8 @@ define('two/minimap', [
                 return false
             }
 
-            type = 'character'
-            id = village.character_id
+            data.type = 'character'
+            data.id = village.character_id
 
             break
         case ACTION_TYPES.HIGHLIGHT_TRIBE:
@@ -635,16 +638,13 @@ define('two/minimap', [
                 return false
             }
 
-            type = 'tribe'
-            id = village.tribe_id
+            data.type = 'tribe'
+            data.id = village.tribe_id
 
             break
         }
 
-        minimap.addHighlight({
-            type: type,
-            id: id
-        }, '#' + colors.palette.random().random())
+        minimap.addHighlight(data, '#' + colors.palette.random().random())
     }
 
     var minimap = {
@@ -703,7 +703,7 @@ define('two/minimap', [
     minimap.addHighlight = function (item, color) {
         var update = false
 
-        if (!item || !item.type || !item.id) {
+        if (!item || !item.type || !item.id || (item.type === 'village' && (!item.x || !item.y))) {
             eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY)
             return false
         }

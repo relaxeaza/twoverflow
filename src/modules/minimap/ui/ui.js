@@ -296,11 +296,9 @@ define('two/minimap/ui', [
             utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
         },
         highlightAdd: function (event, data) {
-            $scope.highlights[data.item.type][data.item.id] = {
-                id: data.item.id,
-                type: data.item.type,
+            $scope.highlights[data.item.type][data.item.id] = angular.extend(data.item, {
                 color: data.color
-            }
+            })
 
             loadHighlightsName()
 
