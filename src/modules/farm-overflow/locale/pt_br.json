@@ -57,7 +57,7 @@
         "settings_saved": "Configurações salvas!",
         "misc": "Diversos",
         "attack": "ataca",
-        "no_logs": "Nenhum log registrado",
+        "no_logs": "Nenhum evento registrado",
         "clear_logs": "Limpar eventos",
         "reseted_logs": "Registro de eventos resetado."
     }
