@@ -9,26 +9,26 @@
     <div class="win-main small-select" scrollbar="">
         <div class="tabs tabs-bg">
             <div class="tabs-three-col">
-                <div class="tab" ng-click="selectTab('add')" ng-class="{true:'tab-active', false:''}[selectedTab == 'add']">
+                <div class="tab" ng-click="selectTab(TAB_TYPES.ADD)" ng-class="{true:'tab-active', false:''}[selectedTab == TAB_TYPES.ADD]">
                     <div class="tab-inner">
-                        <div ng-class="{'box-border-light': selectedTab === 'add'}">
-                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== 'add'}">{{ 'tab_add' | i18n:loc.ale:textObject }}</a>
+                        <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.ADD}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.ADD}">{{ 'tab_add' | i18n:loc.ale:textObject }}</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="tab" ng-click="selectTab('waiting')" ng-class="{true:'tab-active', false:''}[selectedTab == 'waiting']">
+                <div class="tab" ng-click="selectTab(TAB_TYPES.WAITING)" ng-class="{true:'tab-active', false:''}[selectedTab == TAB_TYPES.WAITING]">
                     <div class="tab-inner">
-                        <div ng-class="{'box-border-light': selectedTab === 'waiting'}">
-                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== 'waiting'}">{{ 'tab_waiting' | i18n:loc.ale:textObject }}</a>
+                        <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.WAITING}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.WAITING}">{{ 'tab_waiting' | i18n:loc.ale:textObject }}</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="tab" ng-click="selectTab('logs')" ng-class="{true:'tab-active', false:''}[selectedTab == 'logs']">
+                <div class="tab" ng-click="selectTab(TAB_TYPES.LOGS)" ng-class="{true:'tab-active', false:''}[selectedTab == TAB_TYPES.LOGS]">
                     <div class="tab-inner">
-                        <div ng-class="{'box-border-light': selectedTab === 'logs'}">
-                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== 'logs'}">{{ 'tab_logs' | i18n:loc.ale:textObject }}</a>
+                        <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.LOGS}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.LOGS}">{{ 'tab_logs' | i18n:loc.ale:textObject }}</a>
                         </div>
                     </div>
                 </div>
@@ -37,7 +37,7 @@
 
         <div class="box-paper footer">
             <div class="scroll-wrap">
-                <div class="add" ng-show="selectedTab === 'add'">
+                <div class="add" ng-show="selectedTab === TAB_TYPES.ADD">
                     <form class="addForm">
                         <div>
                             <table class="tbl-border-light tbl-striped">
@@ -263,7 +263,7 @@
                     </form>
                 </div>
                 
-                <div class="waiting rich-text" ng-show="selectedTab === 'waiting'">
+                <div class="waiting rich-text" ng-show="selectedTab === TAB_TYPES.WAITING">
                     <div class="filters">
                         <table class="tbl-border-light">
                             <tbody>
@@ -343,7 +343,7 @@
                     </div>
                 </div>
                 
-                <div class="logs rich-text" ng-show="selectedTab === 'logs'">
+                <div class="logs rich-text" ng-show="selectedTab === TAB_TYPES.LOGS">
                     <h5 class="twx-section">{{ 'queue_sent' | i18n:loc.ale:textObject }}</h5>
                     <p class="text-center" ng-show="!sentCommands.length">{{ 'queue_none_sent' | i18n:loc.ale:textObject }}</p>
                     <table class="tbl-border-light" ng-repeat="command in sentCommands track by $index">
@@ -434,16 +434,16 @@
     
     <footer class="win-foot">
         <ul class="list-btn list-center">
-            <li ng-show="selectedTab === 'logs'">
+            <li ng-show="selectedTab === TAB_TYPES.LOGS">
                 <a class="btn-orange btn-border" ng-click="clearRegisters()">{{ 'general_clear' | i18n:loc.ale:textObject }}</a>
             </li>
-            <li ng-show="selectedTab === 'add'">
+            <li ng-show="selectedTab === TAB_TYPES.ADD">
                 <a class="btn-orange btn-border add" ng-click="addCommand('attack')"><span class="icon-26x26-attack-small"></span> {{ 'attack' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
-            <li ng-show="selectedTab === 'add'">
+            <li ng-show="selectedTab === TAB_TYPES.ADD">
                 <a class="btn-orange btn-border add" ng-click="addCommand('support')"><span class="icon-26x26-support"></span> {{ 'support' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
-            <li ng-show="selectedTab === 'add'">
+            <li ng-show="selectedTab === TAB_TYPES.ADD">
                 <a class="btn-orange btn-border add" ng-click="addCommand('relocate')"><span class="icon-26x26-relocate"></span> {{ 'relocate' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
 

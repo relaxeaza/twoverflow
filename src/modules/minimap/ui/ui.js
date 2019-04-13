@@ -32,7 +32,12 @@ define('two/minimap/ui', [
     var $scope
     var textObject = 'minimap'
     var textObjectCommon = 'common'
-    var DEFAULT_TAB = 'minimap'
+    var TAB_TYPES = {
+        MINIMAP: 'minimap',
+        HIGHLIGHTS: 'highlights',
+        SETTINGS: 'settings'
+    }
+    var DEFAULT_TAB = TAB_TYPES.MINIMAP
     var $minimapCanvas
     var $crossCanvas
     var $minimapContainer
@@ -383,6 +388,7 @@ define('two/minimap/ui', [
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.SETTINGS = SETTINGS
+        $scope.TAB_TYPES = TAB_TYPES
         $scope.selectedTab = DEFAULT_TAB
         $scope.selectedHighlight = false
         $scope.addHighlightColor = '#000000'

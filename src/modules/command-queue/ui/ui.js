@@ -39,7 +39,12 @@ define('two/queue/ui', [
     var unitOrder
     var commandData
     var COMMAND_TYPES = ['attack', 'support', 'relocate']
-    var DEFAULT_TAB = 'add'
+    var TAB_TYPES = {
+        ADD: 'add',
+        WAITING: 'waiting',
+        LOGS: 'logs'
+    }
+    var DEFAULT_TAB = TAB_TYPES.ADD
     var DEFAULT_CATAPULT_TARGET = 'wall'
     var attackableBuildingsList = []
     var unitList = {}
@@ -600,6 +605,7 @@ define('two/queue/ui', [
         $scope.expiredCommands = commandQueue.getExpiredCommands()
         $scope.EVENT_CODES = EVENT_CODES
         $scope.FILTER_TYPES = FILTER_TYPES
+        $scope.TAB_TYPES = TAB_TYPES
 
         // functions
         $scope.onUnitInputFocus = onUnitInputFocus

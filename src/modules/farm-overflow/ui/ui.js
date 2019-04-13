@@ -33,6 +33,11 @@ define('two/farm/ui', [
         SETTINGS.GROUP_INCLUDE,
         SETTINGS.GROUP_ONLY
     ]
+    var TAB_TYPES = {
+        SETTINGS: 'settings',
+        LOGS: 'logs'
+    }
+    var DEFAULT_TAB = TAB_TYPES.SETTINGS
     var presetList = modelDataService.getPresetList()
     var groupList = modelDataService.getGroupList()
 
@@ -314,10 +319,11 @@ define('two/farm/ui', [
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.SETTINGS = SETTINGS
+        $scope.TAB_TYPES = TAB_TYPES
         $scope.presets = []
         $scope.groups = []
         $scope.groupsWithDisabled = []
-        $scope.selectedTab = 'settings'
+        $scope.selectedTab = DEFAULT_TAB
         $scope.settings = genInitialSelectValues()
         $scope.selectedVillage = farmOverflow.getSelectedVillage()
         $scope.lastAttack = farmOverflow.getLastAttack()
