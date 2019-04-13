@@ -44,13 +44,23 @@ define('two/minimap/ui', [
     var mapWrapper
     var tooltipWrapperSpacer = {}
 
-    var selectTab = function (tabType) {
-        $scope.selectedTab = tabType
+    var selectTab = function (tab) {
+        $scope.selectedTab = tab
 
-        if (tabType === 'minimap') {
+        if (tab === 'minimap') {
             minimap.enableRendering()
         } else {
             minimap.disableRendering()
+        }
+
+        if (tab === 'highlights') {
+            util.checkFunc(function () {
+                return $scope.directives
+            }, function () {
+                $timeout(function () {
+                    $scope.directives.scrollbar['minimap-highlights'].recalc()
+                })
+            })
         }
     }
 
