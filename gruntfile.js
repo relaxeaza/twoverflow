@@ -173,8 +173,6 @@ module.exports = function (grunt) {
 
     overflow.js = overflow.js.concat([
         'src/libs/lockr.js',
-        'src/libs/i18n.js',
-        'src/libs/ejs.js',
         'src/header.js',
         'src/event-queue.js',
         'src/event-scope.js',
