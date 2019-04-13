@@ -48,6 +48,7 @@ define('two/minimap/ui', [
     var windowWrapper
     var mapWrapper
     var tooltipWrapperSpacer = {}
+    var tooltipTimeout
 
     var selectTab = function (tab) {
         $scope.selectedTab = tab
@@ -132,47 +133,50 @@ define('two/minimap/ui', [
     }
 
     var showTooltip = function (_, data) {
-        var windowOffset
-        var tooltipOffset
-        var onTop
-        var onLeft
+        tooltipTimeout = setTimeout(function () {
+            var windowOffset
+            var tooltipOffset
+            var onTop
+            var onLeft
 
-        windowWrapper.appendChild(tooltipWrapper)
-        tooltipWrapper.classList.remove('ng-hide')
+            windowWrapper.appendChild(tooltipWrapper)
+            tooltipWrapper.classList.remove('ng-hide')
 
-        MapController.tt.name = data.village.name
-        MapController.tt.x = data.village.x
-        MapController.tt.y = data.village.y
-        MapController.tt.province_name = data.village.province_name
-        MapController.tt.points = data.village.points
-        MapController.tt.character_name = data.village.character_name || '-'
-        MapController.tt.character_points = data.village.character_points || 0
-        MapController.tt.tribe_name = data.village.tribe_name || '-'
-        MapController.tt.tribe_tag = data.village.tribe_tag || '-'
-        MapController.tt.tribe_points = data.village.tribe_points || 0
-        MapController.tt.morale = data.village.morale || 0
-        MapController.tt.position = {}
-        MapController.tt.position.x = data.event.pageX + 50
-        MapController.tt.position.y = data.event.pageY + 50
-        MapController.tt.visible = true
+            MapController.tt.name = data.village.name
+            MapController.tt.x = data.village.x
+            MapController.tt.y = data.village.y
+            MapController.tt.province_name = data.village.province_name
+            MapController.tt.points = data.village.points
+            MapController.tt.character_name = data.village.character_name || '-'
+            MapController.tt.character_points = data.village.character_points || 0
+            MapController.tt.tribe_name = data.village.tribe_name || '-'
+            MapController.tt.tribe_tag = data.village.tribe_tag || '-'
+            MapController.tt.tribe_points = data.village.tribe_points || 0
+            MapController.tt.morale = data.village.morale || 0
+            MapController.tt.position = {}
+            MapController.tt.position.x = data.event.pageX + 50
+            MapController.tt.position.y = data.event.pageY + 50
+            MapController.tt.visible = true
 
-        tooltipOffset = tooltipWrapper.getBoundingClientRect()
-        windowOffset = windowWrapper.getBoundingClientRect()
-        tooltipWrapperSpacer.x = tooltipOffset.width + 50
-        tooltipWrapperSpacer.y = tooltipOffset.height + 50
+            tooltipOffset = tooltipWrapper.getBoundingClientRect()
+            windowOffset = windowWrapper.getBoundingClientRect()
+            tooltipWrapperSpacer.x = tooltipOffset.width + 50
+            tooltipWrapperSpacer.y = tooltipOffset.height + 50
 
-        onTop = MapController.tt.position.y + tooltipWrapperSpacer.y > windowOffset.top + windowOffset.height
-        onLeft = MapController.tt.position.x + tooltipWrapperSpacer.x > windowOffset.width
+            onTop = MapController.tt.position.y + tooltipWrapperSpacer.y > windowOffset.top + windowOffset.height
+            onLeft = MapController.tt.position.x + tooltipWrapperSpacer.x > windowOffset.width
 
-        if (onTop) {
-            MapController.tt.position.y -= 50
-        }
+            if (onTop) {
+                MapController.tt.position.y -= 50
+            }
 
-        tooltipWrapper.classList.toggle('left', onLeft)
-        tooltipWrapper.classList.toggle('top', onTop)
+            tooltipWrapper.classList.toggle('left', onLeft)
+            tooltipWrapper.classList.toggle('top', onTop)
+        }, 50)
     }
 
     var hideTooltip = function () {
+        clearTimeout(tooltipTimeout)
         MapController.tt.visible = false
         tooltipWrapper.classList.add('ng-hide')
         mapWrapper.appendChild(tooltipWrapper)
