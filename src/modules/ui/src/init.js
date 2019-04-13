@@ -1,7 +1,7 @@
 require([
-    'two/ready'
+    'two/ui2'
 ], function (
-    ready
+    interfaceOverflow
 ) {
-    
+    interfaceOverflow.addStyle('__interface_css_style')
 })

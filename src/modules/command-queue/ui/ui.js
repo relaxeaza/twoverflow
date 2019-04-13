@@ -551,8 +551,8 @@ define('two/queue/ui', [
         $rootScope.$on(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage)
         $rootScope.$on(eventTypeProvider.DESTROY_CONTEXT_MENU, unsetMapSelectedVillage)
 
-        interfaceOverflow.template('twoverflow_queue_window', `__queue_html_main`)
-        interfaceOverflow.css('__queue_css_style')
+        interfaceOverflow.addTemplate('twoverflow_queue_window', `__queue_html_main`)
+        interfaceOverflow.addStyle('__queue_css_style')
     }
 
     var buildWindow = function () {

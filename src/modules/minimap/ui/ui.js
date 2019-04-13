@@ -374,8 +374,8 @@ define('two/minimap/ui', [
             }
         })
 
-        interfaceOverflow.template('twoverflow_minimap_window', `__minimap_html_main`)
-        interfaceOverflow.css('__minimap_css_style')
+        interfaceOverflow.addTemplate('twoverflow_minimap_window', `__minimap_html_main`)
+        interfaceOverflow.addStyle('__minimap_css_style')
     }
 
     var buildWindow = function () {

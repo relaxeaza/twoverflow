@@ -1,17 +1,12 @@
 require([
     'two/ready',
-    'Lockr',
-    'ejs'
+    'Lockr'
 ], function (
     ready,
-    Lockr,
-    ejs
+    Lockr
 ) {
     ready(function () {
         var $player = modelDataService.getSelectedCharacter()
-
-        // EJS settings
-        ejs.delimiter = '#'
 
         // Lockr settings
         Lockr.prefix = $player.getId() + '_twOverflow_' + $player.getWorldId() + '-'
