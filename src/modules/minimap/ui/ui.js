@@ -274,6 +274,14 @@ define('two/minimap/ui', [
         return character + tribe
     }
 
+    var openProfile = function (type, itemId) {
+        var handler = type === 'character'
+            ? windowDisplayService.openCharacterProfile
+            : windowDisplayService.openTribeProfile
+
+        handler(itemId)
+    }
+
     var eventHandlers = {
         addHighlightAutoCompleteSelect: function (item) {
             $scope.selectedHighlight = {
@@ -386,6 +394,7 @@ define('two/minimap/ui', [
         $scope.saveSettings = saveSettings
         $scope.resetSettings = resetSettings
         $scope.highlightsCount = highlightsCount
+        $scope.openProfile = openProfile
 
         eventScope = new EventScope('twoverflow_minimap_window')
         eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_RESET, eventHandlers.settingsReset)
