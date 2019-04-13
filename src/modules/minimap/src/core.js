@@ -866,8 +866,8 @@ define('two/minimap', [
                 : defaultValue
         }
 
-        highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS)
-        highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS)
+        highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
+        highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
     }
 
     minimap.run = function () {
@@ -929,8 +929,8 @@ define('two/minimap', [
             })
 
             $rootScope.$on(eventTypeProvider.GROUPS_VILLAGES_CHANGED, function () {
-                highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS)
-                highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS)
+                highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
+                highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
 
                 drawLoadedVillages()
             })
