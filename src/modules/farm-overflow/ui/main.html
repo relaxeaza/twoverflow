@@ -8,14 +8,14 @@
     <div class="win-main" scrollbar="">
         <div class="tabs tabs-bg">
             <div class="tabs-two-col">
-                <div class="tab" ng-click="selectTab(TAB_TYPES.SETTINGS)" ng-class="{true:'tab-active', false:''}[selectedTab == TAB_TYPES.SETTINGS]">
+                <div class="tab" ng-click="selectTab(TAB_TYPES.SETTINGS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.SETTINGS}">
                     <div class="tab-inner">
                         <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.SETTINGS}">
                             <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.SETTINGS}">{{ TAB_TYPES.SETTINGS | i18n:loc.ale:textObjectCommon }}</a>
                         </div>
                     </div>
                 </div>
-                <div class="tab" ng-click="selectTab(TAB_TYPES.LOGS)" ng-class="{true:'tab-active', false:''}[selectedTab == TAB_TYPES.LOGS]">
+                <div class="tab" ng-click="selectTab(TAB_TYPES.LOGS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.LOGS}">
                     <div class="tab-inner">
                         <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.LOGS}">
                             <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.LOGS}">{{ TAB_TYPES.LOGS | i18n:loc.ale:textObjectCommon }}</a>
