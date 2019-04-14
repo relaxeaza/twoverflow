@@ -250,6 +250,7 @@ define('two/minimap', [
         var villageBlock = minimap.getVillageBlock()
         var villageSize = minimap.getVillageSize()
         var villageOffsetX = minimap.getVillageAxisOffset()
+        var villageColors = $player.getVillagesColors()
 
         for (var i = 0; i < villages.length; i++) {
             v = villages[i]
@@ -290,17 +291,17 @@ define('two/minimap', [
                             continue
                         }
 
-                        color = settings[SETTINGS.COLOR_BARBARIAN]
+                        color = villageColors.barbarian
                     } else {
                         if (v.character_id === pid) {
                             if (v.id === selectedVillage.getId() && settings[SETTINGS.HIGHLIGHT_SELECTED]) {
-                                color = settings[SETTINGS.COLOR_SELECTED]
+                                color = villageColors.selected
                             } else if (v.character_id in highlights.character) {
                                 color = highlights.character[v.character_id]
                             } else if (settings[SETTINGS.HIGHLIGHT_OWN]) {
-                                color = settings[SETTINGS.COLOR_PLAYER]
+                                color = villageColors.player
                             } else {
-                                color = settings[SETTINGS.COLOR_UGLY]
+                                color = villageColors.ugly
                             }
                         } else {
                             if (v.character_id in highlights.character) {
@@ -308,19 +309,19 @@ define('two/minimap', [
                             } else if (v.tribe_id in highlights.tribe) {
                                 color = highlights.tribe[v.tribe_id]
                             } else if (tid && tid === v.tribe_id && settings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
-                                color = settings[SETTINGS.COLOR_TRIBE]
+                                color = villageColors.tribe
                             } else if ($tribeRelations && settings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
                                 if ($tribeRelations.isAlly(v.tribe_id)) {
-                                    color = settings[SETTINGS.COLOR_ALLY]
+                                    color = villageColors.ally
                                 } else if ($tribeRelations.isEnemy(v.tribe_id)) {
-                                    color = settings[SETTINGS.COLOR_ENEMY]
+                                    color = villageColors.enemy
                                 } else if ($tribeRelations.isNAP(v.tribe_id)) {
-                                    color = settings[SETTINGS.COLOR_FRIENDLY]
+                                    color = villageColors.friendly
                                 } else {
-                                    color = settings[SETTINGS.COLOR_UGLY]
+                                    color = villageColors.ugly
                                 }
                             } else {
-                                color = settings[SETTINGS.COLOR_UGLY]
+                                color = villageColors.ugly
                             }
                         }
                     }
