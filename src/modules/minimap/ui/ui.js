@@ -62,16 +62,6 @@ define('two/minimap/ui', [
         } else {
             minimap.disableRendering()
         }
-
-        if (tab === TAB_TYPES.HIGHLIGHTS) {
-            util.checkFunc(function () {
-                return $scope.directives
-            }, function () {
-                $timeout(function () {
-                    $scope.directives.scrollbar['minimap-highlights'].recalc()
-                })
-            })
-        }
     }
 
     var appendCanvas = function () {

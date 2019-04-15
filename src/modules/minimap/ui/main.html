@@ -6,7 +6,7 @@
         </ul>
     </header>
 
-    <div class="win-main small-select">
+    <div class="win-main small-select" scrollbar="">
         <div class="tabs tabs-bg">
             <div class="tabs-three-col">
                 <div class="tab" ng-click="selectTab(TAB_TYPES.MINIMAP)" ng-class="{'tab-active': selectedTab == TAB_TYPES.MINIMAP}">
@@ -38,150 +38,138 @@
         <div ng-show="selectedTab === TAB_TYPES.MINIMAP" class="minimap-container">
         </div>
 
-        <div class="box-paper" ng-show="selectedTab == TAB_TYPES.HIGHLIGHTS">
-            <div class="box-outer">
-                <div class="scrollbar" scrollbar="" scrollbar-name="minimap-highlights">
-                    <div class="outer-scroll-wrap">
-                        <div class="scroll-wrap">
-                            <h5 class="twx-section">{{ 'add' | i18n:loc.ale:textObject }}</h5>
-                            <table class="tbl-border-light tbl-striped add-highlight">
-                                <colgroup>
-                                    <col width="40%">
-                                    <col>
-                                    <col width="4%">
-                                    <col width="4%">
-                                </colgroup>
-                                <tbody>
-                                    <tr>
-                                        <td><div auto-complete="autoComplete"></div></td>
-                                        <td class="text-center"><span ng-show="selectedHighlight" class="icon-26x26-rte-{{ selectedHighlight.type }}"></span> {{ selectedHighlight.name }}</td>
-                                        <td><div class="color-container box-border-dark" ng-click="openColorPalette('add_custom_highlight')" ng-style="{'background-color': addHighlightColor }" tooltip="" tooltip-content="{{ 'tooltip_pick_color' | i18n:loc.ale:textObject }}"></div></td>
-                                        <td><span class="btn-orange icon-26x26-plus" ng-click="addCustomHighlight()" tooltip="" tooltip-content="{{ 'add' | i18n:loc.ale:textObject }}"></span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+        <div class="box-paper">
+            <div class="scroll-wrap">
+                <div ng-show="selectedTab == TAB_TYPES.HIGHLIGHTS">
+                    <h5 class="twx-section">{{ 'add' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped add-highlight">
+                        <colgroup>
+                            <col width="40%">
+                            <col>
+                            <col width="4%">
+                            <col width="4%">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td><div auto-complete="autoComplete"></div></td>
+                                <td class="text-center"><span ng-show="selectedHighlight" class="icon-26x26-rte-{{ selectedHighlight.type }}"></span> {{ selectedHighlight.name }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('add_custom_highlight')" ng-style="{'background-color': addHighlightColor }" tooltip="" tooltip-content="{{ 'tooltip_pick_color' | i18n:loc.ale:textObject }}"></div></td>
+                                <td><span class="btn-orange icon-26x26-plus" ng-click="addCustomHighlight()" tooltip="" tooltip-content="{{ 'add' | i18n:loc.ale:textObject }}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                            <h5 class="twx-section">{{ TAB_TYPES.HIGHLIGHTS | i18n:loc.ale:textObject }}</h5>
-                            <p class="text-center" ng-show="!highlightsCount()">{{ 'no_highlights' | i18n:loc.ale:textObject }}</p>
-                            <table class="tbl-border-light tbl-striped" ng-show="highlightsCount()">
-                                <colgroup>
-                                    <col width="4%">
-                                    <col>
-                                    <col width="4%">
-                                    <col width="4%">
-                                </colgroup>
-                                <tbody>
-                                    <tr ng-repeat="(id, color) in highlights.character">
-                                        <td><span class="icon-26x26-rte-character"></span></td>
-                                        <td ng-click="openProfile('character', id)">{{ highlightNames.character[id] }}</td>
-                                        <td><div class="color-container box-border-dark" ng-click="openColorPalette('edit_custom_highlight', 'character', id)" ng-style="{'background-color': color }"></div></td>
-                                        <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight('character', id)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
-                                    </tr>
-                                    <tr ng-repeat="(id, color) in highlights.tribe">
-                                        <td><span class="icon-26x26-rte-tribe"></span></td>
-                                        <td ng-click="openProfile('tribe', id)">{{ highlightNames.tribe[id] }}</td>
-                                        <td><div class="color-container box-border-dark" ng-click="openColorPalette('edit_custom_highlight', 'tribe', id)" ng-style="{'background-color': color }"></div></td>
-                                        <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight('tribe', id)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <h5 class="twx-section">{{ TAB_TYPES.HIGHLIGHTS | i18n:loc.ale:textObject }}</h5>
+                    <p class="text-center" ng-show="!highlightsCount()">{{ 'no_highlights' | i18n:loc.ale:textObject }}</p>
+                    <table class="tbl-border-light tbl-striped" ng-show="highlightsCount()">
+                        <colgroup>
+                            <col width="4%">
+                            <col>
+                            <col width="4%">
+                            <col width="4%">
+                        </colgroup>
+                        <tbody>
+                            <tr ng-repeat="(id, color) in highlights.character">
+                                <td><span class="icon-26x26-rte-character"></span></td>
+                                <td ng-click="openProfile('character', id)">{{ highlightNames.character[id] }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('edit_custom_highlight', 'character', id)" ng-style="{'background-color': color }"></div></td>
+                                <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight('character', id)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
+                            </tr>
+                            <tr ng-repeat="(id, color) in highlights.tribe">
+                                <td><span class="icon-26x26-rte-tribe"></span></td>
+                                <td ng-click="openProfile('tribe', id)">{{ highlightNames.tribe[id] }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('edit_custom_highlight', 'tribe', id)" ng-style="{'background-color': color }"></div></td>
+                                <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight('tribe', id)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-        </div>
 
-        <div class="box-paper footer settings" ng-show="selectedTab == TAB_TYPES.SETTINGS">
-            <div class="box-outer">
-                <div class="scrollbar" scrollbar="" scrollbar-name="minimap-settings">
-                    <div class="outer-scroll-wrap">
-                        <div class="scroll-wrap">
-                            <table class="tbl-border-light tbl-striped">
-                                <colgroup>
-                                    <col width="60%">
-                                    <col>
-                                    <col width="56px">
-                                </colgroup>
-                                <tbody>
-                                    <tr>
-                                        <th colspan="3">{{ 'misc' | i18n:loc.ale:textObject }}</th>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ 'settings_right_click_action' | i18n:loc.ale:textObject }}</td>
-                                        <td colspan="3"><div select="" list="actionTypes" selected="settings[SETTINGS.RIGHT_CLICK_ACTION]" drop-down="true"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">{{ 'settings_show_cross' | i18n:loc.ale:textObject }}</td>
-                                        <td><div switch-slider="" value="settings[SETTINGS.SHOW_CROSS]" vertical="false" size="'56x28'" enabled="true"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">{{ 'settings_show_demarcations' | i18n:loc.ale:textObject }}</td>
-                                        <td><div switch-slider="" value="settings[SETTINGS.SHOW_DEMARCATIONS]" vertical="false" size="'56x28'" enabled="true"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">{{ 'settings_show_barbarians' | i18n:loc.ale:textObject }}</td>
-                                        <td><div switch-slider="" value="settings[SETTINGS.SHOW_BARBARIANS]" vertical="false" size="'56x28'" enabled="true"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">{{ 'settings_show_ghost_villages' | i18n:loc.ale:textObject }}</td>
-                                        <td><div switch-slider="" value="settings[SETTINGS.SHOW_GHOST_VILLAGES]" vertical="false" size="'56x28'" enabled="true"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">{{ 'settings_show_only_custom_highlights' | i18n:loc.ale:textObject }}</td>
-                                        <td><div switch-slider="" value="settings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]" vertical="false" size="'56x28'" enabled="true"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">{{ 'settings_highlight_own' | i18n:loc.ale:textObject }}</td>
-                                        <td><div switch-slider="" value="settings[SETTINGS.HIGHLIGHT_OWN]" vertical="false" size="'56x28'" enabled="true"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">{{ 'settings_highlight_selected' | i18n:loc.ale:textObject }}</td>
-                                        <td><div switch-slider="" value="settings[SETTINGS.HIGHLIGHT_SELECTED]" vertical="false" size="'56x28'" enabled="true"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">{{ 'settings_highlight_diplomacy' | i18n:loc.ale:textObject }}</td>
-                                        <td><div switch-slider="" value="settings[SETTINGS.HIGHLIGHT_DIPLOMACY]" vertical="false" size="'56x28'" enabled="true"></div></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                <div ng-show="selectedTab == TAB_TYPES.SETTINGS">
+                    <table class="tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col width="60%">
+                            <col>
+                            <col width="56px">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <th colspan="3">{{ 'misc' | i18n:loc.ale:textObject }}</th>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings_right_click_action' | i18n:loc.ale:textObject }}</td>
+                                <td colspan="3"><div select="" list="actionTypes" selected="settings[SETTINGS.RIGHT_CLICK_ACTION]" drop-down="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings_show_cross' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_CROSS]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings_show_demarcations' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_DEMARCATIONS]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings_show_barbarians' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_BARBARIANS]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings_show_ghost_villages' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_GHOST_VILLAGES]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings_show_only_custom_highlights' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings_highlight_own' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.HIGHLIGHT_OWN]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings_highlight_selected' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.HIGHLIGHT_SELECTED]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ 'settings_highlight_diplomacy' | i18n:loc.ale:textObject }}</td>
+                                <td><div switch-slider="" value="settings[SETTINGS.HIGHLIGHT_DIPLOMACY]" vertical="false" size="'56x28'" enabled="true"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                            <table class="tbl-border-light tbl-striped">
-                                <colgroup>
-                                    <col>
-                                    <col width="29px">
-                                </colgroup>
-                                <tbody>
-                                    <tr>
-                                        <th colspan="2">{{ 'colors_misc' | i18n:loc.ale:textObject }}</th>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ 'settings_colors_background' | i18n:loc.ale:textObject }}</td>
-                                        <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_BACKGROUND)" ng-style="{'background-color': settings[SETTINGS.COLOR_BACKGROUND] }"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ 'settings_colors_province' | i18n:loc.ale:textObject }}</td>
-                                        <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_PROVINCE)" ng-style="{'background-color': settings[SETTINGS.COLOR_PROVINCE] }"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ 'settings_colors_continent' | i18n:loc.ale:textObject }}</td>
-                                        <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_CONTINENT)" ng-style="{'background-color': settings[SETTINGS.COLOR_CONTINENT] }"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ 'settings_colors_cross' | i18n:loc.ale:textObject }}</td>
-                                        <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_CROSS)" ng-style="{'background-color': settings[SETTINGS.COLOR_CROSS] }"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ 'settings_colors_quick_highlight' | i18n:loc.ale:textObject }}</td>
-                                        <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_QUICK_HIGHLIGHT)" ng-style="{'background-color': settings[SETTINGS.COLOR_QUICK_HIGHLIGHT] }"></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ 'settings_colors_ghost' | i18n:loc.ale:textObject }}</td>
-                                        <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_GHOST)" ng-style="{'background-color': settings[SETTINGS.COLOR_GHOST] }"></div></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <table class="tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col>
+                            <col width="29px">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <th colspan="2">{{ 'colors_misc' | i18n:loc.ale:textObject }}</th>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings_colors_background' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_BACKGROUND)" ng-style="{'background-color': settings[SETTINGS.COLOR_BACKGROUND] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings_colors_province' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_PROVINCE)" ng-style="{'background-color': settings[SETTINGS.COLOR_PROVINCE] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings_colors_continent' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_CONTINENT)" ng-style="{'background-color': settings[SETTINGS.COLOR_CONTINENT] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings_colors_cross' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_CROSS)" ng-style="{'background-color': settings[SETTINGS.COLOR_CROSS] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings_colors_quick_highlight' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_QUICK_HIGHLIGHT)" ng-style="{'background-color': settings[SETTINGS.COLOR_QUICK_HIGHLIGHT] }"></div></td>
+                            </tr>
+                            <tr>
+                                <td>{{ 'settings_colors_ghost' | i18n:loc.ale:textObject }}</td>
+                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_GHOST)" ng-style="{'background-color': settings[SETTINGS.COLOR_GHOST] }"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
