@@ -71,13 +71,13 @@
                         <tbody>
                             <tr ng-repeat="(id, color) in highlights.character">
                                 <td><span class="icon-26x26-rte-character"></span></td>
-                                <td ng-click="openProfile('character', id)">{{ highlightNames.character[id] }}</td>
+                                <td><span class="open-profile" ng-click="openProfile('character', id)">{{ highlightNames.character[id] }}</span></td>
                                 <td><div class="color-container box-border-dark" ng-click="openColorPalette('edit_custom_highlight', 'character', id)" ng-style="{'background-color': color }"></div></td>
                                 <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight('character', id)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
                             </tr>
                             <tr ng-repeat="(id, color) in highlights.tribe">
                                 <td><span class="icon-26x26-rte-tribe"></span></td>
-                                <td ng-click="openProfile('tribe', id)">{{ highlightNames.tribe[id] }}</td>
+                                <td><span class="open-profile" ng-click="openProfile('tribe', id)">{{ highlightNames.tribe[id] }}</span></td>
                                 <td><div class="color-container box-border-dark" ng-click="openColorPalette('edit_custom_highlight', 'tribe', id)" ng-style="{'background-color': color }"></div></td>
                                 <td><a class="size-26x26 btn-red icon-20x20-close" ng-click="removeHighlight('tribe', id)" tooltip="" tooltip-content="{{ 'remove' | i18n:loc.ale:textObject }}"></a></td>
                             </tr>
