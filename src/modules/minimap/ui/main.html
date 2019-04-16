@@ -38,7 +38,7 @@
         <div ng-show="selectedTab === TAB_TYPES.MINIMAP" class="minimap-container">
         </div>
 
-        <div class="box-paper footer">
+        <div class="box-paper" ng-class="{'footer': selectedTab == TAB_TYPES.SETTINGS}">
             <div class="scroll-wrap">
                 <div ng-show="selectedTab == TAB_TYPES.HIGHLIGHTS">
                     <h5 class="twx-section">{{ 'add' | i18n:loc.ale:textObject }}</h5>
