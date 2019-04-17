@@ -348,6 +348,11 @@ define('two/minimap/ui', [
             classBlur: false,
             onClick: function () {
                 var current = minimap.getMapPosition()
+
+                if (!current) {
+                    return false
+                }
+
                 minimap.setCurrentPosition(current[0], current[1])
                 buildWindow()
             }
@@ -358,7 +363,7 @@ define('two/minimap/ui', [
     }
 
     var buildWindow = function () {
-        $scope = window.$scope = $rootScope.$new()
+        $scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.SETTINGS = SETTINGS

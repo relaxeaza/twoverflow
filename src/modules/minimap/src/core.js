@@ -2,6 +2,7 @@ define('two/minimap', [
     'two/minimap/actionTypes',
     'two/minimap/settings',
     'two/minimap/settingsMap',
+    'two/utils',
     'queues/EventQueue',
     'two/ready',
     'Lockr',
@@ -16,6 +17,7 @@ define('two/minimap', [
     ACTION_TYPES,
     SETTINGS,
     SETTINGS_MAP,
+    utils,
     eventQueue,
     ready,
     Lockr,
@@ -63,6 +65,9 @@ define('two/minimap', [
         SETTINGS: 'minimap_settings'
     }
     var colorService = injector.get('colorService')
+    var allowJump = true
+    var allowMove = false
+    var dragStart = {}
 
     /**
      * Calcule the coords from clicked position in the canvas.
@@ -126,116 +131,6 @@ define('two/minimap', [
     }
 
     /**
-     * Events related to minimap canvas.
-     * - Keep the minimap current position based on mouse movement.
-     * - Keep the minimap size accordly to the window size.
-     * - Handle minimap clicks.
-     */
-    var canvasListeners = function () {
-        var allowJump = true
-        var allowMove = false
-        var dragStart = {}
-
-        $cross.addEventListener('mousedown', function (event) {
-            event.preventDefault()
-
-            allowJump = true
-            allowMove = true
-            dragStart = {
-                x: currentPosition.x + event.pageX,
-                y: currentPosition.y + event.pageY
-            }
-
-            if (hoverVillage) {
-                eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_CLICK, [hoverVillage, event])
-
-                // right click
-                if (event.which === 3) {
-                    easyHighlight(hoverVillage)
-                }
-            }
-        })
-
-        $cross.addEventListener('mouseup', function () {
-            allowMove = false
-            dragStart = {}
-
-            if (!allowJump) {
-                eventQueue.trigger(eventTypeProvider.MINIMAP_STOP_MOVE)
-            }
-        })
-
-        $cross.addEventListener('mousemove', function (event) {
-            var coords
-            var village
-            var highlighted
-
-            allowJump = false
-
-            if (allowMove) {
-                currentPosition.x = dragStart.x - event.pageX
-                currentPosition.y = dragStart.y - event.pageY
-                eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
-            }
-
-            coords = getCoords(event)
-
-            if (coords.x in cache.village) {
-                if (coords.y in cache.village[coords.x]) {
-                    village = $mapData.getTownAt(coords.x, coords.y)
-
-                    // ignore barbarian villages
-                    if (!settings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
-                        return false
-                    }
-
-                    // check if the village is custom highlighted
-                    if (settings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-                        highlighted = false
-
-                        if (village.character_id in highlights.character) {
-                            highlighted = true
-                        } else if (village.tribe_id in highlights.tribe) {
-                            highlighted = true
-                        }
-
-                        if (!highlighted) {
-                            return false
-                        }
-                    }
-
-                    return onHoverVillage(coords, event)
-                }
-            }
-
-            onBlurVillage()
-        })
-
-        $cross.addEventListener('mouseleave', function () {
-            if (hoverVillage) {
-                onBlurVillage()
-            }
-
-            eventQueue.trigger(eventTypeProvider.MINIMAP_MOUSE_LEAVE)
-        })
-
-        $cross.addEventListener('click', function (event) {
-            if (!allowJump) {
-                return false
-            }
-
-            var coords = getCoords(event)
-            $rootScope.$broadcast(eventTypeProvider.MAP_CENTER_ON_POSITION, coords.x, coords.y, true)
-            preloadSectors(2, coords.x, coords.y)
-        })
-
-        $cross.addEventListener('contextmenu', function (event) {
-            event.preventDefault()
-            return false
-        })
-    }
-
-    /**
      * @param {Array} villages
      * @param {String=} _color - Force the village to use the
      *   specified color.
@@ -251,8 +146,9 @@ define('two/minimap', [
         var villageSize = minimap.getVillageSize()
         var villageOffsetX = minimap.getVillageAxisOffset()
         var villageColors = $player.getVillagesColors()
+        var i
 
-        for (var i = 0; i < villages.length; i++) {
+        for (i = 0; i < villages.length; i++) {
             v = villages[i]
 
             // meta village
@@ -333,28 +229,15 @@ define('two/minimap', [
         }
     }
 
-    var loadMapBin = function (callback) {
-        var path = $cdn.getPath($conf.getMapPath())
-        var xhr
-
-        xhr = new XMLHttpRequest()
-        xhr.open('GET', path, true)
-        xhr.responseType = 'arraybuffer'
-        xhr.addEventListener('load', function (data) {
-            callback(xhr.response)
-        }, false)
-
-        xhr.send()
-    }
-
     var drawGrid = function () {
+        var binUrl = $cdn.getPath($conf.getMapPath())
         var villageBlock = minimap.getVillageBlock()
         var villageOffsetX = Math.round(villageBlock / 2)
         var tile
         var x
         var y
-        
-        loadMapBin(function (bin) {
+
+        utils.xhrGet(binUrl, function (bin) {
             dataView = new DataView(bin)
 
             for (x = 1; x < 999; x++) {
@@ -375,7 +258,7 @@ define('two/minimap', [
                     }
                 }
             }
-        })
+        }, 'arraybuffer')
     }
 
     var drawLoadedVillages = function () {
@@ -443,28 +326,6 @@ define('two/minimap', [
         $crossContext.clearRect(0, 0, $cross.width, $cross.height)
     }
 
-    var updateSelectedVillage = function () {
-        var old = {
-            id: selectedVillage.getId(),
-            x: selectedVillage.getX(),
-            y: selectedVillage.getY()
-        }
-
-        selectedVillage = $player.getSelectedVillage()
-
-        drawVillages([{
-            character_id: $player.getId(),
-            id: old.id,
-            x: old.x,
-            y: old.y
-        }, {
-            character_id: $player.getId(),
-            id: selectedVillage.getId(),
-            x: selectedVillage.getX(),
-            y: selectedVillage.getY()
-        }])
-    }
-
     var renderStep = function () {
         if(enableRendering) {
             var pos =  {
@@ -500,8 +361,11 @@ define('two/minimap', [
     }
 
     var cacheVillages = function (villages) {
-        for (var i = 0; i < villages.length; i++) {
-            var v = villages[i]
+        var i
+        var v
+
+        for (i = 0; i < villages.length; i++) {
+            v = villages[i]
 
             // meta village
             if (v.id < 0) {
@@ -540,6 +404,8 @@ define('two/minimap', [
     }
 
     var onHoverVillage = function (coords, event) {
+        var pid
+
         if (hoverVillage) {
             if (hoverVillage.x === coords.x && hoverVillage.y === coords.y) {
                 return false
@@ -553,12 +419,8 @@ define('two/minimap', [
             event: event
         })
 
-        hoverVillage = {
-            x: coords.x,
-            y: coords.y
-        }
-
-        var pid = cache.village[coords.x][coords.y]
+        hoverVillage = { x: coords.x, y: coords.y }
+        pid = cache.village[coords.x][coords.y]
 
         if (pid) {
             highlightVillages(cache.character[pid])
@@ -568,11 +430,13 @@ define('two/minimap', [
     }
 
     var onBlurVillage = function () {
+        var pid
+
         if (!hoverVillage) {
             return false
         }
 
-        var pid = cache.village[hoverVillage.x][hoverVillage.y]
+        pid = cache.village[hoverVillage.x][hoverVillage.y]
 
         if (pid) {
             unhighlightVillages(cache.character[pid])
@@ -590,15 +454,16 @@ define('two/minimap', [
 
     var unhighlightVillages = function (villages) {
         var _villages = []
+        var i
 
-        for (var i = 0; i < villages.length; i++) {
+        for (i = 0; i < villages.length; i++) {
             _villages.push($mapData.getTownAt(villages[i][0], villages[i][1]))
         }
 
         drawVillages(_villages)
     }
 
-    var easyHighlight = function (coords) {
+    var quickHighlight = function (coords) {
         var village = $mapData.getTownAt(coords.x, coords.y)
         var action = settings[SETTINGS.RIGHT_CLICK_ACTION]
         var type
@@ -631,6 +496,132 @@ define('two/minimap', [
         }
 
         minimap.addHighlight(data, '#' + colors.palette.random().random())
+    }
+
+    var eventHandlers = {
+        onCrossMouseDown: function (event) {
+            event.preventDefault()
+
+            allowJump = true
+            allowMove = true
+            dragStart = {
+                x: currentPosition.x + event.pageX,
+                y: currentPosition.y + event.pageY
+            }
+
+            if (hoverVillage) {
+                eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_CLICK, [hoverVillage, event])
+
+                // right click
+                if (event.which === 3) {
+                    quickHighlight(hoverVillage)
+                }
+            }
+        },
+        onCrossMouseUp: function () {
+            allowMove = false
+            dragStart = {}
+
+            if (!allowJump) {
+                eventQueue.trigger(eventTypeProvider.MINIMAP_STOP_MOVE)
+            }
+        },
+        onCrossMouseMove: function (event) {
+            var coords
+            var village
+            var highlighted
+
+            allowJump = false
+
+            if (allowMove) {
+                currentPosition.x = dragStart.x - event.pageX
+                currentPosition.y = dragStart.y - event.pageY
+                eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
+            }
+
+            coords = getCoords(event)
+
+            if (coords.x in cache.village) {
+                if (coords.y in cache.village[coords.x]) {
+                    village = $mapData.getTownAt(coords.x, coords.y)
+
+                    // ignore barbarian villages
+                    if (!settings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
+                        return false
+                    }
+
+                    // check if the village is custom highlighted
+                    if (settings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
+                        highlighted = false
+
+                        if (village.character_id in highlights.character) {
+                            highlighted = true
+                        } else if (village.tribe_id in highlights.tribe) {
+                            highlighted = true
+                        }
+
+                        if (!highlighted) {
+                            return false
+                        }
+                    }
+
+                    return onHoverVillage(coords, event)
+                }
+            }
+
+            onBlurVillage()
+        },
+        onCrossMouseLeave: function () {
+            if (hoverVillage) {
+                onBlurVillage()
+            }
+
+            eventQueue.trigger(eventTypeProvider.MINIMAP_MOUSE_LEAVE)
+        },
+        onCrossMouseClick: function (event) {
+            if (!allowJump) {
+                return false
+            }
+
+            var coords = getCoords(event)
+            $rootScope.$broadcast(eventTypeProvider.MAP_CENTER_ON_POSITION, coords.x, coords.y, true)
+            preloadSectors(2, coords.x, coords.y)
+        },
+        onCrossMouseContext: function (event) {
+            event.preventDefault()
+            return false
+        },
+        onVillageData: function (event, data) {
+            drawVillages(data.villages)
+            cacheVillages(data.villages)
+        },
+        onHighlightChange: function () {
+            highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
+            highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
+
+            drawLoadedVillages()
+        },
+        onSelectedVillageChange: function () {
+            var old = {
+                id: selectedVillage.getId(),
+                x: selectedVillage.getX(),
+                y: selectedVillage.getY()
+            }
+
+            selectedVillage = $player.getSelectedVillage()
+
+            drawVillages([{
+                character_id: $player.getId(),
+                id: old.id,
+                x: old.x,
+                y: old.y
+            }, {
+                character_id: $player.getId(),
+                id: selectedVillage.getId(),
+                x: selectedVillage.getX(),
+                y: selectedVillage.getY()
+            }])
+        }
     }
 
     var minimap = {
@@ -767,7 +758,13 @@ define('two/minimap', [
      * @return {Array}
      */
     minimap.getMapPosition = function () {
-        var view = window.twx.game.map.engine.getView()
+        var view
+
+        if (!$map.width || !$map.height) {
+            return false
+        }
+
+        view = window.twx.game.map.engine.getView()
 
         return convert([
             -view.x,
@@ -853,18 +850,18 @@ define('two/minimap', [
     }
 
     minimap.init = function () {
-        minimap.initialized = true
+        var localSettings
+        var key
+        var defaultValue
 
+        minimap.initialized = true
         $viewportCache = document.createElement('canvas')
         $viewportCacheContext = $viewportCache.getContext('2d')
-        var localSettings = Lockr.get(STORAGE_ID.SETTINGS, {}, true)
+        localSettings = Lockr.get(STORAGE_ID.SETTINGS, {}, true)
 
-        for (var key in SETTINGS_MAP) {
-            var defaultValue = SETTINGS_MAP[key].default
-
-            settings[key] = localSettings.hasOwnProperty(key)
-                ? localSettings[key]
-                : defaultValue
+        for (key in SETTINGS_MAP) {
+            defaultValue = SETTINGS_MAP[key].default
+            settings[key] = localSettings.hasOwnProperty(key) ? localSettings[key] : defaultValue
         }
 
         highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
@@ -872,14 +869,15 @@ define('two/minimap', [
     }
 
     minimap.run = function () {
+        var villageBlock
+
         ready(function () {
             $map = document.getElementById('main-canvas')
             $player = modelDataService.getSelectedCharacter()
             $tribeRelations = $player.getTribeRelations()
             cachedVillages = Lockr.get(STORAGE_ID.CACHE_VILLAGES, {}, true)
             
-            var villageBlock = minimap.getVillageBlock()
-
+            villageBlock = minimap.getVillageBlock()
             currentPosition.x = 500 * villageBlock
             currentPosition.y = 500 * villageBlock
 
@@ -910,31 +908,21 @@ define('two/minimap', [
                 drawCachedVillages()
             }
 
-            canvasListeners()
             drawLoadedVillages()
             cacheVillages($mapData.getTowns())
             preloadSectors(2)
             renderStep()
 
-            $rootScope.$on(eventTypeProvider.MAP_VILLAGE_DATA, function (event, data) {
-                drawVillages(data.villages)
-                cacheVillages(data.villages)
-            })
-
-            $rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, function () {
-                updateSelectedVillage()
-            })
-
-            $rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, function (event, data) {
-                drawLoadedVillages()
-            })
-
-            $rootScope.$on(eventTypeProvider.GROUPS_VILLAGES_CHANGED, function () {
-                highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
-                highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
-
-                drawLoadedVillages()
-            })
+            $cross.addEventListener('mousedown', eventHandlers.onCrossMouseDown)
+            $cross.addEventListener('mouseup', eventHandlers.onCrossMouseUp)
+            $cross.addEventListener('mousemove', eventHandlers.onCrossMouseMove)
+            $cross.addEventListener('mouseleave', eventHandlers.onCrossMouseLeave)
+            $cross.addEventListener('click', eventHandlers.onCrossMouseClick)
+            $cross.addEventListener('contextmenu', eventHandlers.onCrossMouseContext)
+            $rootScope.$on(eventTypeProvider.MAP_VILLAGE_DATA, eventHandlers.onVillageData)
+            $rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.onSelectedVillageChange)
+            $rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, drawLoadedVillages)
+            $rootScope.$on(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.onHighlightChange)
         }, ['initial_village', 'tribe_relations'])
     }
 
