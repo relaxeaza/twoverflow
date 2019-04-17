@@ -6,7 +6,7 @@
     "general.started": "BuilderQueue iniciado",
     "general.stopped": "BuilderQueue parado",
     "settings": "Configurações",
-    "settings.groupVillages": "Construir apenas em aldeias do grupo",
+    "settings.villageGroups": "Construir apenas em aldeias do grupo",
     "settings.buildingPreset": "Predefinições de ordens",
     "settings.buildingsOrder": "Ordem de Construção",
     "settings.buildingsOrderFinal": "Nível dos Edifícios",
@@ -19,6 +19,7 @@
     "presets.select-to-edit": "Selecione uma predefinição para editar",
     "presets.edit-preset": "Editar predefinição",
     "presets.presets": "— Predefinições —",
-    "preset.updated": "Predefinição de ordem \"%{presetId}\" atualizada",
-    "preset.added": "Predefinição de ordem \"%{presetId}\" adicionada"
+    "preset.updated": "Predefinição de ordem \"%d\" atualizada",
+    "preset.added": "Predefinição de ordem \"%{presetId}\" adicionada",
+    "select_group": "Selecione um grupo"
 }

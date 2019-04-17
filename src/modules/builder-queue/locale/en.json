@@ -6,7 +6,7 @@
     "general.started": "BuilderQueue started",
     "general.stopped": "BuilderQueue stopped",
     "settings": "Settings",
-    "settings.groupVillages": "Build only on villages with the group",
+    "settings.villageGroups": "Build only on villages with the group",
     "settings.buildingPreset": "Building order preset",
     "settings.buildingsOrder": "Build Order",
     "settings.buildingsOrderFinal": "Buildings Level",
@@ -20,5 +20,6 @@
     "presets.edit-preset": "Edit preset",
     "presets.presets": "— Presets —",
     "preset.updated": "Building order preset \"%{presetId}\" updated",
-    "preset.added": "Building order preset \"%{presetId}\" added"
+    "preset.added": "Building order preset \"%{presetId}\" added",
+    "select_group": "Select a group"
 }

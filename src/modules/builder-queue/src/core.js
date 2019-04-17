@@ -330,9 +330,9 @@ define('two/builder', [
         Lockr.set(STORAGE_ID.SETTINGS, settings)
 
         if (isUpdate) {
-            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, [id])
+            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, id)
         } else {
-            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, [id])
+            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, id)
         }
 
         return true
