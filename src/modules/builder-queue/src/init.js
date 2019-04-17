@@ -1,17 +1,29 @@
 require([
     'two/ready',
     'two/builder',
-    'two/builder/ui'
+    'two/builder/ui',
+    'two/builder/events'
 ], function (
     ready,
-    Builder
+    builderQueue
 ) {
-    if (Builder.isInitialized()) {
+    if (builderQueue.isInitialized()) {
         return false
     }
 
+    var updateModuleLang = function () {
+        var langs = __builder_locale
+        var current = $rootScope.loc.ale
+        var data = current in langs
+            ? langs[current]
+            : langs['en_us']
+
+        i18n.setJSON(data)
+    }
+
     ready(function () {
-        Builder.init()
-        Builder.interface()
+        updateModuleLang()
+        builderQueue.init()
+        builderQueue.interface()
     })
 })

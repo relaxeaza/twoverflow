@@ -1,14 +1,17 @@
 define('two/builder', [
-    'two/builder/defaultOrders',
+    'two/builder/settings',
+    'two/builder/settingsMap',
     'two/utils',
     'two/eventQueue',
     'two/ready',
     'Lockr',
     'conf/upgradeabilityStates',
     'conf/buildingTypes',
-    'conf/locationTypes'
+    'conf/locationTypes',
+    'two/builder/events'
 ], function (
-    defaultBuildingOrders,
+    SETTINGS,
+    SETTINGS_MAP,
     utils,
     eventQueue,
     ready,
@@ -26,73 +29,30 @@ define('two/builder', [
     var ANALYSES_PER_MINUTE = 1
     var VILLAGE_BUILDINGS = {}
     var groupList
-    var player
-    var buildLog
+    var $player
+    var logs
     var settings = {}
-
-    var settingsMap = {
-        groupVillages: {
-            default: '',
-            inputType: 'select'
-        },
-        buildingPreset: {
-            default: 'Essential',
-            inputType: 'select'
-        },
-        buildingOrders: {
-            default: defaultBuildingOrders,
-            inputType: 'buildingOrder'
-        }
-    }
-
-    for (var buildingName in BUILDING_TYPES) {
-        VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
-    }
-
-    var init = function init () {
-        Locale.create('builder', __builder_locale, 'en')
-
-        initialized = true
-        localSettings = Lockr.get('builder-settings', {}, true)
-        buildLog = Lockr.get('builder-log', [], true)
-        player = modelDataService.getSelectedCharacter()
-        groupList = modelDataService.getGroupList()
-
-        for (var key in settingsMap) {
-            var defaultValue = settingsMap[key].default
-
-            settings[key] = localSettings.hasOwnProperty(key)
-                ? localSettings[key]
-                : defaultValue
-        }
-
-        buildingOrderLimit = getSequenceLimit(settings.buildingPreset)
-
-        rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
-            if (!running) {
-                return false
-            }
-
-            setTimeout(function () {
-                var village = player.getVillage(data.village_id)
-                analyseVillageBuildings(village)
-            }, 1000)
-        })
+    var STORAGE_ID = {
+        LOGS: 'builder_queue_log',
+        SETTINGS: 'builder_queue_settings'
     }
 
     /**
      * Loop all player villages, check if ready and init the building analyse
      * for each village.
      */
-    var analyseVillages = function analyseVillages () {
-        var villageIds = settings.groupVillages
-            ? groupList.getGroupVillageIds(settings.groupVillages)
+    var analyseVillages = function () {
+        var villageIds = settings[SETTINGS.GROUP_VILLAGES]
+            ? groupList.getGroupVillageIds(settings[SETTINGS.GROUP_VILLAGES])
             : getVillageIds()
+        var village
+        var readyState
+        var queue
 
         villageIds.forEach(function (id) {
-            var village = player.getVillage(id)
-            var readyState = village.checkReadyState()
-            var queue = village.buildingQueue
+            village = $player.getVillage(id)
+            readyState = village.checkReadyState()
+            queue = village.buildingQueue
 
             if (queue.getAmountJobs() === queue.getUnlockedSlots()) {
                 return false
@@ -117,9 +77,10 @@ define('two/builder', [
      */
     var getVillageIds = function () {
         var ids = []
-        var villages = player.getVillages()
+        var villages = $player.getVillages()
+        var id
 
-        for (var id in villages) {
+        for (id in villages) {
             ids.push(id)
         }
 
@@ -131,10 +92,12 @@ define('two/builder', [
      *
      * @param {VillageModel} village
      */
-    var analyseVillageBuildings = function analyseVillageBuildings (village) {
+    var analyseVillageBuildings = function (village) {
         var buildingLevels = angular.copy(village.buildingData.getBuildingLevels())
         var currentQueue = village.buildingQueue.getQueue()
         var buildingOrder = angular.copy(VILLAGE_BUILDINGS)
+        var now
+        var logData
 
         currentQueue.forEach(function (job) {
             buildingLevels[job.building]++
@@ -144,14 +107,14 @@ define('two/builder', [
             return false
         }
 
-        settings.buildingOrders[settings.buildingPreset].some(function (buildingName) {
+        settings[SETTINGS.BUILDING_ORDERS][settings[SETTINGS.BUILDING_PRESET]].some(function (buildingName) {
             if (++buildingOrder[buildingName] > buildingLevels[buildingName]) {
                 buildingService.compute(village)
 
                 upgradeBuilding(village, buildingName, function (jobAdded, data) {
                     if (jobAdded) {
-                        var now = Date.now()
-                        var logData = [
+                        now = Date.now()
+                        logData = [
                             {
                                 x: village.getX(),
                                 y: village.getY(),
@@ -163,9 +126,9 @@ define('two/builder', [
                             now
                         ]
 
-                        eventQueue.trigger('Builder/jobStarted', logData)
-                        buildLog.unshift(logData)
-                        Lockr.set('builder-log', buildLog)
+                        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_JOB_STARTED, logData)
+                        logs.unshift(logData)
+                        Lockr.set(STORAGE_ID.LOGS, logs)
                     }
                 })
 
@@ -181,7 +144,7 @@ define('two/builder', [
      * @param {String} buildingName - Building to be build.
      * @param {Function} callback
      */
-    var upgradeBuilding = function upgradeBuilding (village, buildingName, callback) {
+    var upgradeBuilding = function (village, buildingName, callback) {
         var buildingData = village.getBuildingData().getDataForBuilding(buildingName)
 
         if (buildingData.upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
@@ -205,7 +168,7 @@ define('two/builder', [
      * @param {Object} buildingLevels - Current buildings level from the village.
      * @return {Boolean} True if the levels already reached the limit.
      */
-    var checkVillageBuildingLimit = function checkVillageBuildingLimit (buildingLevels) {
+    var checkVillageBuildingLimit = function (buildingLevels) {
         for (var buildingName in buildingLevels) {
             if (buildingLevels[buildingName] < buildingOrderLimit[buildingName]) {
                 return false
@@ -215,27 +178,27 @@ define('two/builder', [
         return true
     }
 
-    /**
-     * Check if the building order is valid by analysing if the
-     * buildings exceed the maximum level.
-     *
-     * @param {Array} order
-     * @return {Boolean}
-     */
-    var validSequence = function validSequence (order) {
-        var buildingOrder = angular.copy(VILLAGE_BUILDINGS)
-        var buildingData = modelDataService.getGameData().getBuildings()
-        var invalid = false
+    // /**
+    //  * Check if the building order is valid by analysing if the
+    //  * buildings exceed the maximum level.
+    //  *
+    //  * @param {Array} order
+    //  * @return {Boolean}
+    //  */
+    // var validSequence = function (order) {
+    //     var buildingOrder = angular.copy(VILLAGE_BUILDINGS)
+    //     var buildingData = modelDataService.getGameData().getBuildings()
+    //     var invalid = false
 
-        order.some(function (buildingName) {
-            if (++buildingOrder[buildingName] > buildingData[buildingName].max_level) {
-                invalid = true
-                return true
-            }
-        })
+    //     order.some(function (buildingName) {
+    //         if (++buildingOrder[buildingName] > buildingData[buildingName].max_level) {
+    //             invalid = true
+    //             return true
+    //         }
+    //     })
 
-        return invalid
-    }
+    //     return invalid
+    // }
 
     /**
      * Get the level max for each building.
@@ -243,8 +206,8 @@ define('two/builder', [
      * @param {String} buildingPreset
      * @return {Object} Maximum level for each building.
      */
-    var getSequenceLimit = function getSequenceLimit (buildingPreset) {
-        var buildingOrder = settings.buildingOrders[buildingPreset]
+    var getSequenceLimit = function (buildingPreset) {
+        var buildingOrder = settings[SETTINGS.BUILDING_ORDERS][buildingPreset]
         var orderLimit = angular.copy(VILLAGE_BUILDINGS)
 
         buildingOrder.forEach(function (buildingName) {
@@ -254,17 +217,71 @@ define('two/builder', [
         return orderLimit
     }
 
-    /**
-     * @param {Object} changes - New settings.
-     * @return {Boolean} True if the internal settings changed.
-     */
-    var updateSettings = function updateSettings (changes) {
+    var builderQueue = {}
+
+    builderQueue.init = function () {
+        var key
+        var defaultValue
+        var buildingName
+        var village
+
+        initialized = true
+        localSettings = Lockr.get(STORAGE_ID.SETTINGS, {}, true)
+        logs = Lockr.get(STORAGE_ID.LOGS, [], true)
+        $player = modelDataService.getSelectedCharacter()
+        groupList = modelDataService.getGroupList()
+
+        for (key in SETTINGS_MAP) {
+            defaultValue = SETTINGS_MAP[key].default
+            settings[key] = localSettings.hasOwnProperty(key) ? localSettings[key] : defaultValue
+        }
+
+        for (buildingName in BUILDING_TYPES) {
+            VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
+        }
+
+        buildingOrderLimit = getSequenceLimit(settings[SETTINGS.BUILDING_PRESET])
+
+        rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
+            if (!running) {
+                return false
+            }
+
+            setTimeout(function () {
+                village = $player.getVillage(data.village_id)
+                analyseVillageBuildings(village)
+            }, 1000)
+        })
+    }
+
+    builderQueue.start = function () {
+        running = true
+        intervalCheckId = setInterval(analyseVillages, 60000 / ANALYSES_PER_MINUTE)
+        ready(analyseVillages, ['all_villages_ready'])
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_START)
+    }
+
+    builderQueue.stop = function () {
+        running = false
+        clearInterval(intervalCheckId)
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_STOP)
+    }
+
+    builderQueue.isRunning = function () {
+        return running
+    }
+
+    builderQueue.isInitialized = function () {
+        return initialized
+    }
+
+    builderQueue.updateSettings = function (changes) {
         var newValue
         var key
 
         for (key in changes) {
-            if (!settingsMap[key]) {
-                eventQueue.trigger('Builder/settings/unknownSetting', [key])
+            if (!SETTINGS_MAP[key]) {
+                eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_UNKNOWN_SETTING, [key])
 
                 return false
             }
@@ -279,50 +296,29 @@ define('two/builder', [
         }
 
         buildingOrderLimit = getSequenceLimit(changes.buildingPreset)
-        Lockr.set('builder-settings', settings)
+        Lockr.set(STORAGE_ID.SETTINGS, settings)
 
         return true
     }
 
-    var getSettings = function getSettings () {
+    builderQueue.getSettings = function () {
         return settings
     }
 
-    var start = function start () {
-        running = true
-        intervalCheckId = setInterval(analyseVillages, 60000 / ANALYSES_PER_MINUTE)
-        ready(analyseVillages, ['all_villages_ready'])
-        eventQueue.trigger('Builder/start')
+    builderQueue.getLogs = function () {
+        return logs
     }
 
-    var stop = function stop () {
-        running = false
-        clearInterval(intervalCheckId)
-        eventQueue.trigger('Builder/stop')
+    builderQueue.clearLogs = function () {
+        logs = []
+        Lockr.set(STORAGE_ID.LOGS, logs)
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS)
     }
 
-    var isInitialized = function isInitialized () {
-        return initialized
-    }
-
-    var isRunning = function isRunning () {
-        return running
-    }
-
-    var getBuildLog = function () {
-        return buildLog
-    }
-
-    var clearLogs = function () {
-        buildLog = []
-        Lockr.set('builder-log', buildLog)
-        eventQueue.trigger('Builder/clearLogs')
-    }
-
-    var updateBuildingOrder = function (id, order) {
+    builderQueue.updateBuildingOrder = function (id, order) {
         var isUpdate = false
 
-        if (id in settings.buildingOrders) {
+        if (id in settings[SETTINGS.BUILDING_ORDERS]) {
             isUpdate = true
         }
 
@@ -330,30 +326,17 @@ define('two/builder', [
             return false
         }
 
-        settings.buildingOrders[id] = order
-        Lockr.set('builder-settings', settings)
+        settings[SETTINGS.BUILDING_ORDERS][id] = order
+        Lockr.set(STORAGE_ID.SETTINGS, settings)
 
         if (isUpdate) {
-            eventQueue.trigger('Builder/buildingOrders/updated', [id])
+            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, [id])
         } else {
-            eventQueue.trigger('Builder/buildingOrders/added', [id])
+            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, [id])
         }
 
         return true
     }
 
-    return {
-        init: init,
-        start: start,
-        stop: stop,
-        updateSettings: updateSettings,
-        isRunning: isRunning,
-        isInitialized: isInitialized,
-        settingsMap: settingsMap,
-        getSettings: getSettings,
-        getBuildLog: getBuildLog,
-        clearLogs: clearLogs,
-        updateBuildingOrder: updateBuildingOrder,
-        version: '__builder_version'
-    }
+    return builderQueue
 })

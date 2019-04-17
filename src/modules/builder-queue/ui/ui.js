@@ -7,7 +7,8 @@ define('two/builder/ui', [
     'ejs',
     'conf/buildingTypes',
     'helper/time',
-    'two/ready'
+    'two/ready',
+    'two/builder/settingsMap'
 ], function (
     Builder,
     Interface,
@@ -17,7 +18,8 @@ define('two/builder/ui', [
     ejs,
     BUILDING_TYPES,
     $timeHelper,
-    ready
+    ready,
+    SETTINGS_MAP
 ) {
     var ui
     var opener
@@ -208,24 +210,24 @@ define('two/builder/ui', [
             Builder.clearLogs()
         })
 
-        eventQueue.bind('Builder/start', function () {
+        eventQueue.bind(eventTypeProvider.BUILDER_QUEUE_START, function () {
             $switch.html(Locale('common', 'stop'))
             $switch.removeClass('btn-green').addClass('btn-red')
             opener.$elem.removeClass('btn-green').addClass('btn-red')
             utils.emitNotif('success', Locale('builder', 'general.started'))
         })
 
-        eventQueue.bind('Builder/stop', function () {
+        eventQueue.bind(eventTypeProvider.BUILDER_QUEUE_STOP, function () {
             $switch.html(Locale('common', 'start'))
             $switch.removeClass('btn-red').addClass('btn-green')
             opener.$elem.removeClass('btn-red').addClass('btn-green')
             utils.emitNotif('success', Locale('builder', 'general.stopped'))
         })
 
-        eventQueue.bind('Builder/jobStarted', insertLog)
-        eventQueue.bind('Builder/clearLogs', clearLogs)
+        eventQueue.bind(eventTypeProvider.BUILDER_QUEUE_JOB_STARTED, insertLog)
+        eventQueue.bind(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS, clearLogs)
 
-        eventQueue.bind('Builder/buildingOrders/updated', function (presetId) {
+        eventQueue.bind(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, function (presetId) {
             if (activePresetId === presetId) {
                 populateBuildingOrder()
                 populateBuildingOrderFinal()
@@ -237,7 +239,7 @@ define('two/builder/ui', [
             }))
         })
 
-        eventQueue.bind('Builder/buildingOrders/added', function (presetId) {
+        eventQueue.bind(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, function (presetId) {
             utils.emitNotif('success', Locale('builder', 'preset.added', {
                 presetId: presetId
             }))
@@ -397,7 +399,7 @@ define('two/builder/ui', [
         var newSettings = {}
 
         eachSetting(function ($input, settingId) {
-            var inputType = Builder.settingsMap[settingId].inputType
+            var inputType = SETTINGS_MAP[settingId].inputType
 
             switch (inputType) {
             case 'text':
@@ -433,7 +435,7 @@ define('two/builder/ui', [
         var settings = Builder.getSettings()
 
         eachSetting(function ($input, settingId) {
-            var inputType = Builder.settingsMap[settingId].inputType
+            var inputType = SETTINGS_MAP[settingId].inputType
 
             switch (inputType) {
             case 'text':
