@@ -1,11 +1,14 @@
 require([
+    'helper/i18n',
     'two/ready',
     'two/builder',
     'two/builder/ui',
     'two/builder/events'
 ], function (
+    i18n,
     ready,
-    builderQueue
+    builderQueue,
+    builderQueueInterface
 ) {
     if (builderQueue.isInitialized()) {
         return false
@@ -24,6 +27,6 @@ require([
     ready(function () {
         updateModuleLang()
         builderQueue.init()
-        builderQueue.interface()
+        builderQueueInterface()
     })
 })

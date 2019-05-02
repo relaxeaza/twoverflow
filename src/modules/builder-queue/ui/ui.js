@@ -2,11 +2,12 @@ define('two/builder/ui', [
     'two/builder',
     'two/ui2',
     'two/FrontButton',
-    'two/eventQueue',
+    'queues/EventQueue',
     'two/utils',
     'conf/buildingTypes',
     'helper/time',
     'two/ready',
+    'two/builder/settings',
     'two/builder/settingsMap',
     'two/EventScope'
 ], function (
@@ -18,12 +19,13 @@ define('two/builder/ui', [
     BUILDING_TYPES,
     $timeHelper,
     ready,
+    SETTINGS,
     SETTINGS_MAP,
     EventScope
 ) {
     var eventScope
     var $scope
-    var textObject = 'buider'
+    var textObject = 'builder_queue'
     var textObjectCommon = 'common'
     var buildingOrder = {}
     var buildingOrderFinal = {}
@@ -105,6 +107,7 @@ define('two/builder/ui', [
         var building
         var level
         var state
+        var price
 
         activePresetId = presetId
 
@@ -114,13 +117,13 @@ define('two/builder/ui', [
 
         buildingOrder = buildingOrderRaw.map(function (building) {
             level = ++buildingLevels[building]
+            price = buildingData[building].individual_level_costs[level]
+            state = 'not-reached'
 
             if (buildingLevelReached(building, level)) {
                 state = 'reached'
             } else if (buildingLevelProgress(building, level)) {
                 state = 'progress'
-            } else {
-                state = 'not-reached'
             }
 
             return {
@@ -268,7 +271,7 @@ define('two/builder/ui', [
 
         generateBuildingsLevelPoints()
 
-        interfaceOverflow.addTemplate('twoverflow_builder_window', `__builder_html_main`)
+        interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `__builder_html_main`)
         interfaceOverflow.addStyle('__builder_css_style')
     }
 
@@ -277,6 +280,7 @@ define('two/builder/ui', [
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.selectedTab = TAB_TYPES.SETTINGS
+        $scope.TAB_TYPES = TAB_TYPES
 
         $scope.running = running
         $scope.settings = parseSettings(builderQueue.getSettings())
@@ -312,6 +316,8 @@ define('two/builder/ui', [
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS, eventHandlers.updateLogs)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, eventHandlers.buildingOrdersUpdate)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, eventHandlers.buildingOrdersAdd)
+
+        windowManagerService.getScreenWithInjectedScope('!twoverflow_builder_queue_window', $scope)
     }
 
     return init

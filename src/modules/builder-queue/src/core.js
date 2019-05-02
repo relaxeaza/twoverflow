@@ -242,7 +242,7 @@ define('two/builder', [
 
         buildingOrderLimit = getSequenceLimit(settings[SETTINGS.BUILDING_PRESET])
 
-        rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
+        $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
             if (!running) {
                 return false
             }

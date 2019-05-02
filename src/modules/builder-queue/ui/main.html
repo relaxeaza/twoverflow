@@ -1,8 +1,8 @@
-<div class="win-content message-list-wrapper searchable-list ng-scope">
+<div id="two-builderqueue" class="win-content two-window">
     <header class="win-head">
         <h2>BuilderQueue</h2>
         <ul class="list-btn">
-            <li><a href="#" class="twOverflow-close size-34x34 btn-red icon-26x26-close"></a></li>
+            <li><a href="#" class="size-34x34 btn-red icon-26x26-close"></a></li>
         </ul>
     </header>
 
@@ -18,7 +18,7 @@
             <div class="tab" ng-click="selectTab(TAB_TYPES.PRESETS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.PRESETS}">
                 <div class="tab-inner">
                     <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.PRESETS}">
-                        <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.PRESETS}">{{ TAB_TYPES.PRESETS | i18n:loc.ale:textObjectCommon }}</a>
+                        <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.PRESETS}">{{ TAB_TYPES.PRESETS | i18n:loc.ale:textObject }}</a>
                     </div>
                 </div>
             </div>
@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <div class="win-main">
+    <div class="win-main small-select">
         <div ng-show="selectedTab === TAB_TYPES.SETTINGS" class="box-paper footer has-footer-upper">
             <h5 class="twx-section">{{ 'settings' | i18n:loc.ale:textObject }}</h5>
             <table class="tbl-border-light tbl-striped">
