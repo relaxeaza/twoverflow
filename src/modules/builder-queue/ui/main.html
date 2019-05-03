@@ -1,213 +1,178 @@
-<div id="two-builderqueue" class="win-content two-window">
+<div id="two-builder-queue" class="win-content two-window">
     <header class="win-head">
         <h2>BuilderQueue</h2>
         <ul class="list-btn">
-            <li><a href="#" class="size-34x34 btn-red icon-26x26-close"></a></li>
+            <li><a href="#" class="size-34x34 btn-red icon-26x26-close" ng-click="closeWindow()"></a></li>
         </ul>
     </header>
 
-    <div class="tabs tabs-bg">
-        <div class="tabs-three-col">
-            <div class="tab" ng-click="selectTab(TAB_TYPES.SETTINGS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.SETTINGS}">
-                <div class="tab-inner">
-                    <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.SETTINGS}">
-                        <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.SETTINGS}">{{ TAB_TYPES.SETTINGS | i18n:loc.ale:textObjectCommon }}</a>
+    <div class="win-main small-select" scrollbar="">
+        <div class="tabs tabs-bg">
+            <div class="tabs-three-col">
+                <div class="tab" ng-click="selectTab(TAB_TYPES.SETTINGS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.SETTINGS}">
+                    <div class="tab-inner">
+                        <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.SETTINGS}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.SETTINGS}">{{ TAB_TYPES.SETTINGS | i18n:loc.ale:textObjectCommon }}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab" ng-click="selectTab(TAB_TYPES.PRESETS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.PRESETS}">
+                    <div class="tab-inner">
+                        <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.PRESETS}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.PRESETS}">{{ TAB_TYPES.PRESETS | i18n:loc.ale:textObject }}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab" ng-click="selectTab(TAB_TYPES.LOGS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.LOGS}">
+                    <div class="tab-inner">
+                        <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.LOGS}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.LOGS}">{{ TAB_TYPES.LOGS | i18n:loc.ale:textObjectCommon }}</a>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="tab" ng-click="selectTab(TAB_TYPES.PRESETS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.PRESETS}">
-                <div class="tab-inner">
-                    <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.PRESETS}">
-                        <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.PRESETS}">{{ TAB_TYPES.PRESETS | i18n:loc.ale:textObject }}</a>
-                    </div>
+        </div>
+
+        <div class="box-paper footer">
+            <div class="scroll-wrap">
+                <div ng-show="selectedTab === TAB_TYPES.SETTINGS">
+                    <h5 class="twx-section">{{ 'settings' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col width="50%">
+                            <col>
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td><span class="ff-cell-fix">{{ 'settings.villageGroups' | i18n:loc.ale:textObject }}</span></td>
+                                <td><div select="" list="villageGroups" selected="settings[SETTINGS.GROUP_VILLAGES]" drop-down="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td><span class="ff-cell-fix">{{ 'settings.buildingPreset' | i18n:loc.ale:textObject }}</span></td>
+                                <td><div select="" list="presetList" selected="settings[SETTINGS.BUILDING_PRESET]" drop-down="true"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h5 class="twx-section">{{ 'settings.buildingOrderFinal' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light header-center building-order-final">
+                        <colgroup>
+                            <col width="5%">
+                            <col width="70%">
+                            <col>
+                        </colgroup>
+                        <tr>
+                            <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
+                        </tr>
+                        <tr ng-repeat="(building, level) in buildingOrderFinal">
+                            <td><span class="building-icon icon-20x20-building-{{ building }}"></span></td>
+                            <td>{{ building | i18n:loc.ale:'building_names' }}</td>
+                            <td>{{ level }}</td>
+                        </tr>
+                    </table>
+
+                    <h5 class="twx-section">{{ 'settings.buildingOrder' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped header-center building-order">
+                        <colgroup>
+                            <col width="5%">
+                            <col width="26%">
+                            <col width="7%">
+                            <col width="13%">
+                            <col width="8%">
+                            <col>
+                        </colgroup>
+                        <tr>
+                            <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'duration' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'points' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'costs' | i18n:loc.ale:textObjectCommon }}</th>
+                        </tr>
+                        <tr ng-repeat="item in buildingOrder" class="{{ item.state }}">
+                            <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
+                            <td>{{ item.building | i18n:loc.ale:'building_names' }}</td>
+                            <td>{{ item.level }}</td>
+                            <td>{{ item.duration }}</td>
+                            <td class="green">+{{ item.levelPoints }}</td>
+                            <td>
+                                <span class="icon-26x26-resource-wood force-26to20"></span> {{ item.price.wood }}
+                                <span class="icon-26x26-resource-clay force-26to20"></span> {{ item.price.clay }}
+                                <span class="icon-26x26-resource-iron force-26to20"></span> {{ item.price.iron }}
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-            </div>
-            <div class="tab" ng-click="selectTab(TAB_TYPES.LOGS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.LOGS}">
-                <div class="tab-inner">
-                    <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.LOGS}">
-                        <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.LOGS}">{{ TAB_TYPES.LOGS | i18n:loc.ale:textObjectCommon }}</a>
-                    </div>
+
+                <div ng-show="selectedTab === TAB_TYPES.PRESETS">
+                    <h5 class="twx-section">{{ 'presets.edit-preset' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped">
+                        <colgroup>
+                            <col width="50%">
+                            <col>
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td><span class="ff-cell-fix">{{ 'presets.select-to-edit' | i18n:loc.ale:textObject }}</span></td>
+                                <td><div select="" list="presetList" selected="selectedEditPreset" drop-down="true"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="tbl-border-light tbl-striped header-center">
+                        <colgroup>
+                            <col width="7%">
+                            <col width="7%">
+                            <col width="*">
+                            <col width="7%">
+                            <col>
+                        </colgroup>
+                        <tr>
+                            <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th></th>
+                            <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
+                        </tr>
+                        <tr ng-repeat="item in buildingOrder track by $index">
+                            <td>{{ $index }}</td>
+                            <td>
+                                <label class="size-34x34 btn-orange icon-26x26-checkbox" ng-class="{'icon-26x26-checkbox-checked': item.checked}">
+                                    <input type="checkbox" ng-model="item.checked" />
+                                </label>
+                            </td>
+                            <td><span class="building-icon icon-20x20-building-{{ building }}"></span> {{ building | i18n:loc.ale:'building_names' }}</td>
+                            <td>{{ level }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div ng-show="selectedTab === TAB_TYPES.LOGS">
+                    <table class="tbl-border-light tbl-striped header-center">
+                        <colgroup>
+                            <col width="40%">
+                            <col width="30%">
+                            <col width="5%">
+                            <col width="25%">
+                            <col>
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>{{ 'village' | i18n:loc.ale:textObjectCommon }}</th>
+                                <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
+                                <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
+                                <th>{{ 'started' | i18n:loc.ale:textObjectCommon }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="buildLog">
+                            <tr class="noBuilds">
+                                <td colspan="4">{{ 'logs.noBuilds' | i18n:loc.ale:textObject }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="win-main small-select">
-        <div ng-show="selectedTab === TAB_TYPES.SETTINGS" class="box-paper footer has-footer-upper">
-            <h5 class="twx-section">{{ 'settings' | i18n:loc.ale:textObject }}</h5>
-            <table class="tbl-border-light tbl-striped">
-                <colgroup>
-                    <col width="50%">
-                    <col>
-                </colgroup>
-                <tbody>
-                    <tr>
-                        <td><span class="ff-cell-fix">{{ 'settings.villageGroups' | i18n:loc.ale:textObject }}</span></td>
-                        <td><div select="" list="villageGroups" selected="settings[SETTINGS.GROUP_VILLAGES]" drop-down="true"></div></td>
-                    </tr>
-                    <tr>
-                        <td><span class="ff-cell-fix">{{ 'settings.buildingPreset' | i18n:loc.ale:textObject }}</span></td>
-                        <td><div select="" list="presetList" selected="settings[SETTINGS.BUILDING_PRESET]" drop-down="true"></div></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h5 class="twx-section">{{ 'settings.buildingsOrderFinal' | i18n:loc.ale:textObject }}</h5>
-            <table class="tbl-border-light header-center">
-                <colgroup>
-                    <col width="10%">
-                    <col width="50%">
-                    <col>
-                </colgroup>
-                <tr>
-                    <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                    <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                </tr>
-                <tr ng-repeat="(building, level) in buildingOrderFinal">
-                    <td><span class="building-icon icon-20x20-building-{{ building }}"></span></td>
-                    <td>{{ building | i18n:loc.ale:textObjectCommon }}</td>
-                    <td>{{ level }}</td>
-                </tr>
-            </table>
-
-            <h5 class="twx-section">{{ 'settings.buildingsOrder' | i18n:loc.ale:textObject }}</h5>
-            <table class="tbl-border-light header-center">
-                <colgroup>
-                    <col width="5%">
-                    <col width="26%">
-                    <col width="7%">
-                    <col width="13%">
-                    <col width="8%">
-                    <col>
-                </colgroup>
-                <tr>
-                    <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                    <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                    <th>{{ 'duration' | i18n:loc.ale:textObjectCommon }}</th>
-                    <th>{{ 'points' | i18n:loc.ale:textObjectCommon }}</th>
-                    <th>{{ 'costs' | i18n:loc.ale:textObjectCommon }}</th>
-                </tr>
-                <tr ng-repeat="item in buildingOrder" ng-class="item.state">
-                    <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
-                    <td>{{ item.building | i18n:loc.ale:textObjectCommon }}</td>
-                    <td>{{ item.level }}</td>
-                    <td>{{ item.duration }}</td>
-                    <td class="green">+{{ item.levelPoints }}</td>
-                    <td>
-                        <span class="icon-26x26-resource-wood force-26to20"></span> {{ item.wood }}
-                        <span class="icon-26x26-resource-clay force-26to20"></span> {{ item.clay }}
-                        <span class="icon-26x26-resource-iron force-26to20"></span> {{ item.iron }}
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <!-- presets tab -->
-        <div ng-show="selectedTab === TAB_TYPES.PRESETS" class="box-paper footer has-footer-upper">
-            <h5 class="twx-section">{{ 'presets.edit-preset' | i18n:loc.ale:textObject }}</h5>
-            <table class="tbl-border-light tbl-striped">
-                <colgroup>
-                    <col width="50%">
-                    <col>
-                </colgroup>
-                <tbody>
-                    <tr>
-                        <td><span class="ff-cell-fix">{{ 'presets.select-to-edit' | i18n:loc.ale:textObject }}</span></td>
-                        <td><div select="" list="presetList" selected="selectedEditPreset" drop-down="true"></div></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <table class="tbl-border-light header-center">
-                <colgroup>
-                    <col width="7%">
-                    <col width="7%">
-                    <col width="*">
-                    <col width="7%">
-                    <col>
-                </colgroup>
-                <tr>
-                    <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                    <th></th>
-                    <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                    <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                </tr>
-                <tr ng-repeat="item in buildingOrder track by $index">
-                    <td>{{ $index }}</td>
-                    <td>
-                        <label class="size-34x34 btn-orange icon-26x26-checkbox" ng-class="{'icon-26x26-checkbox-checked': item.checked}">
-                            <input type="checkbox" ng-model="item.checked" />
-                        </label>
-                    </td>
-                    <td><span class="building-icon icon-20x20-building-{{ building }}"></span> {{ building | i18n:loc.ale:textObjectCommon }}</td>
-                    <td>{{ level }}</td>
-                </tr>
-            </table>
-        </div>
-
-        <!-- <div class="box-paper footer has-footer-upper twOverflow-content-log">
-            <table class="tbl-border-light tbl-striped header-center">
-                <colgroup>
-                    <col width="40%">
-                    <col width="30%">
-                    <col width="5%">
-                    <col width="25%">
-                    <col>
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th>{{ 'village' | i18n:loc.ale:textObjectCommon }}</th>
-                        <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                        <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                        <th>{{ 'started' | i18n:loc.ale:textObjectCommon }}</th>
-                    </tr>
-                </thead>
-                <tbody class="buildLog">
-                    <tr class="noBuilds">
-                        <td colspan="4">{{ 'logs.noBuilds' | i18n:loc.ale:textObject }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div> -->
-    </div>
-    <footer class="win-foot">
-        <ul class="list-btn list-center buttons">
-            <li class="twOverflow-button-settings">
-                <a class="btn-orange btn-border save">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
-            </li>
-            <li class="twOverflow-button-settings">
-                <a class="btn-green btn-border switch">{{ 'start' | i18n:loc.ale:textObjectCommon }}</a>
-            </li>
-
-            <li class="twOverflow-button-log">
-                <a class="btn-orange btn-border clearLogs">{{ 'logs.clear' | i18n:loc.ale:textObject }}</a>
-            </li>
-
-            <li class="twOverflow-button-presets">
-                <a class="btn-grey btn-border move-up">
-                    <span class="icon-26x26-normal-arrow-up"></span>
-                    {{ 'presets.move-up' | i18n:loc.ale:textObject }}
-                </a>
-            </li>
-            <li class="twOverflow-button-presets">
-                <a class="btn-grey btn-border move-down">
-                    <span class="icon-26x26-normal-arrow-down"></span>
-                    {{ 'presets.move-down' | i18n:loc.ale:textObject }}
-                </a>
-            </li>
-            <li class="twOverflow-button-presets">
-                <a class="btn-green btn-border add-building">
-                    <span class="icon-26x26-rte-building"></span>
-                    {{ 'presets.add-building' | i18n:loc.ale:textObject }}
-                </a>
-            </li>
-            <li class="twOverflow-button-presets">
-                <a class="btn-red btn-border editor-save">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
-            </li>
-        </ul>
-    </footer>
-
-
 
     <footer class="win-foot">
         <ul class="list-btn list-center">
@@ -231,10 +196,10 @@
                 <a href="#" class="btn-border btn-orange" ng-click="moveDown()">{{ 'presets.move-down' | i18n:loc.ale:textObject }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.PRESETS">
-                <a href="#" class="btn-border btn-orange" ng-click="addBuilding()">{{ 'presets.add-building' | i18n:loc.ale:textObject }}</a>
+                <a href="#" class="btn-border btn-green" ng-click="addBuilding()">{{ 'presets.add-building' | i18n:loc.ale:textObject }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.PRESETS">
-                <a href="#" class="btn-border btn-red" ng-click="saveBuildingOrder()">{{ 'presets.add-building' | i18n:loc.ale:textObject }}</a>
+                <a href="#" class="btn-border btn-red" ng-click="saveBuildingOrder()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
         </ul>
     </footer>

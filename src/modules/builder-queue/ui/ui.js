@@ -27,8 +27,6 @@ define('two/builder/ui', [
     var $scope
     var textObject = 'builder_queue'
     var textObjectCommon = 'common'
-    var buildingOrder = {}
-    var buildingOrderFinal = {}
     var groupList = modelDataService.getGroupList()
     var groups = []
     var activePresetId = null
@@ -66,21 +64,6 @@ define('two/builder/ui', [
         return settings
     }
 
-    var generatePresetList = function () {
-        var presetList = []
-        var presets = $scope.settings[SETTINGS.BUILDING_ORDERS]
-        var id
-
-        for (id in presets) {
-            presetList.push({
-                name: id,
-                value: id
-            })
-        }
-
-        $scope.presetList = presetList
-    }
-
     var buildingLevelReached = function (building, level) {
         var buildingData = modelDataService.getSelectedVillage().getBuildingData()
         return buildingData.getBuildingLevel(building) >= level
@@ -115,7 +98,7 @@ define('two/builder/ui', [
             buildingLevels[BUILDING_TYPES[building]] = 0
         }
 
-        buildingOrder = buildingOrderRaw.map(function (building) {
+        $scope.buildingOrder = buildingOrderRaw.map(function (building) {
             level = ++buildingLevels[building]
             price = buildingData[building].individual_level_costs[level]
             state = 'not-reached'
@@ -141,12 +124,18 @@ define('two/builder/ui', [
         var settings = builderQueue.getSettings()
         var selectedPreset = settings[SETTINGS.BUILDING_PRESET]
         var presetBuildings = settings[SETTINGS.BUILDING_ORDERS][_presetId || selectedPreset]
+        var order = {}
+        var building
 
-        buildingOrderFinal = {}
+        for (building in BUILDING_TYPES) {
+            order[BUILDING_TYPES[building]] = 0
+        }
 
         presetBuildings.forEach(function (building) {
-            buildingOrderFinal[building] = (buildingOrderFinal[building] || 0) + 1
+            order[building]++
         })
+
+        $scope.buildingOrderFinal = order
     }
 
     /**
@@ -230,6 +219,20 @@ define('two/builder/ui', [
                 })
             }
         },
+        updatePresets: function () {
+            var presetList = []
+            var presets = $scope.settings[SETTINGS.BUILDING_ORDERS]
+            var id
+
+            for (id in presets) {
+                presetList.push({
+                    name: id,
+                    value: id
+                })
+            }
+
+            $scope.presetList = presetList
+        },
         updateBuildingOrder: function () {
             generateBuildingOrder()
             generateBuildingOrderFinal()
@@ -269,8 +272,6 @@ define('two/builder/ui', [
             utils.emitNotif('success', $filter('i18n')('general.stopped', $rootScope.loc.ale, textObject))
         })
 
-        generateBuildingsLevelPoints()
-
         interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `__builder_html_main`)
         interfaceOverflow.addStyle('__builder_css_style')
     }
@@ -281,17 +282,18 @@ define('two/builder/ui', [
         $scope.textObjectCommon = textObjectCommon
         $scope.selectedTab = TAB_TYPES.SETTINGS
         $scope.TAB_TYPES = TAB_TYPES
-
+        $scope.SETTINGS = SETTINGS
         $scope.running = running
+        $scope.buildingOrderFinal = {}
+        $scope.buildingOrder = {}
         $scope.settings = parseSettings(builderQueue.getSettings())
         $scope.logs = builderQueue.getLogs()
-        $scope.buildingOrderFinal = buildingOrderFinal
-        $scope.buildingOrder = buildingOrder
         $scope.presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][SETTINGS.BUILDING_PRESET]
         $scope.villageGroups = []
         $scope.presetList = []
         $scope.selectedEditPreset = angular.copy($scope.settings[SETTINGS.BUILDING_PRESET])
 
+        // methods
         $scope.selectTab = selectTab
         $scope.switchBuilder = switchBuilder
         $scope.clearLogs = clearLogs
@@ -301,12 +303,16 @@ define('two/builder/ui', [
         $scope.addBuilding = addBuilding
         $scope.saveBuildingOrder = saveBuildingOrder
 
-        generatePresetList()
+        generateBuildingsLevelPoints()
         generateBuildingOrder()
         generateBuildingOrderFinal()
 
         eventScope = new EventScope('twoverflow_builder_queue_window')
+        eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
+        eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.GROUPS_UPDATED, eventHandlers.updateGroups, true)
+        eventScope.register(eventTypeProvider.GROUPS_CREATED, eventHandlers.updateGroups, true)
+        eventScope.register(eventTypeProvider.GROUPS_DESTROYED, eventHandlers.updateGroups, true)
         eventScope.register(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.updateBuildingOrder, true)
         eventScope.register(eventTypeProvider.BUILDING_UPGRADING, eventHandlers.updateBuildingOrder, true)
         eventScope.register(eventTypeProvider.BUILDING_LEVEL_CHANGED, eventHandlers.updateBuildingOrder, true)
