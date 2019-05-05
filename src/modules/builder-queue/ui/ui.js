@@ -225,6 +225,12 @@ define('two/builder/ui', [
         builderQueue.clearLogs()
     }
 
+    var checkAll = function () {
+        $scope.buildingOrderEditor.forEach(function (item) {
+            item.checked = $scope.checkAllValue
+        })
+    }
+
     var moveUp = function () {
         var copy = angular.copy($scope.buildingOrderEditor)
         var index
@@ -385,6 +391,7 @@ define('two/builder/ui', [
         $scope.villageGroups = []
         $scope.presetList = []
         $scope.selectedEditPreset = angular.copy($scope.settings[SETTINGS.BUILDING_PRESET])
+        $scope.checkAllValue = false
 
         // methods
         $scope.selectTab = selectTab
@@ -395,6 +402,7 @@ define('two/builder/ui', [
         $scope.moveDown = moveDown
         $scope.addBuilding = addBuilding
         $scope.saveBuildingOrder = saveBuildingOrder
+        $scope.checkAll = checkAll
 
         generateBuildingsLevelPoints()
         generateBuildingOrder()

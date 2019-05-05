@@ -129,7 +129,11 @@
                         </colgroup>
                         <tr>
                             <th>#</th>
-                            <th></th>
+                            <th>
+                                <label class="size-26x26 btn-orange icon-26x26-checkbox">
+                                    <input type="checkbox" ng-model="checkAllValue" ng-click="checkAll()" />
+                                </label>
+                            </th>
                             <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
