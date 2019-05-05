@@ -204,6 +204,20 @@ define('two/builder/ui', [
         obj.splice(newIndex, 0, obj.splice(oldIndex, 1)[0])
     }
 
+    var updateVisibleBuildingOrder = function () {
+        var offset = $scope.pagination.buildingOrder.offset
+        var limit = $scope.pagination.buildingOrder.limit
+
+        $scope.visibleBuildingOrder = $scope.buildingOrder.slice(offset, offset + limit)
+    }
+
+    var updateVisibleBuildingOrderEditor = function () {
+        var offset = $scope.pagination.buildingOrderEditor.offset
+        var limit = $scope.pagination.buildingOrderEditor.limit
+
+        $scope.visibleBuildingOrderEditor = $scope.buildingOrderEditor.slice(offset, offset + limit)
+    }
+
     var selectTab = function (tabType) {
         $scope.selectedTab = tabType
     }
@@ -260,6 +274,7 @@ define('two/builder/ui', [
         }
 
         $scope.buildingOrderEditor = copy
+        updateVisibleBuildingOrderEditor()
     }
 
     var moveDown = function () {
@@ -291,6 +306,7 @@ define('two/builder/ui', [
         }
 
         $scope.buildingOrderEditor = copy
+        updateVisibleBuildingOrderEditor()
     }
 
     var addBuilding = function () {
@@ -392,6 +408,7 @@ define('two/builder/ui', [
         $scope.presetList = []
         $scope.selectedEditPreset = angular.copy($scope.settings[SETTINGS.BUILDING_PRESET])
         $scope.checkAllValue = false
+        $scope.pagination = {}
 
         // methods
         $scope.selectTab = selectTab
@@ -408,6 +425,23 @@ define('two/builder/ui', [
         generateBuildingOrder()
         generateBuildingOrderEditor()
         generateBuildingOrderFinal()
+
+        $scope.pagination.buildingOrder = {
+            count: $scope.buildingOrder.length,
+            offset: 0,
+            loader: updateVisibleBuildingOrder,
+            limit: storageService.getPaginationLimit()
+        }
+
+        $scope.pagination.buildingOrderEditor = {
+            count: $scope.buildingOrderEditor.length,
+            offset: 0,
+            loader: updateVisibleBuildingOrderEditor,
+            limit: storageService.getPaginationLimit()
+        }
+
+        updateVisibleBuildingOrder()
+        updateVisibleBuildingOrderEditor()
 
         eventScope = new EventScope('twoverflow_builder_queue_window')
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
