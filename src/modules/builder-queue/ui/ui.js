@@ -274,7 +274,7 @@ define('two/builder/ui', [
                 continue
             }
 
-            if (index === copy.length) {
+            if (index === copy.length - 1) {
                 continue
             }
 
