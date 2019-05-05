@@ -133,8 +133,8 @@
                             <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
-                        <tr ng-repeat="item in buildingOrder track by $index">
-                            <td>{{ $index }}</td>
+                        <tr ng-repeat="item in buildingOrderEditor track by $index" ng-class="{'selected': item.checked}">
+                            <td>{{ $index + 1 }}</td>
                             <td>
                                 <label class="size-26x26 btn-orange icon-26x26-checkbox" ng-class="{'icon-26x26-checkbox-checked': item.checked}">
                                     <input type="checkbox" ng-model="item.checked" />

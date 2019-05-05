@@ -118,6 +118,8 @@ define('two/builder/ui', [
                 state: state
             }
         })
+
+        $scope.buildingOrderEditor = angular.copy($scope.buildingOrder)
     }
 
     var generateBuildingOrderFinal = function (_presetId) {
@@ -168,6 +170,18 @@ define('two/builder/ui', [
         }
     }
 
+    var moveArrayItem = function (obj, oldIndex, newIndex) {
+        if (newIndex >= obj.length) {
+            var i = newIndex - obj.length + 1
+            
+            while (i--) {
+                obj.push(undefined)
+            }
+        }
+
+        obj.splice(newIndex, 0, obj.splice(oldIndex, 1)[0])
+    }
+
     var selectTab = function (tabType) {
         $scope.selectedTab = tabType
     }
@@ -190,11 +204,55 @@ define('two/builder/ui', [
     }
 
     var moveUp = function () {
-        
+        var copy = angular.copy($scope.buildingOrderEditor)
+        var index
+        var item
+
+        for (index = 0; index < copy.length; index++) {
+            item = copy[index]
+
+            if (!item.checked) {
+                continue
+            }
+
+            if (index === 0) {
+                continue
+            }
+
+            if (copy[index - 1].checked) {
+                continue
+            }
+
+            moveArrayItem(copy, index, index - 1)
+        }
+
+        $scope.buildingOrderEditor = copy
     }
 
     var moveDown = function () {
-        
+        var copy = angular.copy($scope.buildingOrderEditor)
+        var index
+        var item
+
+        for (index = copy.length - 1; index >= 0; index--) {
+            item = copy[index]
+
+            if (!item.checked) {
+                continue
+            }
+
+            if (index === copy.length) {
+                continue
+            }
+
+            if (copy[index + 1].checked) {
+                continue
+            }
+
+            moveArrayItem(copy, index, index + 1)
+        }
+
+        $scope.buildingOrderEditor = copy
     }
 
     var addBuilding = function () {
@@ -286,6 +344,7 @@ define('two/builder/ui', [
         $scope.running = running
         $scope.buildingOrderFinal = {}
         $scope.buildingOrder = {}
+        $scope.buildingOrderEditor = {}
         $scope.settings = parseSettings(builderQueue.getSettings())
         $scope.logs = builderQueue.getLogs()
         $scope.presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][SETTINGS.BUILDING_PRESET]
