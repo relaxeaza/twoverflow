@@ -118,8 +118,30 @@ define('two/builder/ui', [
                 state: state
             }
         })
+    }
 
-        $scope.buildingOrderEditor = angular.copy($scope.buildingOrder)
+    var generateBuildingOrderEditor = function (_presetId) {
+        var presetId = _presetId || $scope.settings[SETTINGS.BUILDING_PRESET].value
+        var buildingOrderRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][presetId]
+        var buildingLevels = {}
+        var building
+        var level
+
+        activePresetId = presetId
+
+        for (building in BUILDING_TYPES) {
+            buildingLevels[BUILDING_TYPES[building]] = 0
+        }
+
+        $scope.buildingOrderEditor = buildingOrderRaw.map(function (building) {
+            level = ++buildingLevels[building]
+            
+            return {
+                level: level,
+                building: building,
+                checked: false
+            }
+        })
     }
 
     var generateBuildingOrderFinal = function (_presetId) {
@@ -223,6 +245,11 @@ define('two/builder/ui', [
                 continue
             }
 
+            if (copy[index - 1].building === item.building) {
+                copy[index - 1].level++
+                item.level--
+            }
+
             moveArrayItem(copy, index, index - 1)
         }
 
@@ -247,6 +274,11 @@ define('two/builder/ui', [
 
             if (copy[index + 1].checked) {
                 continue
+            }
+
+            if (copy[index + 1].building === item.building) {
+                copy[index + 1].level--
+                item.level++
             }
 
             moveArrayItem(copy, index, index + 1)
@@ -293,6 +325,7 @@ define('two/builder/ui', [
         },
         updateBuildingOrder: function () {
             generateBuildingOrder()
+            generateBuildingOrderEditor()
             generateBuildingOrderFinal()
         },
         updateLogs: function () {
@@ -301,6 +334,7 @@ define('two/builder/ui', [
         buildingOrdersUpdate: function (event, presetId) {
             if (activePresetId === presetId) {
                 generateBuildingOrder()
+                generateBuildingOrderEditor()
                 generateBuildingOrderFinal()
             }
 
@@ -364,6 +398,7 @@ define('two/builder/ui', [
 
         generateBuildingsLevelPoints()
         generateBuildingOrder()
+        generateBuildingOrderEditor()
         generateBuildingOrderFinal()
 
         eventScope = new EventScope('twoverflow_builder_queue_window')
