@@ -65,10 +65,10 @@
                             <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
-                        <tr ng-repeat="(building, level) in buildingOrderFinal">
-                            <td><span class="building-icon icon-20x20-building-{{ building }}"></span></td>
-                            <td>{{ building | i18n:loc.ale:'building_names' }}</td>
-                            <td>{{ level }}</td>
+                        <tr ng-repeat="item in buildingOrderFinal | orderBy:'order'">
+                            <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
+                            <td>{{ item.building | i18n:loc.ale:'building_names' }}</td>
+                            <td>{{ item.level }}</td>
                         </tr>
                     </table>
 

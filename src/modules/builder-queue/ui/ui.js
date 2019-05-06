@@ -147,16 +147,41 @@ define('two/builder/ui', [
     var generateBuildingOrderFinal = function (_presetId) {
         var selectedPreset = $scope.settings[SETTINGS.BUILDING_PRESET].value
         var presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_presetId || selectedPreset]
-        var order = {}
+        var gameDataBuildings = modelDataService.getGameData().getBuildings()
+        var orderObj = {}
+        var order = []
         var building
+        var buildingId
+        var buildingOrder
 
         for (building in BUILDING_TYPES) {
-            order[BUILDING_TYPES[building]] = 0
+            buildingId = BUILDING_TYPES[building]
+
+            if (buildingId in gameDataBuildings) {
+                buildingOrder = gameDataBuildings[buildingId].order
+            } else {
+                buildingOrder = 99
+            }
+
+            orderObj[buildingId] = {
+                level: 0,
+                order: buildingOrder
+            }
         }
 
         presetBuildings.forEach(function (building) {
-            order[building]++
+            orderObj[building].level++
         })
+
+        for (building in orderObj) {
+            if (orderObj[building].level !== 0) {
+                order.push({
+                    building: building,
+                    level: orderObj[building].level,
+                    order: orderObj[building].order
+                })
+            }
+        }
 
         $scope.buildingOrderFinal = order
     }
