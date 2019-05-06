@@ -82,9 +82,9 @@ define('two/builder/ui', [
         return progress
     }
 
-    var generateBuildingOrder = function (_presetId) {
+    var generateBuildingSequence = function (_presetId) {
         var presetId = _presetId || $scope.settings[SETTINGS.BUILDING_PRESET].value
-        var buildingOrderRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][presetId]
+        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][presetId]
         var buildingData = modelDataService.getGameData().getBuildings()
         var buildingLevels = {}
         var building
@@ -98,7 +98,7 @@ define('two/builder/ui', [
             buildingLevels[BUILDING_TYPES[building]] = 0
         }
 
-        $scope.buildingOrder = buildingOrderRaw.map(function (building) {
+        $scope.buildingSequence = buildingSequenceRaw.map(function (building) {
             level = ++buildingLevels[building]
             price = buildingData[building].individual_level_costs[level]
             state = 'not-reached'
@@ -120,9 +120,9 @@ define('two/builder/ui', [
         })
     }
 
-    var generateBuildingOrderEditor = function (_presetId) {
+    var generateBuildingSequenceEditor = function (_presetId) {
         var presetId = _presetId || $scope.selectedEditPreset.value
-        var buildingOrderRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][presetId]
+        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][presetId]
         var buildingLevels = {}
         var building
         var level
@@ -133,7 +133,7 @@ define('two/builder/ui', [
             buildingLevels[BUILDING_TYPES[building]] = 0
         }
 
-        $scope.buildingOrderEditor = buildingOrderRaw.map(function (building) {
+        $scope.buildingSequenceEditor = buildingSequenceRaw.map(function (building) {
             level = ++buildingLevels[building]
             
             return {
@@ -144,46 +144,36 @@ define('two/builder/ui', [
         })
     }
 
-    var generateBuildingOrderFinal = function (_presetId) {
+    var generateBuildingSequenceFinal = function (_presetId) {
         var selectedPreset = $scope.settings[SETTINGS.BUILDING_PRESET].value
         var presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_presetId || selectedPreset]
         var gameDataBuildings = modelDataService.getGameData().getBuildings()
-        var orderObj = {}
-        var order = []
+        var sequenceObj = {}
+        var sequence = []
         var building
-        var buildingId
-        var buildingOrder
 
-        for (building in BUILDING_TYPES) {
-            buildingId = BUILDING_TYPES[building]
-
-            if (buildingId in gameDataBuildings) {
-                buildingOrder = gameDataBuildings[buildingId].order
-            } else {
-                buildingOrder = 99
-            }
-
-            orderObj[buildingId] = {
+        for (building in gameDataBuildings) {
+            sequenceObj[building] = {
                 level: 0,
-                order: buildingOrder
+                order: gameDataBuildings[building].order
             }
         }
 
         presetBuildings.forEach(function (building) {
-            orderObj[building].level++
+            sequenceObj[building].level++
         })
 
-        for (building in orderObj) {
-            if (orderObj[building].level !== 0) {
-                order.push({
+        for (building in sequenceObj) {
+            if (sequenceObj[building].level !== 0) {
+                sequence.push({
                     building: building,
-                    level: orderObj[building].level,
-                    order: orderObj[building].order
+                    level: sequenceObj[building].level,
+                    order: sequenceObj[building].order
                 })
             }
         }
 
-        $scope.buildingOrderFinal = order
+        $scope.buildingSequenceFinal = sequence
     }
 
     /**
@@ -228,20 +218,20 @@ define('two/builder/ui', [
         obj.splice(newIndex, 0, obj.splice(oldIndex, 1)[0])
     }
 
-    var updateVisibleBuildingOrder = function () {
-        var offset = $scope.pagination.buildingOrder.offset
-        var limit = $scope.pagination.buildingOrder.limit
+    var updateVisibleBuildingSequence = function () {
+        var offset = $scope.pagination.buildingSequence.offset
+        var limit = $scope.pagination.buildingSequence.limit
 
-        $scope.visibleBuildingOrder = $scope.buildingOrder.slice(offset, offset + limit)
-        $scope.pagination.buildingOrder.count = $scope.buildingOrder.length
+        $scope.visibleBuildingSequence = $scope.buildingSequence.slice(offset, offset + limit)
+        $scope.pagination.buildingSequence.count = $scope.buildingSequence.length
     }
 
-    var updateVisibleBuildingOrderEditor = function () {
-        var offset = $scope.pagination.buildingOrderEditor.offset
-        var limit = $scope.pagination.buildingOrderEditor.limit
+    var updateVisibleBuildingSequenceEditor = function () {
+        var offset = $scope.pagination.buildingSequenceEditor.offset
+        var limit = $scope.pagination.buildingSequenceEditor.limit
 
-        $scope.visibleBuildingOrderEditor = $scope.buildingOrderEditor.slice(offset, offset + limit)
-        $scope.pagination.buildingOrderEditor.count = $scope.buildingOrderEditor.length
+        $scope.visibleBuildingSequenceEditor = $scope.buildingSequenceEditor.slice(offset, offset + limit)
+        $scope.pagination.buildingSequenceEditor.count = $scope.buildingSequenceEditor.length
     }
 
     var selectTab = function (tabType) {
@@ -266,13 +256,13 @@ define('two/builder/ui', [
     }
 
     var checkAll = function () {
-        $scope.buildingOrderEditor.forEach(function (item) {
+        $scope.buildingSequenceEditor.forEach(function (item) {
             item.checked = $scope.checkAllValue
         })
     }
 
     var moveUp = function () {
-        var copy = angular.copy($scope.buildingOrderEditor)
+        var copy = angular.copy($scope.buildingSequenceEditor)
         var index
         var item
 
@@ -299,12 +289,12 @@ define('two/builder/ui', [
             moveArrayItem(copy, index, index - 1)
         }
 
-        $scope.buildingOrderEditor = copy
-        updateVisibleBuildingOrderEditor()
+        $scope.buildingSequenceEditor = copy
+        updateVisibleBuildingSequenceEditor()
     }
 
     var moveDown = function () {
-        var copy = angular.copy($scope.buildingOrderEditor)
+        var copy = angular.copy($scope.buildingSequenceEditor)
         var index
         var item
 
@@ -331,15 +321,15 @@ define('two/builder/ui', [
             moveArrayItem(copy, index, index + 1)
         }
 
-        $scope.buildingOrderEditor = copy
-        updateVisibleBuildingOrderEditor()
+        $scope.buildingSequenceEditor = copy
+        updateVisibleBuildingSequenceEditor()
     }
 
     var addBuilding = function () {
         
     }
 
-    var saveBuildingOrder = function () {
+    var saveBuildingSequence = function () {
 
     }
 
@@ -378,28 +368,28 @@ define('two/builder/ui', [
 
             $scope.presetList = presetList
         },
-        updateBuildingOrder: function () {
-            generateBuildingOrder()
-            generateBuildingOrderFinal()
-            updateVisibleBuildingOrder()
+        updateBuildingSequence: function () {
+            generateBuildingSequence()
+            generateBuildingSequenceFinal()
+            updateVisibleBuildingSequence()
         },
-        updateBuildingOrderEditor: function () {
-            generateBuildingOrderEditor()
-            updateVisibleBuildingOrderEditor()
+        updateBuildingSequenceEditor: function () {
+            generateBuildingSequenceEditor()
+            updateVisibleBuildingSequenceEditor()
             $scope.checkAllValue = false
         },
         updateLogs: function () {
             $scope.logs = builderQueue.getLogs()
         },
-        buildingOrdersUpdate: function (event, presetId) {
+        buildingSequenceUpdate: function (event, presetId) {
             if (activePresetId === presetId) {
-                generateBuildingOrder()
-                generateBuildingOrderFinal()
+                generateBuildingSequence()
+                generateBuildingSequenceFinal()
             }
 
             utils.emitNotif('success', $filter('i18n')('preset.updated', $rootScope.loc.ale, textObject, presetId))
         },
-        buildingOrdersAdd: function (event, presetId) {
+        buildingSequenceAdd: function (event, presetId) {
             utils.emitNotif('success', $filter('i18n')('preset.added', $rootScope.loc.ale, textObject, presetId))
         }
     }
@@ -435,9 +425,9 @@ define('two/builder/ui', [
         $scope.TAB_TYPES = TAB_TYPES
         $scope.SETTINGS = SETTINGS
         $scope.running = running
-        $scope.buildingOrderFinal = {}
-        $scope.buildingOrder = {}
-        $scope.buildingOrderEditor = {}
+        $scope.buildingSequenceFinal = {}
+        $scope.buildingSequence = {}
+        $scope.buildingSequenceEditor = {}
         $scope.settings = parseSettings(builderQueue.getSettings())
         $scope.logs = builderQueue.getLogs()
         $scope.presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][SETTINGS.BUILDING_PRESET]
@@ -455,35 +445,35 @@ define('two/builder/ui', [
         $scope.moveUp = moveUp
         $scope.moveDown = moveDown
         $scope.addBuilding = addBuilding
-        $scope.saveBuildingOrder = saveBuildingOrder
+        $scope.saveBuildingSequence = saveBuildingSequence
         $scope.checkAll = checkAll
 
         eventHandlers.updateGroups()
         eventHandlers.updatePresets()
         generateBuildingsLevelPoints()
-        generateBuildingOrder()
-        generateBuildingOrderEditor()
-        generateBuildingOrderFinal()
+        generateBuildingSequence()
+        generateBuildingSequenceEditor()
+        generateBuildingSequenceFinal()
 
-        $scope.pagination.buildingOrder = {
-            count: $scope.buildingOrder.length,
+        $scope.pagination.buildingSequence = {
+            count: $scope.buildingSequence.length,
             offset: 0,
-            loader: updateVisibleBuildingOrder,
+            loader: updateVisibleBuildingSequence,
             limit: storageService.getPaginationLimit()
         }
 
-        $scope.pagination.buildingOrderEditor = {
-            count: $scope.buildingOrderEditor.length,
+        $scope.pagination.buildingSequenceEditor = {
+            count: $scope.buildingSequenceEditor.length,
             offset: 0,
-            loader: updateVisibleBuildingOrderEditor,
+            loader: updateVisibleBuildingSequenceEditor,
             limit: storageService.getPaginationLimit()
         }
 
-        updateVisibleBuildingOrder()
-        updateVisibleBuildingOrderEditor()
+        updateVisibleBuildingSequence()
+        updateVisibleBuildingSequenceEditor()
 
-        $scope.$watch('settings[SETTINGS.BUILDING_PRESET].value', eventHandlers.updateBuildingOrder)
-        $scope.$watch('selectedEditPreset.value', eventHandlers.updateBuildingOrderEditor)
+        $scope.$watch('settings[SETTINGS.BUILDING_PRESET].value', eventHandlers.updateBuildingSequence)
+        $scope.$watch('selectedEditPreset.value', eventHandlers.updateBuildingSequenceEditor)
 
         eventScope = new EventScope('twoverflow_builder_queue_window')
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
@@ -491,15 +481,15 @@ define('two/builder/ui', [
         eventScope.register(eventTypeProvider.GROUPS_UPDATED, eventHandlers.updateGroups, true)
         eventScope.register(eventTypeProvider.GROUPS_CREATED, eventHandlers.updateGroups, true)
         eventScope.register(eventTypeProvider.GROUPS_DESTROYED, eventHandlers.updateGroups, true)
-        eventScope.register(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.updateBuildingOrder, true)
-        eventScope.register(eventTypeProvider.BUILDING_UPGRADING, eventHandlers.updateBuildingOrder, true)
-        eventScope.register(eventTypeProvider.BUILDING_LEVEL_CHANGED, eventHandlers.updateBuildingOrder, true)
-        eventScope.register(eventTypeProvider.BUILDING_TEARING_DOWN, eventHandlers.updateBuildingOrder, true)
-        eventScope.register(eventTypeProvider.VILLAGE_BUILDING_QUEUE_CHANGED, eventHandlers.updateBuildingOrder, true)
+        eventScope.register(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.updateBuildingSequence, true)
+        eventScope.register(eventTypeProvider.BUILDING_UPGRADING, eventHandlers.updateBuildingSequence, true)
+        eventScope.register(eventTypeProvider.BUILDING_LEVEL_CHANGED, eventHandlers.updateBuildingSequence, true)
+        eventScope.register(eventTypeProvider.BUILDING_TEARING_DOWN, eventHandlers.updateBuildingSequence, true)
+        eventScope.register(eventTypeProvider.VILLAGE_BUILDING_QUEUE_CHANGED, eventHandlers.updateBuildingSequence, true)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_JOB_STARTED, eventHandlers.updateLogs)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS, eventHandlers.updateLogs)
-        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, eventHandlers.buildingOrdersUpdate)
-        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, eventHandlers.buildingOrdersAdd)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, eventHandlers.buildingSequenceUpdate)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, eventHandlers.buildingSequenceAdd)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_builder_queue_window', $scope)
     }

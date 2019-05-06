@@ -54,7 +54,7 @@
                         </tbody>
                     </table>
 
-                    <h5 class="twx-section">{{ 'settings.buildingOrderFinal' | i18n:loc.ale:textObject }}</h5>
+                    <h5 class="twx-section">{{ 'settings.buildingSequenceFinal' | i18n:loc.ale:textObject }}</h5>
                     <table class="tbl-border-light tbl-striped header-center building-order-final">
                         <colgroup>
                             <col width="5%">
@@ -65,16 +65,16 @@
                             <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
-                        <tr ng-repeat="item in buildingOrderFinal | orderBy:'order'">
+                        <tr ng-repeat="item in buildingSequenceFinal | orderBy:'order'">
                             <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
                             <td>{{ item.building | i18n:loc.ale:'building_names' }}</td>
                             <td>{{ item.level }}</td>
                         </tr>
                     </table>
 
-                    <h5 class="twx-section">{{ 'settings.buildingOrder' | i18n:loc.ale:textObject }}</h5>
+                    <h5 class="twx-section">{{ 'settings.buildingSequence' | i18n:loc.ale:textObject }}</h5>
                     
-                    <div class="page-wrap" pagination="pagination.buildingOrder"></div>
+                    <div class="page-wrap" pagination="pagination.buildingSequence"></div>
                     <table class="tbl-border-light tbl-striped header-center building-order">
                         <colgroup>
                             <col width="5%">
@@ -91,7 +91,7 @@
                             <th>{{ 'points' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'costs' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
-                        <tr ng-repeat="item in visibleBuildingOrder" class="{{ item.state }}">
+                        <tr ng-repeat="item in visibleBuildingSequence" class="{{ item.state }}">
                             <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
                             <td>{{ item.building | i18n:loc.ale:'building_names' }}</td>
                             <td>{{ item.level }}</td>
@@ -104,7 +104,7 @@
                             </td>
                         </tr>
                     </table>
-                    <div class="page-wrap" pagination="pagination.buildingOrder"></div>
+                    <div class="page-wrap" pagination="pagination.buildingSequence"></div>
                 </div>
 
                 <div ng-show="selectedTab === TAB_TYPES.PRESETS">
@@ -122,7 +122,7 @@
                         </tbody>
                     </table>
 
-                    <div class="page-wrap" pagination="pagination.buildingOrderEditor"></div>
+                    <div class="page-wrap" pagination="pagination.buildingSequenceEditor"></div>
                     <table class="tbl-border-light tbl-striped header-center building-order-editor">
                         <colgroup>
                             <col width="5%">
@@ -141,7 +141,7 @@
                             <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
-                        <tr ng-repeat="item in visibleBuildingOrderEditor track by $index" ng-class="{'selected': item.checked}">
+                        <tr ng-repeat="item in visibleBuildingSequenceEditor track by $index" ng-class="{'selected': item.checked}">
                             <td>{{ $index + 1 }}</td>
                             <td>
                                 <label class="size-26x26 btn-orange icon-26x26-checkbox" ng-class="{'icon-26x26-checkbox-checked': item.checked}">
@@ -152,7 +152,7 @@
                             <td>{{ item.level }}</td>
                         </tr>
                     </table>
-                    <div class="page-wrap" pagination="pagination.buildingOrderEditor"></div>
+                    <div class="page-wrap" pagination="pagination.buildingSequenceEditor"></div>
                 </div>
 
                 <div ng-show="selectedTab === TAB_TYPES.LOGS">
@@ -208,7 +208,7 @@
                 <a href="#" class="btn-border btn-green" ng-click="addBuilding()">{{ 'presets.add-building' | i18n:loc.ale:textObject }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.PRESETS">
-                <a href="#" class="btn-border btn-red" ng-click="saveBuildingOrder()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
+                <a href="#" class="btn-border btn-red" ng-click="saveBuildingSequence()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
         </ul>
     </footer>
