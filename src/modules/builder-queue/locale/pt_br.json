@@ -9,7 +9,7 @@
         "settings.villageGroups": "Construir apenas em aldeias do grupo",
         "settings.buildingPreset": "Predefinições de ordens",
         "settings.buildingSequence": "Sequência das construções",
-        "settings.buildingSequenceFinal": "Nível dos final das construções",
+        "settings.buildingSequenceFinal": "Nível final das construções",
         "settings.saved": "Configurações salvas!",
         "logs.noBuilds": "Nenhuma construção iniciada",
         "logs.clear": "Limpar registros",
