@@ -51,8 +51,8 @@ define('two/builder/ui', [
             }
         } else {
             settings[SETTINGS.GROUP_VILLAGES] = {
-                name: $filter('i18n')('select_group', $rootScope.loc.ale, textObject),
-                value: null
+                name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
+                value: false
             }
         }
 
@@ -121,7 +121,7 @@ define('two/builder/ui', [
     }
 
     var generateBuildingOrderEditor = function (_presetId) {
-        var presetId = _presetId || $scope.settings[SETTINGS.BUILDING_PRESET].value
+        var presetId = _presetId || $scope.selectedEditPreset.value
         var buildingOrderRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][presetId]
         var buildingLevels = {}
         var building
@@ -145,9 +145,8 @@ define('two/builder/ui', [
     }
 
     var generateBuildingOrderFinal = function (_presetId) {
-        var settings = builderQueue.getSettings()
-        var selectedPreset = settings[SETTINGS.BUILDING_PRESET]
-        var presetBuildings = settings[SETTINGS.BUILDING_ORDERS][_presetId || selectedPreset]
+        var selectedPreset = $scope.settings[SETTINGS.BUILDING_PRESET].value
+        var presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_presetId || selectedPreset]
         var order = {}
         var building
 
@@ -209,6 +208,7 @@ define('two/builder/ui', [
         var limit = $scope.pagination.buildingOrder.limit
 
         $scope.visibleBuildingOrder = $scope.buildingOrder.slice(offset, offset + limit)
+        $scope.pagination.buildingOrder.count = $scope.buildingOrder.length
     }
 
     var updateVisibleBuildingOrderEditor = function () {
@@ -216,6 +216,7 @@ define('two/builder/ui', [
         var limit = $scope.pagination.buildingOrderEditor.limit
 
         $scope.visibleBuildingOrderEditor = $scope.buildingOrderEditor.slice(offset, offset + limit)
+        $scope.pagination.buildingOrderEditor.count = $scope.buildingOrderEditor.length
     }
 
     var selectTab = function (tabType) {
@@ -323,12 +324,19 @@ define('two/builder/ui', [
 
             groups = utils.obj2selectOptions(groupList.getGroups(), true)
 
+            $scope.villageGroups.push({
+                name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
+                value: false
+            })
+
             for (id in groups) {
-                $scope.villageGroups.push({
-                    name: groups[id].name,
-                    value: id,
-                    leftIcon: groups[id].icon
-                })
+                if (groups.hasOwnProperty(id)) {
+                    $scope.villageGroups.push({
+                        name: groups[id].name,
+                        value: id,
+                        leftIcon: groups[id].leftIcon
+                    })
+                }
             }
         },
         updatePresets: function () {
@@ -347,8 +355,13 @@ define('two/builder/ui', [
         },
         updateBuildingOrder: function () {
             generateBuildingOrder()
-            generateBuildingOrderEditor()
             generateBuildingOrderFinal()
+            updateVisibleBuildingOrder()
+        },
+        updateBuildingOrderEditor: function () {
+            generateBuildingOrderEditor()
+            updateVisibleBuildingOrderEditor()
+            $scope.checkAllValue = false
         },
         updateLogs: function () {
             $scope.logs = builderQueue.getLogs()
@@ -356,7 +369,6 @@ define('two/builder/ui', [
         buildingOrdersUpdate: function (event, presetId) {
             if (activePresetId === presetId) {
                 generateBuildingOrder()
-                generateBuildingOrderEditor()
                 generateBuildingOrderFinal()
             }
 
@@ -421,6 +433,8 @@ define('two/builder/ui', [
         $scope.saveBuildingOrder = saveBuildingOrder
         $scope.checkAll = checkAll
 
+        eventHandlers.updateGroups()
+        eventHandlers.updatePresets()
         generateBuildingsLevelPoints()
         generateBuildingOrder()
         generateBuildingOrderEditor()
@@ -442,6 +456,9 @@ define('two/builder/ui', [
 
         updateVisibleBuildingOrder()
         updateVisibleBuildingOrderEditor()
+
+        $scope.$watch('settings[SETTINGS.BUILDING_PRESET].value', eventHandlers.updateBuildingOrder)
+        $scope.$watch('selectedEditPreset.value', eventHandlers.updateBuildingOrderEditor)
 
         eventScope = new EventScope('twoverflow_builder_queue_window')
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
