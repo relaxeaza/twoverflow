@@ -419,8 +419,17 @@ define('two/builder/ui', [
         updateVisibleBuildingSequenceEditor()
     }
 
-    var saveBuildingSequence = function () {
+    var parseBuildingSequence = function (sequence) {
+        return sequence.map(function (item) {
+            return item.building
+        })
+    }
 
+    var saveBuildingSequence = function () {
+        var selectedPreset = $scope.selectedEditPreset.value
+        var parsedSequence = parseBuildingSequence($scope.buildingSequenceEditor)
+
+        builderQueue.updateBuildingOrder(selectedPreset, parsedSequence)
     }
 
     var eventHandlers = {
@@ -471,14 +480,23 @@ define('two/builder/ui', [
             $scope.logs = builderQueue.getLogs()
         },
         buildingSequenceUpdate: function (event, presetId) {
+            var settings = builderQueue.getSettings()
+
+            $scope.settings[SETTINGS.BUILDING_ORDERS][presetId] = settings[SETTINGS.BUILDING_ORDERS][presetId]
+
             if (activePresetId === presetId) {
                 generateBuildingSequence()
                 generateBuildingSequenceFinal()
+                updateVisibleBuildingSequence()
             }
 
             utils.emitNotif('success', $filter('i18n')('preset.updated', $rootScope.loc.ale, textObject, presetId))
         },
         buildingSequenceAdd: function (event, presetId) {
+            var settings = builderQueue.getSettings()
+            
+            $scope.settings[SETTINGS.BUILDING_ORDERS][presetId] = settings[SETTINGS.BUILDING_ORDERS][presetId]
+            eventHandlers.updatePresets()
             utils.emitNotif('success', $filter('i18n')('preset.added', $rootScope.loc.ale, textObject, presetId))
         }
     }

@@ -2,7 +2,7 @@ define('two/builder', [
     'two/builder/settings',
     'two/builder/settingsMap',
     'two/utils',
-    'two/eventQueue',
+    'queues/EventQueue',
     'two/ready',
     'Lockr',
     'conf/upgradeabilityStates',
