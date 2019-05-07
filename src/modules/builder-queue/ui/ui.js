@@ -33,6 +33,7 @@ define('two/builder/ui', [
     var selectedEditPreset
     var buildingsLevelPoints = {}
     var running = false
+    var gameDataBuildings
 
     var TAB_TYPES = {
         SETTINGS: 'settings',
@@ -125,7 +126,6 @@ define('two/builder/ui', [
         var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][presetId]
         var buildingLevels = {}
         var building
-        var level
 
         activePresetId = presetId
 
@@ -134,20 +134,52 @@ define('two/builder/ui', [
         }
 
         $scope.buildingSequenceEditor = buildingSequenceRaw.map(function (building) {
-            level = ++buildingLevels[building]
-            
             return {
-                level: level,
+                level: ++buildingLevels[building],
                 building: building,
                 checked: false
             }
         })
     }
 
+    var updateBuildingSequenceEditorLevels = function (sequence, building) {
+        var buildingLevel = 0
+        var modifiedSequence = []
+        var i
+        var item
+        var limitExceeded = false
+
+        for (i = 0; i < sequence.length; i++) {
+            item = sequence[i]
+
+            if (item.building === building) {
+                buildingLevel++
+
+                if (buildingLevel > gameDataBuildings[building].max_level) {
+                    limitExceeded = true
+                    break
+                }
+
+                modifiedSequence.push({
+                    level: buildingLevel,
+                    building: building,
+                    checked: false
+                })
+            } else {
+                modifiedSequence.push(item)
+            }
+        }
+
+        if (limitExceeded) {
+            return false
+        }
+
+        return modifiedSequence
+    }
+
     var generateBuildingSequenceFinal = function (_presetId) {
         var selectedPreset = $scope.settings[SETTINGS.BUILDING_PRESET].value
         var presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_presetId || selectedPreset]
-        var gameDataBuildings = modelDataService.getGameData().getBuildings()
         var sequenceObj = {}
         var sequence = []
         var building
@@ -325,8 +357,63 @@ define('two/builder/ui', [
         updateVisibleBuildingSequenceEditor()
     }
 
-    var addBuilding = function () {
+    var addBuilding = function (building, position) {
+        var index = position - 1
+        var clonedSequence = $scope.buildingSequenceEditor.slice()
+        var updatedSequence
         
+        clonedSequence.splice(index, 0, {
+            level: null,
+            building: building,
+            checked: false
+        })
+
+        updatedSequence = updateBuildingSequenceEditorLevels(clonedSequence, building)
+
+        if (!updatedSequence) {
+            return false
+        }
+
+        $scope.buildingSequenceEditor = updatedSequence
+        updateVisibleBuildingSequenceEditor()
+
+        return true
+    }
+
+    var openAddBuildingModal = function () {
+        var modalScope = $rootScope.$new()
+        var building
+
+        modalScope.buildings = []
+        modalScope.position = 1
+        modalScope.buildingSequenceCount = $scope.buildingSequence.length
+        modalScope.selectedBuilding = {
+            name: $filter('i18n')(BUILDING_TYPES.HEADQUARTER, $rootScope.loc.ale, 'building_names'),
+            value: BUILDING_TYPES.HEADQUARTER
+        }
+
+        for (building in gameDataBuildings) {
+            modalScope.buildings.push({
+                name: $filter('i18n')(building, $rootScope.loc.ale, 'building_names'),
+                value: building
+            })
+        }
+
+        modalScope.add = function () {
+            var building = modalScope.selectedBuilding.value
+            var position = modalScope.position
+            var buildingName = $filter('i18n')(building, $rootScope.loc.ale, 'building_names')
+            var buildingLimit = gameDataBuildings[building].max_level
+
+            if (addBuilding(building, position)) {
+                modalScope.closeWindow()
+                utils.emitNotif('success', $filter('i18n')('add_building_success', $rootScope.loc.ale, textObject, buildingName, position))
+            } else {
+                utils.emitNotif('error', $filter('i18n')('add_building_limit_exceeded', $rootScope.loc.ale, textObject, buildingName, buildingLimit))
+            }
+        }
+
+        windowManagerService.getModal('!twoverflow_builder_queue_add_building_modal', modalScope)
     }
 
     var saveBuildingSequence = function () {
@@ -395,6 +482,8 @@ define('two/builder/ui', [
     }
 
     var init = function () {
+        gameDataBuildings = modelDataService.getGameData().getBuildings()
+
         var opener = new FrontButton('Builder', {
             classHover: false,
             classBlur: false,
@@ -414,6 +503,7 @@ define('two/builder/ui', [
         })
 
         interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `__builder_html_main`)
+        interfaceOverflow.addTemplate('twoverflow_builder_queue_add_building_modal', `__builder_html_modal-add-building`)
         interfaceOverflow.addStyle('__builder_css_style')
     }
 
@@ -444,6 +534,7 @@ define('two/builder/ui', [
         $scope.saveSettings = saveSettings
         $scope.moveUp = moveUp
         $scope.moveDown = moveDown
+        $scope.openAddBuildingModal = openAddBuildingModal
         $scope.addBuilding = addBuilding
         $scope.saveBuildingSequence = saveBuildingSequence
         $scope.checkAll = checkAll

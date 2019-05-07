@@ -20,8 +20,13 @@
         "presets.select-to-edit": "Select a preset to edit",
         "presets.edit-preset": "Edit preset",
         "presets.presets": "— Presets —",
-        "preset.updated": "Building order preset \"%{presetId}\" updated",
+        "preset.updated": "Building order preset \"%d\" updated",
         "preset.added": "Building order preset \"%{presetId}\" added",
-        "select_group": "Select a group"
+        "select_group": "Select a group",
+        "add_building_success": "%d has added at position %d",
+        "add_building_limit_exceeded": "%d reached maximum level (%d)"
+    },
+    "builder_queue_add_building_modal": {
+        "title": "Add new building"
     }
 }

@@ -22,6 +22,11 @@
         "presets.presets": "— Predefinições —",
         "preset.updated": "Predefinição de ordem \"%d\" atualizada",
         "preset.added": "Predefinição de ordem \"%{presetId}\" adicionada",
-        "select_group": "Selecione um grupo"
+        "select_group": "Selecione um grupo",
+        "add_building_success": "%d foi adicionado à posição %d",
+        "add_building_limit_exceeded": "%d chegou ao nível máximo (%d)"
+    },
+    "builder_queue_add_building_modal": {
+        "title": "Adicionar novo edifício"
     }
 }
