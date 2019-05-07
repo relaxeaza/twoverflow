@@ -132,23 +132,23 @@
                             <col width="10%">
                         </colgroup>
                         <tr>
-                            <th tooltip="" tooltip-content="{{ 'position' | i18n:loc.ale:textObject }}">#</th>
                             <th>
                                 <label class="size-26x26 btn-orange icon-26x26-checkbox" ng-class="{'icon-26x26-checkbox-checked': checkAllValue}">
                                     <input type="checkbox" ng-model="checkAllValue" ng-click="checkAll()" />
                                 </label>
                             </th>
+                            <th tooltip="" tooltip-content="{{ 'position' | i18n:loc.ale:textObject }}">#</th>
                             <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'actions' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
                         <tr ng-repeat="item in visibleBuildingSequenceEditor track by $index" ng-class="{'selected': item.checked}">
-                            <td>{{ pagination.buildingSequenceEditor.offset + $index + 1 }}</td>
                             <td>
                                 <label class="size-26x26 btn-orange icon-26x26-checkbox" ng-class="{'icon-26x26-checkbox-checked': item.checked}">
                                     <input type="checkbox" ng-model="item.checked" />
                                 </label>
                             </td>
+                            <td>{{ pagination.buildingSequenceEditor.offset + $index + 1 }}</td>
                             <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span> {{ item.building | i18n:loc.ale:'building_names' }}</td>
                             <td>{{ item.level }}</td>
                             <td><a href="#" class="size-20x20 btn-red icon-20x20-close" ng-click="removeBuildingEditor(pagination.buildingSequenceEditor.offset + $index)" tooltip="" tooltip-content="{{ 'remove_building' | i18n:loc.ale:textObject }}"></a></td>
