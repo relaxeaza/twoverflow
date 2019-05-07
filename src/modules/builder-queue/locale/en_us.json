@@ -25,7 +25,8 @@
         "select_group": "Select a group",
         "add_building_success": "%d has added at position %d",
         "add_building_limit_exceeded": "%d reached maximum level (%d)",
-        "position": "Position"
+        "position": "Position",
+        "remove_building": "Remove building from list"
     },
     "builder_queue_add_building_modal": {
         "title": "Add new building"

@@ -359,22 +359,22 @@ define('two/builder/ui', [
 
     var addBuilding = function (building, position) {
         var index = position - 1
-        var clonedSequence = $scope.buildingSequenceEditor.slice()
-        var updatedSequence
-        
-        clonedSequence.splice(index, 0, {
+        var newSequence = $scope.buildingSequenceEditor.slice()
+        var updated
+
+        newSequence.splice(index, 0, {
             level: null,
             building: building,
             checked: false
         })
 
-        updatedSequence = updateBuildingSequenceEditorLevels(clonedSequence, building)
+        newSequence = updateBuildingSequenceEditorLevels(newSequence, building)
 
-        if (!updatedSequence) {
+        if (!newSequence) {
             return false
         }
 
-        $scope.buildingSequenceEditor = updatedSequence
+        $scope.buildingSequenceEditor = newSequence
         updateVisibleBuildingSequenceEditor()
 
         return true
@@ -414,6 +414,15 @@ define('two/builder/ui', [
         }
 
         windowManagerService.getModal('!twoverflow_builder_queue_add_building_modal', modalScope)
+    }
+
+    var removeBuildingEditor = function (index) {
+        var building = $scope.buildingSequenceEditor[index].building
+
+        $scope.buildingSequenceEditor.splice(index, 1)
+        $scope.buildingSequenceEditor = updateBuildingSequenceEditorLevels($scope.buildingSequenceEditor, building)
+
+        updateVisibleBuildingSequenceEditor()
     }
 
     var saveBuildingSequence = function () {
@@ -538,6 +547,7 @@ define('two/builder/ui', [
         $scope.addBuilding = addBuilding
         $scope.saveBuildingSequence = saveBuildingSequence
         $scope.checkAll = checkAll
+        $scope.removeBuildingEditor = removeBuildingEditor
 
         eventHandlers.updateGroups()
         eventHandlers.updatePresets()

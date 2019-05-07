@@ -75,6 +75,8 @@
         "reset": "Resetar",
         "here": "aqui",
         "disabled": "— Desativado —",
-        "cancel": "Cancelar"
+        "cancel": "Cancelar",
+        "actions": "Ações",
+        "remove": "Remover"
     }
 }
