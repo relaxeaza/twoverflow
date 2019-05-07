@@ -34,7 +34,6 @@
         "title": "Adicionar novo edifício"
     },
     "builder_queue_name_sequence_modal": {
-        "title": "Nomear sequência",
-        "description": "Nomeia a nova sequência"
+        "title": "Nomear sequência"
     }
 }

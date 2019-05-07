@@ -34,7 +34,6 @@
         "title": "Add new building"
     },
     "builder_queue_name_sequence_modal": {
-        "title": "Sequence name",
-        "description": "Name the new sequence"
+        "title": "Sequence name"
     }
 }

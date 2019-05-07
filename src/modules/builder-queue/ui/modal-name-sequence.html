@@ -8,32 +8,11 @@
     <div class="win-main" scrollbar="">
         <div class="box-paper">
             <div class="scroll-wrap">
-                <table>
-                <table>
-                    <colgroup>
-                        <col width="150">
-                        <col width="*">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td class="content cell-top">
-                                <div class="box-border-shadow">
-                                    <div class="box-border-dark" style="display: inline-block">
-                                        <div class="size-152x152 btn-orange icon-152x152-attention"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="content cell-top">
-                                <span>{{ 'description' | i18n:loc.ale:textObject }}</span>
-                                <div class="unit-border box-input">
-                                    <form ng-submit="submit()">
-                                        <input type="text" class="input-border input-margin-top" focus="true" ng-model="name" />
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="box-border-light input-wrapper">
+                    <form ng-submit="submit()">
+                        <input type="text" focus="true" ng-model="name" minlength="3" />
+                    </form>
+                </div>
             </div>
         </div>
     </div>
