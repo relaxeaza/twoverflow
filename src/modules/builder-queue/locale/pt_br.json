@@ -23,10 +23,12 @@
         "position": "Posição",
         "remove_building": "Remover edifício da lista",
         "clone": "Clonar",
-        "tooltip_clone": "Crie uma nova sequência a partir da sequência selecionada",
+        "tooltip_clone": "Criar uma nova sequência a partir da sequência selecionada",
+        "tooltip_remove_sequence": "Remover sequência selecionada",
         "name_sequence_min_lenght": "O nome da sequência deve ter pelo menos 3 caracteres.",
         "sequence_created": "Nova sequência %d criada.",
         "sequence_updated": "Sequência %d atualizada.",
+        "sequence_removed": "Sequência %d removida.",
         "error_sequence_exits": "Esta sequência já existe.",
         "error_sequence_invalid": "Algum valor da sequência é inválido."
     },
@@ -35,5 +37,9 @@
     },
     "builder_queue_name_sequence_modal": {
         "title": "Nomear sequência"
+    },
+    "builder_queue_remove_sequence_modal": {
+        "title": "Remover sequência",
+        "text": "Tem certeza que deseja remover esta sequência? Se esta sequência estiver ativa, outra será selecionada e o BuilderQueue será parado."
     }
 }

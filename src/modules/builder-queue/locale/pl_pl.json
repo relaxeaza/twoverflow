@@ -24,9 +24,11 @@
         "remove_building": "Remove building from list",
         "clone": "Clone",
         "tooltip_clone": "Crate a new sequence from the selected sequence",
+        "tooltip_remove_sequence": "Remove selected sequence",
         "name_sequence_min_lenght": "The sequence name must have at least 3 character.",
         "sequence_created": "New sequence %d created.",
         "sequence_updated": "Sequence %d updated.",
+        "sequence_removed": "Sequence %d removed.",
         "error_sequence_exits": "This sequence already exists.",
         "error_sequence_invalid": "Some sequence's value is invalid."
     },
@@ -35,5 +37,9 @@
     },
     "builder_queue_name_sequence_modal": {
         "title": "Sequence name"
+    },
+    "builder_queue_remove_sequence_modal": {
+        "title": "Remove sequence",
+        "text": "Are you sure to remove this sequence? If this sequence is the active one, another sequence will be selected and the BuilderQueue stopped."
     }
 }

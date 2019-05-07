@@ -349,5 +349,15 @@ define('two/builder', [
         return true
     }
 
+    builderQueue.removeSequence = function (id) {
+        if (!(id in settings[SETTINGS.BUILDING_ORDERS])) {
+            return ERROR_CODES.SEQUENCE_NO_EXISTS
+        }
+
+        delete settings[SETTINGS.BUILDING_ORDERS][id]
+        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_REMOVED, id)
+    }
+
     return builderQueue
 })

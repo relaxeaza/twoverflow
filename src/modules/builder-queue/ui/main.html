@@ -120,6 +120,7 @@
                                 <td>
                                     <div class="select-sequence-editor" select="" list="sequenceList" selected="editorView.selectedSequence" drop-down="true"></div>
                                     <a class="btn btn-orange clone-sequence" ng-click="editorView.modal.nameSequence()" tooltip="" tooltip-content="{{ 'tooltip_clone' | i18n:loc.ale:textObject }}">{{ 'clone' | i18n:loc.ale:textObject }}</a>
+                                    <a href="#" class="btn-red remove-sequence icon-20x20-close" ng-click="editorView.modal.removeSequence()" tooltip="" tooltip-content="{{ 'tooltip_remove_sequence' | i18n:loc.ale:textObject }}"></a>
                                 </td>
                             </tr>
                         </tbody>

@@ -31,7 +31,6 @@ define('two/builder/ui', [
     var textObjectCommon = 'common'
     var groupList = modelDataService.getGroupList()
     var groups = []
-    var activeSequence = null
     var buildingsLevelPoints = {}
     var running = false
     var gameDataBuildings
@@ -132,8 +131,18 @@ define('two/builder/ui', [
         return true
     }
 
-    settingsView.generateBuildingSequence = function (_sequenceId) {
-        var sequenceId = _sequenceId || $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
+    var selectSome = function (obj) {
+        for (var i in obj) {
+            if (obj.hasOwnProperty(i)) {
+                return i
+            }
+        }
+
+        return false
+    }
+
+    settingsView.generateBuildingSequence = function () {
+        var sequenceId = $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
         var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
         var buildingData = modelDataService.getGameData().getBuildings()
         var buildingLevels = {}
@@ -141,8 +150,6 @@ define('two/builder/ui', [
         var level
         var state
         var price
-
-        activeSequence = sequenceId
 
         for (building in BUILDING_TYPES) {
             buildingLevels[BUILDING_TYPES[building]] = 0
@@ -363,13 +370,11 @@ define('two/builder/ui', [
         return modifiedSequence
     }
 
-    editorView.generateBuildingSequence = function (_sequenceId) {
-        var sequenceId = _sequenceId || editorView.selectedSequence.value
+    editorView.generateBuildingSequence = function () {
+        var sequenceId = editorView.selectedSequence.value
         var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
         var buildingLevels = {}
         var building
-
-        activeSequence = sequenceId
 
         for (building in BUILDING_TYPES) {
             buildingLevels[BUILDING_TYPES[building]] = 0
@@ -390,6 +395,27 @@ define('two/builder/ui', [
 
         editorView.visibleBuildingSequence = editorView.buildingSequence.slice(offset, offset + limit)
         $scope.pagination.buildingSequenceEditor.count = editorView.buildingSequence.length
+    }
+
+    editorView.modal.removeSequence = function () {
+        var modalScope = $rootScope.$new()
+        var textObject = 'builder_queue_remove_sequence_modal'
+
+        modalScope.title = $filter('i18n')('title', $rootScope.loc.ale, textObject)
+        modalScope.text = $filter('i18n')('text', $rootScope.loc.ale, textObject)
+        modalScope.submitText = $filter('i18n')('remove', $rootScope.loc.ale, textObjectCommon)
+        modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, textObjectCommon)
+
+        modalScope.submit = function () {
+            modalScope.closeWindow()
+            builderQueue.removeSequence(editorView.selectedSequence.value)
+        }
+
+        modalScope.cancel = function () {
+            modalScope.closeWindow()
+        }
+
+        windowManagerService.getModal('modal_attention', modalScope)
     }
 
     editorView.modal.addBuilding = function () {
@@ -540,7 +566,7 @@ define('two/builder/ui', [
 
             $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId] = settings[SETTINGS.BUILDING_ORDERS][sequenceId]
 
-            if (activeSequence === sequenceId) {
+            if ($scope.settings[SETTINGS.BUILDING_SEQUENCE].value === sequenceId) {
                 settingsView.generateBuildingSequence()
                 settingsView.generateBuildingSequenceFinal()
                 settingsView.updateVisibleBuildingSequence()
@@ -554,6 +580,25 @@ define('two/builder/ui', [
             $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId] = settings[SETTINGS.BUILDING_ORDERS][sequenceId]
             eventHandlers.updateSequences()
             utils.emitNotif('success', $filter('i18n')('sequence_created', $rootScope.loc.ale, textObject, sequenceId))
+        },
+        buildingSequenceRemoved: function (event, sequenceId) {
+            var substituteSequence
+
+            delete $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
+
+            substituteSequence = selectSome($scope.settings[SETTINGS.BUILDING_ORDERS])
+            editorView.selectedSequence = { name: substituteSequence, value: substituteSequence }
+            eventHandlers.updateSequences()
+            editorView.generateBuildingSequence()
+
+            if ($scope.settings[SETTINGS.BUILDING_SEQUENCE].value === sequenceId) {
+                $scope.settings[SETTINGS.BUILDING_SEQUENCE] = { name: substituteSequence, value: substituteSequence }
+                settingsView.generateBuildingsLevelPoints()
+                settingsView.generateBuildingSequence()
+                settingsView.generateBuildingSequenceFinal()
+            }
+
+            utils.emitNotif('success', $filter('i18n')('sequence_removed', $rootScope.loc.ale, textObject, sequenceId))
         }
     }
 
@@ -657,6 +702,7 @@ define('two/builder/ui', [
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS, eventHandlers.updateLogs)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, eventHandlers.buildingSequenceUpdate)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, eventHandlers.buildingSequenceAdd)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_REMOVED, eventHandlers.buildingSequenceRemoved)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_builder_queue_window', $scope)
     }
