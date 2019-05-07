@@ -65,7 +65,7 @@
                             <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
-                        <tr ng-repeat="item in buildingSequenceFinal | orderBy:'order'">
+                        <tr ng-repeat="item in settingsView.buildingSequenceFinal | orderBy:'order'">
                             <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
                             <td>{{ item.building | i18n:loc.ale:'building_names' }}</td>
                             <td>{{ item.level }}</td>
@@ -91,7 +91,7 @@
                             <th>{{ 'points' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'costs' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
-                        <tr ng-repeat="item in visibleBuildingSequence" class="{{ item.state }}">
+                        <tr ng-repeat="item in settingsView.visibleBuildingSequence" class="{{ item.state }}">
                             <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
                             <td>{{ item.building | i18n:loc.ale:'building_names' }}</td>
                             <td>{{ item.level }}</td>

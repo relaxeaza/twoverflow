@@ -38,6 +38,7 @@ define('two/builder/ui', [
     var editorView = {
         modal: {}
     }
+    var settingsView = {}
 
     var TAB_TYPES = {
         SETTINGS: 'settings',
@@ -87,103 +88,11 @@ define('two/builder/ui', [
         return progress
     }
 
-    var generateBuildingSequence = function (_sequenceId) {
-        var sequenceId = _sequenceId || $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
-        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
-        var buildingData = modelDataService.getGameData().getBuildings()
-        var buildingLevels = {}
-        var building
-        var level
-        var state
-        var price
-
-        activeSequence = sequenceId
-
-        for (building in BUILDING_TYPES) {
-            buildingLevels[BUILDING_TYPES[building]] = 0
-        }
-
-        $scope.buildingSequence = buildingSequenceRaw.map(function (building) {
-            level = ++buildingLevels[building]
-            price = buildingData[building].individual_level_costs[level]
-            state = 'not-reached'
-
-            if (buildingLevelReached(building, level)) {
-                state = 'reached'
-            } else if (buildingLevelProgress(building, level)) {
-                state = 'progress'
-            }
-
-            return {
-                level: level,
-                price: buildingData[building].individual_level_costs[level],
-                building: building,
-                duration: $timeHelper.readableSeconds(price.build_time),
-                levelPoints: buildingsLevelPoints[building][level - 1],
-                state: state
-            }
-        })
-    }
-
-    var generateBuildingSequenceFinal = function (_sequenceId) {
-        var selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
-        var sequenceBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_sequenceId || selectedSequence]
-        var sequenceObj = {}
-        var sequence = []
-        var building
-
-        for (building in gameDataBuildings) {
-            sequenceObj[building] = {
-                level: 0,
-                order: gameDataBuildings[building].order
-            }
-        }
-
-        sequenceBuildings.forEach(function (building) {
-            sequenceObj[building].level++
-        })
-
-        for (building in sequenceObj) {
-            if (sequenceObj[building].level !== 0) {
-                sequence.push({
-                    building: building,
-                    level: sequenceObj[building].level,
-                    order: sequenceObj[building].order
-                })
-            }
-        }
-
-        $scope.buildingSequenceFinal = sequence
-    }
-
     /**
      * Calculate the total of points accumulated ultil the specified level.
      */
     var getLevelScale = function (factor, base, level) {
         return level ? parseInt(Math.round(factor * Math.pow(base, level - 1)), 10) : 0
-    }
-
-    var generateBuildingsLevelPoints = function () {
-        var $gameData = modelDataService.getGameData()
-        var buildingName
-        var buildingData
-        var buildingTotalPoints
-        var levelPoints
-        var currentLevelPoints
-        var level
-
-        for(buildingName in $gameData.data.buildings) {
-            buildingData = $gameData.getBuildingDataForBuilding(buildingName)
-            buildingTotalPoints = 0
-            buildingsLevelPoints[buildingName] = []
-
-            for (level = 1; level <= buildingData.max_level; level++) {
-                currentLevelPoints  = getLevelScale(buildingData.points, buildingData.points_factor, level)
-                levelPoints = currentLevelPoints - buildingTotalPoints
-                buildingTotalPoints += levelPoints
-                buildingsLevelPoints[buildingName].push(levelPoints)
-            }
-        }
     }
 
     var moveArrayItem = function (obj, oldIndex, newIndex) {
@@ -196,14 +105,6 @@ define('two/builder/ui', [
         }
 
         obj.splice(newIndex, 0, obj.splice(oldIndex, 1)[0])
-    }
-
-    var updateVisibleBuildingSequence = function () {
-        var offset = $scope.pagination.buildingSequence.offset
-        var limit = $scope.pagination.buildingSequence.limit
-
-        $scope.visibleBuildingSequence = $scope.buildingSequence.slice(offset, offset + limit)
-        $scope.pagination.buildingSequence.count = $scope.buildingSequence.length
     }
 
     var parseBuildingSequence = function (sequence) {
@@ -231,24 +132,104 @@ define('two/builder/ui', [
         return true
     }
 
-    var selectTab = function (tabType) {
-        $scope.selectedTab = tabType
-    }
+    settingsView.generateBuildingSequence = function (_sequenceId) {
+        var sequenceId = _sequenceId || $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
+        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
+        var buildingData = modelDataService.getGameData().getBuildings()
+        var buildingLevels = {}
+        var building
+        var level
+        var state
+        var price
 
-    var saveSettings = function () {
-        builderQueue.updateSettings($scope.settings)
-    }
+        activeSequence = sequenceId
 
-    var switchBuilder = function () {
-        if (builderQueue.isRunning()) {
-            builderQueue.start()
-        } else {
-            builderQueue.stop()
+        for (building in BUILDING_TYPES) {
+            buildingLevels[BUILDING_TYPES[building]] = 0
         }
+
+        settingsView.buildingSequence = buildingSequenceRaw.map(function (building) {
+            level = ++buildingLevels[building]
+            price = buildingData[building].individual_level_costs[level]
+            state = 'not-reached'
+
+            if (buildingLevelReached(building, level)) {
+                state = 'reached'
+            } else if (buildingLevelProgress(building, level)) {
+                state = 'progress'
+            }
+
+            return {
+                level: level,
+                price: buildingData[building].individual_level_costs[level],
+                building: building,
+                duration: $timeHelper.readableSeconds(price.build_time),
+                levelPoints: buildingsLevelPoints[building][level - 1],
+                state: state
+            }
+        })
     }
 
-    var clearLogs = function () {
-        builderQueue.clearLogs()
+    settingsView.generateBuildingSequenceFinal = function (_sequenceId) {
+        var selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
+        var sequenceBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_sequenceId || selectedSequence]
+        var sequenceObj = {}
+        var sequence = []
+        var building
+
+        for (building in gameDataBuildings) {
+            sequenceObj[building] = {
+                level: 0,
+                order: gameDataBuildings[building].order
+            }
+        }
+
+        sequenceBuildings.forEach(function (building) {
+            sequenceObj[building].level++
+        })
+
+        for (building in sequenceObj) {
+            if (sequenceObj[building].level !== 0) {
+                sequence.push({
+                    building: building,
+                    level: sequenceObj[building].level,
+                    order: sequenceObj[building].order
+                })
+            }
+        }
+
+        settingsView.buildingSequenceFinal = sequence
+    }
+
+    settingsView.updateVisibleBuildingSequence = function () {
+        var offset = $scope.pagination.buildingSequence.offset
+        var limit = $scope.pagination.buildingSequence.limit
+
+        settingsView.visibleBuildingSequence = settingsView.buildingSequence.slice(offset, offset + limit)
+        $scope.pagination.buildingSequence.count = settingsView.buildingSequence.length
+    }
+
+    settingsView.generateBuildingsLevelPoints = function () {
+        var $gameData = modelDataService.getGameData()
+        var buildingName
+        var buildingData
+        var buildingTotalPoints
+        var levelPoints
+        var currentLevelPoints
+        var level
+
+        for(buildingName in $gameData.data.buildings) {
+            buildingData = $gameData.getBuildingDataForBuilding(buildingName)
+            buildingTotalPoints = 0
+            buildingsLevelPoints[buildingName] = []
+
+            for (level = 1; level <= buildingData.max_level; level++) {
+                currentLevelPoints  = getLevelScale(buildingData.points, buildingData.points_factor, level)
+                levelPoints = currentLevelPoints - buildingTotalPoints
+                buildingTotalPoints += levelPoints
+                buildingsLevelPoints[buildingName].push(levelPoints)
+            }
+        }
     }
 
     editorView.moveUp = function () {
@@ -417,7 +398,7 @@ define('two/builder/ui', [
 
         modalScope.buildings = []
         modalScope.position = 1
-        modalScope.buildingSequenceCount = $scope.buildingSequence.length
+        modalScope.buildingSequenceCount = settingsView.buildingSequence.length
         modalScope.selectedBuilding = {
             name: $filter('i18n')(BUILDING_TYPES.HEADQUARTER, $rootScope.loc.ale, 'building_names'),
             value: BUILDING_TYPES.HEADQUARTER
@@ -487,6 +468,26 @@ define('two/builder/ui', [
         }
     }
 
+    var selectTab = function (tabType) {
+        $scope.selectedTab = tabType
+    }
+
+    var saveSettings = function () {
+        builderQueue.updateSettings($scope.settings)
+    }
+
+    var switchBuilder = function () {
+        if (builderQueue.isRunning()) {
+            builderQueue.start()
+        } else {
+            builderQueue.stop()
+        }
+    }
+
+    var clearLogs = function () {
+        builderQueue.clearLogs()
+    }
+
     var eventHandlers = {
         updateGroups: function () {
             var id
@@ -523,9 +524,9 @@ define('two/builder/ui', [
             $scope.sequenceList = sequenceList
         },
         generateBuildingSequences: function () {
-            generateBuildingSequence()
-            generateBuildingSequenceFinal()
-            updateVisibleBuildingSequence()
+            settingsView.generateBuildingSequence()
+            settingsView.generateBuildingSequenceFinal()
+            settingsView.updateVisibleBuildingSequence()
         },
         generateBuildingSequencesEditor: function () {
             editorView.generateBuildingSequence()
@@ -540,9 +541,9 @@ define('two/builder/ui', [
             $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId] = settings[SETTINGS.BUILDING_ORDERS][sequenceId]
 
             if (activeSequence === sequenceId) {
-                generateBuildingSequence()
-                generateBuildingSequenceFinal()
-                updateVisibleBuildingSequence()
+                settingsView.generateBuildingSequence()
+                settingsView.generateBuildingSequenceFinal()
+                settingsView.updateVisibleBuildingSequence()
             }
 
             utils.emitNotif('success', $filter('i18n')('sequence_updated', $rootScope.loc.ale, textObject, sequenceId))
@@ -591,20 +592,21 @@ define('two/builder/ui', [
         $scope.TAB_TYPES = TAB_TYPES
         $scope.SETTINGS = SETTINGS
         $scope.running = running
-        $scope.buildingSequenceFinal = {}
-        $scope.buildingSequence = {}
         $scope.settings = parseSettings(builderQueue.getSettings())
         $scope.logs = builderQueue.getLogs()
         $scope.villageGroups = []
         $scope.sequenceList = []
-        
+
         $scope.pagination = {}
 
-        // editor
         $scope.editorView = editorView
         $scope.editorView.buildingSequence = {}
         $scope.editorView.visibleBuildingSequence = {}
         $scope.editorView.selectedSequence = angular.copy($scope.settings[SETTINGS.BUILDING_SEQUENCE])
+
+        $scope.settingsView = settingsView
+        $scope.settingsView.buildingSequence = {}
+        $scope.settingsView.buildingSequenceFinal = {}
 
         // methods
         $scope.selectTab = selectTab
@@ -615,15 +617,17 @@ define('two/builder/ui', [
 
         eventHandlers.updateGroups()
         eventHandlers.updateSequences()
-        generateBuildingsLevelPoints()
-        generateBuildingSequence()
+        
+        settingsView.generateBuildingsLevelPoints()
+        settingsView.generateBuildingSequence()
+        settingsView.generateBuildingSequenceFinal()
+
         editorView.generateBuildingSequence()
-        generateBuildingSequenceFinal()
 
         $scope.pagination.buildingSequence = {
-            count: $scope.buildingSequence.length,
+            count: settingsView.buildingSequence.length,
             offset: 0,
-            loader: updateVisibleBuildingSequence,
+            loader: settingsView.updateVisibleBuildingSequence,
             limit: storageService.getPaginationLimit()
         }
 
@@ -634,7 +638,7 @@ define('two/builder/ui', [
             limit: storageService.getPaginationLimit()
         }
 
-        updateVisibleBuildingSequence()
+        settingsView.updateVisibleBuildingSequence()
         editorView.updateVisibleBuildingSequence()
 
         $scope.$watch('settings[SETTINGS.BUILDING_SEQUENCE].value', eventHandlers.generateBuildingSequences)
