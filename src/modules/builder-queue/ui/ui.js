@@ -287,12 +287,6 @@ define('two/builder/ui', [
         builderQueue.clearLogs()
     }
 
-    var checkAll = function () {
-        $scope.buildingSequenceEditor.forEach(function (item) {
-            item.checked = $scope.checkAllValue
-        })
-    }
-
     var moveUp = function () {
         var copy = angular.copy($scope.buildingSequenceEditor)
         var index
@@ -472,7 +466,6 @@ define('two/builder/ui', [
         updateBuildingSequenceEditor: function () {
             generateBuildingSequenceEditor()
             updateVisibleBuildingSequenceEditor()
-            $scope.checkAllValue = false
         },
         updateLogs: function () {
             $scope.logs = builderQueue.getLogs()
@@ -533,7 +526,6 @@ define('two/builder/ui', [
         $scope.villageGroups = []
         $scope.presetList = []
         $scope.selectedEditPreset = angular.copy($scope.settings[SETTINGS.BUILDING_PRESET])
-        $scope.checkAllValue = false
         $scope.pagination = {}
 
         // methods
@@ -546,7 +538,6 @@ define('two/builder/ui', [
         $scope.openAddBuildingModal = openAddBuildingModal
         $scope.addBuilding = addBuilding
         $scope.saveBuildingSequence = saveBuildingSequence
-        $scope.checkAll = checkAll
         $scope.removeBuildingEditor = removeBuildingEditor
 
         eventHandlers.updateGroups()
