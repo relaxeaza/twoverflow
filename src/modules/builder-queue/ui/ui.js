@@ -279,13 +279,17 @@ define('two/builder/ui', [
         switch (error) {
         case ERROR_CODES.SEQUENCE_EXISTS:
             utils.emitNotif('error', $filter('i18n')('error_sequence_exits', $rootScope.loc.ale, textObject))
+            return false
 
             break
         case ERROR_CODES.SEQUENCE_INVALID:
             utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, textObject))
+            return false
 
             break
         }
+
+        return true
     }
 
     var addBuildingEditor = function (building, position) {
@@ -444,8 +448,11 @@ define('two/builder/ui', [
                 return false
             }
 
-            createBuildingSequence(modalScope.name, selectedSequence)
-            modalScope.closeWindow()
+            var success = createBuildingSequence(modalScope.name, selectedSequence)
+
+            if (success) {
+                modalScope.closeWindow()
+            }
         }
 
         windowManagerService.getModal('!twoverflow_builder_queue_name_sequence_modal', modalScope)
