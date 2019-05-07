@@ -300,6 +300,8 @@ define('two/builder', [
         buildingOrderLimit = getSequenceLimit(changes[SETTINGS.ACTIVE_SEQUENCE])
         Lockr.set(STORAGE_ID.SETTINGS, settings)
 
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
+
         return true
     }
 

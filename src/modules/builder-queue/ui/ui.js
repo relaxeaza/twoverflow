@@ -597,6 +597,9 @@ define('two/builder/ui', [
             }
 
             utils.emitNotif('success', $filter('i18n')('sequence_removed', $rootScope.loc.ale, textObject, sequenceId))
+        },
+        saveSettings: function () {
+            utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
         }
     }
 
@@ -699,6 +702,7 @@ define('two/builder/ui', [
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_UPDATED, eventHandlers.buildingSequenceUpdate)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, eventHandlers.buildingSequenceAdd)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, eventHandlers.buildingSequenceRemoved)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE, eventHandlers.saveSettings)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_builder_queue_window', $scope)
     }
