@@ -45,11 +45,11 @@
                         <tbody>
                             <tr>
                                 <td><span class="ff-cell-fix">{{ 'settings_village_groups' | i18n:loc.ale:textObject }}</span></td>
-                                <td><div select="" list="villageGroups" selected="settings[SETTINGS.GROUP_VILLAGES]" drop-down="true"></div></td>
+                                <td><div select="" list="groups" selected="settings[SETTINGS.GROUP_VILLAGES]" drop-down="true"></div></td>
                             </tr>
                             <tr>
                                 <td><span class="ff-cell-fix">{{ 'settings_building_sequence' | i18n:loc.ale:textObject }}</span></td>
-                                <td><div select="" list="sequenceList" selected="settings[SETTINGS.ACTIVE_SEQUENCE]" drop-down="true"></div></td>
+                                <td><div select="" list="sequences" selected="settings[SETTINGS.ACTIVE_SEQUENCE]" drop-down="true"></div></td>
                             </tr>
                         </tbody>
                     </table>
@@ -118,7 +118,7 @@
                             <tr>
                                 <td><span class="ff-cell-fix">{{ 'sequences_select_edit' | i18n:loc.ale:textObject }}</span></td>
                                 <td>
-                                    <div class="select-sequence-editor" select="" list="sequenceList" selected="editorView.selectedSequence" drop-down="true"></div>
+                                    <div class="select-sequence-editor" select="" list="sequences" selected="editorView.selectedSequence" drop-down="true"></div>
                                     <a class="btn btn-orange clone-sequence" ng-click="editorView.modal.nameSequence()" tooltip="" tooltip-content="{{ 'tooltip_clone' | i18n:loc.ale:textObject }}">{{ 'clone' | i18n:loc.ale:textObject }}</a>
                                     <a href="#" class="btn-red remove-sequence icon-20x20-close" ng-click="editorView.modal.removeSequence()" tooltip="" tooltip-content="{{ 'tooltip_remove_sequence' | i18n:loc.ale:textObject }}"></a>
                                 </td>

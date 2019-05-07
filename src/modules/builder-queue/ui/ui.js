@@ -47,6 +47,7 @@ define('two/builder/ui', [
 
     var parseSettings = function (rawSettings) {
         var settings = angular.copy(rawSettings)
+        var groups = groupList.getGroups()
         var selectedGroup = groups[settings[SETTINGS.GROUP_VILLAGES]]
 
         if (selectedGroup) {
@@ -55,10 +56,7 @@ define('two/builder/ui', [
                 value: settings[SETTINGS.GROUP_VILLAGES]
             }
         } else {
-            settings[SETTINGS.GROUP_VILLAGES] = {
-                name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
-                value: false
-            }
+            settings[SETTINGS.GROUP_VILLAGES] = disabledOption()
         }
 
         settings[SETTINGS.ACTIVE_SEQUENCE] = {
@@ -67,6 +65,13 @@ define('two/builder/ui', [
         }
 
         return settings
+    }
+
+    var disabledOption = function () {
+        return {
+            name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
+            value: false
+        }
     }
 
     var buildingLevelReached = function (building, level) {
@@ -525,24 +530,8 @@ define('two/builder/ui', [
 
     var eventHandlers = {
         updateGroups: function () {
-            var id
-
-            groups = utils.obj2selectOptions(groupList.getGroups(), true)
-
-            $scope.villageGroups.push({
-                name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
-                value: false
-            })
-
-            for (id in groups) {
-                if (groups.hasOwnProperty(id)) {
-                    $scope.villageGroups.push({
-                        name: groups[id].name,
-                        value: id,
-                        leftIcon: groups[id].leftIcon
-                    })
-                }
-            }
+            $scope.groups = utils.obj2selectOptions(groupList.getGroups(), true)
+            $scope.groups.unshift(disabledOption())
         },
         updateSequences: function () {
             var sequenceList = []
@@ -556,7 +545,7 @@ define('two/builder/ui', [
                 })
             }
 
-            $scope.sequenceList = sequenceList
+            $scope.sequences = sequenceList
         },
         generateBuildingSequences: function () {
             settingsView.generateBuildingSequence()
@@ -648,8 +637,6 @@ define('two/builder/ui', [
         $scope.running = running
         $scope.settings = parseSettings(builderQueue.getSettings())
         $scope.logs = builderQueue.getLogs()
-        $scope.villageGroups = []
-        $scope.sequenceList = []
 
         $scope.pagination = {}
 
