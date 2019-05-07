@@ -107,7 +107,7 @@ define('two/builder', [
             return false
         }
 
-        settings[SETTINGS.BUILDING_ORDERS][settings[SETTINGS.BUILDING_PRESET]].some(function (buildingName) {
+        settings[SETTINGS.BUILDING_ORDERS][settings[SETTINGS.BUILDING_SEQUENCE]].some(function (buildingName) {
             if (++buildingOrder[buildingName] > buildingLevels[buildingName]) {
                 buildingService.compute(village)
 
@@ -203,11 +203,11 @@ define('two/builder', [
     /**
      * Get the level max for each building.
      *
-     * @param {String} buildingPreset
+     * @param {String} buildingSequence
      * @return {Object} Maximum level for each building.
      */
-    var getSequenceLimit = function (buildingPreset) {
-        var buildingOrder = settings[SETTINGS.BUILDING_ORDERS][buildingPreset]
+    var getSequenceLimit = function (buildingSequence) {
+        var buildingOrder = settings[SETTINGS.BUILDING_ORDERS][buildingSequence]
         var orderLimit = angular.copy(VILLAGE_BUILDINGS)
 
         buildingOrder.forEach(function (buildingName) {
@@ -240,7 +240,7 @@ define('two/builder', [
             VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
         }
 
-        buildingOrderLimit = getSequenceLimit(settings[SETTINGS.BUILDING_PRESET])
+        buildingOrderLimit = getSequenceLimit(settings[SETTINGS.BUILDING_SEQUENCE])
 
         $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
             if (!running) {
@@ -295,7 +295,7 @@ define('two/builder', [
             settings[key] = newValue
         }
 
-        buildingOrderLimit = getSequenceLimit(changes.buildingPreset)
+        buildingOrderLimit = getSequenceLimit(changes[SETTINGS.BUILDING_SEQUENCE])
         Lockr.set(STORAGE_ID.SETTINGS, settings)
 
         return true

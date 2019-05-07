@@ -10,7 +10,7 @@ define('two/builder/settingsMap', [
             default: '',
             inputType: 'select'
         },
-        [SETTINGS.BUILDING_PRESET]: {
+        [SETTINGS.BUILDING_SEQUENCE]: {
             default: 'Essential',
             inputType: 'select'
         },

@@ -29,15 +29,14 @@ define('two/builder/ui', [
     var textObjectCommon = 'common'
     var groupList = modelDataService.getGroupList()
     var groups = []
-    var activePresetId = null
-    var selectedEditPreset
+    var activeSequence = null
     var buildingsLevelPoints = {}
     var running = false
     var gameDataBuildings
 
     var TAB_TYPES = {
         SETTINGS: 'settings',
-        PRESETS: 'presets',
+        SEQUENCES: 'sequences',
         LOGS: 'logs'
     }
 
@@ -57,9 +56,9 @@ define('two/builder/ui', [
             }
         }
 
-        settings[SETTINGS.BUILDING_PRESET] = {
-            name: settings[SETTINGS.BUILDING_PRESET],
-            value: settings[SETTINGS.BUILDING_PRESET]
+        settings[SETTINGS.BUILDING_SEQUENCE] = {
+            name: settings[SETTINGS.BUILDING_SEQUENCE],
+            value: settings[SETTINGS.BUILDING_SEQUENCE]
         }
 
         return settings
@@ -83,9 +82,9 @@ define('two/builder/ui', [
         return progress
     }
 
-    var generateBuildingSequence = function (_presetId) {
-        var presetId = _presetId || $scope.settings[SETTINGS.BUILDING_PRESET].value
-        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][presetId]
+    var generateBuildingSequence = function (_sequenceId) {
+        var sequenceId = _sequenceId || $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
+        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
         var buildingData = modelDataService.getGameData().getBuildings()
         var buildingLevels = {}
         var building
@@ -93,7 +92,7 @@ define('two/builder/ui', [
         var state
         var price
 
-        activePresetId = presetId
+        activeSequence = sequenceId
 
         for (building in BUILDING_TYPES) {
             buildingLevels[BUILDING_TYPES[building]] = 0
@@ -121,13 +120,13 @@ define('two/builder/ui', [
         })
     }
 
-    var generateBuildingSequenceEditor = function (_presetId) {
-        var presetId = _presetId || $scope.selectedEditPreset.value
-        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][presetId]
+    var generateBuildingSequenceEditor = function (_sequenceId) {
+        var sequenceId = _sequenceId || $scope.selectedEditSequence.value
+        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
         var buildingLevels = {}
         var building
 
-        activePresetId = presetId
+        activeSequence = sequenceId
 
         for (building in BUILDING_TYPES) {
             buildingLevels[BUILDING_TYPES[building]] = 0
@@ -177,9 +176,9 @@ define('two/builder/ui', [
         return modifiedSequence
     }
 
-    var generateBuildingSequenceFinal = function (_presetId) {
-        var selectedPreset = $scope.settings[SETTINGS.BUILDING_PRESET].value
-        var presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_presetId || selectedPreset]
+    var generateBuildingSequenceFinal = function (_sequenceId) {
+        var selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
+        var sequenceBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_sequenceId || selectedSequence]
         var sequenceObj = {}
         var sequence = []
         var building
@@ -191,7 +190,7 @@ define('two/builder/ui', [
             }
         }
 
-        presetBuildings.forEach(function (building) {
+        sequenceBuildings.forEach(function (building) {
             sequenceObj[building].level++
         })
 
@@ -271,7 +270,6 @@ define('two/builder/ui', [
     }
 
     var saveSettings = function () {
-        $scope.presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][SETTINGS.BUILDING_PRESET]
         builderQueue.updateSettings($scope.settings)
     }
 
@@ -426,10 +424,10 @@ define('two/builder/ui', [
     }
 
     var saveBuildingSequence = function () {
-        var selectedPreset = $scope.selectedEditPreset.value
+        var selectedSequence = $scope.selectedEditSequence.value
         var parsedSequence = parseBuildingSequence($scope.buildingSequenceEditor)
 
-        builderQueue.updateBuildingOrder(selectedPreset, parsedSequence)
+        builderQueue.updateBuildingOrder(selectedSequence, parsedSequence)
     }
 
     var eventHandlers = {
@@ -453,19 +451,19 @@ define('two/builder/ui', [
                 }
             }
         },
-        updatePresets: function () {
-            var presetList = []
-            var presets = $scope.settings[SETTINGS.BUILDING_ORDERS]
+        updateSequences: function () {
+            var sequenceList = []
+            var sequences = $scope.settings[SETTINGS.BUILDING_ORDERS]
             var id
 
-            for (id in presets) {
-                presetList.push({
+            for (id in sequences) {
+                sequenceList.push({
                     name: id,
                     value: id
                 })
             }
 
-            $scope.presetList = presetList
+            $scope.sequenceList = sequenceList
         },
         updateBuildingSequence: function () {
             generateBuildingSequence()
@@ -479,25 +477,25 @@ define('two/builder/ui', [
         updateLogs: function () {
             $scope.logs = builderQueue.getLogs()
         },
-        buildingSequenceUpdate: function (event, presetId) {
+        buildingSequenceUpdate: function (event, sequenceId) {
             var settings = builderQueue.getSettings()
 
-            $scope.settings[SETTINGS.BUILDING_ORDERS][presetId] = settings[SETTINGS.BUILDING_ORDERS][presetId]
+            $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId] = settings[SETTINGS.BUILDING_ORDERS][sequenceId]
 
-            if (activePresetId === presetId) {
+            if (activeSequence === sequenceId) {
                 generateBuildingSequence()
                 generateBuildingSequenceFinal()
                 updateVisibleBuildingSequence()
             }
 
-            utils.emitNotif('success', $filter('i18n')('preset.updated', $rootScope.loc.ale, textObject, presetId))
+            utils.emitNotif('success', $filter('i18n')('sequence_updated', $rootScope.loc.ale, textObject, sequenceId))
         },
-        buildingSequenceAdd: function (event, presetId) {
+        buildingSequenceAdd: function (event, sequenceId) {
             var settings = builderQueue.getSettings()
             
-            $scope.settings[SETTINGS.BUILDING_ORDERS][presetId] = settings[SETTINGS.BUILDING_ORDERS][presetId]
-            eventHandlers.updatePresets()
-            utils.emitNotif('success', $filter('i18n')('preset.added', $rootScope.loc.ale, textObject, presetId))
+            $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId] = settings[SETTINGS.BUILDING_ORDERS][sequenceId]
+            eventHandlers.updateSequences()
+            utils.emitNotif('success', $filter('i18n')('sequence_added', $rootScope.loc.ale, textObject, sequenceId))
         }
     }
 
@@ -540,10 +538,9 @@ define('two/builder/ui', [
         $scope.buildingSequenceEditor = {}
         $scope.settings = parseSettings(builderQueue.getSettings())
         $scope.logs = builderQueue.getLogs()
-        $scope.presetBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][SETTINGS.BUILDING_PRESET]
         $scope.villageGroups = []
-        $scope.presetList = []
-        $scope.selectedEditPreset = angular.copy($scope.settings[SETTINGS.BUILDING_PRESET])
+        $scope.sequenceList = []
+        $scope.selectedEditSequence = angular.copy($scope.settings[SETTINGS.BUILDING_SEQUENCE])
         $scope.pagination = {}
 
         // methods
@@ -559,7 +556,7 @@ define('two/builder/ui', [
         $scope.removeBuildingEditor = removeBuildingEditor
 
         eventHandlers.updateGroups()
-        eventHandlers.updatePresets()
+        eventHandlers.updateSequences()
         generateBuildingsLevelPoints()
         generateBuildingSequence()
         generateBuildingSequenceEditor()
@@ -582,8 +579,8 @@ define('two/builder/ui', [
         updateVisibleBuildingSequence()
         updateVisibleBuildingSequenceEditor()
 
-        $scope.$watch('settings[SETTINGS.BUILDING_PRESET].value', eventHandlers.updateBuildingSequence)
-        $scope.$watch('selectedEditPreset.value', eventHandlers.updateBuildingSequenceEditor)
+        $scope.$watch('settings[SETTINGS.BUILDING_SEQUENCE].value', eventHandlers.updateBuildingSequence)
+        $scope.$watch('selectedEditSequence.value', eventHandlers.updateBuildingSequenceEditor)
 
         eventScope = new EventScope('twoverflow_builder_queue_window')
         eventScope.register(eventTypeProvider.GROUPS_UPDATED, eventHandlers.updateGroups, true)

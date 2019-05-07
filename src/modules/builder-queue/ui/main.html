@@ -16,10 +16,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab" ng-click="selectTab(TAB_TYPES.PRESETS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.PRESETS}">
+                <div class="tab" ng-click="selectTab(TAB_TYPES.SEQUENCES)" ng-class="{'tab-active': selectedTab == TAB_TYPES.SEQUENCES}">
                     <div class="tab-inner">
-                        <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.PRESETS}">
-                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.PRESETS}">{{ TAB_TYPES.PRESETS | i18n:loc.ale:textObject }}</a>
+                        <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.SEQUENCES}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.SEQUENCES}">{{ TAB_TYPES.SEQUENCES | i18n:loc.ale:textObject }}</a>
                         </div>
                     </div>
                 </div>
@@ -48,14 +48,14 @@
                                 <td><div select="" list="villageGroups" selected="settings[SETTINGS.GROUP_VILLAGES]" drop-down="true"></div></td>
                             </tr>
                             <tr>
-                                <td><span class="ff-cell-fix">{{ 'settings.buildingPreset' | i18n:loc.ale:textObject }}</span></td>
-                                <td><div select="" list="presetList" selected="settings[SETTINGS.BUILDING_PRESET]" drop-down="true"></div></td>
+                                <td><span class="ff-cell-fix">{{ 'settings_building_sequence' | i18n:loc.ale:textObject }}</span></td>
+                                <td><div select="" list="sequenceList" selected="settings[SETTINGS.BUILDING_SEQUENCE]" drop-down="true"></div></td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <h5 class="twx-section">{{ 'settings.buildingSequenceFinal' | i18n:loc.ale:textObject }}</h5>
-                    <table class="tbl-border-light tbl-striped header-center building-order-final">
+                    <h5 class="twx-section">{{ 'settings_building_sequence_final' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped header-center building-sequence-final">
                         <colgroup>
                             <col width="5%">
                             <col width="70%">
@@ -72,10 +72,10 @@
                         </tr>
                     </table>
 
-                    <h5 class="twx-section">{{ 'settings.buildingSequence' | i18n:loc.ale:textObject }}</h5>
+                    <h5 class="twx-section">{{ 'settings_building_sequence' | i18n:loc.ale:textObject }}</h5>
                     
                     <div class="page-wrap" pagination="pagination.buildingSequence"></div>
-                    <table class="tbl-border-light header-center building-order">
+                    <table class="tbl-border-light header-center building-sequence">
                         <colgroup>
                             <col width="5%">
                             <col width="26%">
@@ -107,23 +107,23 @@
                     <div class="page-wrap" pagination="pagination.buildingSequence"></div>
                 </div>
 
-                <div ng-show="selectedTab === TAB_TYPES.PRESETS">
-                    <h5 class="twx-section">{{ 'presets.edit-preset' | i18n:loc.ale:textObject }}</h5>
-                    <table class="tbl-border-light tbl-striped editor-select-preset">
+                <div ng-show="selectedTab === TAB_TYPES.SEQUENCES">
+                    <h5 class="twx-section">{{ 'sequences_edit_sequence' | i18n:loc.ale:textObject }}</h5>
+                    <table class="tbl-border-light tbl-striped editor-select-sequence">
                         <colgroup>
                             <col width="50%">
                             <col>
                         </colgroup>
                         <tbody>
                             <tr>
-                                <td><span class="ff-cell-fix">{{ 'presets.select-to-edit' | i18n:loc.ale:textObject }}</span></td>
-                                <td><div select="" list="presetList" selected="selectedEditPreset" drop-down="true"></div></td>
+                                <td><span class="ff-cell-fix">{{ 'sequences_select_edit' | i18n:loc.ale:textObject }}</span></td>
+                                <td><div select="" list="sequenceList" selected="selectedEditSequence" drop-down="true"></div></td>
                             </tr>
                         </tbody>
                     </table>
 
                     <div class="page-wrap" pagination="pagination.buildingSequenceEditor"></div>
-                    <table class="tbl-border-light tbl-striped header-center building-order-editor">
+                    <table class="tbl-border-light tbl-striped header-center building-sequence-editor">
                         <colgroup>
                             <col width="5%">
                             <col width="5%">
@@ -196,16 +196,16 @@
                 <a href="#" class="btn-border btn-orange" ng-click="clearLogs()">{{ 'clear_logs' | i18n:loc.ale:textObject }}</a>
             </li>
 
-            <li ng-show="selectedTab === TAB_TYPES.PRESETS">
-                <a href="#" class="btn-border btn-orange" ng-click="moveUp()">{{ 'presets.move-up' | i18n:loc.ale:textObject }}</a>
+            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES">
+                <a href="#" class="btn-border btn-orange" ng-click="moveUp()">{{ 'sequences_move_up' | i18n:loc.ale:textObject }}</a>
             </li>
-            <li ng-show="selectedTab === TAB_TYPES.PRESETS">
-                <a href="#" class="btn-border btn-orange" ng-click="moveDown()">{{ 'presets.move-down' | i18n:loc.ale:textObject }}</a>
+            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES">
+                <a href="#" class="btn-border btn-orange" ng-click="moveDown()">{{ 'sequences_move_down' | i18n:loc.ale:textObject }}</a>
             </li>
-            <li ng-show="selectedTab === TAB_TYPES.PRESETS">
-                <a href="#" class="btn-border btn-green" ng-click="openAddBuildingModal()">{{ 'presets.add-building' | i18n:loc.ale:textObject }}</a>
+            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES">
+                <a href="#" class="btn-border btn-green" ng-click="openAddBuildingModal()">{{ 'sequences_add_building' | i18n:loc.ale:textObject }}</a>
             </li>
-            <li ng-show="selectedTab === TAB_TYPES.PRESETS">
+            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES">
                 <a href="#" class="btn-border btn-red" ng-click="saveBuildingSequence()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
         </ul>
