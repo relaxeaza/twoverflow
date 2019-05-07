@@ -499,7 +499,16 @@ define('two/builder/ui', [
     }
 
     var saveSettings = function () {
-        builderQueue.updateSettings($scope.settings)
+        var settings = angular.copy($scope.settings)
+        var id
+
+        for (id in SETTINGS_MAP) {
+            if (SETTINGS_MAP[id].inputType === 'select') {
+                settings[id] = settings[id].value
+            }
+        }
+
+        builderQueue.updateSettings(settings)
     }
 
     var switchBuilder = function () {
