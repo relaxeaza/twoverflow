@@ -9,6 +9,7 @@ define('two/builder/ui', [
     'two/ready',
     'two/builder/settings',
     'two/builder/settingsMap',
+    'two/builder/errorCodes',
     'two/EventScope'
 ], function (
     builderQueue,
@@ -21,6 +22,7 @@ define('two/builder/ui', [
     ready,
     SETTINGS,
     SETTINGS_MAP,
+    ERROR_CODES,
     EventScope
 ) {
     var eventScope
@@ -141,7 +143,7 @@ define('two/builder/ui', [
         })
     }
 
-    var updateBuildingSequenceEditorLevels = function (sequence, building) {
+    var updateEditorLevels = function (sequence, building) {
         var buildingLevel = 0
         var modifiedSequence = []
         var i
@@ -265,6 +267,50 @@ define('two/builder/ui', [
         $scope.pagination.buildingSequenceEditor.count = $scope.buildingSequenceEditor.length
     }
 
+    var parseBuildingSequence = function (sequence) {
+        return sequence.map(function (item) {
+            return item.building
+        })
+    }
+
+    var createBuildingSequence = function (sequenceId, sequence) {
+        var error = builderQueue.addBuildingSequence(sequenceId, sequence)
+
+        switch (error) {
+        case ERROR_CODES.SEQUENCE_EXISTS:
+            utils.emitNotif('error', $filter('i18n')('error_sequence_exits', $rootScope.loc.ale, textObject))
+
+            break
+        case ERROR_CODES.SEQUENCE_INVALID:
+            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, textObject))
+
+            break
+        }
+    }
+
+    var addBuildingEditor = function (building, position) {
+        var index = position - 1
+        var newSequence = $scope.buildingSequenceEditor.slice()
+        var updated
+
+        newSequence.splice(index, 0, {
+            level: null,
+            building: building,
+            checked: false
+        })
+
+        newSequence = updateEditorLevels(newSequence, building)
+
+        if (!newSequence) {
+            return false
+        }
+
+        $scope.buildingSequenceEditor = newSequence
+        updateVisibleBuildingSequenceEditor()
+
+        return true
+    }
+
     var selectTab = function (tabType) {
         $scope.selectedTab = tabType
     }
@@ -349,29 +395,6 @@ define('two/builder/ui', [
         updateVisibleBuildingSequenceEditor()
     }
 
-    var addBuilding = function (building, position) {
-        var index = position - 1
-        var newSequence = $scope.buildingSequenceEditor.slice()
-        var updated
-
-        newSequence.splice(index, 0, {
-            level: null,
-            building: building,
-            checked: false
-        })
-
-        newSequence = updateBuildingSequenceEditorLevels(newSequence, building)
-
-        if (!newSequence) {
-            return false
-        }
-
-        $scope.buildingSequenceEditor = newSequence
-        updateVisibleBuildingSequenceEditor()
-
-        return true
-    }
-
     var openAddBuildingModal = function () {
         var modalScope = $rootScope.$new()
         var building
@@ -397,7 +420,7 @@ define('two/builder/ui', [
             var buildingName = $filter('i18n')(building, $rootScope.loc.ale, 'building_names')
             var buildingLimit = gameDataBuildings[building].max_level
 
-            if (addBuilding(building, position)) {
+            if (addBuildingEditor(building, position)) {
                 modalScope.closeWindow()
                 utils.emitNotif('success', $filter('i18n')('add_building_success', $rootScope.loc.ale, textObject, buildingName, position))
             } else {
@@ -408,26 +431,50 @@ define('two/builder/ui', [
         windowManagerService.getModal('!twoverflow_builder_queue_add_building_modal', modalScope)
     }
 
+    var openNameSequenceModal = function () {
+        var modalScope = $rootScope.$new()
+        var selectedSequenceName = $scope.selectedEditSequence.name
+        var selectedSequence = $scope.settings[SETTINGS.BUILDING_ORDERS][selectedSequenceName]
+        
+        modalScope.name = selectedSequenceName
+
+        modalScope.submit = function () {
+            if (modalScope.name.length < 3) {
+                utils.emitNotif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, textObject))
+                return false
+            }
+
+            createBuildingSequence(modalScope.name, selectedSequence)
+            modalScope.closeWindow()
+        }
+
+        windowManagerService.getModal('!twoverflow_builder_queue_name_sequence_modal', modalScope)
+    }
+
     var removeBuildingEditor = function (index) {
         var building = $scope.buildingSequenceEditor[index].building
 
         $scope.buildingSequenceEditor.splice(index, 1)
-        $scope.buildingSequenceEditor = updateBuildingSequenceEditorLevels($scope.buildingSequenceEditor, building)
+        $scope.buildingSequenceEditor = updateEditorLevels($scope.buildingSequenceEditor, building)
 
         updateVisibleBuildingSequenceEditor()
     }
 
-    var parseBuildingSequence = function (sequence) {
-        return sequence.map(function (item) {
-            return item.building
-        })
-    }
-
-    var saveBuildingSequence = function () {
+    var updateBuildingSequence = function () {
         var selectedSequence = $scope.selectedEditSequence.value
         var parsedSequence = parseBuildingSequence($scope.buildingSequenceEditor)
+        var error = builderQueue.updateBuildingOrder(selectedSequence, parsedSequence)
 
-        builderQueue.updateBuildingOrder(selectedSequence, parsedSequence)
+        switch (error) {
+        case ERROR_CODES.SEQUENCE_NO_EXISTS:
+            utils.emitNotif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, textObject))
+
+            break
+        case ERROR_CODES.SEQUENCE_INVALID:
+            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, textObject))
+
+            break
+        }
     }
 
     var eventHandlers = {
@@ -465,12 +512,12 @@ define('two/builder/ui', [
 
             $scope.sequenceList = sequenceList
         },
-        updateBuildingSequence: function () {
+        generateBuildingSequences: function () {
             generateBuildingSequence()
             generateBuildingSequenceFinal()
             updateVisibleBuildingSequence()
         },
-        updateBuildingSequenceEditor: function () {
+        generateBuildingSequencesEditor: function () {
             generateBuildingSequenceEditor()
             updateVisibleBuildingSequenceEditor()
         },
@@ -495,7 +542,7 @@ define('two/builder/ui', [
             
             $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId] = settings[SETTINGS.BUILDING_ORDERS][sequenceId]
             eventHandlers.updateSequences()
-            utils.emitNotif('success', $filter('i18n')('sequence_added', $rootScope.loc.ale, textObject, sequenceId))
+            utils.emitNotif('success', $filter('i18n')('sequence_created', $rootScope.loc.ale, textObject, sequenceId))
         }
     }
 
@@ -522,6 +569,7 @@ define('two/builder/ui', [
 
         interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `__builder_html_main`)
         interfaceOverflow.addTemplate('twoverflow_builder_queue_add_building_modal', `__builder_html_modal-add-building`)
+        interfaceOverflow.addTemplate('twoverflow_builder_queue_name_sequence_modal', `__builder_html_modal-name-sequence`)
         interfaceOverflow.addStyle('__builder_css_style')
     }
 
@@ -551,8 +599,8 @@ define('two/builder/ui', [
         $scope.moveUp = moveUp
         $scope.moveDown = moveDown
         $scope.openAddBuildingModal = openAddBuildingModal
-        $scope.addBuilding = addBuilding
-        $scope.saveBuildingSequence = saveBuildingSequence
+        $scope.openNameSequenceModal = openNameSequenceModal
+        $scope.updateBuildingSequence = updateBuildingSequence
         $scope.removeBuildingEditor = removeBuildingEditor
 
         eventHandlers.updateGroups()
@@ -579,18 +627,18 @@ define('two/builder/ui', [
         updateVisibleBuildingSequence()
         updateVisibleBuildingSequenceEditor()
 
-        $scope.$watch('settings[SETTINGS.BUILDING_SEQUENCE].value', eventHandlers.updateBuildingSequence)
-        $scope.$watch('selectedEditSequence.value', eventHandlers.updateBuildingSequenceEditor)
+        $scope.$watch('settings[SETTINGS.BUILDING_SEQUENCE].value', eventHandlers.generateBuildingSequences)
+        $scope.$watch('selectedEditSequence.value', eventHandlers.generateBuildingSequencesEditor)
 
         eventScope = new EventScope('twoverflow_builder_queue_window')
         eventScope.register(eventTypeProvider.GROUPS_UPDATED, eventHandlers.updateGroups, true)
         eventScope.register(eventTypeProvider.GROUPS_CREATED, eventHandlers.updateGroups, true)
         eventScope.register(eventTypeProvider.GROUPS_DESTROYED, eventHandlers.updateGroups, true)
-        eventScope.register(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.updateBuildingSequence, true)
-        eventScope.register(eventTypeProvider.BUILDING_UPGRADING, eventHandlers.updateBuildingSequence, true)
-        eventScope.register(eventTypeProvider.BUILDING_LEVEL_CHANGED, eventHandlers.updateBuildingSequence, true)
-        eventScope.register(eventTypeProvider.BUILDING_TEARING_DOWN, eventHandlers.updateBuildingSequence, true)
-        eventScope.register(eventTypeProvider.VILLAGE_BUILDING_QUEUE_CHANGED, eventHandlers.updateBuildingSequence, true)
+        eventScope.register(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.generateBuildingSequences, true)
+        eventScope.register(eventTypeProvider.BUILDING_UPGRADING, eventHandlers.generateBuildingSequences, true)
+        eventScope.register(eventTypeProvider.BUILDING_LEVEL_CHANGED, eventHandlers.generateBuildingSequences, true)
+        eventScope.register(eventTypeProvider.BUILDING_TEARING_DOWN, eventHandlers.generateBuildingSequences, true)
+        eventScope.register(eventTypeProvider.VILLAGE_BUILDING_QUEUE_CHANGED, eventHandlers.generateBuildingSequences, true)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_JOB_STARTED, eventHandlers.updateLogs)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS, eventHandlers.updateLogs)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, eventHandlers.buildingSequenceUpdate)

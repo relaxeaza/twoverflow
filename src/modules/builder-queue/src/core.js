@@ -1,6 +1,7 @@
 define('two/builder', [
     'two/builder/settings',
     'two/builder/settingsMap',
+    'two/builder/errorCodes',
     'two/utils',
     'queues/EventQueue',
     'two/ready',
@@ -12,6 +13,7 @@ define('two/builder', [
 ], function (
     SETTINGS,
     SETTINGS_MAP,
+    ERROR_CODES,
     utils,
     eventQueue,
     ready,
@@ -315,25 +317,34 @@ define('two/builder', [
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS)
     }
 
-    builderQueue.updateBuildingOrder = function (id, order) {
-        var isUpdate = false
-
+    builderQueue.addBuildingSequence = function (id, sequence) {
         if (id in settings[SETTINGS.BUILDING_ORDERS]) {
-            isUpdate = true
+            return ERROR_CODES.SEQUENCE_EXISTS
         }
 
-        if (!angular.isArray(order)) {
-            return false
+        if (!angular.isArray(sequence)) {
+            return ERROR_CODES.SEQUENCE_INVALID
         }
 
-        settings[SETTINGS.BUILDING_ORDERS][id] = order
+        settings[SETTINGS.BUILDING_ORDERS][id] = sequence
         Lockr.set(STORAGE_ID.SETTINGS, settings)
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, id)
 
-        if (isUpdate) {
-            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, id)
-        } else {
-            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, id)
+        return true
+    }
+
+    builderQueue.updateBuildingOrder = function (id, sequence) {
+        if (!(id in settings[SETTINGS.BUILDING_ORDERS])) {
+            return ERROR_CODES.SEQUENCE_NO_EXISTS
         }
+
+        if (!angular.isArray(sequence)) {
+            return ERROR_CODES.SEQUENCE_INVALID
+        }
+
+        settings[SETTINGS.BUILDING_ORDERS][id] = sequence
+        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, id)
 
         return true
     }

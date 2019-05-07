@@ -21,9 +21,20 @@
         "add_building_success": "%d foi adicionado à posição %d",
         "add_building_limit_exceeded": "%d chegou ao nível máximo (%d)",
         "position": "Posição",
-        "remove_building": "Remover edifício da lista"
+        "remove_building": "Remover edifício da lista",
+        "clone": "Clonar",
+        "tooltip_clone": "Crie uma nova sequência a partir da sequência selecionada",
+        "name_sequence_min_lenght": "O nome da sequência deve ter pelo menos 3 caracteres.",
+        "sequence_created": "Nova sequência %d criada.",
+        "sequence_updated": "Sequência %d atualizada.",
+        "error_sequence_exits": "Esta sequência já existe.",
+        "error_sequence_invalid": "Algum valor da sequência é inválido."
     },
     "builder_queue_add_building_modal": {
         "title": "Adicionar novo edifício"
+    },
+    "builder_queue_name_sequence_modal": {
+        "title": "Nomear sequência",
+        "description": "Nomeia a nova sequência"
     }
 }

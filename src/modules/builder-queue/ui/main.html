@@ -117,7 +117,10 @@
                         <tbody>
                             <tr>
                                 <td><span class="ff-cell-fix">{{ 'sequences_select_edit' | i18n:loc.ale:textObject }}</span></td>
-                                <td><div select="" list="sequenceList" selected="selectedEditSequence" drop-down="true"></div></td>
+                                <td>
+                                    <div class="select-sequence-editor" select="" list="sequenceList" selected="selectedEditSequence" drop-down="true"></div>
+                                    <a class="btn btn-orange clone-sequence" ng-click="openNameSequenceModal()" tooltip="" tooltip-content="{{ 'tooltip_clone' | i18n:loc.ale:textObject }}">{{ 'clone' | i18n:loc.ale:textObject }}</a>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -206,7 +209,7 @@
                 <a href="#" class="btn-border btn-green" ng-click="openAddBuildingModal()">{{ 'sequences_add_building' | i18n:loc.ale:textObject }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.SEQUENCES">
-                <a href="#" class="btn-border btn-red" ng-click="saveBuildingSequence()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
+                <a href="#" class="btn-border btn-red" ng-click="updateBuildingSequence()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
             </li>
         </ul>
     </footer>
