@@ -518,9 +518,9 @@ define('two/builder/ui', [
 
     var switchBuilder = function () {
         if (builderQueue.isRunning()) {
-            builderQueue.start()
-        } else {
             builderQueue.stop()
+        } else {
+            builderQueue.start()
         }
     }
 
@@ -600,6 +600,12 @@ define('two/builder/ui', [
         },
         saveSettings: function () {
             utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
+        },
+        started: function () {
+            $scope.running = true
+        },
+        stopped: function () {
+            $scope.running = false
         }
     }
 
@@ -702,6 +708,8 @@ define('two/builder/ui', [
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, eventHandlers.buildingSequenceAdd)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, eventHandlers.buildingSequenceRemoved)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE, eventHandlers.saveSettings)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_START, eventHandlers.started)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_STOP, eventHandlers.stopped)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_builder_queue_window', $scope)
     }
