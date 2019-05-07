@@ -35,6 +35,9 @@ define('two/builder/ui', [
     var buildingsLevelPoints = {}
     var running = false
     var gameDataBuildings
+    var editorView = {
+        modal: {}
+    }
 
     var TAB_TYPES = {
         SETTINGS: 'settings',
@@ -122,62 +125,6 @@ define('two/builder/ui', [
         })
     }
 
-    var generateBuildingSequenceEditor = function (_sequenceId) {
-        var sequenceId = _sequenceId || $scope.selectedEditSequence.value
-        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
-        var buildingLevels = {}
-        var building
-
-        activeSequence = sequenceId
-
-        for (building in BUILDING_TYPES) {
-            buildingLevels[BUILDING_TYPES[building]] = 0
-        }
-
-        $scope.buildingSequenceEditor = buildingSequenceRaw.map(function (building) {
-            return {
-                level: ++buildingLevels[building],
-                building: building,
-                checked: false
-            }
-        })
-    }
-
-    var updateEditorLevels = function (sequence, building) {
-        var buildingLevel = 0
-        var modifiedSequence = []
-        var i
-        var item
-        var limitExceeded = false
-
-        for (i = 0; i < sequence.length; i++) {
-            item = sequence[i]
-
-            if (item.building === building) {
-                buildingLevel++
-
-                if (buildingLevel > gameDataBuildings[building].max_level) {
-                    limitExceeded = true
-                    break
-                }
-
-                modifiedSequence.push({
-                    level: buildingLevel,
-                    building: building,
-                    checked: false
-                })
-            } else {
-                modifiedSequence.push(item)
-            }
-        }
-
-        if (limitExceeded) {
-            return false
-        }
-
-        return modifiedSequence
-    }
-
     var generateBuildingSequenceFinal = function (_sequenceId) {
         var selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
         var sequenceBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_sequenceId || selectedSequence]
@@ -259,14 +206,6 @@ define('two/builder/ui', [
         $scope.pagination.buildingSequence.count = $scope.buildingSequence.length
     }
 
-    var updateVisibleBuildingSequenceEditor = function () {
-        var offset = $scope.pagination.buildingSequenceEditor.offset
-        var limit = $scope.pagination.buildingSequenceEditor.limit
-
-        $scope.visibleBuildingSequenceEditor = $scope.buildingSequenceEditor.slice(offset, offset + limit)
-        $scope.pagination.buildingSequenceEditor.count = $scope.buildingSequenceEditor.length
-    }
-
     var parseBuildingSequence = function (sequence) {
         return sequence.map(function (item) {
             return item.building
@@ -292,29 +231,6 @@ define('two/builder/ui', [
         return true
     }
 
-    var addBuildingEditor = function (building, position) {
-        var index = position - 1
-        var newSequence = $scope.buildingSequenceEditor.slice()
-        var updated
-
-        newSequence.splice(index, 0, {
-            level: null,
-            building: building,
-            checked: false
-        })
-
-        newSequence = updateEditorLevels(newSequence, building)
-
-        if (!newSequence) {
-            return false
-        }
-
-        $scope.buildingSequenceEditor = newSequence
-        updateVisibleBuildingSequenceEditor()
-
-        return true
-    }
-
     var selectTab = function (tabType) {
         $scope.selectedTab = tabType
     }
@@ -335,8 +251,8 @@ define('two/builder/ui', [
         builderQueue.clearLogs()
     }
 
-    var moveUp = function () {
-        var copy = angular.copy($scope.buildingSequenceEditor)
+    editorView.moveUp = function () {
+        var copy = angular.copy(editorView.buildingSequence)
         var index
         var item
 
@@ -363,12 +279,12 @@ define('two/builder/ui', [
             moveArrayItem(copy, index, index - 1)
         }
 
-        $scope.buildingSequenceEditor = copy
-        updateVisibleBuildingSequenceEditor()
+        editorView.buildingSequence = copy
+        editorView.updateVisibleBuildingSequence()
     }
 
-    var moveDown = function () {
-        var copy = angular.copy($scope.buildingSequenceEditor)
+    editorView.moveDown = function () {
+        var copy = angular.copy(editorView.buildingSequence)
         var index
         var item
 
@@ -395,11 +311,107 @@ define('two/builder/ui', [
             moveArrayItem(copy, index, index + 1)
         }
 
-        $scope.buildingSequenceEditor = copy
-        updateVisibleBuildingSequenceEditor()
+        editorView.buildingSequence = copy
+        editorView.updateVisibleBuildingSequence()
     }
 
-    var openAddBuildingModal = function () {
+    editorView.addBuilding = function (building, position) {
+        var index = position - 1
+        var newSequence = editorView.buildingSequence.slice()
+        var updated
+
+        newSequence.splice(index, 0, {
+            level: null,
+            building: building,
+            checked: false
+        })
+
+        newSequence = editorView.updateLevels(newSequence, building)
+
+        if (!newSequence) {
+            return false
+        }
+
+        editorView.buildingSequence = newSequence
+        editorView.updateVisibleBuildingSequence()
+
+        return true
+    }
+
+    editorView.removeBuilding = function (index) {
+        var building = editorView.buildingSequence[index].building
+
+        editorView.buildingSequence.splice(index, 1)
+        editorView.buildingSequence = editorView.updateLevels(editorView.buildingSequence, building)
+
+        editorView.updateVisibleBuildingSequence()
+    }
+
+    editorView.updateLevels = function (sequence, building) {
+        var buildingLevel = 0
+        var modifiedSequence = []
+        var i
+        var item
+        var limitExceeded = false
+
+        for (i = 0; i < sequence.length; i++) {
+            item = sequence[i]
+
+            if (item.building === building) {
+                buildingLevel++
+
+                if (buildingLevel > gameDataBuildings[building].max_level) {
+                    limitExceeded = true
+                    break
+                }
+
+                modifiedSequence.push({
+                    level: buildingLevel,
+                    building: building,
+                    checked: false
+                })
+            } else {
+                modifiedSequence.push(item)
+            }
+        }
+
+        if (limitExceeded) {
+            return false
+        }
+
+        return modifiedSequence
+    }
+
+    editorView.generateBuildingSequence = function (_sequenceId) {
+        var sequenceId = _sequenceId || editorView.selectedSequence.value
+        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
+        var buildingLevels = {}
+        var building
+
+        activeSequence = sequenceId
+
+        for (building in BUILDING_TYPES) {
+            buildingLevels[BUILDING_TYPES[building]] = 0
+        }
+
+        editorView.buildingSequence = buildingSequenceRaw.map(function (building) {
+            return {
+                level: ++buildingLevels[building],
+                building: building,
+                checked: false
+            }
+        })
+    }
+
+    editorView.updateVisibleBuildingSequence = function () {
+        var offset = $scope.pagination.buildingSequenceEditor.offset
+        var limit = $scope.pagination.buildingSequenceEditor.limit
+
+        editorView.visibleBuildingSequence = editorView.buildingSequence.slice(offset, offset + limit)
+        $scope.pagination.buildingSequenceEditor.count = editorView.buildingSequence.length
+    }
+
+    editorView.modal.addBuilding = function () {
         var modalScope = $rootScope.$new()
         var building
 
@@ -424,7 +436,7 @@ define('two/builder/ui', [
             var buildingName = $filter('i18n')(building, $rootScope.loc.ale, 'building_names')
             var buildingLimit = gameDataBuildings[building].max_level
 
-            if (addBuildingEditor(building, position)) {
+            if (editorView.addBuilding(building, position)) {
                 modalScope.closeWindow()
                 utils.emitNotif('success', $filter('i18n')('add_building_success', $rootScope.loc.ale, textObject, buildingName, position))
             } else {
@@ -435,9 +447,9 @@ define('two/builder/ui', [
         windowManagerService.getModal('!twoverflow_builder_queue_add_building_modal', modalScope)
     }
 
-    var openNameSequenceModal = function () {
+    editorView.modal.nameSequence = function () {
         var modalScope = $rootScope.$new()
-        var selectedSequenceName = $scope.selectedEditSequence.name
+        var selectedSequenceName = editorView.selectedSequence.name
         var selectedSequence = $scope.settings[SETTINGS.BUILDING_ORDERS][selectedSequenceName]
         
         modalScope.name = selectedSequenceName
@@ -458,18 +470,9 @@ define('two/builder/ui', [
         windowManagerService.getModal('!twoverflow_builder_queue_name_sequence_modal', modalScope)
     }
 
-    var removeBuildingEditor = function (index) {
-        var building = $scope.buildingSequenceEditor[index].building
-
-        $scope.buildingSequenceEditor.splice(index, 1)
-        $scope.buildingSequenceEditor = updateEditorLevels($scope.buildingSequenceEditor, building)
-
-        updateVisibleBuildingSequenceEditor()
-    }
-
     var updateBuildingSequence = function () {
-        var selectedSequence = $scope.selectedEditSequence.value
-        var parsedSequence = parseBuildingSequence($scope.buildingSequenceEditor)
+        var selectedSequence = editorView.selectedSequence.value
+        var parsedSequence = parseBuildingSequence(editorView.buildingSequence)
         var error = builderQueue.updateBuildingOrder(selectedSequence, parsedSequence)
 
         switch (error) {
@@ -525,8 +528,8 @@ define('two/builder/ui', [
             updateVisibleBuildingSequence()
         },
         generateBuildingSequencesEditor: function () {
-            generateBuildingSequenceEditor()
-            updateVisibleBuildingSequenceEditor()
+            editorView.generateBuildingSequence()
+            editorView.updateVisibleBuildingSequence()
         },
         updateLogs: function () {
             $scope.logs = builderQueue.getLogs()
@@ -590,31 +593,31 @@ define('two/builder/ui', [
         $scope.running = running
         $scope.buildingSequenceFinal = {}
         $scope.buildingSequence = {}
-        $scope.buildingSequenceEditor = {}
         $scope.settings = parseSettings(builderQueue.getSettings())
         $scope.logs = builderQueue.getLogs()
         $scope.villageGroups = []
         $scope.sequenceList = []
-        $scope.selectedEditSequence = angular.copy($scope.settings[SETTINGS.BUILDING_SEQUENCE])
+        
         $scope.pagination = {}
+
+        // editor
+        $scope.editorView = editorView
+        $scope.editorView.buildingSequence = {}
+        $scope.editorView.visibleBuildingSequence = {}
+        $scope.editorView.selectedSequence = angular.copy($scope.settings[SETTINGS.BUILDING_SEQUENCE])
 
         // methods
         $scope.selectTab = selectTab
         $scope.switchBuilder = switchBuilder
         $scope.clearLogs = clearLogs
         $scope.saveSettings = saveSettings
-        $scope.moveUp = moveUp
-        $scope.moveDown = moveDown
-        $scope.openAddBuildingModal = openAddBuildingModal
-        $scope.openNameSequenceModal = openNameSequenceModal
         $scope.updateBuildingSequence = updateBuildingSequence
-        $scope.removeBuildingEditor = removeBuildingEditor
 
         eventHandlers.updateGroups()
         eventHandlers.updateSequences()
         generateBuildingsLevelPoints()
         generateBuildingSequence()
-        generateBuildingSequenceEditor()
+        editorView.generateBuildingSequence()
         generateBuildingSequenceFinal()
 
         $scope.pagination.buildingSequence = {
@@ -625,17 +628,17 @@ define('two/builder/ui', [
         }
 
         $scope.pagination.buildingSequenceEditor = {
-            count: $scope.buildingSequenceEditor.length,
+            count: editorView.buildingSequence.length,
             offset: 0,
-            loader: updateVisibleBuildingSequenceEditor,
+            loader: editorView.updateVisibleBuildingSequence,
             limit: storageService.getPaginationLimit()
         }
 
         updateVisibleBuildingSequence()
-        updateVisibleBuildingSequenceEditor()
+        editorView.updateVisibleBuildingSequence()
 
         $scope.$watch('settings[SETTINGS.BUILDING_SEQUENCE].value', eventHandlers.generateBuildingSequences)
-        $scope.$watch('selectedEditSequence.value', eventHandlers.generateBuildingSequencesEditor)
+        $scope.$watch('editorView.selectedSequence.value', eventHandlers.generateBuildingSequencesEditor)
 
         eventScope = new EventScope('twoverflow_builder_queue_window')
         eventScope.register(eventTypeProvider.GROUPS_UPDATED, eventHandlers.updateGroups, true)
