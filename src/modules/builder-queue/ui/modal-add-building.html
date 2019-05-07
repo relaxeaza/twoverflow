@@ -15,11 +15,11 @@
                         <col width="15%">
                     </colgroup>
                     <tr>
-                        <td>Edificio</td>
+                        <td>{{ 'building' | i18n:loc.ale:'common' }}</td>
                         <td colspan="2"><div select="" list="buildings" selected="selectedBuilding" drop-down="true"></div></td>
                     </tr>
                     <tr>
-                        <td>Posição</td>
+                        <td>{{ 'position' | i18n:loc.ale:'builder_queue' }}</td>
                         <td><div range-slider="" min="1" max="buildingSequenceCount" value="position" enabled="true"></div></td>
                         <td><input type="text" class="input-border text-center" ng-model="position"></td>
                     </tr>
