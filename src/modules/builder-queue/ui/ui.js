@@ -511,13 +511,13 @@ define('two/builder/ui', [
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_START, function () {
             running = true
             opener.$elem.removeClass('btn-green').addClass('btn-red')
-            utils.emitNotif('success', $filter('i18n')('general.started', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('started', $rootScope.loc.ale, textObject))
         })
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_STOP, function () {
             running = false
             opener.$elem.removeClass('btn-red').addClass('btn-green')
-            utils.emitNotif('success', $filter('i18n')('general.stopped', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('stopped', $rootScope.loc.ale, textObject))
         })
 
         interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `__builder_html_main`)
