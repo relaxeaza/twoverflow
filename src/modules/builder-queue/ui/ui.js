@@ -402,6 +402,23 @@ define('two/builder/ui', [
         $scope.pagination.buildingSequenceEditor.count = editorView.buildingSequence.length
     }
 
+    editorView.updateBuildingSequence = function () {
+        var selectedSequence = editorView.selectedSequence.value
+        var parsedSequence = parseBuildingSequence(editorView.buildingSequence)
+        var error = builderQueue.updateBuildingOrder(selectedSequence, parsedSequence)
+
+        switch (error) {
+        case ERROR_CODES.SEQUENCE_NO_EXISTS:
+            utils.emitNotif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, textObject))
+
+            break
+        case ERROR_CODES.SEQUENCE_INVALID:
+            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, textObject))
+
+            break
+        }
+    }
+
     editorView.modal.removeSequence = function () {
         var modalScope = $rootScope.$new()
         var textObject = 'builder_queue_remove_sequence_modal'
@@ -480,23 +497,6 @@ define('two/builder/ui', [
         }
 
         windowManagerService.getModal('!twoverflow_builder_queue_name_sequence_modal', modalScope)
-    }
-
-    var updateBuildingSequence = function () {
-        var selectedSequence = editorView.selectedSequence.value
-        var parsedSequence = parseBuildingSequence(editorView.buildingSequence)
-        var error = builderQueue.updateBuildingOrder(selectedSequence, parsedSequence)
-
-        switch (error) {
-        case ERROR_CODES.SEQUENCE_NO_EXISTS:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, textObject))
-
-            break
-        case ERROR_CODES.SEQUENCE_INVALID:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, textObject))
-
-            break
-        }
     }
 
     var selectTab = function (tabType) {
@@ -657,7 +657,6 @@ define('two/builder/ui', [
         $scope.switchBuilder = switchBuilder
         $scope.clearLogs = clearLogs
         $scope.saveSettings = saveSettings
-        $scope.updateBuildingSequence = updateBuildingSequence
 
         eventHandlers.updateGroups()
         eventHandlers.updateSequences()
