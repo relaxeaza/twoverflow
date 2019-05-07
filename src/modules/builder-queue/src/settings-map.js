@@ -10,11 +10,11 @@ define('two/builder/settingsMap', [
             default: '',
             inputType: 'select'
         },
-        [SETTINGS.BUILDING_SEQUENCE]: {
+        [SETTINGS.ACTIVE_SEQUENCE]: {
             default: 'Essential',
             inputType: 'select'
         },
-        [SETTINGS.BUILDING_ORDERS]: {
+        [SETTINGS.BUILDING_SEQUENCES]: {
             default: DEFAULT_ORDERS,
             inputType: 'buildingOrder'
         }

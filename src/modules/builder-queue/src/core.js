@@ -109,7 +109,7 @@ define('two/builder', [
             return false
         }
 
-        settings[SETTINGS.BUILDING_ORDERS][settings[SETTINGS.BUILDING_SEQUENCE]].some(function (buildingName) {
+        settings[SETTINGS.BUILDING_SEQUENCES][settings[SETTINGS.ACTIVE_SEQUENCE]].some(function (buildingName) {
             if (++buildingOrder[buildingName] > buildingLevels[buildingName]) {
                 buildingService.compute(village)
 
@@ -209,7 +209,7 @@ define('two/builder', [
      * @return {Object} Maximum level for each building.
      */
     var getSequenceLimit = function (buildingSequence) {
-        var buildingOrder = settings[SETTINGS.BUILDING_ORDERS][buildingSequence]
+        var buildingOrder = settings[SETTINGS.BUILDING_SEQUENCES][buildingSequence]
         var orderLimit = angular.copy(VILLAGE_BUILDINGS)
 
         buildingOrder.forEach(function (buildingName) {
@@ -242,7 +242,7 @@ define('two/builder', [
             VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
         }
 
-        buildingOrderLimit = getSequenceLimit(settings[SETTINGS.BUILDING_SEQUENCE])
+        buildingOrderLimit = getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE])
 
         $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
             if (!running) {
@@ -297,7 +297,7 @@ define('two/builder', [
             settings[key] = newValue
         }
 
-        buildingOrderLimit = getSequenceLimit(changes[SETTINGS.BUILDING_SEQUENCE])
+        buildingOrderLimit = getSequenceLimit(changes[SETTINGS.ACTIVE_SEQUENCE])
         Lockr.set(STORAGE_ID.SETTINGS, settings)
 
         return true
@@ -318,7 +318,7 @@ define('two/builder', [
     }
 
     builderQueue.addBuildingSequence = function (id, sequence) {
-        if (id in settings[SETTINGS.BUILDING_ORDERS]) {
+        if (id in settings[SETTINGS.BUILDING_SEQUENCES]) {
             return ERROR_CODES.SEQUENCE_EXISTS
         }
 
@@ -326,15 +326,15 @@ define('two/builder', [
             return ERROR_CODES.SEQUENCE_INVALID
         }
 
-        settings[SETTINGS.BUILDING_ORDERS][id] = sequence
+        settings[SETTINGS.BUILDING_SEQUENCES][id] = sequence
         Lockr.set(STORAGE_ID.SETTINGS, settings)
-        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, id)
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, id)
 
         return true
     }
 
     builderQueue.updateBuildingOrder = function (id, sequence) {
-        if (!(id in settings[SETTINGS.BUILDING_ORDERS])) {
+        if (!(id in settings[SETTINGS.BUILDING_SEQUENCES])) {
             return ERROR_CODES.SEQUENCE_NO_EXISTS
         }
 
@@ -342,21 +342,21 @@ define('two/builder', [
             return ERROR_CODES.SEQUENCE_INVALID
         }
 
-        settings[SETTINGS.BUILDING_ORDERS][id] = sequence
+        settings[SETTINGS.BUILDING_SEQUENCES][id] = sequence
         Lockr.set(STORAGE_ID.SETTINGS, settings)
-        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, id)
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_UPDATED, id)
 
         return true
     }
 
     builderQueue.removeSequence = function (id) {
-        if (!(id in settings[SETTINGS.BUILDING_ORDERS])) {
+        if (!(id in settings[SETTINGS.BUILDING_SEQUENCES])) {
             return ERROR_CODES.SEQUENCE_NO_EXISTS
         }
 
-        delete settings[SETTINGS.BUILDING_ORDERS][id]
+        delete settings[SETTINGS.BUILDING_SEQUENCES][id]
         Lockr.set(STORAGE_ID.SETTINGS, settings)
-        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_REMOVED, id)
+        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, id)
     }
 
     return builderQueue

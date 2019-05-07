@@ -61,9 +61,9 @@ define('two/builder/ui', [
             }
         }
 
-        settings[SETTINGS.BUILDING_SEQUENCE] = {
-            name: settings[SETTINGS.BUILDING_SEQUENCE],
-            value: settings[SETTINGS.BUILDING_SEQUENCE]
+        settings[SETTINGS.ACTIVE_SEQUENCE] = {
+            name: settings[SETTINGS.ACTIVE_SEQUENCE],
+            value: settings[SETTINGS.ACTIVE_SEQUENCE]
         }
 
         return settings
@@ -142,8 +142,8 @@ define('two/builder/ui', [
     }
 
     settingsView.generateBuildingSequence = function () {
-        var sequenceId = $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
-        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
+        var sequenceId = $scope.settings[SETTINGS.ACTIVE_SEQUENCE].value
+        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
         var buildingData = modelDataService.getGameData().getBuildings()
         var buildingLevels = {}
         var building
@@ -178,8 +178,8 @@ define('two/builder/ui', [
     }
 
     settingsView.generateBuildingSequenceFinal = function (_sequenceId) {
-        var selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCE].value
-        var sequenceBuildings = $scope.settings[SETTINGS.BUILDING_ORDERS][_sequenceId || selectedSequence]
+        var selectedSequence = $scope.settings[SETTINGS.ACTIVE_SEQUENCE].value
+        var sequenceBuildings = $scope.settings[SETTINGS.BUILDING_SEQUENCES][_sequenceId || selectedSequence]
         var sequenceObj = {}
         var sequence = []
         var building
@@ -372,7 +372,7 @@ define('two/builder/ui', [
 
     editorView.generateBuildingSequence = function () {
         var sequenceId = editorView.selectedSequence.value
-        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
+        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
         var buildingLevels = {}
         var building
 
@@ -457,7 +457,7 @@ define('two/builder/ui', [
     editorView.modal.nameSequence = function () {
         var modalScope = $rootScope.$new()
         var selectedSequenceName = editorView.selectedSequence.name
-        var selectedSequence = $scope.settings[SETTINGS.BUILDING_ORDERS][selectedSequenceName]
+        var selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCES][selectedSequenceName]
         
         modalScope.name = selectedSequenceName
 
@@ -537,7 +537,7 @@ define('two/builder/ui', [
         },
         updateSequences: function () {
             var sequenceList = []
-            var sequences = $scope.settings[SETTINGS.BUILDING_ORDERS]
+            var sequences = $scope.settings[SETTINGS.BUILDING_SEQUENCES]
             var id
 
             for (id in sequences) {
@@ -564,9 +564,9 @@ define('two/builder/ui', [
         buildingSequenceUpdate: function (event, sequenceId) {
             var settings = builderQueue.getSettings()
 
-            $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId] = settings[SETTINGS.BUILDING_ORDERS][sequenceId]
+            $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId] = settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
 
-            if ($scope.settings[SETTINGS.BUILDING_SEQUENCE].value === sequenceId) {
+            if ($scope.settings[SETTINGS.ACTIVE_SEQUENCE].value === sequenceId) {
                 settingsView.generateBuildingSequence()
                 settingsView.generateBuildingSequenceFinal()
                 settingsView.updateVisibleBuildingSequence()
@@ -577,22 +577,22 @@ define('two/builder/ui', [
         buildingSequenceAdd: function (event, sequenceId) {
             var settings = builderQueue.getSettings()
             
-            $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId] = settings[SETTINGS.BUILDING_ORDERS][sequenceId]
+            $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId] = settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
             eventHandlers.updateSequences()
             utils.emitNotif('success', $filter('i18n')('sequence_created', $rootScope.loc.ale, textObject, sequenceId))
         },
         buildingSequenceRemoved: function (event, sequenceId) {
             var substituteSequence
 
-            delete $scope.settings[SETTINGS.BUILDING_ORDERS][sequenceId]
+            delete $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
 
-            substituteSequence = selectSome($scope.settings[SETTINGS.BUILDING_ORDERS])
+            substituteSequence = selectSome($scope.settings[SETTINGS.BUILDING_SEQUENCES])
             editorView.selectedSequence = { name: substituteSequence, value: substituteSequence }
             eventHandlers.updateSequences()
             editorView.generateBuildingSequence()
 
-            if ($scope.settings[SETTINGS.BUILDING_SEQUENCE].value === sequenceId) {
-                $scope.settings[SETTINGS.BUILDING_SEQUENCE] = { name: substituteSequence, value: substituteSequence }
+            if ($scope.settings[SETTINGS.ACTIVE_SEQUENCE].value === sequenceId) {
+                $scope.settings[SETTINGS.ACTIVE_SEQUENCE] = { name: substituteSequence, value: substituteSequence }
                 settingsView.generateBuildingsLevelPoints()
                 settingsView.generateBuildingSequence()
                 settingsView.generateBuildingSequenceFinal()
@@ -647,7 +647,7 @@ define('two/builder/ui', [
         $scope.editorView = editorView
         $scope.editorView.buildingSequence = {}
         $scope.editorView.visibleBuildingSequence = {}
-        $scope.editorView.selectedSequence = angular.copy($scope.settings[SETTINGS.BUILDING_SEQUENCE])
+        $scope.editorView.selectedSequence = angular.copy($scope.settings[SETTINGS.ACTIVE_SEQUENCE])
 
         $scope.settingsView = settingsView
         $scope.settingsView.buildingSequence = {}
@@ -686,7 +686,7 @@ define('two/builder/ui', [
         settingsView.updateVisibleBuildingSequence()
         editorView.updateVisibleBuildingSequence()
 
-        $scope.$watch('settings[SETTINGS.BUILDING_SEQUENCE].value', eventHandlers.generateBuildingSequences)
+        $scope.$watch('settings[SETTINGS.ACTIVE_SEQUENCE].value', eventHandlers.generateBuildingSequences)
         $scope.$watch('editorView.selectedSequence.value', eventHandlers.generateBuildingSequencesEditor)
 
         eventScope = new EventScope('twoverflow_builder_queue_window')
@@ -700,9 +700,9 @@ define('two/builder/ui', [
         eventScope.register(eventTypeProvider.VILLAGE_BUILDING_QUEUE_CHANGED, eventHandlers.generateBuildingSequences, true)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_JOB_STARTED, eventHandlers.updateLogs)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS, eventHandlers.updateLogs)
-        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_UPDATED, eventHandlers.buildingSequenceUpdate)
-        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_ADDED, eventHandlers.buildingSequenceAdd)
-        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_ORDERS_REMOVED, eventHandlers.buildingSequenceRemoved)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_UPDATED, eventHandlers.buildingSequenceUpdate)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, eventHandlers.buildingSequenceAdd)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, eventHandlers.buildingSequenceRemoved)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_builder_queue_window', $scope)
     }
