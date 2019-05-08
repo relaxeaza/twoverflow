@@ -29,7 +29,8 @@
         "sequence_created": "New sequence %d created.",
         "sequence_updated": "Sequence %d updated.",
         "sequence_removed": "Sequence %d removed.",
-        "error_sequence_exits": "This sequence already exists.",
+        "error_sequence_exists": "This sequence already exists.",
+        "error_sequence_no_exists": "This sequence not exists.",
         "error_sequence_invalid": "Some sequence's value is invalid."
     },
     "builder_queue_add_building_modal": {

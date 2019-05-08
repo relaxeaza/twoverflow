@@ -122,7 +122,7 @@ define('two/builder/ui', [
 
         switch (error) {
         case ERROR_CODES.SEQUENCE_EXISTS:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_exits', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_sequence_exists', $rootScope.loc.ale, textObject))
             return false
 
             break
