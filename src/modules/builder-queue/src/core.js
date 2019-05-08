@@ -180,27 +180,29 @@ define('two/builder', [
         return true
     }
 
-    // /**
-    //  * Check if the building sequence is valid by analysing if the
-    //  * buildings exceed the maximum level.
-    //  *
-    //  * @param {Array} sequence
-    //  * @return {Boolean}
-    //  */
-    // var validSequence = function (sequence) {
-    //     var sequence = angular.copy(VILLAGE_BUILDINGS)
-    //     var buildingData = modelDataService.getGameData().getBuildings()
-    //     var invalid = false
+    /**
+     * Check if the building sequence is valid by analysing if the
+     * buildings exceed the maximum level.
+     *
+     * @param {Array} sequence
+     * @return {Boolean}
+     */
+    var validSequence = function (sequence) {
+        var sequence = angular.copy(VILLAGE_BUILDINGS)
+        var buildingData = modelDataService.getGameData().getBuildings()
+        var building
+        var i
 
-    //     sequence.some(function (buildingName) {
-    //         if (++sequence[buildingName] > buildingData[buildingName].max_level) {
-    //             invalid = true
-    //             return true
-    //         }
-    //     })
+        for (i = 0; i < sequence.length; i++) {
+            building = sequence[i]
 
-    //     return invalid
-    // }
+            if (++sequence[building] > buildingData[building].max_level) {
+                return false
+            }
+        }
+
+        return true
+    }
 
     /**
      * Get the level max for each building.
@@ -340,7 +342,7 @@ define('two/builder', [
             return ERROR_CODES.SEQUENCE_NO_EXISTS
         }
 
-        if (!angular.isArray(sequence)) {
+        if (!angular.isArray(sequence) || !validSequence(sequence)) {
             return ERROR_CODES.SEQUENCE_INVALID
         }
 
