@@ -75,6 +75,8 @@
         "reset": "Reset",
         "here": "here",
         "disabled": "— Wyłączony —",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "actions": "Actions",
+        "remove": "Remove"
     }
 }
