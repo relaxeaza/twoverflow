@@ -546,11 +546,13 @@ define('two/queue/ui', [
         })
 
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_START, function () {
-            opener.$elem.removeClass('btn-green').addClass('btn-red')
+            opener.$elem.classList.remove('btn-green')
+            opener.$elem.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_STOP, function () {
-            opener.$elem.removeClass('btn-red').addClass('btn-green')
+            opener.$elem.classList.remove('btn-red')
+            opener.$elem.classList.add('btn-green')
         })
 
         $rootScope.$on(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage)

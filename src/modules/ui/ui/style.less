@@ -32,11 +32,18 @@
     }
 }
 
-#twOverflow-leftbar {
-    position: relative;
-    top: 0px;
-    left: 0px;
+#toolbar-left {
+    height: calc(100% - 358px) !important;
+    top: 250px !important;
+}
+
+#two-bar {
+    position: absolute;
+    top: 110px;
+    left: 5px;
     margin-bottom: 7px;
+    z-index: 10;
+    width: 100px;
 
     .button {
         white-space: nowrap;
@@ -59,6 +66,6 @@
     }
 }
 
-#wrapper.window-open #twOverflow-leftbar .button {
-    left: 720px;
+#wrapper.window-open #two-bar .button {
+    left: 715px;
 }

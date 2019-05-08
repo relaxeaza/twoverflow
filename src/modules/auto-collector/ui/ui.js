@@ -31,11 +31,13 @@ define('two/autoCollector/ui', [
         })
 
         eventQueue.bind('Collector/started', function () {
-            opener.$elem.removeClass('btn-green').addClass('btn-red')
+            opener.$elem.classList.remove('btn-green')
+            opener.$elem.classList.add('btn-red')
         })
 
         eventQueue.bind('Collector/stopped', function () {
-            opener.$elem.removeClass('btn-red').addClass('btn-green')
+            opener.$elem.classList.remove('btn-red')
+            opener.$elem.classList.add('btn-green')
         })
 
         if (autoCollector.isRunning()) {

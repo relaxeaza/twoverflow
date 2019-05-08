@@ -620,13 +620,15 @@ define('two/builder/ui', [
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_START, function () {
             running = true
-            opener.$elem.removeClass('btn-green').addClass('btn-red')
+            opener.$elem.classList.remove('btn-green')
+            opener.$elem.classList.add('btn-red')
             utils.emitNotif('success', $filter('i18n')('started', $rootScope.loc.ale, textObject))
         })
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_STOP, function () {
             running = false
-            opener.$elem.removeClass('btn-red').addClass('btn-green')
+            opener.$elem.classList.remove('btn-red')
+            opener.$elem.classList.add('btn-green')
             utils.emitNotif('success', $filter('i18n')('stopped', $rootScope.loc.ale, textObject))
         })
 

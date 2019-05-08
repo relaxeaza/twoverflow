@@ -305,11 +305,13 @@ define('two/farm/ui', [
         })
 
         eventQueue.register(eventTypeProvider.FARM_START, function () {
-            opener.$elem.removeClass('btn-green').addClass('btn-red')
+            opener.$elem.classList.remove('btn-green')
+            opener.$elem.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.FARM_PAUSE, function () {
-            opener.$elem.removeClass('btn-red').addClass('btn-green')
+            opener.$elem.classList.remove('btn-red')
+            opener.$elem.classList.add('btn-green')
         })
 
         interfaceOverflow.addTemplate('twoverflow_farm_window', `__farm_html_main`)

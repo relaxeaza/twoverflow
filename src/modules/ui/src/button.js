@@ -14,31 +14,35 @@ define('two/FrontButton', [], function () {
 
         var $elem = this.$elem
 
-        var $label = $elem.find('.label')
-        var $quick = $elem.find('.quickview')
+        var $label = $elem.querySelector('.label')
+        var $quick = $elem.querySelector('.quickview')
 
         if (options.classHover) {
-            $elem.on('mouseenter', function () {
-                $elem.addClass(options.classHover)
-                $elem.removeClass(options.classBlur)
+            $elem.addEventListener('mouseenter', function () {
+                $elem.classList.add(options.classHover)
+                $elem.classList.remove(options.classBlur)
 
-                $label.hide()
-                $quick.show()
+                // $label.hide()
+                $label.style.display = 'none'
+                // $quick.show()
+                $quick.style.display = ''
             })
         }
 
         if (options.classBlur) {
-            $elem.on('mouseleave', function () {
-                $elem.addClass(options.classBlur)
-                $elem.removeClass(options.classHover)
+            $elem.addEventListener('mouseleave', function () {
+                $elem.classList.add(options.classBlur)
+                $elem.classList.remove(options.classHover)
 
-                $quick.hide()
-                $label.show()
+                // $quick.hide()
+                $quick.style.display = 'none'
+                // $label.show()
+                $label.style.display = ''
             })
         }
 
         if (options.tooltip) {
-            $elem.on('mouseenter', function (event) {
+            $elem.addEventListener('mouseenter', function (event) {
                 $rootScope.$broadcast(
                     eventTypeProvider.TOOLTIP_SHOW,
                     'twoverflow-tooltip',
@@ -48,37 +52,37 @@ define('two/FrontButton', [], function () {
                 )
             })
 
-            $elem.on('mouseleave', function () {
+            $elem.addEventListener('mouseleave', function () {
                 $rootScope.$broadcast(eventTypeProvider.TOOLTIP_HIDE, 'twoverflow-tooltip')
             })
         }
 
         if (options.onClick) {
-            this.click(options.onClick)
+            $elem.addEventListener('click', options.onClick)
         }
 
         return this
     }
 
     FrontButton.prototype.updateQuickview = function (text) {
-        this.$elem.find('.quickview').html(text)
+        this.$elem.querySelector('.quickview').innerHTML = text
     }
 
     FrontButton.prototype.hover = function (handler) {
-        this.$elem.on('mouseenter', handler)
+        this.$elem.addEventListener('mouseenter', handler)
     }
 
     FrontButton.prototype.click = function (handler) {
-        this.$elem.on('click', handler)
+        this.$elem.addEventListener('click', handler)
     }
 
     FrontButton.prototype.buildWrapper = function () {
-        var $wrapper = document.getElementById('twOverflow-leftbar')
+        var $wrapper = document.getElementById('two-bar')
 
         if (!$wrapper) {
             $wrapper = document.createElement('div')
-            $wrapper.id = 'twOverflow-leftbar'
-            $('#toolbar-left').prepend($wrapper)
+            $wrapper.id = 'two-bar'
+            document.querySelector('#wrapper').appendChild($wrapper)
         }
 
         this.$wrapper = $wrapper
@@ -90,7 +94,7 @@ define('two/FrontButton', [], function () {
         var $elem = $container.children[0]
 
         this.$wrapper.appendChild($elem)
-        this.$elem = $($elem)
+        this.$elem = $elem
     }
 
     FrontButton.prototype.destroy = function () {
