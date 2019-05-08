@@ -54,24 +54,6 @@
                         </tbody>
                     </table>
 
-                    <h5 class="twx-section">{{ 'settings_building_sequence_final' | i18n:loc.ale:textObject }}</h5>
-                    <table class="tbl-border-light tbl-striped header-center building-sequence-final">
-                        <colgroup>
-                            <col width="5%">
-                            <col width="70%">
-                            <col>
-                        </colgroup>
-                        <tr>
-                            <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                            <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                        </tr>
-                        <tr ng-repeat="item in settingsView.buildingSequenceFinal | orderBy:'order'">
-                            <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
-                            <td>{{ item.building | i18n:loc.ale:'building_names' }}</td>
-                            <td>{{ item.level }}</td>
-                        </tr>
-                    </table>
-
                     <h5 class="twx-section">{{ 'settings_building_sequence' | i18n:loc.ale:textObject }}</h5>
                     
                     <div class="page-wrap" pagination="pagination.buildingSequence"></div>
@@ -109,6 +91,25 @@
                         </tr>
                     </table>
                     <div class="page-wrap" pagination="pagination.buildingSequence"></div>
+
+                    <h5 class="twx-section">{{ 'settings_building_sequence_final' | i18n:loc.ale:textObject }}</h5>
+                    
+                    <table class="tbl-border-light tbl-striped header-center building-sequence-final">
+                        <colgroup>
+                            <col width="5%">
+                            <col width="70%">
+                            <col>
+                        </colgroup>
+                        <tr>
+                            <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
+                        </tr>
+                        <tr ng-repeat="item in settingsView.buildingSequenceFinal | orderBy:'order'">
+                            <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
+                            <td>{{ item.building | i18n:loc.ale:'building_names' }}</td>
+                            <td>{{ item.level }}</td>
+                        </tr>
+                    </table>
                 </div>
 
                 <div ng-show="selectedTab === TAB_TYPES.SEQUENCES">
