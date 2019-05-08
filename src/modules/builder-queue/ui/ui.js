@@ -405,7 +405,7 @@ define('two/builder/ui', [
     editorView.updateBuildingSequence = function () {
         var selectedSequence = editorView.selectedSequence.value
         var parsedSequence = parseBuildingSequence(editorView.buildingSequence)
-        var error = builderQueue.updateBuildingOrder(selectedSequence, parsedSequence)
+        var error = builderQueue.updateBuildingSequence(selectedSequence, parsedSequence)
 
         switch (error) {
         case ERROR_CODES.SEQUENCE_NO_EXISTS:

@@ -25,9 +25,9 @@ define('two/builder', [
     var buildingService = injector.get('buildingService')
     var initialized = false
     var running = false
-    var buildingSequeOrder
     var localSettings
     var intervalCheckId
+    var buildingSequenceLimit
     var ANALYSES_PER_MINUTE = 1
     var VILLAGE_BUILDINGS = {}
     var groupList
@@ -97,7 +97,7 @@ define('two/builder', [
     var analyseVillageBuildings = function (village) {
         var buildingLevels = angular.copy(village.buildingData.getBuildingLevels())
         var currentQueue = village.buildingQueue.getQueue()
-        var buildingOrder = angular.copy(VILLAGE_BUILDINGS)
+        var sequence = angular.copy(VILLAGE_BUILDINGS)
         var now
         var logData
 
@@ -110,7 +110,7 @@ define('two/builder', [
         }
 
         settings[SETTINGS.BUILDING_SEQUENCES][settings[SETTINGS.ACTIVE_SEQUENCE]].some(function (buildingName) {
-            if (++buildingOrder[buildingName] > buildingLevels[buildingName]) {
+            if (++sequence[buildingName] > buildingLevels[buildingName]) {
                 buildingService.compute(village)
 
                 upgradeBuilding(village, buildingName, function (jobAdded, data) {
@@ -164,7 +164,7 @@ define('two/builder', [
     }
 
     /**
-     * Check if all buildings from the order already reached
+     * Check if all buildings from the sequence already reached
      * the specified level.
      *
      * @param {Object} buildingLevels - Current buildings level from the village.
@@ -172,7 +172,7 @@ define('two/builder', [
      */
     var checkVillageBuildingLimit = function (buildingLevels) {
         for (var buildingName in buildingLevels) {
-            if (buildingLevels[buildingName] < buildingOrderLimit[buildingName]) {
+            if (buildingLevels[buildingName] < buildingSequenceLimit[buildingName]) {
                 return false
             }
         }
@@ -181,19 +181,19 @@ define('two/builder', [
     }
 
     // /**
-    //  * Check if the building order is valid by analysing if the
+    //  * Check if the building sequence is valid by analysing if the
     //  * buildings exceed the maximum level.
     //  *
-    //  * @param {Array} order
+    //  * @param {Array} sequence
     //  * @return {Boolean}
     //  */
-    // var validSequence = function (order) {
-    //     var buildingOrder = angular.copy(VILLAGE_BUILDINGS)
+    // var validSequence = function (sequence) {
+    //     var sequence = angular.copy(VILLAGE_BUILDINGS)
     //     var buildingData = modelDataService.getGameData().getBuildings()
     //     var invalid = false
 
-    //     order.some(function (buildingName) {
-    //         if (++buildingOrder[buildingName] > buildingData[buildingName].max_level) {
+    //     sequence.some(function (buildingName) {
+    //         if (++sequence[buildingName] > buildingData[buildingName].max_level) {
     //             invalid = true
     //             return true
     //         }
@@ -205,18 +205,18 @@ define('two/builder', [
     /**
      * Get the level max for each building.
      *
-     * @param {String} buildingSequence
+     * @param {String} sequenceId
      * @return {Object} Maximum level for each building.
      */
-    var getSequenceLimit = function (buildingSequence) {
-        var buildingOrder = settings[SETTINGS.BUILDING_SEQUENCES][buildingSequence]
-        var orderLimit = angular.copy(VILLAGE_BUILDINGS)
+    var getSequenceLimit = function (sequenceId) {
+        var sequence = settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
+        var sequenceLimit = angular.copy(VILLAGE_BUILDINGS)
 
-        buildingOrder.forEach(function (buildingName) {
-            orderLimit[buildingName]++
+        sequence.forEach(function (buildingName) {
+            sequenceLimit[buildingName]++
         })
 
-        return orderLimit
+        return sequenceLimit
     }
 
     var builderQueue = {}
@@ -242,7 +242,7 @@ define('two/builder', [
             VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
         }
 
-        buildingOrderLimit = getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE])
+        buildingSequenceLimit = getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE])
 
         $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
             if (!running) {
@@ -297,7 +297,7 @@ define('two/builder', [
             settings[key] = newValue
         }
 
-        buildingOrderLimit = getSequenceLimit(changes[SETTINGS.ACTIVE_SEQUENCE])
+        buildingSequenceLimit = getSequenceLimit(changes[SETTINGS.ACTIVE_SEQUENCE])
         Lockr.set(STORAGE_ID.SETTINGS, settings)
 
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
@@ -335,7 +335,7 @@ define('two/builder', [
         return true
     }
 
-    builderQueue.updateBuildingOrder = function (id, sequence) {
+    builderQueue.updateBuildingSequence = function (id, sequence) {
         if (!(id in settings[SETTINGS.BUILDING_SEQUENCES])) {
             return ERROR_CODES.SEQUENCE_NO_EXISTS
         }
