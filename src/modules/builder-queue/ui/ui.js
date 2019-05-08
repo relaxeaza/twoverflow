@@ -446,7 +446,7 @@ define('two/builder/ui', [
 
         modalScope.buildings = []
         modalScope.position = 1
-        modalScope.buildingSequenceCount = settingsView.buildingSequence.length
+        modalScope.indexLimit = editorView.buildingSequence.length + 1
         modalScope.selectedBuilding = {
             name: $filter('i18n')(BUILDING_TYPES.HEADQUARTER, $rootScope.loc.ale, 'building_names'),
             value: BUILDING_TYPES.HEADQUARTER
