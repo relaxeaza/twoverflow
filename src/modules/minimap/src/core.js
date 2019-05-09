@@ -764,7 +764,7 @@ define('two/minimap', [
             return false
         }
 
-        view = window.twx.game.map.engine.getView()
+        view = $mapData.getMap().engine.getView()
 
         return convert([
             -view.x,
