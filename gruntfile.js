@@ -180,6 +180,7 @@ module.exports = function (grunt) {
         'src/locale.js',
         'src/ready.js',
         'src/configs.js',
+        'src/language.js',
         'src/init.js'
     ])
 
