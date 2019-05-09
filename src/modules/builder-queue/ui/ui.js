@@ -38,6 +38,7 @@ define('two/builder/ui', [
         modal: {}
     }
     var settingsView = {}
+    var logsView = {}
 
     var TAB_TYPES = {
         SETTINGS: 'settings',
@@ -499,6 +500,18 @@ define('two/builder/ui', [
         windowManagerService.getModal('!twoverflow_builder_queue_name_sequence_modal', modalScope)
     }
 
+    logsView.updateVisibleLogs = function () {
+        var offset = $scope.pagination.logs.offset
+        var limit = $scope.pagination.logs.limit
+
+        logsView.visibleLogs = logsView.logs.slice(offset, offset + limit)
+        $scope.pagination.logs.count = logsView.logs.length
+    }
+
+    logsView.clearLogs = function () {
+        builderQueue.clearLogs()
+    }
+
     var selectTab = function (tabType) {
         $scope.selectedTab = tabType
     }
@@ -522,10 +535,6 @@ define('two/builder/ui', [
         } else {
             builderQueue.start()
         }
-    }
-
-    var clearLogs = function () {
-        builderQueue.clearLogs()
     }
 
     var eventHandlers = {
@@ -558,6 +567,11 @@ define('two/builder/ui', [
         },
         updateLogs: function () {
             $scope.logs = builderQueue.getLogs()
+            logsView.updateVisibleLogs()
+        },
+        clearLogs: function () {
+            utils.emitNotif('success', $filter('i18n')('logs_cleared', $rootScope.loc.ale, textObject))
+            eventHandlers.updateLogs()
         },
         buildingSequenceUpdate: function (event, sequenceId) {
             var settings = builderQueue.getSettings()
@@ -647,7 +661,6 @@ define('two/builder/ui', [
         $scope.SETTINGS = SETTINGS
         $scope.running = running
         $scope.settings = parseSettings(builderQueue.getSettings())
-        $scope.logs = builderQueue.getLogs()
 
         $scope.pagination = {}
 
@@ -660,11 +673,14 @@ define('two/builder/ui', [
         $scope.settingsView.buildingSequence = {}
         $scope.settingsView.buildingSequenceFinal = {}
 
+        $scope.logsView = logsView
+        $scope.logsView.logs = builderQueue.getLogs()
+
         // methods
         $scope.selectTab = selectTab
         $scope.switchBuilder = switchBuilder
-        $scope.clearLogs = clearLogs
         $scope.saveSettings = saveSettings
+        $scope.openVillageInfo = windowDisplayService.openVillageInfo
 
         eventHandlers.updateGroups()
         eventHandlers.updateSequences()
@@ -689,6 +705,13 @@ define('two/builder/ui', [
             limit: storageService.getPaginationLimit()
         }
 
+        $scope.pagination.logs = {
+            count: $scope.length,
+            offset: 0,
+            loader: logsView.updateVisibleLogs,
+            limit: storageService.getPaginationLimit()
+        }
+
         settingsView.updateVisibleBuildingSequence()
         editorView.updateVisibleBuildingSequence()
 
@@ -705,7 +728,7 @@ define('two/builder/ui', [
         eventScope.register(eventTypeProvider.BUILDING_TEARING_DOWN, eventHandlers.generateBuildingSequences, true)
         eventScope.register(eventTypeProvider.VILLAGE_BUILDING_QUEUE_CHANGED, eventHandlers.generateBuildingSequences, true)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_JOB_STARTED, eventHandlers.updateLogs)
-        eventScope.register(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS, eventHandlers.updateLogs)
+        eventScope.register(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS, eventHandlers.clearLogs)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_UPDATED, eventHandlers.buildingSequenceUpdate)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, eventHandlers.buildingSequenceAdd)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, eventHandlers.buildingSequenceRemoved)

@@ -162,8 +162,9 @@
                     <div class="page-wrap" pagination="pagination.buildingSequenceEditor"></div>
                 </div>
 
-                <div ng-show="selectedTab === TAB_TYPES.LOGS">
-                    <table class="tbl-border-light tbl-striped header-center">
+                <div ng-show="selectedTab === TAB_TYPES.LOGS" class="rich-text">
+                    <div class="page-wrap" pagination="pagination.logs"></div>
+                    <table class="tbl-border-light tbl-striped header-center logs">
                         <colgroup>
                             <col width="40%">
                             <col width="30%">
@@ -176,15 +177,22 @@
                                 <th>{{ 'village' | i18n:loc.ale:textObjectCommon }}</th>
                                 <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
                                 <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'started' | i18n:loc.ale:textObjectCommon }}</th>
+                                <th>{{ 'started_at' | i18n:loc.ale:textObjectCommon }}</th>
                             </tr>
                         </thead>
-                        <tbody class="buildLog">
-                            <tr class="noBuilds">
+                        <tbody>
+                            <tr ng-show="!logsView.logs.length">
                                 <td colspan="4">{{ 'logs_no_builds' | i18n:loc.ale:textObject }}</td>
+                            </tr>
+                            <tr ng-repeat="log in logsView.logs">
+                                <td><span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log[0].id)">{{ log[0].name }} ({{ log[0].x }}|{{ log[0].y }})</span></td>
+                                <td><span class="building-icon icon-20x20-building-{{ log[1] }}"></span> {{ log[1] | i18n:loc.ale:'building_names' }}</td>
+                                <td>{{ log[2] }}</td>
+                                <td>{{ log[3] | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
                             </tr>
                         </tbody>
                     </table>
+                    <div class="page-wrap" pagination="pagination.logs"></div>
                 </div>
             </div>
         </div>
@@ -202,7 +210,7 @@
                 </a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.LOGS">
-                <a href="#" class="btn-border btn-orange" ng-click="clearLogs()">{{ 'clear_logs' | i18n:loc.ale:textObject }}</a>
+                <a href="#" class="btn-border btn-orange" ng-click="logsView.clearLogs()">{{ 'logs_clear' | i18n:loc.ale:textObject }}</a>
             </li>
 
             <li ng-show="selectedTab === TAB_TYPES.SEQUENCES">

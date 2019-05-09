@@ -77,6 +77,7 @@
         "disabled": "— Disabled —",
         "cancel": "Cancel",
         "actions": "Actions",
-        "remove": "Remove"
+        "remove": "Remove",
+        "started_at": "Started at"
     }
 }
