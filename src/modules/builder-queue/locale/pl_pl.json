@@ -32,7 +32,8 @@
         "error_sequence_exists": "This sequence already exists.",
         "error_sequence_no_exists": "This sequence not exists.",
         "error_sequence_invalid": "Some sequence's value is invalid.",
-        "logs_cleared": "Logs cleared."
+        "logs_cleared": "Logs cleared.",
+        "create_sequence": "Create a sequence"
     },
     "builder_queue_add_building_modal": {
         "title": "Add new building"

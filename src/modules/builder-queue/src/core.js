@@ -33,11 +33,13 @@ define('two/builder', [
     var groupList
     var $player
     var logs
+    var sequencesAvail = true
     var settings = {}
     var STORAGE_ID = {
         LOGS: 'builder_queue_log',
         SETTINGS: 'builder_queue_settings'
     }
+    var builderQueue = {}
 
     /**
      * Loop all player villages, check if ready and init the building analyse
@@ -50,6 +52,11 @@ define('two/builder', [
         var village
         var readyState
         var queue
+
+        if (!sequencesAvail) {
+            builderQueue.stop()
+            return false
+        }
 
         villageIds.forEach(function (id) {
             village = $player.getVillage(id)
@@ -221,8 +228,6 @@ define('two/builder', [
         return sequenceLimit
     }
 
-    var builderQueue = {}
-
     builderQueue.init = function () {
         var key
         var defaultValue
@@ -244,7 +249,8 @@ define('two/builder', [
             VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
         }
 
-        buildingSequenceLimit = getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE])
+        sequencesAvail = Object.keys(settings[SETTINGS.BUILDING_SEQUENCES]).length
+        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE]) : false
 
         $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
             if (!running) {
@@ -259,6 +265,11 @@ define('two/builder', [
     }
 
     builderQueue.start = function () {
+        if (!sequencesAvail) {
+            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_NO_SEQUENCES)
+            return false
+        }
+
         running = true
         intervalCheckId = setInterval(analyseVillages, 60000 / ANALYSES_PER_MINUTE)
         ready(analyseVillages, ['all_villages_ready'])
@@ -279,7 +290,7 @@ define('two/builder', [
         return initialized
     }
 
-    builderQueue.updateSettings = function (changes) {
+    builderQueue.updateSettings = function (changes, _quiet) {
         var newValue
         var key
 
@@ -299,10 +310,13 @@ define('two/builder', [
             settings[key] = newValue
         }
 
-        buildingSequenceLimit = getSequenceLimit(changes[SETTINGS.ACTIVE_SEQUENCE])
+        sequencesAvail = Object.keys(settings[SETTINGS.BUILDING_SEQUENCES]).length
+        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE]) : false
         Lockr.set(STORAGE_ID.SETTINGS, settings)
 
-        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
+        if (!_quiet) {
+            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
+        }
 
         return true
     }
