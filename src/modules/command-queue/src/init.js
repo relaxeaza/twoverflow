@@ -1,11 +1,11 @@
 require([
-    'helper/i18n',
+    'two/language',
     'two/ready',
     'two/queue',
     'two/queue/ui',
     'two/queue/Events'
 ], function (
-    i18n,
+    twoLanguage,
     ready,
     commandQueue,
     commandQueueInterface
@@ -14,19 +14,8 @@ require([
         return false
     }
 
-    var updateModuleLang = function () {
-        var langs = __queue_locale
-        var current = $rootScope.loc.ale
-        var data = current in langs
-            ? langs[current]
-            : langs['en_us']
-
-        i18n.setJSON(data)
-    }
-
     ready(function () {
-        updateModuleLang()
-
+        twoLanguage.addData('__queue_id', __queue_locale)
         commandQueue.init()
         commandQueueInterface()
 

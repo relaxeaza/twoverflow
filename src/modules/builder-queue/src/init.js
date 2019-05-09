@@ -1,11 +1,11 @@
 require([
-    'helper/i18n',
+    'two/language',
     'two/ready',
     'two/builder',
     'two/builder/ui',
     'two/builder/events'
 ], function (
-    i18n,
+    twoLanguage,
     ready,
     builderQueue,
     builderQueueInterface
@@ -14,18 +14,8 @@ require([
         return false
     }
 
-    var updateModuleLang = function () {
-        var langs = __builder_locale
-        var current = $rootScope.loc.ale
-        var data = current in langs
-            ? langs[current]
-            : langs['en_us']
-
-        i18n.setJSON(data)
-    }
-
     ready(function () {
-        updateModuleLang()
+        twoLanguage.addData('__builder_id', __builder_locale)
         builderQueue.init()
         builderQueueInterface()
     })

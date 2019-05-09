@@ -1,34 +1,24 @@
 require([
+    'two/language',
     'two/ready',
     'two/autoCollector',
     'Lockr',
-    'helper/i18n',
     'two/eventQueue',
     'two/autoCollector/secondVillage',
     'two/autoCollector/ui'
 ], function (
+    twoLanguage,
     ready,
     autoCollector,
     Lockr,
-    i18n,
     eventQueue
 ) {
     if (autoCollector.isInitialized()) {
         return false
     }
 
-    var updateModuleLang = function () {
-        var langs = __collector_locale
-        var current = $rootScope.loc.ale
-        var data = current in langs
-            ? langs[current]
-            : langs['en_us']
-
-        i18n.setJSON(data)
-    }
-
     ready(function () {
-        updateModuleLang()
+        twoLanguage.addData('__collector_id', __collector_locale)
         autoCollector.init()
         autoCollector.secondVillage.init()
         autoCollector.interface()

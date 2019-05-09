@@ -1,5 +1,5 @@
 require([
-    'helper/i18n',
+    'two/language',
     'two/ready',
     'two/minimap',
     'two/minimap/ui',
@@ -8,7 +8,7 @@ require([
     'two/minimap/settings',
     'two/minimap/settingsMap',
 ], function (
-    i18n,
+    twoLanguage,
     ready,
     minimap,
     minimapInterface
@@ -17,18 +17,8 @@ require([
         return false
     }
 
-    var updateModuleLang = function () {
-        var langs = __minimap_locale
-        var current = $rootScope.loc.ale
-        var data = current in langs
-            ? langs[current]
-            : langs['en_us']
-
-        i18n.setJSON(data)
-    }
-
     ready(function () {
-        updateModuleLang()
+        twoLanguage.addData('__minimap_id', __minimap_locale)
         minimap.init()
         minimapInterface()
         minimap.run()
