@@ -585,7 +585,6 @@ define('two/minimap', [
 
             var coords = getCoords(event)
             $rootScope.$broadcast(eventTypeProvider.MAP_CENTER_ON_POSITION, coords.x, coords.y, true)
-            preloadSectors(2, coords.x, coords.y)
         },
         onCrossMouseContext: function (event) {
             event.preventDefault()
@@ -910,7 +909,6 @@ define('two/minimap', [
 
             drawLoadedVillages()
             cacheVillages($mapData.getTowns())
-            preloadSectors(2)
             renderStep()
 
             $cross.addEventListener('mousedown', eventHandlers.onCrossMouseDown)
