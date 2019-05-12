@@ -1,15 +1,19 @@
 define('two/attackView', [
     'two/queue',
-    'two/eventQueue',
+    'queues/EventQueue',
     'two/ready',
     'models/CommandModel',
     'conf/unitTypes',
     'Lockr',
     'helper/math',
     'helper/mapconvert',
-    'struct/MapData'
+    'struct/MapData',
+    'two/attackView/columnTypes',
+    'two/attackView/commandTypes',
+    'two/attackView/filterTypes',
+    'two/attackView/unitSpeedOrder'
 ], function (
-    Queue,
+    commandQueue,
     eventQueue,
     ready,
     CommandModel,
@@ -17,53 +21,12 @@ define('two/attackView', [
     Lockr,
     $math,
     $convert,
-    $mapData
+    $mapData,
+    COLUMN_TYPES,
+    COMMAND_TYPES,
+    FILTER_TYPES,
+    UNIT_SPEED_ORDER
 ) {
-    var COLUMN_TYPES = {
-        'ORIGIN_VILLAGE'    : 'origin_village_name',
-        'COMMAND_TYPE'      : 'command_type',
-        'TARGET_VILLAGE'    : 'target_village_name',
-        'TIME_COMPLETED'    : 'time_completed',
-        'COMMAND_PROGRESS'  : 'command_progress',
-        'ORIGIN_CHARACTER'  : 'origin_character_name'
-    }
-    var COMMAND_TYPES = {
-        'ATTACK': 'attack',
-        'SUPPORT': 'support',
-        'RELOCATE': 'relocate'
-    }
-    var COMMAND_ORDER = [
-        'ATTACK',
-        'SUPPORT',
-        'RELOCATE'
-    ]
-    var FILTER_TYPES = {
-        'COMMAND_TYPES'     : 'commandTypes',
-        'VILLAGE'           : 'village',
-        'INCOMING_UNITS'    : 'incomingUnits'
-    }
-    var UNIT_SPEED_ORDER = [
-        UNIT_TYPES.LIGHT_CAVALRY,
-        UNIT_TYPES.HEAVY_CAVALRY,
-        UNIT_TYPES.AXE,
-        UNIT_TYPES.SWORD,
-        UNIT_TYPES.RAM,
-        UNIT_TYPES.SNOB,
-        UNIT_TYPES.TREBUCHET
-    ]
-    var INCOMING_UNITS_FILTER = {}
-
-    for (var i = 0; i < UNIT_SPEED_ORDER.length; i++) {
-        INCOMING_UNITS_FILTER[UNIT_SPEED_ORDER[i]] = true
-    }
-
-    var resetFilters = function () {
-        filters = {}
-        filters[FILTER_TYPES.COMMAND_TYPES] = angular.copy(COMMAND_TYPES)
-        filters[FILTER_TYPES.VILLAGE] = false
-        filters[FILTER_TYPES.INCOMING_UNITS] = angular.copy(INCOMING_UNITS_FILTER)
-    }
-
     var initialized = false
     var listeners = {}
     var overviewService = injector.get('overviewService')
@@ -75,8 +38,24 @@ define('two/attackView', [
         reverse: false,
         column: COLUMN_TYPES.COMMAND_PROGRESS
     }
+    var COMMAND_ORDER = [
+        'ATTACK',
+        'SUPPORT',
+        'RELOCATE'
+    ]
+    var STORAGE_ID = {
+        FILTERS: 'attack_view_filters'
+    }
+    var INCOMING_UNITS_FILTER = {}
 
-    var formatFilters = function formatFilters () {
+    var resetFilters = function () {
+        filters = {}
+        filters[FILTER_TYPES.COMMAND_TYPES] = angular.copy(COMMAND_TYPES)
+        filters[FILTER_TYPES.VILLAGE] = false
+        filters[FILTER_TYPES.INCOMING_UNITS] = angular.copy(INCOMING_UNITS_FILTER)
+    }
+
+    var formatFilters = function () {
         var toArray = [FILTER_TYPES.COMMAND_TYPES]
         var currentVillageId = modelDataService.getSelectedVillage().getId()
         var arrays = {}
@@ -111,45 +90,11 @@ define('two/attackView', [
     }
 
     /**
-     * Toggles the given filter.
-     *
-     * @param {string} type The category of the filter (see FILTER_TYPES)
-     * @param {string} opt_filter The filter to be toggled.
-     */
-    var toggleFilter = function (type, opt_filter) {
-        if (!opt_filter) {
-            filters[type] = !filters[type]
-        } else {
-            filters[type][opt_filter] = !filters[type][opt_filter]
-        }
-
-        // format filters for the backend
-        formatFilters()
-
-        eventQueue.trigger('attackView/filtersChanged')
-    }
-
-    var toggleSorting = function (newColumn) {
-        if (!COLUMN_TYPES[newColumn]) {
-            return false
-        }
-
-        if (COLUMN_TYPES[newColumn] === sorting.column) {
-            sorting.reverse = !sorting.reverse
-        } else {
-            sorting.column = COLUMN_TYPES[newColumn]
-            sorting.reverse = false
-        }
-
-        eventQueue.trigger('attackView/sortingChanged')
-    }
-
-    /**
      * Command was sent.
      */
     var onCommandIncomming = function () {
         // we can never know if the command is currently visible (because of filters, sorting and stuff) -> reload
-        loadCommands()
+        attackView.loadCommands()
     }
 
     /**
@@ -159,7 +104,7 @@ define('two/attackView', [
      * @param {Object} data The backend-data
      */
     var onCommandCancelled = function (event, data) {
-        eventQueue.trigger('attackView/commandCancelled', [data.id || data.command_id])
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMAND_CANCELLED, [data.id || data.command_id])
     }
 
     /**
@@ -169,13 +114,15 @@ define('two/attackView', [
      * @param {Object} data The backend-data
      */
     var onCommandIgnored = function (event, data) {
-        for (var i = 0; i < commands.length; i++) {
+        var i
+
+        for (i = 0; i < commands.length; i++) {
             if (commands[i].command_id === data.command_id) {
                 commands.splice(i, 1)
             }
         }
 
-        eventQueue.trigger('attackView/commandIgnored', [data.command_id])
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMAND_IGNORED, [data.command_id])
     }
 
     /**
@@ -185,65 +132,34 @@ define('two/attackView', [
      * @param {Object} data The backend-data
      */
     var onVillageNameChanged = function (event, data) {
-        for (var i = 0; i < commands.length; i++) {
+        var i
+
+        for (i = 0; i < commands.length; i++) {
             if (commands[i].target_village_id === data.village_id) {
                 commands[i].target_village_name = data.name
                 commands[i].targetVillage.name = data.name
             }
         }
 
-        eventQueue.trigger('attackView/villageRenamed', [data])
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_VILLAGE_RENAMED, [data])
     }
 
     var onVillageSwitched = function (e, newVillageId) {
         if (params[FILTER_TYPES.VILLAGE].length) {
             params[FILTER_TYPES.VILLAGE] = [newVillageId]
 
-            loadCommands()
+            attackView.loadCommands()
         }
     }
 
     var onFiltersChanged = function () {
-        Lockr.set('attackView-filters', filters)
+        Lockr.set(STORAGE_ID.FILTERS, filters)
 
-        loadCommands()
+        attackView.loadCommands()
     }
 
     var onSortingChanged = function () {
-        loadCommands()
-    }
-
-    /**
-     * @param {Object} data The data-object from the backend
-     */
-    var onOverviewIncomming = function onOverviewIncomming (data) {
-        commands = data.commands
-
-        for (var i = 0; i < commands.length; i++) {
-            overviewService.formatCommand(commands[i])
-            commands[i].slowestUnit = getSlowestUnit(commands[i])
-        }
-
-        commands = commands.filter(function (command) {
-            return filters[FILTER_TYPES.INCOMING_UNITS][command.slowestUnit]
-        })
-
-        eventQueue.trigger('attackView/commandsLoaded', [commands])
-    }
-
-    var loadCommands = function () { 
-        var incomingCommands = globalInfoModel.getCommandListModel().getIncomingCommands().length
-        var count = incomingCommands > 25 ? incomingCommands : 25
-
-        socketService.emit(routeProvider.OVERVIEW_GET_INCOMING, {
-            'count'         : count,
-            'offset'        : 0,
-            'sorting'       : sorting.column,
-            'reverse'       : sorting.reverse ? 1 : 0,
-            'groups'        : [],
-            'command_types' : params[FILTER_TYPES.COMMAND_TYPES],
-            'villages'      : params[FILTER_TYPES.VILLAGE]
-        }, onOverviewIncomming)
+        attackView.loadCommands()
     }
 
     /**
@@ -262,7 +178,7 @@ define('two/attackView', [
             
             travelTimes.push({
                 unit: unit,
-                duration: Queue.getTravelTime(origin, target, units, command.command_type, {})
+                duration: commandQueue.getTravelTime(origin, target, units, command.command_type, {})
             })
         })
 
@@ -276,32 +192,6 @@ define('two/attackView', [
         return travelTimes[0].unit
     }
 
-    var getCommands = function () {
-        return commands
-    }
-
-    var getFilters = function () {
-        return filters
-    }
-
-    var getSortings = function () {
-        return sorting
-    }
-
-    var registerListeners = function () {
-        listeners[eventTypeProvider.COMMAND_INCOMING] = rootScope.$on(eventTypeProvider.COMMAND_INCOMING, onCommandIncomming)
-        listeners[eventTypeProvider.COMMAND_CANCELLED] = rootScope.$on(eventTypeProvider.COMMAND_CANCELLED, onCommandCancelled)
-        listeners[eventTypeProvider.MAP_SELECTED_VILLAGE] = rootScope.$on(eventTypeProvider.MAP_SELECTED_VILLAGE, onVillageSwitched)
-        listeners[eventTypeProvider.VILLAGE_NAME_CHANGED] = rootScope.$on(eventTypeProvider.VILLAGE_NAME_CHANGED, onVillageNameChanged)
-        listeners[eventTypeProvider.COMMAND_IGNORED] = rootScope.$on(eventTypeProvider.COMMAND_IGNORED, onCommandIgnored)
-    }
-
-    var unregisterListeners = function () {
-        for (var event in listeners) {
-            listeners[event]()
-        }
-    }
-
     /**
      * Sort a set of villages by distance from a specified village.
      *
@@ -310,9 +200,12 @@ define('two/attackView', [
      * @return {Array} Sorted villages
      */
     var sortByDistance = function (villages, origin) {
+        var distA
+        var distB
+
         return villages.sort(function (villageA, villageB) {
-            var distA = $math.actualDistance(origin, villageA)
-            var distB = $math.actualDistance(origin, villageB)
+            distA = $math.actualDistance(origin, villageA)
+            distB = $math.actualDistance(origin, villageB)
 
             return distA - distB
         })
@@ -329,19 +222,30 @@ define('two/attackView', [
      */
     var closestNonHostileVillage = function (origin, callback) {
         var size = 25
+        var sectors
+        var targets
+        var possibleTargets
+        var closestTargets
+        var barbs
+        var own
+        var tribe
+        var x
+        var y
+        var tribeId
+        var playerId
+        var loads
+        var index = 0
 
         if ($mapData.hasTownDataInChunk(origin.x, origin.y)) {
-            var sectors = $mapData.loadTownData(origin.x, origin.y, size, size, size)
-            var targets = []
-            var possibleTargets = []
-            var closestTargets
-            var barbs = []
-            var own = []
-            var tribe = []
-            var x
-            var y
-            var tribeId = modelDataService.getSelectedCharacter().getTribeId()
-            var playerId = modelDataService.getSelectedCharacter().getId()
+            sectors = $mapData.loadTownData(origin.x, origin.y, size, size, size)
+            targets = []
+            possibleTargets = []
+            closestTargets
+            barbs = []
+            own = []
+            tribe = []
+            tribeId = modelDataService.getSelectedCharacter().getTribeId()
+            playerId = modelDataService.getSelectedCharacter().getId()
 
             sectors.forEach(function (sector) {
                 for (x in sector.data) {
@@ -379,8 +283,7 @@ define('two/attackView', [
             return callback(closestTargets[0])
         }
         
-        var loads = $convert.scaledGridCoordinates(origin.x, origin.y, size, size, size)
-        var index = 0
+        loads = $convert.scaledGridCoordinates(origin.x, origin.y, size, size, size)
 
         $mapData.loadTownDataAsync(origin.x, origin.y, size, size, function () {
             if (++index === loads.length) {
@@ -390,19 +293,122 @@ define('two/attackView', [
     }
 
     /**
+     * @param {Object} data The data-object from the backend
+     */
+    var onOverviewIncomming = function (data) {v
+        var i
+
+        commands = data.commands
+
+        for (i = 0; i < commands.length; i++) {
+            overviewService.formatCommand(commands[i])
+            commands[i].slowestUnit = getSlowestUnit(commands[i])
+        }
+
+        commands = commands.filter(function (command) {
+            return filters[FILTER_TYPES.INCOMING_UNITS][command.slowestUnit]
+        })
+
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMANDS_LOADED, [commands])
+    }
+
+    var attackView = {}
+
+    attackView.loadCommands = function () { 
+        var incomingCommands = globalInfoModel.getCommandListModel().getIncomingCommands().length
+        var count = incomingCommands > 25 ? incomingCommands : 25
+
+        socketService.emit(routeProvider.OVERVIEW_GET_INCOMING, {
+            'count': count,
+            'offset' : 0,
+            'sorting' : sorting.column,
+            'reverse' : sorting.reverse ? 1 : 0,
+            'groups' : [],
+            'command_types' : params[FILTER_TYPES.COMMAND_TYPES],
+            'villages' : params[FILTER_TYPES.VILLAGE]
+        }, onOverviewIncomming)
+    }
+
+    attackView.getCommands = function () {
+        return commands
+    }
+
+    attackView.getFilters = function () {
+        return filters
+    }
+
+    attackView.getSortings = function () {
+        return sorting
+    }
+
+    /**
+     * Toggles the given filter.
+     *
+     * @param {string} type The category of the filter (see FILTER_TYPES)
+     * @param {string} opt_filter The filter to be toggled.
+     */
+    attackView.toggleFilter = function (type, opt_filter) {
+        if (!opt_filter) {
+            filters[type] = !filters[type]
+        } else {
+            filters[type][opt_filter] = !filters[type][opt_filter]
+        }
+
+        // format filters for the backend
+        formatFilters()
+
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_FILTERS_CHANGED)
+    }
+
+    attackView.toggleSorting = function (newColumn) {
+        if (!COLUMN_TYPES[newColumn]) {
+            return false
+        }
+
+        if (COLUMN_TYPES[newColumn] === sorting.column) {
+            sorting.reverse = !sorting.reverse
+        } else {
+            sorting.column = COLUMN_TYPES[newColumn]
+            sorting.reverse = false
+        }
+
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_SORTING_CHANGED)
+    }
+
+    attackView.registerListeners = function () {
+        listeners[eventTypeProvider.COMMAND_INCOMING] = rootScope.$on(eventTypeProvider.COMMAND_INCOMING, onCommandIncomming)
+        listeners[eventTypeProvider.COMMAND_CANCELLED] = rootScope.$on(eventTypeProvider.COMMAND_CANCELLED, onCommandCancelled)
+        listeners[eventTypeProvider.MAP_SELECTED_VILLAGE] = rootScope.$on(eventTypeProvider.MAP_SELECTED_VILLAGE, onVillageSwitched)
+        listeners[eventTypeProvider.VILLAGE_NAME_CHANGED] = rootScope.$on(eventTypeProvider.VILLAGE_NAME_CHANGED, onVillageNameChanged)
+        listeners[eventTypeProvider.COMMAND_IGNORED] = rootScope.$on(eventTypeProvider.COMMAND_IGNORED, onCommandIgnored)
+    }
+
+    attackView.unregisterListeners = function () {
+        var event
+
+        for (event in listeners) {
+            listeners[event]()
+        }
+    }
+
+    /**
      * Set an automatic command with all units from the village
      * and start the CommandQueue module if it's disabled.
      *
      * @param {Object} command Data of the command like origin, target.
      * @param {String} date Date that the command has to leave.
      */
-    var setQueueCommand = function (command, date) {
+    attackView.setQueueCommand = function (command, date) {
+        var origin
+        var target
+        var type
+
         closestNonHostileVillage(command.targetVillage, function (closestVillage) {
-            var origin = command.targetVillage
-            var target = closestVillage
-            var type = target.character_id === null ? 'attack' : 'support'
+            origin = command.targetVillage
+            target = closestVillage
+            type = target.character_id === null ? 'attack' : 'support'
             
-            Queue.addCommand({
+            commandQueue.addCommand({
                 origin: origin,
                 target: target,
                 date: date,
@@ -427,48 +433,37 @@ define('two/attackView', [
                 catapultTarget: 'wall'
             })
 
-            if (!Queue.isRunning()) {
-                Queue.start()
+            if (!commandQueue.isRunning()) {
+                commandQueue.start()
             }
         })
     }
 
-    var init = function () {
-        Locale.create('attackView', __attackView_locale, 'en')
-        
-        var defaultFilters = {}
+    attackView.init = function () {
+        var defaultFilters
+        var i
+
+        for (i = 0; i < UNIT_SPEED_ORDER.length; i++) {
+            INCOMING_UNITS_FILTER[UNIT_SPEED_ORDER[i]] = true
+        }
+
+        defaultFilters = {}
         defaultFilters[FILTER_TYPES.COMMAND_TYPES] = angular.copy(COMMAND_TYPES)
         defaultFilters[FILTER_TYPES.INCOMING_UNITS] = angular.copy(INCOMING_UNITS_FILTER)
         defaultFilters[FILTER_TYPES.VILLAGE] = false
 
         initialized = true
         globalInfoModel = modelDataService.getSelectedCharacter().getGlobalInfo()
-        filters = Lockr.get('attackView-filters', {}, true)
+        filters = Lockr.get(STORAGE_ID.FILTERS, {}, true)
         angular.merge(filters, defaultFilters)
 
         ready(function () {
             formatFilters()
         }, ['initial_village'])
 
-        eventQueue.bind('attackView/filtersChanged', onFiltersChanged)
-        eventQueue.bind('attackView/sortingChanged', onSortingChanged)
+        eventQueue.register(eventTypeProvider.ATTACK_VIEW_FILTERS_CHANGED, onFiltersChanged)
+        eventQueue.register(eventTypeProvider.ATTACK_VIEW_SORTING_CHANGED, onSortingChanged)
     }
 
-    return {
-        init: init,
-        version: '__attackView_version',
-        loadCommands: loadCommands,
-        getCommands: getCommands,
-        getFilters: getFilters,
-        getSortings: getSortings,
-        toggleFilter: toggleFilter,
-        toggleSorting: toggleSorting,
-        FILTER_TYPES: FILTER_TYPES,
-        COMMAND_TYPES: COMMAND_TYPES,
-        UNIT_SPEED_ORDER: UNIT_SPEED_ORDER,
-        COLUMN_TYPES: COLUMN_TYPES,
-        registerListeners: registerListeners,
-        unregisterListeners: unregisterListeners,
-        setQueueCommand: setQueueCommand
-    }
+    return attackView
 })
