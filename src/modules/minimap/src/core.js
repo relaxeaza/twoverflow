@@ -12,7 +12,8 @@ define('two/minimap', [
     'helper/mapconvert',
     'cdn',
     'conf/colors',
-    'conf/colorGroups'
+    'conf/colorGroups',
+    'version'
 ], function (
     ACTION_TYPES,
     SETTINGS,
@@ -27,7 +28,8 @@ define('two/minimap', [
     $mapconvert,
     $cdn,
     colors,
-    colorGroups
+    colorGroups,
+    gameVersion
 ) {
     var enableRendering = false
     var highlights = {}
@@ -763,7 +765,11 @@ define('two/minimap', [
             return false
         }
 
-        view = $mapData.getMap().engine.getView()
+        if (gameVersion.product.major === 1 && gameVersion.product.minor < 94) {
+            view = window.twx.game.map.engine.getView()
+        } else {
+            view = $mapData.getMap().engine.getView()
+        }
 
         return convert([
             -view.x,
