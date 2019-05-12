@@ -28,8 +28,6 @@
     "grunt-replace": "^1.0.1"
   },
   "scripts": {
-    "build": "grunt build --exclude=attackView",
-    "build-minify": "grunt build --minify",
     "release": "node scripts/release.js",
     "release-testing": "node scripts/release.js --testing"
   },

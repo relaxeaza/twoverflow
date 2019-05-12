@@ -43,6 +43,19 @@ cd twoverflow
 npm install
 ```
 
-To compile run `npm run build`.
+Install grunt globally.
 
-The script will be compiled inside `dist/`
+```bash
+npm install -g grunt-cli
+```
+
+To compile run `grunt build`. The script will be compiled inside `dist/`
+
+### Compile flags
+
+You can use some flags to customize the resulting file.
+
+- `--minify` to generate a minified file.
+- `--ignore` to ignore specific modules by ID (check _module.json_ for ID).
+
+Example: `grunt build --ignore=farm,minimap --minify` ignores both modules farm and minimap and will generate an minified file.

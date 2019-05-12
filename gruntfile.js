@@ -147,7 +147,7 @@ var generateLocaleFile = function (module) {
  * Parse all modules inside /src/modules and generate info objects
  * from each with generateModule().
  */
-var generateAllModules = function (excludeModules) {
+var generateAllModules = function (ignoreModules) {
     fs.readdirSync('src/modules/').forEach(function (moduleDir) {
         if (!fs.existsSync(`src/modules/${moduleDir}/module.json`)) {
             return false
@@ -155,7 +155,7 @@ var generateAllModules = function (excludeModules) {
 
         var moduleInfo = JSON.parse(fs.readFileSync(`src/modules/${moduleDir}/module.json`, 'utf8'))
 
-        if (excludeModules && excludeModules.includes(moduleInfo.id)) {
+        if (ignoreModules && ignoreModules.includes(moduleInfo.id)) {
             console.log(`Ignoring module ${moduleInfo.id}`)
             return false
         }
@@ -167,9 +167,9 @@ var generateAllModules = function (excludeModules) {
 }
 
 module.exports = function (grunt) {
-    var excludeModules = grunt.option('exclude')
+    var ignoreModules = grunt.option('ignore')
 
-    generateAllModules(excludeModules)
+    generateAllModules(ignoreModules)
 
     overflow.js = overflow.js.concat([
         'src/libs/lockr.js',
