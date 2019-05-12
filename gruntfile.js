@@ -147,29 +147,40 @@ var generateLocaleFile = function (module) {
  * Parse all modules inside /src/modules and generate info objects
  * from each with generateModule().
  */
-var generateAllModules = function (ignoreModules) {
+var generateModules = function (opt) {
+    var info
+    var data
+
     fs.readdirSync('src/modules/').forEach(function (moduleDir) {
         if (!fs.existsSync(`src/modules/${moduleDir}/module.json`)) {
             return false
         }
 
-        var moduleInfo = JSON.parse(fs.readFileSync(`src/modules/${moduleDir}/module.json`, 'utf8'))
+        info = JSON.parse(fs.readFileSync(`src/modules/${moduleDir}/module.json`, 'utf8'))
 
-        if (ignoreModules && ignoreModules.includes(moduleInfo.id)) {
-            console.log(`Ignoring module ${moduleInfo.id}`)
+        if (opt.only && opt.only !== info.id) {
+            console.log(`Ignoring module ${info.id}`)
+            
             return false
         }
 
-        var moduleData = generateModule(moduleInfo.id, moduleDir)
+        if (opt.ignore && opt.ignore.includes(info.id)) {
+            console.log(`Ignoring module ${info.id}`)
 
-        modules.push(moduleData)
+            return false
+        }
+
+        data = generateModule(info.id, moduleDir)
+
+        modules.push(data)
     })
 }
 
 module.exports = function (grunt) {
-    var ignoreModules = grunt.option('ignore')
-
-    generateAllModules(ignoreModules)
+    generateModules({
+        ignore: grunt.option('ignore'),
+        only: grunt.option('only')
+    })
 
     overflow.js = overflow.js.concat([
         'src/libs/lockr.js',
