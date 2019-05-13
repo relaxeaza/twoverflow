@@ -47,7 +47,10 @@ define('two/attackView/ui', [
 
     var switchWindowSize = function () {
         var $window = $('#two-attack-view').parent()
+        var $wrapper = $('#wrapper')
+
         $window.toggleClass('fullsize')
+        $wrapper.toggleClass('window-fullsize')
     }
 
     var eventHandlers = {
