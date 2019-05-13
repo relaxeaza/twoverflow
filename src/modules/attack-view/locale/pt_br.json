@@ -1,0 +1,20 @@
+{
+    "attack_view": {
+        "title": "AttackView",
+        "filters.tooltip.current-only": "Apenas aldeia selecionada",
+        "filters.types": "Tipos",
+        "filters.tooltip.show-attacks": "Mostrar ataques",
+        "filters.tooltip.show-supports": "Mostrar apoios",
+        "filters.tooltip.show-relocations": "Mostrar transferências",
+        "filters.incoming-units": "Unidades Chegando",
+        "tooltip.command-type": "Tipo de Comando",
+        "tooltip.slowest-unit": "Unidade mais Lenta",
+        "command-type": "TC",
+        "slowest-unit": "UL",
+        "actions": "Ações",
+        "no-incoming": "Nenhum comando chegando.",
+        "commands.tooltip.copy-arrival": "Copiar data de chegada.",
+        "commands.tooltip.copy-back": "Copiar backtime.",
+        "commands.tooltip.set-remove": "Criar um comando no CommandQueue para remover todas tropas da aldeia antes do comando bater na aldeia."
+    }
+}

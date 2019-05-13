@@ -295,7 +295,7 @@ define('two/attackView', [
     /**
      * @param {Object} data The data-object from the backend
      */
-    var onOverviewIncomming = function (data) {v
+    var onOverviewIncomming = function (data) {
         var i
 
         commands = data.commands
@@ -320,12 +320,12 @@ define('two/attackView', [
 
         socketService.emit(routeProvider.OVERVIEW_GET_INCOMING, {
             'count': count,
-            'offset' : 0,
-            'sorting' : sorting.column,
-            'reverse' : sorting.reverse ? 1 : 0,
-            'groups' : [],
-            'command_types' : params[FILTER_TYPES.COMMAND_TYPES],
-            'villages' : params[FILTER_TYPES.VILLAGE]
+            'offset': 0,
+            'sorting': sorting.column,
+            'reverse': sorting.reverse ? 1 : 0,
+            'groups': [],
+            'command_types': params[FILTER_TYPES.COMMAND_TYPES],
+            'villages': params[FILTER_TYPES.VILLAGE]
         }, onOverviewIncomming)
     }
 
@@ -373,22 +373,6 @@ define('two/attackView', [
         }
 
         eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_SORTING_CHANGED)
-    }
-
-    attackView.registerListeners = function () {
-        listeners[eventTypeProvider.COMMAND_INCOMING] = rootScope.$on(eventTypeProvider.COMMAND_INCOMING, onCommandIncomming)
-        listeners[eventTypeProvider.COMMAND_CANCELLED] = rootScope.$on(eventTypeProvider.COMMAND_CANCELLED, onCommandCancelled)
-        listeners[eventTypeProvider.MAP_SELECTED_VILLAGE] = rootScope.$on(eventTypeProvider.MAP_SELECTED_VILLAGE, onVillageSwitched)
-        listeners[eventTypeProvider.VILLAGE_NAME_CHANGED] = rootScope.$on(eventTypeProvider.VILLAGE_NAME_CHANGED, onVillageNameChanged)
-        listeners[eventTypeProvider.COMMAND_IGNORED] = rootScope.$on(eventTypeProvider.COMMAND_IGNORED, onCommandIgnored)
-    }
-
-    attackView.unregisterListeners = function () {
-        var event
-
-        for (event in listeners) {
-            listeners[event]()
-        }
     }
 
     /**
@@ -463,6 +447,13 @@ define('two/attackView', [
 
         eventQueue.register(eventTypeProvider.ATTACK_VIEW_FILTERS_CHANGED, onFiltersChanged)
         eventQueue.register(eventTypeProvider.ATTACK_VIEW_SORTING_CHANGED, onSortingChanged)
+        $rootScope.$on(eventTypeProvider.COMMAND_INCOMING, onCommandIncomming)
+        $rootScope.$on(eventTypeProvider.COMMAND_CANCELLED, onCommandCancelled)
+        $rootScope.$on(eventTypeProvider.MAP_SELECTED_VILLAGE, onVillageSwitched)
+        $rootScope.$on(eventTypeProvider.VILLAGE_NAME_CHANGED, onVillageNameChanged)
+        $rootScope.$on(eventTypeProvider.COMMAND_IGNORED, onCommandIgnored)
+
+        attackView.loadCommands()
     }
 
     return attackView

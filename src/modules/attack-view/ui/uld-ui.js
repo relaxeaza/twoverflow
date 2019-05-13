@@ -151,9 +151,11 @@ define('two/attackView/ui', [
             var arriveTimeFormated = utils.formatDate(arriveTime, 'HH:mm:ss dd/MM/yyyy')
             var arrivalIn = $timeHelper.server2ClientTimeInSeconds(arriveTime - now)
             var arrivalInFormated = $timeHelper.readableMilliseconds(arrivalIn, false, true)
+            
             var duration = command.time_completed - command.time_start
             var backTime = (command.time_completed + duration) * 1000
             var backTimeFormated = utils.formatDate(backTime, 'HH:mm:ss dd/MM/yyyy')
+            
             var commandClass = 'command-' + command.command_id + ' ' + command.command_type
 
             if (command.slowestUnit === UNIT_TYPES.SNOB) {

@@ -78,6 +78,7 @@
         "cancel": "Cancel",
         "actions": "Actions",
         "remove": "Remove",
-        "started_at": "Started at"
+        "started_at": "Started at",
+        "arrive": "Arrive"
     }
 }

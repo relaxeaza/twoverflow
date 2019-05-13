@@ -2,13 +2,70 @@
     <header class="win-head">
         <h2>AttackView</h2>
         <ul class="list-btn">
+            <li><a href="#" class="size-34x34 btn-orange icon-26x26-double-arrow" ng-click="switchWindowSize()"></a></li>
             <li><a href="#" class="size-34x34 btn-red icon-26x26-close" ng-click="closeWindow()"></a></li>
         </ul>
     </header>
     <div class="win-main" scrollbar="">
-        <div class="box-paper footer">
-            <div class="scroll-wrap">
-
+        <div class="box-paper">
+            <div class="scroll-wrap rich-text">
+                <table class="tbl-border-light commands-table">
+                    <colgroup>
+                        <col width="7%">
+                        <col width="14%">
+                        <col>
+                        <col>
+                        <col width="4%">
+                        <col width="12%">
+                        <col width="11%">
+                    </colgroup>
+                    <thead class="sorting">
+                        <tr>
+                            <th data-sort="COMMAND_TYPE" tooltip="" tooltip-content="{{ 'tooltip.command-type' | i18n:loc.ale:textObject }}">{{ 'command-type' | i18n:loc.ale:textObject }}</th>
+                            <th data-sort="ORIGIN_CHARACTER">{{ 'player' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th data-sort="ORIGIN_VILLAGE">{{ 'origin' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th data-sort="TARGET_VILLAGE">{{ 'target' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th tooltip="" tooltip-content="{{ 'tooltip.slowest-unit' | i18n:loc.ale:textObject }}">{{ 'slowest-unit' | i18n:loc.ale:textObject }}</th>
+                            <th data-sort="TIME_COMPLETED">{{ 'arrive' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'actions' | i18n:loc.ale:textObject }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-show="!commands.length">
+                            <td colspan="7" class="text-center">{{ 'no-incoming' | i18n:loc.ale:textObject }}</td>
+                        </tr>
+                        <tr ng-repeat="command in commands" class="{{ command.command_type }}" ng-class="{'snob': command.slowestUnit === UNIT_TYPES.SNOB}">
+                            <td>
+                                <span class="icon-20x20-{{ command.command_type }}"></span>
+                            </td>
+                            <td ng-click="openCharacterProfile(command.originCharacter.id)" class="character">
+                                <span class="name">{{ command.originCharacter.name }}</span>
+                            </td>
+                            <td ng-class="{'selected': command.originVillage.id === selectedVillageId}" class="village">
+                                <span class="name" ng-click="openVillageInfo(command.originVillage.id)">{{ command.originVillage.name }}</span>
+                                <span class="coords" ng-click="jumpToVillage(command.originVillage.x, command.originVillage.y)">({{ command.originVillage.x }}|{{ command.originVillage.y }})</span>
+                            </td>
+                            <td ng-class="{'selected': command.targetVillage.id === selectedVillageId}" class="village">
+                                <span class="name" ng-click="openVillageInfo(command.targetVillage.id)">{{ command.targetVillage.name }}</span>
+                                <span class="coords" ng-click="jumpToVillage(command.targetVillage.x, command.targetVillage.y)">({{ command.targetVillage.x }}|{{ command.targetVillage.y }})</span>
+                            </td>
+                            <td><span class="icon-20x20-unit-{{ command.slowestUnit }}"></span></td>
+                            <td>
+                                <div class="progress-wrapper" tooltip="" tooltip-content="{{ command.model.arrivalTime() | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}">
+                                    <div class="progress-bar" ng-style="{width: command.model.percent() + '%'}"></div>
+                                    <div class="progress-text">
+                                        <span>{{ command.model.countdown() }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a ng-click="showText(command.time_completed)" class="btn btn-orange size-20x20 icon-20x20-arrivetime" tooltip="" tooltip-content="{{ 'commands.tooltip.copy-arrival' | i18n:loc.ale:textObject }}"></a>
+                                <a ng-click="showText(command.time_completed + (command.time_completed - command.time_start))" class="btn btn-red size-20x20 icon-20x20-backtime" tooltip="" tooltip-content="{{ 'commands.tooltip.copy-back' | i18n:loc.ale:textObject }}"></a>
+                                <a ng-click="removeTroops(command)" class="btn btn-orange size-20x20 icon-20x20-units-outgoing" tooltip="" tooltip-content="{{ 'commands.tooltip.set-remove' | i18n:loc.ale:textObject }}"></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
