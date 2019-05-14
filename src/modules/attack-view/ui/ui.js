@@ -43,7 +43,7 @@ define('two/attackView/ui', [
 
     var removeTroops = function (command) {
         var formatedDate = $filter('readableDateFilter')((command.time_completed - 10) * 1000, $rootScope.loc.ale, $rootScope.GAME_TIMEZONE, $rootScope.GAME_TIME_OFFSET, 'H:mm:ss:sss dd/MM/yyyy')
-        attackView.setQueueCommand(command, formatedDate)
+        attackView.setCommander(command, formatedDate)
     }
 
     var switchWindowSize = function () {
@@ -60,6 +60,21 @@ define('two/attackView/ui', [
 
         $scope.visibleCommands = $scope.commands.slice(offset, offset + limit)
         $scope.pagination.count = $scope.commands.length
+    }
+
+    var checkCommands = function () {
+        var now = Date.now()
+        var i
+        
+        for (i = 0; i < $scope.commands.length; i++) {
+            if ($scope.commands[i].model.percent(now) === 100) {
+                $scope.commands.splice(i, 1)
+                
+                break
+            }
+        }
+
+        updateVisibileCommands()
     }
 
     var eventHandlers = {
@@ -87,6 +102,7 @@ define('two/attackView/ui', [
         $scope = window.$scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
+        $scope.commandQueueEnabled = attackView.commandQueueEnabled()
 
         $scope.commands = attackView.getCommands()
         $scope.selectedVillageId = modelDataService.getSelectedVillage().getId()
@@ -109,7 +125,9 @@ define('two/attackView/ui', [
 
         updateVisibileCommands()
 
-        eventScope = new EventScope('twoverflow_queue_window')
+        eventScope = new EventScope('twoverflow_queue_window', function onWindowClose() {
+            timeHelper.timer.remove(checkCommands)
+        })
         eventScope.register(eventTypeProvider.MAP_SELECTED_VILLAGE, eventHandlers.onVillageSwitched, true)
         eventScope.register(eventTypeProvider.ATTACK_VIEW_COMMANDS_LOADED, eventHandlers.updateCommands)
         eventScope.register(eventTypeProvider.ATTACK_VIEW_COMMAND_CANCELLED, eventHandlers.updateCommands)
@@ -119,6 +137,8 @@ define('two/attackView/ui', [
         // eventScope.register(eventTypeProvider.ATTACK_VIEW_SORTING_CHANGED, updateSortingElements)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_attack_view_main', $scope)
+
+        timeHelper.timer.add(checkCommands)
     }
 
     return init

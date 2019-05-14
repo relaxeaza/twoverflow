@@ -1,27 +1,27 @@
 define('two/attackView', [
-    'two/queue',
     'queues/EventQueue',
     'two/ready',
+    'two/utils',
     'models/CommandModel',
-    'conf/unitTypes',
     'Lockr',
     'helper/math',
     'helper/mapconvert',
     'struct/MapData',
+    'conf/unitTypes',
     'two/attackView/columnTypes',
     'two/attackView/commandTypes',
     'two/attackView/filterTypes',
     'two/attackView/unitSpeedOrder'
 ], function (
-    commandQueue,
     eventQueue,
     ready,
+    utils,
     CommandModel,
-    UNIT_TYPES,
     Lockr,
     $math,
     $convert,
     $mapData,
+    UNIT_TYPES,
     COLUMN_TYPES,
     COMMAND_TYPES,
     FILTER_TYPES,
@@ -32,6 +32,8 @@ define('two/attackView', [
     var overviewService = injector.get('overviewService')
     var globalInfoModel
     var commands = []
+    var commandQueue
+    var commandQueueEnabled = false
     var filters = {}
     var params = {}
     var sorting = {
@@ -178,7 +180,7 @@ define('two/attackView', [
             
             travelTimes.push({
                 unit: unit,
-                duration: commandQueue.getTravelTime(origin, target, units, command.command_type, {})
+                duration: utils.getTravelTime(origin, target, units, command.command_type, {})
             })
         })
 
@@ -382,7 +384,7 @@ define('two/attackView', [
      * @param {Object} command Data of the command like origin, target.
      * @param {String} date Date that the command has to leave.
      */
-    attackView.setQueueCommand = function (command, date) {
+    attackView.setCommander = function (command, date) {
         var origin
         var target
         var type
@@ -423,6 +425,10 @@ define('two/attackView', [
         })
     }
 
+    attackView.commandQueueEnabled = function () {
+        return commandQueueEnabled
+    }
+
     attackView.init = function () {
         var defaultFilters
         var i
@@ -430,6 +436,11 @@ define('two/attackView', [
         for (i = 0; i < UNIT_SPEED_ORDER.length; i++) {
             INCOMING_UNITS_FILTER[UNIT_SPEED_ORDER[i]] = true
         }
+        
+        try {
+            commandQueue = require('two/queue')
+            commandQueueEnabled = !!commandQueue
+        } catch (e) {}
 
         defaultFilters = {}
         defaultFilters[FILTER_TYPES.COMMAND_TYPES] = angular.copy(COMMAND_TYPES)

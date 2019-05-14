@@ -1,6 +1,10 @@
 define('two/utils', [
-    'helper/time'
-], function ($timeHelper) {
+    'helper/time',
+    'helper/math'
+], function (
+    $timeHelper,
+    $math
+) {
     var notifTimeout = null
     var utils = {}
 
@@ -215,6 +219,64 @@ define('two/utils', [
         }
 
         return list
+    }
+
+    /**
+     * @param {Object} origin - Objeto da aldeia origem.
+     * @param {Object} target - Objeto da aldeia alvo.
+     * @param {Object} units - Exercito usado no ataque como referência
+     * para calcular o tempo.
+     * @param {String} type - Tipo de comando (attack,support,relocate)
+     * @param {Object} officers - Oficiais usados no comando (usados para efeitos)
+     *
+     * @return {Number} Tempo de viagem
+     */
+    utils.getTravelTime = function (origin, target, units, type, officers) {
+        var useEffects = false
+        var targetIsBarbarian = target.character_id === null
+        var targetIsSameTribe = target.character_id && target.tribe_id &&
+                target.tribe_id === modelDataService.getSelectedCharacter().getTribeId()
+
+        if (type === 'attack') {
+            if ('supporter' in officers) {
+                delete officers.supporter
+            }
+
+            if (targetIsBarbarian) {
+                useEffects = true
+            }
+        } else if (type === 'support') {
+            if (targetIsSameTribe) {
+                useEffects = true
+            }
+
+            if ('supporter' in officers) {
+                useEffects = true
+            }
+        }
+
+        var army = {
+            units: units,
+            officers: angular.copy(officers)
+        }
+
+        var travelTime = armyService.calculateTravelTime(army, {
+            barbarian: targetIsBarbarian,
+            ownTribe: targetIsSameTribe,
+            officers: officers,
+            effects: useEffects
+        }, type)
+
+        var distance = $math.actualDistance(origin, target)
+
+        var totalTravelTime = armyService.getTravelTimeForDistance(
+            army,
+            travelTime,
+            distance,
+            type
+        )
+
+        return totalTravelTime * 1000
     }
 
     return utils

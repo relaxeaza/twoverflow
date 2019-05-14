@@ -128,7 +128,7 @@ define('two/queue/ui', [
             $scope.travelTimes[commandType] = {}
 
             UNITS_BY_SPEED.forEach(function (unit) {
-                travelTime = commandQueue.getTravelTime(
+                travelTime = utils.getTravelTime(
                     commandData.origin,
                     commandData.target,
                     {[unit]: 1},

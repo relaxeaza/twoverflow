@@ -352,7 +352,7 @@ define('two/queue', [
             command.target = villages[1]
             command.units = cleanZeroUnits(command.units)
             command.date = utils.fixDate(command.date)
-            command.travelTime = commandQueue.getTravelTime(
+            command.travelTime = utils.getTravelTime(
                 command.origin,
                 command.target,
                 command.units,
@@ -488,64 +488,6 @@ define('two/queue', [
 
     commandQueue.getExpiredCommands = function () {
         return expiredCommands
-    }
-
-    /**
-     * @param {Object} origin - Objeto da aldeia origem.
-     * @param {Object} target - Objeto da aldeia alvo.
-     * @param {Object} units - Exercito usado no ataque como referência
-     * para calcular o tempo.
-     * @param {String} type - Tipo de comando (attack,support,relocate)
-     * @param {Object} officers - Oficiais usados no comando (usados para efeitos)
-     *
-     * @return {Number} Tempo de viagem
-     */
-    commandQueue.getTravelTime = function (origin, target, units, type, officers) {
-        var useEffects = false
-        var targetIsBarbarian = target.character_id === null
-        var targetIsSameTribe = target.character_id && target.tribe_id &&
-            target.tribe_id === $player.getTribeId()
-
-        if (type === 'attack') {
-            if ('supporter' in officers) {
-                delete officers.supporter
-            }
-
-            if (targetIsBarbarian) {
-                useEffects = true
-            }
-        } else if (type === 'support') {
-            if (targetIsSameTribe) {
-                useEffects = true
-            }
-
-            if ('supporter' in officers) {
-                useEffects = true
-            }
-        }
-
-        var army = {
-            units: units,
-            officers: angular.copy(officers)
-        }
-
-        var travelTime = armyService.calculateTravelTime(army, {
-            barbarian: targetIsBarbarian,
-            ownTribe: targetIsSameTribe,
-            officers: officers,
-            effects: useEffects
-        }, type)
-
-        var distance = $math.actualDistance(origin, target)
-
-        var totalTravelTime = armyService.getTravelTimeForDistance(
-            army,
-            travelTime,
-            distance,
-            type
-        )
-
-        return totalTravelTime * 1000
     }
 
     commandQueue.getVillageByCoords = function (x, y, callback) {
