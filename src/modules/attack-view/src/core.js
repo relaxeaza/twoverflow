@@ -447,15 +447,15 @@ define('two/attackView', [
 
         ready(function () {
             formatFilters()
+
+            $rootScope.$on(eventTypeProvider.COMMAND_INCOMING, onCommandIncomming)
+            $rootScope.$on(eventTypeProvider.COMMAND_CANCELLED, onCommandCancelled)
+            $rootScope.$on(eventTypeProvider.MAP_SELECTED_VILLAGE, onVillageSwitched)
+            $rootScope.$on(eventTypeProvider.VILLAGE_NAME_CHANGED, onVillageNameChanged)
+            $rootScope.$on(eventTypeProvider.COMMAND_IGNORED, onCommandIgnored)
+
+            attackView.loadCommands()
         }, ['initial_village'])
-
-        $rootScope.$on(eventTypeProvider.COMMAND_INCOMING, onCommandIncomming)
-        $rootScope.$on(eventTypeProvider.COMMAND_CANCELLED, onCommandCancelled)
-        $rootScope.$on(eventTypeProvider.MAP_SELECTED_VILLAGE, onVillageSwitched)
-        $rootScope.$on(eventTypeProvider.VILLAGE_NAME_CHANGED, onVillageNameChanged)
-        $rootScope.$on(eventTypeProvider.COMMAND_IGNORED, onCommandIgnored)
-
-        attackView.loadCommands()
     }
 
     return attackView
