@@ -69,12 +69,17 @@ define('two/attackView/ui', [
         for (i = 0; i < $scope.commands.length; i++) {
             if ($scope.commands[i].model.percent(now) === 100) {
                 $scope.commands.splice(i, 1)
-                
-                break
             }
         }
 
         updateVisibileCommands()
+    }
+
+    // scope functions
+
+    var toggleFilter = function (type, _filter) {
+        attackView.toggleFilter(type, _filter)
+        $scope.filters = attackView.getFilters()
     }
 
     var eventHandlers = {
@@ -103,10 +108,13 @@ define('two/attackView/ui', [
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.commandQueueEnabled = attackView.commandQueueEnabled()
-
         $scope.commands = attackView.getCommands()
         $scope.selectedVillageId = modelDataService.getSelectedVillage().getId()
+        $scope.filters = attackView.getFilters()
         $scope.UNIT_TYPES = UNIT_TYPES
+        $scope.FILTER_TYPES = FILTER_TYPES
+        $scope.COMMAND_TYPES = COMMAND_TYPES
+        $scope.UNIT_SPEED_ORDER = UNIT_SPEED_ORDER
         $scope.pagination = {
             count: $scope.commands.length,
             offset: 0,
@@ -122,6 +130,7 @@ define('two/attackView/ui', [
         $scope.copyTimeModal = copyTimeModal
         $scope.removeTroops = removeTroops
         $scope.switchWindowSize = switchWindowSize
+        $scope.toggleFilter = toggleFilter
 
         updateVisibileCommands()
 
@@ -133,8 +142,6 @@ define('two/attackView/ui', [
         eventScope.register(eventTypeProvider.ATTACK_VIEW_COMMAND_CANCELLED, eventHandlers.updateCommands)
         eventScope.register(eventTypeProvider.ATTACK_VIEW_COMMAND_IGNORED, eventHandlers.updateCommands)
         eventScope.register(eventTypeProvider.ATTACK_VIEW_VILLAGE_RENAMED, eventHandlers.updateCommands)
-        // eventScope.register(eventTypeProvider.ATTACK_VIEW_FILTERS_CHANGED, updateFilterElements)
-        // eventScope.register(eventTypeProvider.ATTACK_VIEW_SORTING_CHANGED, updateSortingElements)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_attack_view_main', $scope)
 

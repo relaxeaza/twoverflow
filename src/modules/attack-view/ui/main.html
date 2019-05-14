@@ -9,7 +9,55 @@
     <div class="win-main" scrollbar="">
         <div class="box-paper">
             <div class="scroll-wrap rich-text">
+                <div class="filters">
+                    <table class="tbl-border-light">
+                        <tbody>
+                            <tr><th>{{ 'village' | i18n:loc.ale:textObjectCommon }}</th></tr>
+                            <tr>
+                                <td>
+                                    <div class="box-border-dark icon" ng-class="{'active': filters[FILTER_TYPES.VILLAGE]}" ng-click="toggleFilter(FILTER_TYPES.VILLAGE)" tooltip="" tooltip-content="{{ 'filters.tooltip.current-only' | i18n:loc.ale:textObject }}">
+                                        <span class="icon-34x34-village-info icon-bg-black"></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="tbl-border-light">
+                        <tbody>
+                            <tr><th>{{ 'filters.types' | i18n:loc.ale:textObject }}</th></tr>
+                            <tr>
+                                <td>
+                                    <div class="box-border-dark icon" ng-class="{'active': filters[FILTER_TYPES.COMMAND_TYPES][COMMAND_TYPES.ATTACK]}" ng-click="toggleFilter(FILTER_TYPES.COMMAND_TYPES, COMMAND_TYPES.ATTACK)" tooltip="" tooltip-content="{{ 'filters.tooltip.show-attacks' | i18n:loc.ale:textObject }}">
+                                        <span class="icon-34x34-attack icon-bg-black"></span>
+                                    </div>
+                                    <div class="box-border-dark icon" ng-class="{'active': filters[FILTER_TYPES.COMMAND_TYPES][COMMAND_TYPES.SUPPORT]}" ng-click="toggleFilter(FILTER_TYPES.COMMAND_TYPES, COMMAND_TYPES.SUPPORT)" tooltip="" tooltip-content="{{ 'filters.tooltip.show-supports' | i18n:loc.ale:textObject }}">
+                                        <span class="icon-34x34-support icon-bg-black"></span>
+                                    </div>
+                                    <div class="box-border-dark icon" ng-class="{'active': filters[FILTER_TYPES.COMMAND_TYPES][COMMAND_TYPES.RELOCATE]}" ng-click="toggleFilter(FILTER_TYPES.COMMAND_TYPES, COMMAND_TYPES.RELOCATE)" tooltip="" tooltip-content="{{ 'filters.tooltip.show-relocations' | i18n:loc.ale:textObject }}">
+                                        <span class="icon-34x34-relocate icon-bg-black"></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="tbl-border-light">
+                        <tbody>
+                            <tr><th>{{ 'filters.incoming-units' | i18n:loc.ale:textObject }}</th></tr>
+                            <tr>
+                                <td>
+                                    <div ng-repeat="unit in ::UNIT_SPEED_ORDER" class="box-border-dark icon" ng-class="{'active': filters[FILTER_TYPES.INCOMING_UNITS][unit]}" ng-click="toggleFilter(FILTER_TYPES.INCOMING_UNITS, unit)" tooltip="" tooltip-content="{{ unit | i18n:loc.ale:'unit_names' }}">
+                                        <span class="icon-34x34-unit-{{ unit }} icon-bg-black"></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <div class="page-wrap" pagination="pagination"></div>
+
                 <table class="tbl-border-light commands-table">
                     <colgroup>
                         <col width="7%">
@@ -67,6 +115,7 @@
                         </tr>
                     </tbody>
                 </table>
+
                 <div class="page-wrap" pagination="pagination"></div>
             </div>
         </div>

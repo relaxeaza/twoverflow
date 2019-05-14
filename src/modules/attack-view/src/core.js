@@ -35,7 +35,7 @@ define('two/attackView', [
     var commandQueue
     var commandQueueEnabled = false
     var filters = {}
-    var params = {}
+    var filterParams = {}
     var sorting = {
         reverse: false,
         column: COLUMN_TYPES.COMMAND_PROGRESS
@@ -49,11 +49,12 @@ define('two/attackView', [
         FILTERS: 'attack_view_filters'
     }
     var INCOMING_UNITS_FILTER = {}
+    var COMMAND_TYPES_FILTER = {}
 
     var resetFilters = function () {
         filters = {}
-        filters[FILTER_TYPES.COMMAND_TYPES] = angular.copy(COMMAND_TYPES)
-        filters[FILTER_TYPES.VILLAGE] = false
+        filters[FILTER_TYPES.COMMAND_TYPES] = {}
+        filters[FILTER_TYPES.VILLAGE] = angular.copy(COMMAND_TYPES_FILTER)
         filters[FILTER_TYPES.INCOMING_UNITS] = angular.copy(INCOMING_UNITS_FILTER)
     }
 
@@ -74,11 +75,11 @@ define('two/attackView', [
                 if (filters[toArray[i]][j]) {
                     switch (toArray[i]) {
                     case FILTER_TYPES.COMMAND_TYPES:
-                        if (j === 'ATTACK') {
+                        if (j === COMMAND_TYPES.ATTACK) {
                             arrays[toArray[i]].push(COMMAND_TYPES.ATTACK)
-                        } else if (j === 'SUPPORT') {
+                        } else if (j === COMMAND_TYPES.SUPPORT) {
                             arrays[toArray[i]].push(COMMAND_TYPES.SUPPORT)
-                        } else if (j === 'RELOCATE') {
+                        } else if (j === COMMAND_TYPES.RELOCATE) {
                             arrays[toArray[i]].push(COMMAND_TYPES.RELOCATE)
                         }
                         break
@@ -87,8 +88,8 @@ define('two/attackView', [
             }
         }
 
-        params = arrays
-        params.village = filters[FILTER_TYPES.VILLAGE] ? [currentVillageId] : []
+        filterParams = arrays
+        filterParams.village = filters[FILTER_TYPES.VILLAGE] ? [currentVillageId] : []
     }
 
     /**
@@ -147,17 +148,11 @@ define('two/attackView', [
     }
 
     var onVillageSwitched = function (e, newVillageId) {
-        if (params[FILTER_TYPES.VILLAGE].length) {
-            params[FILTER_TYPES.VILLAGE] = [newVillageId]
+        if (filterParams[FILTER_TYPES.VILLAGE].length) {
+            filterParams[FILTER_TYPES.VILLAGE] = [newVillageId]
 
             attackView.loadCommands()
         }
-    }
-
-    var onFiltersChanged = function () {
-        Lockr.set(STORAGE_ID.FILTERS, filters)
-
-        attackView.loadCommands()
     }
 
     var onSortingChanged = function () {
@@ -326,8 +321,8 @@ define('two/attackView', [
             'sorting': sorting.column,
             'reverse': sorting.reverse ? 1 : 0,
             'groups': [],
-            'command_types': params[FILTER_TYPES.COMMAND_TYPES],
-            'villages': params[FILTER_TYPES.VILLAGE]
+            'command_types': filterParams[FILTER_TYPES.COMMAND_TYPES],
+            'villages': filterParams[FILTER_TYPES.VILLAGE]
         }, onOverviewIncomming)
     }
 
@@ -358,8 +353,8 @@ define('two/attackView', [
 
         // format filters for the backend
         formatFilters()
-
-        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_FILTERS_CHANGED)
+        Lockr.set(STORAGE_ID.FILTERS, filters)
+        attackView.loadCommands()
     }
 
     attackView.toggleSorting = function (newColumn) {
@@ -436,21 +431,24 @@ define('two/attackView', [
         for (i = 0; i < UNIT_SPEED_ORDER.length; i++) {
             INCOMING_UNITS_FILTER[UNIT_SPEED_ORDER[i]] = true
         }
-        
+
+        for (i in COMMAND_TYPES) {
+            COMMAND_TYPES_FILTER[COMMAND_TYPES[i]] = true
+        }
+
         try {
             commandQueue = require('two/queue')
             commandQueueEnabled = !!commandQueue
         } catch (e) {}
 
         defaultFilters = {}
-        defaultFilters[FILTER_TYPES.COMMAND_TYPES] = angular.copy(COMMAND_TYPES)
+        defaultFilters[FILTER_TYPES.COMMAND_TYPES] = angular.copy(COMMAND_TYPES_FILTER)
         defaultFilters[FILTER_TYPES.INCOMING_UNITS] = angular.copy(INCOMING_UNITS_FILTER)
         defaultFilters[FILTER_TYPES.VILLAGE] = false
 
         initialized = true
         globalInfoModel = modelDataService.getSelectedCharacter().getGlobalInfo()
-        filters = Lockr.get(STORAGE_ID.FILTERS, {}, true)
-        angular.merge(filters, defaultFilters)
+        filters = Lockr.get(STORAGE_ID.FILTERS, defaultFilters, true)
 
         ready(function () {
             formatFilters()
