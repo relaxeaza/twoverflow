@@ -23,8 +23,13 @@ define('two/queue', [
 ) {
     var CHECKS_PER_SECOND = 10
     var ERROR_CODES = {
-        INVALID_ORIGIN: 'invalidOrigin',
-        INVALID_TARGET: 'invalidTarget'
+        INVALID_ORIGIN: 'invalid_rigin',
+        INVALID_TARGET: 'invalid_target'
+    }
+    var STORAGE_KEYS = {
+        QUEUE_COMMANDS: 'commander_queue_commands',
+        QUEUE_SENT: 'commander_queue_sent',
+        QUEUE_EXPIRED: 'commander_queue_expired'
     }
     var waitingCommands = []
     var waitingCommandsObject = {}
