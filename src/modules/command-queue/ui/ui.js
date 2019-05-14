@@ -1,5 +1,5 @@
-define('two/queue/ui', [
-    'two/queue',
+define('two/commandQueue/ui', [
+    'two/commandQueue',
     'two/ui2',
     'two/FrontButton',
     'two/utils',
@@ -9,10 +9,10 @@ define('two/queue/ui', [
     'two/utils',
     'two/EventScope',
     'two/ui/autoComplete',
-    'two/queue/dateTypes',
-    'two/queue/eventCodes',
-    'two/queue/filterTypes',
-    'two/queue/commandTypes'
+    'two/commandQueue/dateTypes',
+    'two/commandQueue/eventCodes',
+    'two/commandQueue/filterTypes',
+    'two/commandQueue/commandTypes'
 ], function (
     commandQueue,
     interfaceOverflow,
@@ -322,11 +322,11 @@ define('two/queue/ui', [
 
         switch (type) {
         case 'origin':
-            $elem = document.querySelector('#two-commandqueue .village-origin')
+            $elem = document.querySelector('#two-command-queue .village-origin')
 
             break
         case 'target':
-            $elem = document.querySelector('#two-commandqueue .village-target')
+            $elem = document.querySelector('#two-command-queue .village-target')
 
             break
         default:
@@ -562,8 +562,8 @@ define('two/queue/ui', [
         $rootScope.$on(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage)
         $rootScope.$on(eventTypeProvider.DESTROY_CONTEXT_MENU, unsetMapSelectedVillage)
 
-        interfaceOverflow.addTemplate('twoverflow_queue_window', `__queue_html_main`)
-        interfaceOverflow.addStyle('__queue_css_style')
+        interfaceOverflow.addTemplate('twoverflow_queue_window', `__command_queue_html_main`)
+        interfaceOverflow.addStyle('__command_queue_css_style')
     }
 
     var buildWindow = function () {

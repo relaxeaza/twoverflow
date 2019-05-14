@@ -1,4 +1,4 @@
-define('two/queue/Events', [], function () {
+define('two/commandQueue/Events', [], function () {
     angular.extend(eventTypeProvider, {
         COMMAND_QUEUE_SEND: 'commandqueue_send',
         COMMAND_QUEUE_SEND_TIME_LIMIT: 'commandqueue_send_time_limit',

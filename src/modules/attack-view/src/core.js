@@ -432,7 +432,7 @@ define('two/attackView', [
         }
 
         try {
-            commandQueue = require('two/queue')
+            commandQueue = require('two/commandQueue')
             commandQueueEnabled = !!commandQueue
         } catch (e) {}
 

@@ -1,4 +1,4 @@
-define('two/queue/filterTypes', [], function () {
+define('two/commandQueue/filterTypes', [], function () {
     return {
         SELECTED_VILLAGE: 'selected_village',
         BARBARIAN_TARGET: 'barbarian_target',

@@ -1,9 +1,9 @@
 require([
     'two/language',
     'two/ready',
-    'two/queue',
-    'two/queue/ui',
-    'two/queue/Events'
+    'two/commandQueue',
+    'two/commandQueue/ui',
+    'two/commandQueue/Events'
 ], function (
     twoLanguage,
     ready,
@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('__queue_id', __queue_locale)
+        twoLanguage.add('__command_queue_id', __command_queue_locale)
         commandQueue.init()
         commandQueueInterface()
 

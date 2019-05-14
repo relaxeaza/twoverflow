@@ -1,4 +1,4 @@
-define('two/queue', [
+define('two/commandQueue', [
     'two/utils',
     'queues/EventQueue',
     'helper/time',
@@ -6,10 +6,10 @@ define('two/queue', [
     'struct/MapData',
     'conf/conf',
     'Lockr',
-    'two/queue/dateTypes',
-    'two/queue/eventCodes',
-    'two/queue/filterTypes',
-    'two/queue/commandTypes'
+    'two/commandQueue/dateTypes',
+    'two/commandQueue/eventCodes',
+    'two/commandQueue/filterTypes',
+    'two/commandQueue/commandTypes'
 ], function (
     utils,
     eventQueue,

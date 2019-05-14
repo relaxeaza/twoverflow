@@ -1,4 +1,4 @@
-define('two/queue/dateTypes', [], function () {
+define('two/commandQueue/dateTypes', [], function () {
     return {
         ARRIVE: 'arrive',
         OUT: 'out'

@@ -1,4 +1,4 @@
-define('two/queue/commandTypes', [], function () {
+define('two/commandQueue/commandTypes', [], function () {
     return {
         'ATTACK': 'attack',
         'SUPPORT': 'support',

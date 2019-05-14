@@ -1,4 +1,4 @@
-define('two/queue/eventCodes', [], function () {
+define('two/commandQueue/eventCodes', [], function () {
     return {
         NOT_OWN_VILLAGE: 'not_own_village',
         NOT_ENOUGH_UNITS: 'not_enough_units',
