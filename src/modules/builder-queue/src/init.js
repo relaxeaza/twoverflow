@@ -1,9 +1,9 @@
 require([
     'two/language',
     'two/ready',
-    'two/builder',
-    'two/builder/ui',
-    'two/builder/events'
+    'two/builderQueue',
+    'two/builderQueue/ui',
+    'two/builderQueue/events'
 ], function (
     twoLanguage,
     ready,
@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('__builder_id', __builder_locale)
+        twoLanguage.add('__builder_queue_id', __builder_queue_locale)
         builderQueue.init()
         builderQueueInterface()
     })

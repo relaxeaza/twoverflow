@@ -1,4 +1,4 @@
-define('two/builder/events', [], function () {
+define('two/builderQueue/events', [], function () {
     angular.extend(eventTypeProvider, {
         BUILDER_QUEUE_JOB_STARTED: 'Builder/jobStarted',
         BUILDER_QUEUE_START: 'Builder/start',

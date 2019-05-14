@@ -1,5 +1,5 @@
-define('two/builder/ui', [
-    'two/builder',
+define('two/builderQueue/ui', [
+    'two/builderQueue',
     'two/ui2',
     'two/FrontButton',
     'queues/EventQueue',
@@ -7,9 +7,9 @@ define('two/builder/ui', [
     'conf/buildingTypes',
     'helper/time',
     'two/ready',
-    'two/builder/settings',
-    'two/builder/settingsMap',
-    'two/builder/errorCodes',
+    'two/builderQueue/settings',
+    'two/builderQueue/settingsMap',
+    'two/builderQueue/errorCodes',
     'two/EventScope'
 ], function (
     builderQueue,
@@ -706,10 +706,10 @@ define('two/builder/ui', [
             utils.emitNotif('success', $filter('i18n')('stopped', $rootScope.loc.ale, textObject))
         })
 
-        interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `__builder_html_main`)
-        interfaceOverflow.addTemplate('twoverflow_builder_queue_add_building_modal', `__builder_html_modal-add-building`)
-        interfaceOverflow.addTemplate('twoverflow_builder_queue_name_sequence_modal', `__builder_html_modal-name-sequence`)
-        interfaceOverflow.addStyle('__builder_css_style')
+        interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `__builder_queue_html_main`)
+        interfaceOverflow.addTemplate('twoverflow_builder_queue_add_building_modal', `__builder_queue_html_modal-add-building`)
+        interfaceOverflow.addTemplate('twoverflow_builder_queue_name_sequence_modal', `__builder_queue_html_modal-name-sequence`)
+        interfaceOverflow.addStyle('__builder_queue_css_style')
     }
 
     var buildWindow = function () {

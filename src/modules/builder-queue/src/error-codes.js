@@ -1,4 +1,4 @@
-define('two/builder/errorCodes', [], function () {
+define('two/builderQueue/errorCodes', [], function () {
     return {
         SEQUENCE_NO_EXISTS: 'sequence_no_exists',
         SEQUENCE_EXISTS: 'sequence_exists',

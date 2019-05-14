@@ -1,4 +1,4 @@
-define('two/builder/defaultOrders', [
+define('two/builderQueue/defaultOrders', [
     'conf/buildingTypes'
 ], function (
     BUILDING_TYPES

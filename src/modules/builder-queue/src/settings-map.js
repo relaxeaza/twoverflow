@@ -1,6 +1,6 @@
-define('two/builder/settingsMap', [
-    'two/builder/defaultOrders',
-    'two/builder/settings'
+define('two/builderQueue/settingsMap', [
+    'two/builderQueue/defaultOrders',
+    'two/builderQueue/settings'
 ], function (
     DEFAULT_ORDERS,
     SETTINGS

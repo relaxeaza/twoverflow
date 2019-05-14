@@ -1,7 +1,7 @@
-define('two/builder', [
-    'two/builder/settings',
-    'two/builder/settingsMap',
-    'two/builder/errorCodes',
+define('two/builderQueue', [
+    'two/builderQueue/settings',
+    'two/builderQueue/settingsMap',
+    'two/builderQueue/errorCodes',
     'two/utils',
     'queues/EventQueue',
     'two/ready',
@@ -9,7 +9,7 @@ define('two/builder', [
     'conf/upgradeabilityStates',
     'conf/buildingTypes',
     'conf/locationTypes',
-    'two/builder/events'
+    'two/builderQueue/events'
 ], function (
     SETTINGS,
     SETTINGS_MAP,
