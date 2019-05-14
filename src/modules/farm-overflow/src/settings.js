@@ -1,4 +1,4 @@
-define('two/farm/settings', [], function () {
+define('two/farmOverflow/settings', [], function () {
     return {
         PRESETS: 'presets',
         GROUP_IGNORE: 'group_ignore',

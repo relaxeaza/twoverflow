@@ -1,6 +1,6 @@
-define('two/farm/settingsMap', [
-    'two/farm/settings',
-    'two/farm/settingsUpdate'
+define('two/farmOverflow/settingsMap', [
+    'two/farmOverflow/settings',
+    'two/farmOverflow/settingsUpdate'
 ], function (
     SETTINGS,
     SETTINGS_UPDATE

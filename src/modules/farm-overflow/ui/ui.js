@@ -1,14 +1,14 @@
-define('two/farm/ui', [
-    'two/farm',
-    'two/farm/errorTypes',
-    'two/farm/logTypes',
-    'two/farm/settings',
+define('two/farmOverflow/ui', [
+    'two/farmOverflow',
+    'two/farmOverflow/errorTypes',
+    'two/farmOverflow/logTypes',
+    'two/farmOverflow/settings',
     'two/ui2',
     'two/FrontButton',
     'queues/EventQueue',
     'struct/MapData',
     'helper/time',
-    'two/farm/Events',
+    'two/farmOverflow/Events',
     'two/utils',
     'two/EventScope'
 ], function (
@@ -39,7 +39,6 @@ define('two/farm/ui', [
         SETTINGS: 'settings',
         LOGS: 'logs'
     }
-    var DEFAULT_TAB = TAB_TYPES.SETTINGS
     var presetList = modelDataService.getPresetList()
     var groupList = modelDataService.getGroupList()
 
@@ -314,8 +313,8 @@ define('two/farm/ui', [
             opener.$elem.classList.add('btn-green')
         })
 
-        interfaceOverflow.addTemplate('twoverflow_farm_window', `__farm_html_main`)
-        interfaceOverflow.addStyle('__farm_css_style')
+        interfaceOverflow.addTemplate('twoverflow_farm_window', `__farm_overflow_html_main`)
+        interfaceOverflow.addStyle('__farm_overflow_css_style')
     }
 
     var buildWindow = function () {
@@ -328,7 +327,7 @@ define('two/farm/ui', [
         $scope.presets = []
         $scope.groups = []
         $scope.groupsWithDisabled = []
-        $scope.selectedTab = DEFAULT_TAB
+        $scope.selectedTab = TAB_TYPES.SETTINGS
         $scope.settings = genInitialSelectValues()
         $scope.selectedVillage = farmOverflow.getSelectedVillage()
         $scope.lastAttack = farmOverflow.getLastAttack()
@@ -344,7 +343,6 @@ define('two/farm/ui', [
             limit: storageService.getPaginationLimit()
         }
         
-
         eventHandlers.updatePresets()
         eventHandlers.updateGroups()
         eventHandlers.updateSelectedVillage()

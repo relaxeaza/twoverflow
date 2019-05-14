@@ -1,4 +1,4 @@
-define('two/farm/settingsUpdate', function () {
+define('two/farmOverflow/settingsUpdate', function () {
     return {
         PRESET: 'preset',
         GROUPS: 'groups',

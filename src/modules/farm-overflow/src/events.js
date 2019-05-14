@@ -1,4 +1,4 @@
-define('two/farm/Events', [], function () {
+define('two/farmOverflow/Events', [], function () {
     angular.extend(eventTypeProvider, {
         FARM_NO_PRESET: 'farmoverflow_no_preset',
         FARM_NO_VILLAGE_SELECTED: 'farmoverflow_no_village_selected',

@@ -1,4 +1,4 @@
-define('two/farm/logTypes', [], function () {
+define('two/farmOverflow/logTypes', [], function () {
     return {
         ATTACK: 'attack',
         VILLAGE_SWITCH: 'village_switch',

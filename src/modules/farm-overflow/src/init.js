@@ -1,9 +1,9 @@
 require([
     'two/language',
     'two/ready',
-    'two/farm',
-    'two/farm/ui',
-    'two/farm/Events'
+    'two/farmOverflow',
+    'two/farmOverflow/ui',
+    'two/farmOverflow/Events'
 ], function (
     twoLanguage,
     ready,
@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('__farm_id', __farm_locale)
+        twoLanguage.add('__farm_overflow_id', __farm_overflow_locale)
         farmOverflow.init()
         farmOverflowInterface()
     }, ['map'])

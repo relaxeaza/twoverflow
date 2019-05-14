@@ -1,10 +1,10 @@
-define('two/farm', [
-    'two/farm/Village',
-    'two/farm/errorTypes',
-    'two/farm/settings',
-    'two/farm/settingsMap',
-    'two/farm/settingsUpdate',
-    'two/farm/logTypes',
+define('two/farmOverflow', [
+    'two/farmOverflow/Village',
+    'two/farmOverflow/errorTypes',
+    'two/farmOverflow/settings',
+    'two/farmOverflow/settingsMap',
+    'two/farmOverflow/settingsUpdate',
+    'two/farmOverflow/logTypes',
     'two/utils',
     'helper/math',
     'conf/conf',

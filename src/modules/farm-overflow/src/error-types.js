@@ -1,4 +1,4 @@
-define('two/farm/errorTypes', [], function () {
+define('two/farmOverflow/errorTypes', [], function () {
     return {
         TIME_LIMIT: 'time_limit',
         COMMAND_LIMIT: 'command_limit',
