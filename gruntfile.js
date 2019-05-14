@@ -158,7 +158,7 @@ var generateModules = function (opt) {
 
         info = JSON.parse(fs.readFileSync(`src/modules/${moduleDir}/module.json`, 'utf8'))
 
-        if (opt.only && opt.only !== info.id) {
+        if (opt.only && opt.only !== info.id && info.id !== 'interface') {
             console.log(`Ignoring module ${info.id}`)
             
             return false
