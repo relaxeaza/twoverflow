@@ -47,7 +47,7 @@ define('two/farm', [
     var $gameState
     var textObject = 'farm'
     var textObjectCommon = 'common'
-    var STORAGE_ID = {
+    var STORAGE_KEYS = {
         INDEXES: 'farmoverflow_indexes',
         LOGS: 'farmoverflow_logs',
         LAST_ATTACK: 'farmoverflow_last_attack',
@@ -749,7 +749,7 @@ define('two/farm', [
 
     var updateLastAttack = function () {
         lastAttack = timeHelper.gameTime()
-        Lockr.set(STORAGE_ID.LAST_ATTACK, lastAttack)
+        Lockr.set(STORAGE_KEYS.LAST_ATTACK, lastAttack)
     }
 
     var getVillageById = function (vid) {
@@ -1037,7 +1037,7 @@ define('two/farm', [
      * Load the local settings and merge with the defaults.
      */
     var loadSettings = function () {
-        var localSettings = Lockr.get(STORAGE_ID.SETTINGS, {}, true)
+        var localSettings = Lockr.get(STORAGE_KEYS.SETTINGS, {}, true)
         var key
 
         for (key in SETTINGS_MAP) {
@@ -1077,7 +1077,7 @@ define('two/farm', [
         }
 
         logs = newLogs
-        Lockr.set(STORAGE_ID.LOGS, logs)
+        Lockr.set(STORAGE_KEYS.LOGS, logs)
     }
 
     var isFullStorage = function (_village) {
@@ -1113,7 +1113,7 @@ define('two/farm', [
 
     var updateActivity = function () {
         lastActivity = timeHelper.gameTime()
-        Lockr.set(STORAGE_ID.LAST_ACTIVITY, lastActivity)
+        Lockr.set(STORAGE_KEYS.LAST_ACTIVITY, lastActivity)
     }
 
     /**
@@ -1183,7 +1183,7 @@ define('two/farm', [
             targetIndexes[sid] = 0
         }
 
-        Lockr.set(STORAGE_ID.INDEXES, targetIndexes)
+        Lockr.set(STORAGE_KEYS.INDEXES, targetIndexes)
 
         return true
     }
@@ -1250,12 +1250,12 @@ define('two/farm', [
                 if (targetIndexes[sid] > villagesTargets[sid].length) {
                     targetIndexes[sid] = 0
 
-                    Lockr.set(STORAGE_ID.INDEXES, targetIndexes)
+                    Lockr.set(STORAGE_KEYS.INDEXES, targetIndexes)
                 }
             } else {
                 targetIndexes[sid] = 0
 
-                Lockr.set(STORAGE_ID.INDEXES, targetIndexes)
+                Lockr.set(STORAGE_KEYS.INDEXES, targetIndexes)
             }
 
             callback()
@@ -1927,10 +1927,10 @@ define('two/farm', [
         initialized = true
         $player = modelDataService.getSelectedCharacter()
         $gameState = modelDataService.getGameState()
-        logs = Lockr.get(STORAGE_ID.LOGS, [], true)
-        lastActivity = Lockr.get(STORAGE_ID.LAST_ACTIVITY, timeHelper.gameTime(), true)
-        lastAttack = Lockr.get(STORAGE_ID.LAST_ATTACK, -1, true)
-        targetIndexes = Lockr.get(STORAGE_ID.INDEXES, {}, true)
+        logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
+        lastActivity = Lockr.get(STORAGE_KEYS.LAST_ACTIVITY, timeHelper.gameTime(), true)
+        lastAttack = Lockr.get(STORAGE_KEYS.LAST_ATTACK, -1, true)
+        targetIndexes = Lockr.get(STORAGE_KEYS.INDEXES, {}, true)
         commander = new Commander()
         loadSettings()
         updateExceptionGroups()
@@ -2034,7 +2034,7 @@ define('two/farm', [
             settings[key] = newValue
         }
 
-        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
 
         if (modify[SETTINGS_UPDATE.GROUPS]) {
             updateExceptionGroups()
@@ -2100,7 +2100,7 @@ define('two/farm', [
 
     farmOverflow.clearLogs = function () {
         logs = []
-        Lockr.set(STORAGE_ID.LOGS, logs)
+        Lockr.set(STORAGE_KEYS.LOGS, logs)
         eventQueue.trigger(eventTypeProvider.FARM_LOGS_RESETED)
     }
 

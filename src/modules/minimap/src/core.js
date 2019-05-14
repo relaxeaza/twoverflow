@@ -62,7 +62,7 @@ define('two/minimap', [
     var frameSize = {}
     var dataView
     var settings = {}
-    var STORAGE_ID = {
+    var STORAGE_KEYS = {
         CACHE_VILLAGES: 'minimap_cache_villages',
         SETTINGS: 'minimap_settings'
     }
@@ -402,7 +402,7 @@ define('two/minimap', [
             }
         }
 
-        Lockr.set(STORAGE_ID.CACHE_VILLAGES, cachedVillages)
+        Lockr.set(STORAGE_KEYS.CACHE_VILLAGES, cachedVillages)
     }
 
     var onHoverVillage = function (coords, event) {
@@ -804,7 +804,7 @@ define('two/minimap', [
             settings[key] = newValue
         }
 
-        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
 
         if (updateMinimap) {
             minimap.update()
@@ -820,7 +820,7 @@ define('two/minimap', [
             settings[key] = SETTINGS_MAP[key].default
         }
 
-        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
         minimap.update()
         eventQueue.trigger(eventTypeProvider.MINIMAP_SETTINGS_RESET)
     }
@@ -862,7 +862,7 @@ define('two/minimap', [
         minimap.initialized = true
         $viewportCache = document.createElement('canvas')
         $viewportCacheContext = $viewportCache.getContext('2d')
-        localSettings = Lockr.get(STORAGE_ID.SETTINGS, {}, true)
+        localSettings = Lockr.get(STORAGE_KEYS.SETTINGS, {}, true)
 
         for (key in SETTINGS_MAP) {
             defaultValue = SETTINGS_MAP[key].default
@@ -880,7 +880,7 @@ define('two/minimap', [
             $map = document.getElementById('main-canvas')
             $player = modelDataService.getSelectedCharacter()
             $tribeRelations = $player.getTribeRelations()
-            cachedVillages = Lockr.get(STORAGE_ID.CACHE_VILLAGES, {}, true)
+            cachedVillages = Lockr.get(STORAGE_KEYS.CACHE_VILLAGES, {}, true)
             
             villageBlock = minimap.getVillageBlock()
             currentPosition.x = 500 * villageBlock

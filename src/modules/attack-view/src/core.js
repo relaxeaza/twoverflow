@@ -45,7 +45,7 @@ define('two/attackView', [
         'SUPPORT',
         'RELOCATE'
     ]
-    var STORAGE_ID = {
+    var STORAGE_KEYS = {
         FILTERS: 'attack_view_filters'
     }
     var INCOMING_UNITS_FILTER = {}
@@ -352,7 +352,7 @@ define('two/attackView', [
 
         // format filters for the backend
         formatFilters()
-        Lockr.set(STORAGE_ID.FILTERS, filters)
+        Lockr.set(STORAGE_KEYS.FILTERS, filters)
         attackView.loadCommands()
     }
 
@@ -443,7 +443,7 @@ define('two/attackView', [
 
         initialized = true
         globalInfoModel = modelDataService.getSelectedCharacter().getGlobalInfo()
-        filters = Lockr.get(STORAGE_ID.FILTERS, defaultFilters, true)
+        filters = Lockr.get(STORAGE_KEYS.FILTERS, defaultFilters, true)
 
         ready(function () {
             formatFilters()

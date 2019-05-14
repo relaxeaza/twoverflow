@@ -35,7 +35,7 @@ define('two/builder', [
     var logs
     var sequencesAvail = true
     var settings = {}
-    var STORAGE_ID = {
+    var STORAGE_KEYS = {
         LOGS: 'builder_queue_log',
         SETTINGS: 'builder_queue_settings'
     }
@@ -137,7 +137,7 @@ define('two/builder', [
 
                         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_JOB_STARTED, logData)
                         logs.unshift(logData)
-                        Lockr.set(STORAGE_ID.LOGS, logs)
+                        Lockr.set(STORAGE_KEYS.LOGS, logs)
                     }
                 })
 
@@ -235,8 +235,8 @@ define('two/builder', [
         var village
 
         initialized = true
-        localSettings = Lockr.get(STORAGE_ID.SETTINGS, {}, true)
-        logs = Lockr.get(STORAGE_ID.LOGS, [], true)
+        localSettings = Lockr.get(STORAGE_KEYS.SETTINGS, {}, true)
+        logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
         $player = modelDataService.getSelectedCharacter()
         groupList = modelDataService.getGroupList()
 
@@ -312,7 +312,7 @@ define('two/builder', [
 
         sequencesAvail = Object.keys(settings[SETTINGS.BUILDING_SEQUENCES]).length
         buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE]) : false
-        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
 
         if (!_quiet) {
             eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
@@ -331,7 +331,7 @@ define('two/builder', [
 
     builderQueue.clearLogs = function () {
         logs = []
-        Lockr.set(STORAGE_ID.LOGS, logs)
+        Lockr.set(STORAGE_KEYS.LOGS, logs)
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_CLEAR_LOGS)
     }
 
@@ -345,7 +345,7 @@ define('two/builder', [
         }
 
         settings[SETTINGS.BUILDING_SEQUENCES][id] = sequence
-        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, id)
 
         return true
@@ -361,7 +361,7 @@ define('two/builder', [
         }
 
         settings[SETTINGS.BUILDING_SEQUENCES][id] = sequence
-        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_UPDATED, id)
 
         return true
@@ -373,7 +373,7 @@ define('two/builder', [
         }
 
         delete settings[SETTINGS.BUILDING_SEQUENCES][id]
-        Lockr.set(STORAGE_ID.SETTINGS, settings)
+        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, id)
     }
 
