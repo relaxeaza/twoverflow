@@ -304,7 +304,7 @@
                             <tbody>
                                 <tr>
                                     <th colspan="2">
-                                        <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === 'attack']" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
+                                        <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === COMMAND_TYPES.ATTACK]" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
                                         <span class="size-26x26 icon-bg-black icon-26x26-time-duration" tooltip="" tooltip-content="{{ 'command_time_left' | i18n:loc.ale:textObject }}"></span>
                                         <span class="time-left">{{ command.countdown() }}</span>
 
@@ -330,7 +330,7 @@
                                         <div class="unit" ng-repeat="(unit, amount) in command.units">
                                             <span class="icon-34x34-unit-{{ unit }} icon"></span>
                                             <span class="amount">{{ amount }}</span>
-                                            <span ng-if="unit === 'catapult' && command.type === 'attack'">({{ command.catapultTarget | i18n:loc.ale:textObjectCommon }})</span>
+                                            <span ng-if="unit === 'catapult' && command.type === COMMAND_TYPES.ATTACK">({{ command.catapultTarget | i18n:loc.ale:textObjectCommon }})</span>
                                         </div>
 
                                         <div class="officer" ng-repeat="(officer, enabled) in command.officers">
@@ -353,7 +353,7 @@
                         <tbody>
                             <tr>
                                 <th colspan="2">
-                                    <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === 'attack']" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
+                                    <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === COMMAND_TYPES.ATTACK]" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
 
                                     <span class="size-26x26 icon-bg-black icon-20x20-units-outgoing" tooltip="" tooltip-content="{{ 'command_out' | i18n:loc.ale:textObject }}"></span>
                                     <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
@@ -375,7 +375,7 @@
                                     <div class="unit" ng-repeat="(unit, amount) in command.units">
                                         <span class="icon-34x34-unit-{{ unit }} icon"></span>
                                         <span class="amount">{{ amount }}</span>
-                                        <span ng-if="unit === 'catapult' && command.type === 'attack'">({{ command.catapultTarget | i18n:loc.ale:textObjectCommon }})</span>
+                                        <span ng-if="unit === 'catapult' && command.type === COMMAND_TYPES.ATTACK">({{ command.catapultTarget | i18n:loc.ale:textObjectCommon }})</span>
                                     </div>
 
                                     <div class="officer" ng-repeat="(officer, enabled) in command.officers">
@@ -395,7 +395,7 @@
                         <tbody>
                             <tr>
                                 <th colspan="2">
-                                    <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === 'attack']" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
+                                    <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === COMMAND_TYPES.ATTACK]" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
 
                                     <span class="size-26x26 icon-bg-black icon-20x20-units-outgoing" tooltip="" tooltip-content="{{ 'command_out' | i18n:loc.ale:textObject }}"></span>
                                     <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
@@ -417,7 +417,7 @@
                                     <div class="unit" ng-repeat="(unit, amount) in command.units">
                                         <span class="icon-34x34-unit-{{ unit }} icon"></span>
                                         <span class="amount">{{ amount }}</span>
-                                        <span ng-if="unit === 'catapult' && command.type === 'attack'">({{ command.catapultTarget | i18n:loc.ale:textObjectCommon }})</span>
+                                        <span ng-if="unit === 'catapult' && command.type === COMMAND_TYPES.ATTACK">({{ command.catapultTarget | i18n:loc.ale:textObjectCommon }})</span>
                                     </div>
 
                                     <div class="officer" ng-repeat="(officer, enabled) in command.officers">
@@ -438,13 +438,13 @@
                 <a class="btn-orange btn-border" ng-click="clearRegisters()">{{ 'general_clear' | i18n:loc.ale:textObject }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.ADD">
-                <a class="btn-orange btn-border add" ng-click="addCommand('attack')"><span class="icon-26x26-attack-small"></span> {{ 'attack' | i18n:loc.ale:textObjectCommon }}</a>
+                <a class="btn-orange btn-border add" ng-click="addCommand(COMMAND_TYPES.ATTACK)"><span class="icon-26x26-attack-small"></span> {{ COMMAND_TYPES.ATTACK | i18n:loc.ale:textObjectCommon }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.ADD">
-                <a class="btn-orange btn-border add" ng-click="addCommand('support')"><span class="icon-26x26-support"></span> {{ 'support' | i18n:loc.ale:textObjectCommon }}</a>
+                <a class="btn-orange btn-border add" ng-click="addCommand(COMMAND_TYPES.SUPPORT)"><span class="icon-26x26-support"></span> {{ COMMAND_TYPES.SUPPORT | i18n:loc.ale:textObjectCommon }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.ADD">
-                <a class="btn-orange btn-border add" ng-click="addCommand('relocate')"><span class="icon-26x26-relocate"></span> {{ 'relocate' | i18n:loc.ale:textObjectCommon }}</a>
+                <a class="btn-orange btn-border add" ng-click="addCommand(COMMAND_TYPES.RELOCATE)"><span class="icon-26x26-relocate"></span> {{ COMMAND_TYPES.RELOCATE | i18n:loc.ale:textObjectCommon }}</a>
             </li>
 
             <li>

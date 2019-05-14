@@ -8,7 +8,8 @@ define('two/queue', [
     'Lockr',
     'two/queue/dateTypes',
     'two/queue/eventCodes',
-    'two/queue/filterTypes'
+    'two/queue/filterTypes',
+    'two/queue/commandTypes'
 ], function (
     utils,
     eventQueue,
@@ -19,7 +20,8 @@ define('two/queue', [
     Lockr,
     DATE_TYPES,
     EVENT_CODES,
-    FILTER_TYPES
+    FILTER_TYPES,
+    COMMAND_TYPES
 ) {
     var CHECKS_PER_SECOND = 10
     var ERROR_CODES = {
@@ -37,7 +39,6 @@ define('two/queue', [
     var expiredCommands = []
     var running = false
     var $player
-    var commandTypes = ['attack', 'support', 'relocate']
     var timeOffset
 
     var commandFilters = {
@@ -51,13 +52,13 @@ define('two/queue', [
             return options[FILTER_TYPES.ALLOWED_TYPES][command.type]
         },
         [FILTER_TYPES.ATTACK]: function (command) {
-            return command.type !== 'attack'
+            return command.type !== COMMAND_TYPES.ATTACK
         },
         [FILTER_TYPES.SUPPORT]: function (command) {
-            return command.type !== 'support'
+            return command.type !== COMMAND_TYPES.SUPPORT
         },
         [FILTER_TYPES.RELOCATE]: function (command) {
-            return command.type !== 'relocate'
+            return command.type !== COMMAND_TYPES.RELOCATE
         },
         [FILTER_TYPES.TEXT_MATCH]: function (command, options) {
             var show = true
@@ -367,24 +368,26 @@ define('two/queue', [
 
             var inputTime = utils.getTimeFromString(command.date)
 
-            if (command.dateType === 'arrive') {
+            if (command.dateType === DATE_TYPES.ARRIVE) {
                 command.sendTime = inputTime - command.travelTime
                 command.arriveTime = inputTime
-            } else {
+            } else if (command.dateType === DATE_TYPES.OUT) {
                 command.sendTime = inputTime
                 command.arriveTime = inputTime + command.travelTime
+            } else {
+                throw new Error('CommandQueue: wrong dateType:' + command.dateType)
             }
 
             if (isTimeToSend(command.sendTime)) {
                 return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, command)
             }
 
-            if (command.type === 'attack' && 'supporter' in command.officers) {
+            if (command.type === COMMAND_TYPES.ATTACK && 'supporter' in command.officers) {
                 delete command.officers.supporter
             }
 
 
-            if (command.type === 'attack' && command.units.catapult) {
+            if (command.type === COMMAND_TYPES.ATTACK && command.units.catapult) {
                 command.catapultTarget = command.catapultTarget || 'headquarter'
             } else {
                 command.catapultTarget = null

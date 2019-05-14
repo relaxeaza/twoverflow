@@ -11,7 +11,8 @@ define('two/queue/ui', [
     'two/ui/autoComplete',
     'two/queue/dateTypes',
     'two/queue/eventCodes',
-    'two/queue/filterTypes'
+    'two/queue/filterTypes',
+    'two/queue/commandTypes'
 ], function (
     commandQueue,
     interfaceOverflow,
@@ -25,7 +26,8 @@ define('two/queue/ui', [
     autoComplete,
     DATE_TYPES,
     EVENT_CODES,
-    FILTER_TYPES
+    FILTER_TYPES,
+    COMMAND_TYPES
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'
@@ -38,7 +40,6 @@ define('two/queue/ui', [
     var mapSelectedVillage = false
     var unitOrder
     var commandData
-    var COMMAND_TYPES = ['attack', 'support', 'relocate']
     var TAB_TYPES = {
         ADD: 'add',
         WAITING: 'waiting',
@@ -123,8 +124,11 @@ define('two/queue/ui', [
         var travelTime
         var sendTime
         var valueType
+        var commandType
+        var i
 
-        COMMAND_TYPES.forEach(function (commandType) {
+        for (i in COMMAND_TYPES) {
+            commandType = COMMAND_TYPES[i]
             $scope.travelTimes[commandType] = {}
 
             UNITS_BY_SPEED.forEach(function (unit) {
@@ -160,7 +164,7 @@ define('two/queue/ui', [
                     valueType: valueType
                 }
             })
-        })
+        }
     }
 
     /**
@@ -608,6 +612,7 @@ define('two/queue/ui', [
         $scope.EVENT_CODES = EVENT_CODES
         $scope.FILTER_TYPES = FILTER_TYPES
         $scope.TAB_TYPES = TAB_TYPES
+        $scope.COMMAND_TYPES = COMMAND_TYPES
 
         // functions
         $scope.onUnitInputFocus = onUnitInputFocus
