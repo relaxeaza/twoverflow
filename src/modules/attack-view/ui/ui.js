@@ -103,9 +103,9 @@ define('two/attackView/ui', [
             onClick: buildWindow
         })
 
-        interfaceOverflow.addTemplate('twoverflow_attack_view_main', `__attackView_html_main`)
-        interfaceOverflow.addTemplate('twoverflow_attack_view_show_text_modal', `__attackView_html_modal-show-text`)
-        interfaceOverflow.addStyle('__attackView_css_style')
+        interfaceOverflow.addTemplate('twoverflow_attack_view_main', `__attack_view_html_main`)
+        interfaceOverflow.addTemplate('twoverflow_attack_view_show_text_modal', `__attack_view_html_modal-show-text`)
+        interfaceOverflow.addStyle('__attack_view_css_style')
     }
 
     var buildWindow = function () {
