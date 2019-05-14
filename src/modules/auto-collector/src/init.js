@@ -18,7 +18,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.addData('__collector_id', __collector_locale)
+        twoLanguage.add('__collector_id', __collector_locale)
         autoCollector.init()
         autoCollector.secondVillage.init()
         autoCollector.interface()

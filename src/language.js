@@ -24,12 +24,19 @@ define('two/language', ['helper/i18n'], function (i18n) {
         i18n.setJSON(moduleLanguage)
     }
 
+    var selectLanguage = function (language) {
+        selectedLanguage = language
+        
+        if (selectedLanguage in sharedLanguages) {
+            selectedLanguage = sharedLanguages[selectedLanguage]
+        }
+    }
+
     var twoLanguage = {}
 
-    twoLanguage.addData = function (moduleId, languages) {
+    twoLanguage.add = function (moduleId, languages) {
         if (!initialized) {
-            throw new Error('Language module not initialized.')
-            return false
+            twoLanguage.init()
         }
 
         if (moduleId in moduleLanguages) {
@@ -40,14 +47,6 @@ define('two/language', ['helper/i18n'], function (i18n) {
         moduleLanguages[moduleId] = languages
 
         injectLanguage(moduleId)
-    }
-
-    var selectLanguage = function (language) {
-        selectedLanguage = language
-        
-        if (selectedLanguage in sharedLanguages) {
-            selectedLanguage = sharedLanguages[selectedLanguage]
-        }
     }
 
     twoLanguage.init = function () {

@@ -6,7 +6,6 @@ require([
     ready
 ) {
     ready(function () {
-        twoLanguage.init()
-        twoLanguage.addData('core', __overflow_locales)
+        twoLanguage.add('core', __overflow_locales)
     })
 })

@@ -18,7 +18,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.addData('__minimap_id', __minimap_locale)
+        twoLanguage.add('__minimap_id', __minimap_locale)
         minimap.init()
         minimapInterface()
         minimap.run()
