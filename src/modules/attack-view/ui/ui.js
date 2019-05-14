@@ -54,6 +54,14 @@ define('two/attackView/ui', [
         $wrapper.toggleClass('window-fullsize')
     }
 
+    var updateVisibileCommands = function () {
+        var offset = $scope.pagination.offset
+        var limit = $scope.pagination.limit
+
+        $scope.visibleCommands = $scope.commands.slice(offset, offset + limit)
+        $scope.pagination.count = $scope.commands.length
+    }
+
     var eventHandlers = {
         updateCommands: function () {
             $scope.commands = attackView.getCommands()
@@ -83,6 +91,12 @@ define('two/attackView/ui', [
         $scope.commands = attackView.getCommands()
         $scope.selectedVillageId = modelDataService.getSelectedVillage().getId()
         $scope.UNIT_TYPES = UNIT_TYPES
+        $scope.pagination = {
+            count: $scope.commands.length,
+            offset: 0,
+            loader: updateVisibileCommands,
+            limit: storageService.getPaginationLimit()
+        }
 
         // functions
         $scope.openCharacterProfile = windowDisplayService.openCharacterProfile
@@ -92,6 +106,8 @@ define('two/attackView/ui', [
         $scope.copyTimeModal = copyTimeModal
         $scope.removeTroops = removeTroops
         $scope.switchWindowSize = switchWindowSize
+
+        updateVisibileCommands()
 
         eventScope = new EventScope('twoverflow_queue_window')
         eventScope.register(eventTypeProvider.MAP_SELECTED_VILLAGE, eventHandlers.onVillageSwitched, true)

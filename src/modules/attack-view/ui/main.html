@@ -9,6 +9,7 @@
     <div class="win-main" scrollbar="">
         <div class="box-paper">
             <div class="scroll-wrap rich-text">
+                <div class="page-wrap" pagination="pagination"></div>
                 <table class="tbl-border-light commands-table">
                     <colgroup>
                         <col width="7%">
@@ -34,7 +35,7 @@
                         <tr ng-show="!commands.length">
                             <td colspan="7" class="text-center">{{ 'no-incoming' | i18n:loc.ale:textObject }}</td>
                         </tr>
-                        <tr ng-repeat="command in commands" class="{{ command.command_type }}" ng-class="{'snob': command.slowestUnit === UNIT_TYPES.SNOB}">
+                        <tr ng-repeat="command in visibleCommands" class="{{ command.command_type }}" ng-class="{'snob': command.slowestUnit === UNIT_TYPES.SNOB}">
                             <td>
                                 <span class="icon-20x20-{{ command.command_type }}"></span>
                             </td>
@@ -66,6 +67,7 @@
                         </tr>
                     </tbody>
                 </table>
+                <div class="page-wrap" pagination="pagination"></div>
             </div>
         </div>
     </div>
