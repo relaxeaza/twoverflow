@@ -59,8 +59,8 @@
                                 </div>
                             </td>
                             <td>
-                                <a ng-click="showText(command.time_completed)" class="btn btn-orange size-20x20 icon-20x20-arrivetime" tooltip="" tooltip-content="{{ 'commands.tooltip.copy-arrival' | i18n:loc.ale:textObject }}"></a>
-                                <a ng-click="showText(command.time_completed + (command.time_completed - command.time_start))" class="btn btn-red size-20x20 icon-20x20-backtime" tooltip="" tooltip-content="{{ 'commands.tooltip.copy-back' | i18n:loc.ale:textObject }}"></a>
+                                <a ng-click="copyTimeModal(command.time_completed)" class="btn btn-orange size-20x20 icon-20x20-arrivetime" tooltip="" tooltip-content="{{ 'commands.tooltip.copy-arrival' | i18n:loc.ale:textObject }}"></a>
+                                <a ng-click="copyTimeModal(command.time_completed + (command.time_completed - command.time_start))" class="btn btn-red size-20x20 icon-20x20-backtime" tooltip="" tooltip-content="{{ 'commands.tooltip.copy-back' | i18n:loc.ale:textObject }}"></a>
                                 <a ng-click="removeTroops(command)" class="btn btn-orange size-20x20 icon-20x20-units-outgoing" tooltip="" tooltip-content="{{ 'commands.tooltip.set-remove' | i18n:loc.ale:textObject }}"></a>
                             </td>
                         </tr>

@@ -15,6 +15,7 @@
         "no-incoming": "Nenhum comando chegando.",
         "commands.tooltip.copy-arrival": "Copiar data de chegada.",
         "commands.tooltip.copy-back": "Copiar backtime.",
-        "commands.tooltip.set-remove": "Criar um comando no CommandQueue para remover todas tropas da aldeia antes do comando bater na aldeia."
+        "commands.tooltip.set-remove": "Criar um comando no CommandQueue para remover todas tropas da aldeia antes do comando bater na aldeia.",
+        "copy": "Copiar"
     }
 }

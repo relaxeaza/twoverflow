@@ -15,6 +15,7 @@
         "no-incoming": "Brak nadchodzących wojsk.",
         "commands.tooltip.copy-arrival": "Kopiuj czas dotarcia.",
         "commands.tooltip.copy-back": "Kopiuj czas powrotu do wioski źródłowej.",
-        "commands.tooltip.set-remove": "Wstaw rozkaz wycofania wojsk przed dotarciem ataku do Kolejki rozkazów."
+        "commands.tooltip.set-remove": "Wstaw rozkaz wycofania wojsk przed dotarciem ataku do Kolejki rozkazów.",
+        "copy": "Copy"
     }
 }

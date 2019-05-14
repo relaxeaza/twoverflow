@@ -34,15 +34,16 @@ define('two/attackView/ui', [
         return Date.now() / 1000
     }
 
-    var showText = function (text) {
+    var copyTimeModal = function (time) {
         var modalScope = $rootScope.$new()
-        modalScope.text = text
+        modalScope.text = $filter('readableDateFilter')(time * 1000, $rootScope.loc.ale, $rootScope.GAME_TIMEZONE, $rootScope.GAME_TIME_OFFSET, 'H:mm:ss:sss dd/MM/yyyy')
+        modalScope.title = $filter('i18n')('copy', $rootScope.loc.ale, textObject)
         windowManagerService.getModal('!twoverflow_attack_view_show_text_modal', modalScope)
     }
 
     var removeTroops = function (command) {
-        var outDate = utils.formatDate((command.time_completed - 10) * 1000, 'HH:mm:ss:sss dd/MM/yyyy')
-        attackView.setQueueCommand(command, outDate)
+        var formatedDate = $filter('readableDateFilter')((command.time_completed - 10) * 1000, $rootScope.loc.ale, $rootScope.GAME_TIMEZONE, $rootScope.GAME_TIME_OFFSET, 'H:mm:ss:sss dd/MM/yyyy')
+        attackView.setQueueCommand(command, formatedDate)
     }
 
     var switchWindowSize = function () {
@@ -70,7 +71,7 @@ define('two/attackView/ui', [
         })
 
         interfaceOverflow.addTemplate('twoverflow_attack_view_main', `__attackView_html_main`)
-        interfaceOverflow.addTemplate('twoverflow_attack_view_show_text_modal', `__builder_html_modal-show-text`)
+        interfaceOverflow.addTemplate('twoverflow_attack_view_show_text_modal', `__attackView_html_modal-show-text`)
         interfaceOverflow.addStyle('__attackView_css_style')
     }
 
@@ -88,7 +89,7 @@ define('two/attackView/ui', [
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
         $scope.jumpToVillage = mapService.jumpToVillage
         $scope.now = nowSeconds
-        $scope.showText = showText
+        $scope.copyTimeModal = copyTimeModal
         $scope.removeTroops = removeTroops
         $scope.switchWindowSize = switchWindowSize
 

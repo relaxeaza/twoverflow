@@ -15,6 +15,7 @@
         "no-incoming": "No commands incoming.",
         "commands.tooltip.copy-arrival": "Copy arrival date.",
         "commands.tooltip.copy-back": "Copy backtime date.",
-        "commands.tooltip.set-remove": "Set a CommandQueue to remove all troops before the attack hit."
+        "commands.tooltip.set-remove": "Set a CommandQueue to remove all troops before the attack hit.",
+        "copy": "Copy"
     }
 }
