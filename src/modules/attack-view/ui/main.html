@@ -58,7 +58,9 @@
 
                 <div class="page-wrap" pagination="pagination"></div>
 
-                <table class="tbl-border-light commands-table">
+                <p class="text-center" ng-show="!visibleCommands.length">{{ 'no-incoming' | i18n:loc.ale:textObject }}</p>
+
+                <table class="tbl-border-light commands-table" ng-show="visibleCommands.length">
                     <colgroup>
                         <col width="8%">
                         <col width="14%">
@@ -99,9 +101,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-show="!commands.length">
-                            <td colspan="7" class="text-center">{{ 'no-incoming' | i18n:loc.ale:textObject }}</td>
-                        </tr>
                         <tr ng-repeat="command in visibleCommands" class="{{ command.command_type }}" ng-class="{'snob': command.slowestUnit === UNIT_TYPES.SNOB}">
                             <td>
                                 <span class="icon-20x20-{{ command.command_type }}"></span>
