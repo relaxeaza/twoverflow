@@ -40,7 +40,7 @@ define('two/language', ['helper/i18n'], function (i18n) {
         }
 
         if (moduleId in moduleLanguages) {
-            throw new Error('Language data for ' + moduleId + ' already exists.')
+            console.log('Language data for ' + moduleId + ' already exists. Ignoring...')
             return false
         }
 
