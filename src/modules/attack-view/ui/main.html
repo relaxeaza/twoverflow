@@ -60,23 +60,42 @@
 
                 <table class="tbl-border-light commands-table">
                     <colgroup>
-                        <col width="7%">
+                        <col width="8%">
                         <col width="14%">
                         <col>
                         <col>
                         <col width="4%">
-                        <col width="12%">
+                        <col width="15%">
                         <col width="11%">
                     </colgroup>
                     <thead class="sorting">
                         <tr>
-                            <th data-sort="COMMAND_TYPE" tooltip="" tooltip-content="{{ 'tooltip.command-type' | i18n:loc.ale:textObject }}">{{ 'command-type' | i18n:loc.ale:textObject }}</th>
-                            <th data-sort="ORIGIN_CHARACTER">{{ 'player' | i18n:loc.ale:textObjectCommon }}</th>
-                            <th data-sort="ORIGIN_VILLAGE">{{ 'origin' | i18n:loc.ale:textObjectCommon }}</th>
-                            <th data-sort="TARGET_VILLAGE">{{ 'target' | i18n:loc.ale:textObjectCommon }}</th>
-                            <th tooltip="" tooltip-content="{{ 'tooltip.slowest-unit' | i18n:loc.ale:textObject }}">{{ 'slowest-unit' | i18n:loc.ale:textObject }}</th>
-                            <th data-sort="TIME_COMPLETED">{{ 'arrive' | i18n:loc.ale:textObjectCommon }}</th>
-                            <th>{{ 'actions' | i18n:loc.ale:textObject }}</th>
+                            <th ng-click="toggleSorting(COLUMN_TYPES.COMMAND_TYPE)" tooltip="" tooltip-content="{{ 'tooltip.command-type' | i18n:loc.ale:textObject }}">
+                                {{ 'command-type' | i18n:loc.ale:textObject }}
+                                <span class="arrow" ng-show="sorting.column == COLUMN_TYPES.COMMAND_TYPE" ng-class="{'icon-26x26-normal-arrow-down': sorting.reverse, 'icon-26x26-normal-arrow-up': !sorting.reverse}"></span>
+                            </th>
+                            <th ng-click="toggleSorting(COLUMN_TYPES.ORIGIN_CHARACTER)">
+                                {{ 'player' | i18n:loc.ale:textObjectCommon }}
+                                <span class="arrow" ng-show="sorting.column == COLUMN_TYPES.ORIGIN_CHARACTER" ng-class="{'icon-26x26-normal-arrow-down': sorting.reverse, 'icon-26x26-normal-arrow-up': !sorting.reverse}"></span>
+                            </th>
+                            <th ng-click="toggleSorting(COLUMN_TYPES.ORIGIN_VILLAGE)">
+                                {{ 'origin' | i18n:loc.ale:textObjectCommon }}
+                                <span class="arrow" ng-show="sorting.column == COLUMN_TYPES.ORIGIN_VILLAGE" ng-class="{'icon-26x26-normal-arrow-down': sorting.reverse, 'icon-26x26-normal-arrow-up': !sorting.reverse}"></span>
+                            </th>
+                            <th ng-click="toggleSorting(COLUMN_TYPES.TARGET_VILLAGE)">
+                                {{ 'target' | i18n:loc.ale:textObjectCommon }}
+                                <span class="arrow" ng-show="sorting.column == COLUMN_TYPES.TARGET_VILLAGE" ng-class="{'icon-26x26-normal-arrow-down': sorting.reverse, 'icon-26x26-normal-arrow-up': !sorting.reverse}"></span>
+                            </th>
+                            <th tooltip="" tooltip-content="{{ 'tooltip.slowest-unit' | i18n:loc.ale:textObject }}">
+                                {{ 'slowest-unit' | i18n:loc.ale:textObject }}
+                            </th>
+                            <th ng-click="toggleSorting(COLUMN_TYPES.TIME_COMPLETED)">
+                                {{ 'arrive' | i18n:loc.ale:textObjectCommon }}
+                                <span class="arrow" ng-show="sorting.column == COLUMN_TYPES.TIME_COMPLETED" ng-class="{'icon-26x26-normal-arrow-down': sorting.reverse, 'icon-26x26-normal-arrow-up': !sorting.reverse}"></span>
+                            </th>
+                            <th>
+                                {{ 'actions' | i18n:loc.ale:textObject }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>

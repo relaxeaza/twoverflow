@@ -82,6 +82,11 @@ define('two/attackView/ui', [
         $scope.filters = attackView.getFilters()
     }
 
+    var toggleSorting = function (column) {
+        attackView.toggleSorting(column)
+        $scope.sorting = attackView.getSortings()
+    }
+
     var eventHandlers = {
         updateCommands: function () {
             $scope.commands = attackView.getCommands()
@@ -111,10 +116,12 @@ define('two/attackView/ui', [
         $scope.commands = attackView.getCommands()
         $scope.selectedVillageId = modelDataService.getSelectedVillage().getId()
         $scope.filters = attackView.getFilters()
+        $scope.sorting = attackView.getSortings()
         $scope.UNIT_TYPES = UNIT_TYPES
         $scope.FILTER_TYPES = FILTER_TYPES
         $scope.COMMAND_TYPES = COMMAND_TYPES
         $scope.UNIT_SPEED_ORDER = UNIT_SPEED_ORDER
+        $scope.COLUMN_TYPES = COLUMN_TYPES
         $scope.pagination = {
             count: $scope.commands.length,
             offset: 0,
@@ -131,6 +138,7 @@ define('two/attackView/ui', [
         $scope.removeTroops = removeTroops
         $scope.switchWindowSize = switchWindowSize
         $scope.toggleFilter = toggleFilter
+        $scope.toggleSorting = toggleSorting
 
         updateVisibileCommands()
 

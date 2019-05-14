@@ -38,7 +38,7 @@ define('two/attackView', [
     var filterParams = {}
     var sorting = {
         reverse: false,
-        column: COLUMN_TYPES.COMMAND_PROGRESS
+        column: COLUMN_TYPES.TIME_COMPLETED
     }
     var COMMAND_ORDER = [
         'ATTACK',
@@ -141,6 +141,9 @@ define('two/attackView', [
             if (commands[i].target_village_id === data.village_id) {
                 commands[i].target_village_name = data.name
                 commands[i].targetVillage.name = data.name
+            } else if (commands[i].origin_village_id === data.village_id) {
+                commands[i].origin_village_name = data.name
+                commands[i].originVillage.name = data.name
             }
         }
 
@@ -153,10 +156,6 @@ define('two/attackView', [
 
             attackView.loadCommands()
         }
-    }
-
-    var onSortingChanged = function () {
-        attackView.loadCommands()
     }
 
     /**
@@ -358,18 +357,14 @@ define('two/attackView', [
     }
 
     attackView.toggleSorting = function (newColumn) {
-        if (!COLUMN_TYPES[newColumn]) {
-            return false
-        }
-
-        if (COLUMN_TYPES[newColumn] === sorting.column) {
+        if (newColumn === sorting.column) {
             sorting.reverse = !sorting.reverse
         } else {
-            sorting.column = COLUMN_TYPES[newColumn]
+            sorting.column = newColumn
             sorting.reverse = false
         }
 
-        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_SORTING_CHANGED)
+        attackView.loadCommands()
     }
 
     /**
@@ -454,8 +449,6 @@ define('two/attackView', [
             formatFilters()
         }, ['initial_village'])
 
-        eventQueue.register(eventTypeProvider.ATTACK_VIEW_FILTERS_CHANGED, onFiltersChanged)
-        eventQueue.register(eventTypeProvider.ATTACK_VIEW_SORTING_CHANGED, onSortingChanged)
         $rootScope.$on(eventTypeProvider.COMMAND_INCOMING, onCommandIncomming)
         $rootScope.$on(eventTypeProvider.COMMAND_CANCELLED, onCommandCancelled)
         $rootScope.$on(eventTypeProvider.MAP_SELECTED_VILLAGE, onVillageSwitched)
