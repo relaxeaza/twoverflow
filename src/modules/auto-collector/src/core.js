@@ -1,5 +1,5 @@
 define('two/autoCollector', [
-    'two/eventQueue',
+    'queues/EventQueue',
     'helper/time',
     'Lockr'
 ], function (

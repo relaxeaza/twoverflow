@@ -2,7 +2,7 @@ define('two/autoCollector/ui', [
     'two/autoCollector',
     'two/ui/button',
     'two/utils',
-    'two/eventQueue'
+    'queues/EventQueue'
 ], function (
     autoCollector,
     FrontButton,
@@ -30,12 +30,12 @@ define('two/autoCollector/ui', [
             }
         })
 
-        eventQueue.bind('Collector/started', function () {
+        eventQueue.register('Collector/started', function () {
             opener.$elem.classList.remove('btn-green')
             opener.$elem.classList.add('btn-red')
         })
 
-        eventQueue.bind('Collector/stopped', function () {
+        eventQueue.register('Collector/stopped', function () {
             opener.$elem.classList.remove('btn-red')
             opener.$elem.classList.add('btn-green')
         })

@@ -3,7 +3,7 @@ require([
     'two/ready',
     'two/autoCollector',
     'Lockr',
-    'two/eventQueue',
+    'queues/EventQueue',
     'two/autoCollector/secondVillage',
     'two/autoCollector/ui'
 ], function (
@@ -29,11 +29,11 @@ require([
                 autoCollector.secondVillage.start()
             }
 
-            eventQueue.bind('Collector/started', function () {
+            eventQueue.register('Collector/started', function () {
                 Lockr.set('collector-active', true)
             })
 
-            eventQueue.bind('Collector/stopped', function () {
+            eventQueue.register('Collector/stopped', function () {
                 Lockr.set('collector-active', false)
             })
         }, ['initial_village'])

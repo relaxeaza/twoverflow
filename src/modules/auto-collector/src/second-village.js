@@ -1,6 +1,6 @@
 define('two/autoCollector/secondVillage', [
     'two/autoCollector',
-    'two/eventQueue',
+    'queues/EventQueue',
     'helper/time',
     'models/SecondVillageModel'
 ], function (
