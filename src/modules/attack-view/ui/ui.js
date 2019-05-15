@@ -10,7 +10,8 @@ define('two/attackView/ui', [
     'two/attackView/commandTypes',
     'two/attackView/filterTypes',
     'two/attackView/unitSpeedOrder',
-    'two/EventScope'
+    'two/EventScope',
+    'battlecat'
 ], function (
     attackView,
     interfaceOverflow,
@@ -23,7 +24,8 @@ define('two/attackView/ui', [
     COMMAND_TYPES,
     FILTER_TYPES,
     UNIT_SPEED_ORDER,
-    EventScope
+    EventScope,
+    $
 ) {
     var $scope
     var textObject = 'attack_view'
