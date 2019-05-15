@@ -1,31 +1,31 @@
 define('two/attackView', [
-    'queues/EventQueue',
     'two/ready',
     'two/utils',
-    'models/CommandModel',
+    'two/attackView/columnTypes',
+    'two/attackView/commandTypes',
+    'two/attackView/filterTypes',
+    'two/attackView/unitSpeedOrder',
+    'conf/unitTypes',
     'Lockr',
     'helper/math',
     'helper/mapconvert',
     'struct/MapData',
-    'conf/unitTypes',
-    'two/attackView/columnTypes',
-    'two/attackView/commandTypes',
-    'two/attackView/filterTypes',
-    'two/attackView/unitSpeedOrder'
+    'queues/EventQueue',
+    'models/CommandModel'
 ], function (
-    eventQueue,
     ready,
     utils,
-    CommandModel,
-    Lockr,
-    $math,
-    $convert,
-    $mapData,
-    UNIT_TYPES,
     COLUMN_TYPES,
     COMMAND_TYPES,
     FILTER_TYPES,
-    UNIT_SPEED_ORDER
+    UNIT_SPEED_ORDER,
+    UNIT_TYPES,
+    Lockr,
+    math,
+    convert,
+    mapData,
+    eventQueue,
+    CommandModel
 ) {
     var initialized = false
     var listeners = {}
@@ -200,8 +200,8 @@ define('two/attackView', [
         var distB
 
         return villages.sort(function (villageA, villageB) {
-            distA = $math.actualDistance(origin, villageA)
-            distB = $math.actualDistance(origin, villageB)
+            distA = math.actualDistance(origin, villageA)
+            distB = math.actualDistance(origin, villageB)
 
             return distA - distB
         })
@@ -232,8 +232,8 @@ define('two/attackView', [
         var loads
         var index = 0
 
-        if ($mapData.hasTownDataInChunk(origin.x, origin.y)) {
-            sectors = $mapData.loadTownData(origin.x, origin.y, size, size, size)
+        if (mapData.hasTownDataInChunk(origin.x, origin.y)) {
+            sectors = mapData.loadTownData(origin.x, origin.y, size, size, size)
             targets = []
             possibleTargets = []
             closestTargets
@@ -279,9 +279,9 @@ define('two/attackView', [
             return callback(closestTargets[0])
         }
         
-        loads = $convert.scaledGridCoordinates(origin.x, origin.y, size, size, size)
+        loads = convert.scaledGridCoordinates(origin.x, origin.y, size, size, size)
 
-        $mapData.loadTownDataAsync(origin.x, origin.y, size, size, function () {
+        mapData.loadTownDataAsync(origin.x, origin.y, size, size, function () {
             if (++index === loads.length) {
                 closestNonHostileVillage(origin, callback)
             }
