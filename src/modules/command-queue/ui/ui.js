@@ -1,31 +1,29 @@
 define('two/commandQueue/ui', [
-    'two/commandQueue',
     'two/ui',
     'two/ui/button',
-    'two/utils',
-    'queues/EventQueue',
-    'helper/time',
-    'helper/util',
-    'two/utils',
+    'two/commandQueue',
     'two/EventScope',
+    'two/utils',
     'two/commandQueue/dateTypes',
     'two/commandQueue/eventCodes',
     'two/commandQueue/filterTypes',
-    'two/commandQueue/commandTypes'
+    'two/commandQueue/commandTypes',
+    'queues/EventQueue',
+    'helper/time',
+    'helper/util'
 ], function (
-    commandQueue,
     interfaceOverflow,
     FrontButton,
-    utils,
-    eventQueue,
-    $timeHelper,
-    util,
-    utils,
+    commandQueue,
     EventScope,
+    utils,
     DATE_TYPES,
     EVENT_CODES,
     FILTER_TYPES,
-    COMMAND_TYPES
+    COMMAND_TYPES,
+    eventQueue,
+    $timeHelper,
+    util
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'

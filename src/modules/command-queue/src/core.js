@@ -1,27 +1,25 @@
 define('two/commandQueue', [
     'two/utils',
+    'two/commandQueue/dateTypes',
+    'two/commandQueue/eventCodes',
+    'two/commandQueue/filterTypes',
+    'two/commandQueue/commandTypes',
     'queues/EventQueue',
     'helper/time',
     'helper/math',
     'struct/MapData',
-    'conf/conf',
-    'Lockr',
-    'two/commandQueue/dateTypes',
-    'two/commandQueue/eventCodes',
-    'two/commandQueue/filterTypes',
-    'two/commandQueue/commandTypes'
+    'Lockr'
 ], function (
     utils,
-    eventQueue,
-    $timeHelper,
-    $math,
-    $mapData,
-    $conf,
-    Lockr,
     DATE_TYPES,
     EVENT_CODES,
     FILTER_TYPES,
-    COMMAND_TYPES
+    COMMAND_TYPES,
+    eventQueue,
+    timeHelper,
+    $math,
+    mapData,
+    Lockr
 ) {
     var CHECKS_PER_SECOND = 10
     var ERROR_CODES = {
@@ -89,7 +87,7 @@ define('two/commandQueue', [
     }
 
     var isTimeToSend = function (sendTime) {
-        return sendTime < ($timeHelper.gameTime() + timeOffset)
+        return sendTime < (timeHelper.gameTime() + timeOffset)
     }
 
     /**
@@ -157,7 +155,7 @@ define('two/commandQueue', [
             for (var i = 0; i < storedQueue.length; i++) {
                 var command = storedQueue[i]
 
-                if ($timeHelper.gameTime() > command.sendTime) {
+                if (timeHelper.gameTime() > command.sendTime) {
                     commandQueue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
                 } else {
                     waitingCommandHelpers(command)
@@ -174,7 +172,7 @@ define('two/commandQueue', [
         }
 
         command.countdown = function () {
-            return $timeHelper.readableMilliseconds(Date.now() - command.sendTime)
+            return timeHelper.readableMilliseconds(Date.now() - command.sendTime)
         }
     }
 
@@ -499,7 +497,7 @@ define('two/commandQueue', [
     }
 
     commandQueue.getVillageByCoords = function (x, y, callback) {
-        $mapData.loadTownDataAsync(x, y, 1, 1, callback)
+        mapData.loadTownDataAsync(x, y, 1, 1, callback)
     }
 
     /**
