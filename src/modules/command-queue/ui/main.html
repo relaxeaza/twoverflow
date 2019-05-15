@@ -305,9 +305,9 @@
                                         <span class="time-left">{{ command.countdown() }}</span>
 
                                         <span class="size-26x26 icon-bg-black icon-20x20-units-outgoing" tooltip="" tooltip-content="{{ 'command_out' | i18n:loc.ale:textObject }}"></span>
-                                        <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
+                                        <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale }}</span>
                                         <span class="size-26x26 icon-bg-black icon-20x20-time-arrival" tooltip="" tooltip-content="{{ 'command_arrive' | i18n:loc.ale:textObject }}"></span>
-                                        <span class="arrive-time">{{ command.arriveTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
+                                        <span class="arrive-time">{{ command.arriveTime | readableDateFilter:loc.ale }}</span>
 
                                         <a href="#" class="remove-command size-20x20 btn-red icon-20x20-close" ng-click="removeCommand(command, EVENT_CODES.COMMAND_REMOVED)" tooltip="" tooltip-content="{{ 'queue_remove' | i18n:loc.ale:textObject }}"></a>
                                     </th>
@@ -352,9 +352,9 @@
                                     <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === COMMAND_TYPES.ATTACK]" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
 
                                     <span class="size-26x26 icon-bg-black icon-20x20-units-outgoing" tooltip="" tooltip-content="{{ 'command_out' | i18n:loc.ale:textObject }}"></span>
-                                    <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
+                                    <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale }}</span>
                                     <span class="size-26x26 icon-bg-black icon-20x20-time-arrival" tooltip="" tooltip-content="{{ 'command_arrive' | i18n:loc.ale:textObject }}"></span>
-                                    <span class="arrive-time">{{ command.arriveTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
+                                    <span class="arrive-time">{{ command.arriveTime | readableDateFilter:loc.ale }}</span>
                                 </th>
                             </tr>
                             <tr>
@@ -394,9 +394,9 @@
                                     <span ng-class="{true: 'icon-bg-red', false:'icon-bg-blue'}[command.type === COMMAND_TYPES.ATTACK]" class="icon-26x26-{{ command.type }}" tooltip="" tooltip-content="{{ command.type | i18n:loc.ale:textObjectCommon }}"></span>
 
                                     <span class="size-26x26 icon-bg-black icon-20x20-units-outgoing" tooltip="" tooltip-content="{{ 'command_out' | i18n:loc.ale:textObject }}"></span>
-                                    <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
+                                    <span class="sent-time">{{ command.sendTime | readableDateFilter:loc.ale }}</span>
                                     <span class="size-26x26 icon-bg-black icon-20x20-time-arrival" tooltip="" tooltip-content="{{ 'command_arrive' | i18n:loc.ale:textObject }}"></span>
-                                    <span class="arrive-time">{{ command.arriveTime | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
+                                    <span class="arrive-time">{{ command.arriveTime | readableDateFilter:loc.ale }}</span>
                                 </th>
                             </tr>
                             <tr>

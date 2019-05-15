@@ -172,7 +172,7 @@ define('two/commandQueue', [
         }
 
         command.countdown = function () {
-            return timeHelper.readableMilliseconds(Date.now() - command.sendTime)
+            return timeHelper.readableMilliseconds((timeHelper.gameTime() + timeOffset) - command.sendTime)
         }
     }
 
@@ -383,7 +383,6 @@ define('two/commandQueue', [
             if (command.type === COMMAND_TYPES.ATTACK && 'supporter' in command.officers) {
                 delete command.officers.supporter
             }
-
 
             if (command.type === COMMAND_TYPES.ATTACK && command.units.catapult) {
                 command.catapultTarget = command.catapultTarget || 'headquarter'
