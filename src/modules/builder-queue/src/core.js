@@ -1,26 +1,25 @@
 define('two/builderQueue', [
+    'two/ready',
+    'two/utils',
     'two/builderQueue/settings',
     'two/builderQueue/settingsMap',
     'two/builderQueue/errorCodes',
-    'two/utils',
-    'queues/EventQueue',
-    'two/ready',
-    'Lockr',
     'conf/upgradeabilityStates',
     'conf/buildingTypes',
     'conf/locationTypes',
-    'two/builderQueue/events'
+    'queues/EventQueue',
+    'Lockr'
 ], function (
+    ready,
+    utils,
     SETTINGS,
     SETTINGS_MAP,
     ERROR_CODES,
-    utils,
-    eventQueue,
-    ready,
-    Lockr,
     UPGRADEABILITY_STATES,
     BUILDING_TYPES,
-    LOCATION_TYPES
+    LOCATION_TYPES,
+    eventQueue,
+    Lockr
 ) {
     var buildingService = injector.get('buildingService')
     var initialized = false

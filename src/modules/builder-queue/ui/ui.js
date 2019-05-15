@@ -1,29 +1,29 @@
 define('two/builderQueue/ui', [
-    'two/builderQueue',
     'two/ui',
     'two/ui/button',
-    'queues/EventQueue',
+    'two/builderQueue',
     'two/utils',
-    'conf/buildingTypes',
-    'helper/time',
     'two/ready',
     'two/builderQueue/settings',
     'two/builderQueue/settingsMap',
     'two/builderQueue/errorCodes',
+    'conf/buildingTypes',
     'two/EventScope'
+    'queues/EventQueue',
+    'helper/time',
 ], function (
-    builderQueue,
     interfaceOverflow,
     FrontButton,
-    eventQueue,
+    builderQueue,
     utils,
-    BUILDING_TYPES,
-    $timeHelper,
     ready,
     SETTINGS,
     SETTINGS_MAP,
     ERROR_CODES,
-    EventScope
+    BUILDING_TYPES,
+    EventScope,
+    eventQueue,
+    timeHelper
 ) {
     var eventScope
     var $scope
@@ -200,7 +200,7 @@ define('two/builderQueue/ui', [
                 level: level,
                 price: buildingData[building].individual_level_costs[level],
                 building: building,
-                duration: $timeHelper.readableSeconds(price.build_time),
+                duration: timeHelper.readableSeconds(price.build_time),
                 levelPoints: buildingsLevelPoints[building][level - 1],
                 state: state
             }
