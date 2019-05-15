@@ -790,7 +790,6 @@ define('two/builderQueue/ui', [
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE, eventHandlers.saveSettings)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_START, eventHandlers.started)
         eventScope.register(eventTypeProvider.BUILDER_QUEUE_STOP, eventHandlers.stopped)
-        // eventScope.register(eventTypeProvider.BUILDER_QUEUE_NO_SEQUENCES, )
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_builder_queue_window', $scope)
     }

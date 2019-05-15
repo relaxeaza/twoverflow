@@ -8,7 +8,6 @@ define('two/minimap/ui', [
     'two/utils',
     'two/EventScope',
     'helper/util',
-    'queues/EventQueue',
     'struct/MapData',
     'cdn',
     'conf/colors'
@@ -22,7 +21,6 @@ define('two/minimap/ui', [
     utils,
     EventScope,
     util,
-    eventQueue,
     mapData,
     cdn,
     colors

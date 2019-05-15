@@ -38,7 +38,6 @@ define('two/builderQueue', [
         LOGS: 'builder_queue_log',
         SETTINGS: 'builder_queue_settings'
     }
-    var builderQueue = {}
 
     /**
      * Loop all player villages, check if ready and init the building analyse
@@ -227,41 +226,7 @@ define('two/builderQueue', [
         return sequenceLimit
     }
 
-    builderQueue.init = function () {
-        var key
-        var defaultValue
-        var buildingName
-        var village
-
-        initialized = true
-        localSettings = Lockr.get(STORAGE_KEYS.SETTINGS, {}, true)
-        logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
-        $player = modelDataService.getSelectedCharacter()
-        groupList = modelDataService.getGroupList()
-
-        for (key in SETTINGS_MAP) {
-            defaultValue = SETTINGS_MAP[key].default
-            settings[key] = localSettings.hasOwnProperty(key) ? localSettings[key] : defaultValue
-        }
-
-        for (buildingName in BUILDING_TYPES) {
-            VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
-        }
-
-        sequencesAvail = Object.keys(settings[SETTINGS.BUILDING_SEQUENCES]).length
-        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE]) : false
-
-        $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
-            if (!running) {
-                return false
-            }
-
-            setTimeout(function () {
-                village = $player.getVillage(data.village_id)
-                analyseVillageBuildings(village)
-            }, 1000)
-        })
-    }
+    var builderQueue = {}
 
     builderQueue.start = function () {
         if (!sequencesAvail) {
@@ -374,6 +339,42 @@ define('two/builderQueue', [
         delete settings[SETTINGS.BUILDING_SEQUENCES][id]
         Lockr.set(STORAGE_KEYS.SETTINGS, settings)
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, id)
+    }
+
+    builderQueue.init = function () {
+        var key
+        var defaultValue
+        var buildingName
+        var village
+
+        initialized = true
+        localSettings = Lockr.get(STORAGE_KEYS.SETTINGS, {}, true)
+        logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
+        $player = modelDataService.getSelectedCharacter()
+        groupList = modelDataService.getGroupList()
+
+        for (key in SETTINGS_MAP) {
+            defaultValue = SETTINGS_MAP[key].default
+            settings[key] = localSettings.hasOwnProperty(key) ? localSettings[key] : defaultValue
+        }
+
+        for (buildingName in BUILDING_TYPES) {
+            VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
+        }
+
+        sequencesAvail = Object.keys(settings[SETTINGS.BUILDING_SEQUENCES]).length
+        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE]) : false
+
+        $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
+            if (!running) {
+                return false
+            }
+
+            setTimeout(function () {
+                village = $player.getVillage(data.village_id)
+                analyseVillageBuildings(village)
+            }, 1000)
+        })
     }
 
     return builderQueue
