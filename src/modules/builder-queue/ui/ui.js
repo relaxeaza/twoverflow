@@ -8,9 +8,9 @@ define('two/builderQueue/ui', [
     'two/builderQueue/settingsMap',
     'two/builderQueue/errorCodes',
     'conf/buildingTypes',
-    'two/EventScope'
+    'two/EventScope',
     'queues/EventQueue',
-    'helper/time',
+    'helper/time'
 ], function (
     interfaceOverflow,
     FrontButton,

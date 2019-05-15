@@ -1,30 +1,30 @@
 define('two/minimap/ui', [
+    'two/ui',
+    'two/ui/button',
     'two/minimap',
     'two/minimap/actionTypes',
     'two/minimap/settingsMap',
     'two/minimap/settings',
-    'two/ui',
-    'two/ui/button',
     'two/utils',
+    'two/EventScope',
     'helper/util',
     'queues/EventQueue',
     'struct/MapData',
     'cdn',
-    'two/EventScope',
-    'conf/colors',
+    'conf/colors'
 ], function (
+    interfaceOverflow,
+    FrontButton,
     minimap,
     ACTION_TYPES,
     SETTINGS_MAP,
     SETTINGS,
-    interfaceOverflow,
-    FrontButton,
     utils,
+    EventScope,
     util,
     eventQueue,
-    $mapData,
+    mapData,
     cdn,
-    EventScope,
     colors
 ) {
     var $scope
@@ -81,7 +81,7 @@ define('two/minimap/ui', [
     }
 
     var getVillageData = function (data, callback) {
-        $mapData.loadTownDataAsync(data.x, data.y, 1, 1, callback)
+        mapData.loadTownDataAsync(data.x, data.y, 1, 1, callback)
     }
 
     var updateHighlightNames = function () {

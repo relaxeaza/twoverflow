@@ -3,32 +3,30 @@ define('two/minimap', [
     'two/minimap/settings',
     'two/minimap/settingsMap',
     'two/utils',
-    'queues/EventQueue',
     'two/ready',
+    'queues/EventQueue',
     'Lockr',
     'struct/MapData',
-    'conf/conf',
-    'helper/time',
     'helper/mapconvert',
     'cdn',
     'conf/colors',
     'conf/colorGroups',
+    'conf/conf',
     'version'
 ], function (
     ACTION_TYPES,
     SETTINGS,
     SETTINGS_MAP,
     utils,
-    eventQueue,
     ready,
+    eventQueue,
     Lockr,
-    $mapData,
-    $conf,
-    $timeHelper,
-    $mapconvert,
-    $cdn,
+    mapData,
+    mapconvert,
+    cdn,
     colors,
     colorGroups,
+    conf,
     gameVersion
 ) {
     var enableRendering = false
@@ -106,8 +104,8 @@ define('two/minimap', [
      */
     var pixel2Tiles = function (x, y) {
         return {
-            x: (x / $conf.TILESIZE.x),
-            y: (y / $conf.TILESIZE.y / $conf.TILESIZE.off)
+            x: (x / conf.TILESIZE.x),
+            y: (y / conf.TILESIZE.y / conf.TILESIZE.off)
         }
     }
 
@@ -232,7 +230,7 @@ define('two/minimap', [
     }
 
     var drawGrid = function () {
-        var binUrl = $cdn.getPath($conf.getMapPath())
+        var binUrl = cdn.getPath(conf.getMapPath())
         var villageBlock = minimap.getVillageBlock()
         var villageOffsetX = Math.round(villageBlock / 2)
         var tile
@@ -244,7 +242,7 @@ define('two/minimap', [
 
             for (x = 1; x < 999; x++) {
                 for (y = 1; y < 999; y++) {
-                    tile = $mapconvert.toTile(dataView, x, y)
+                    tile = mapconvert.toTile(dataView, x, y)
                     
                     // is border
                     if (tile.key.b) {
@@ -264,7 +262,7 @@ define('two/minimap', [
     }
 
     var drawLoadedVillages = function () {
-        drawVillages($mapData.getTowns())
+        drawVillages(mapData.getTowns())
     }
 
     var drawCachedVillages = function () {
@@ -359,7 +357,7 @@ define('two/minimap', [
         var x = (_x || selectedVillage.getX()) - (size / 2)
         var y = (_y || selectedVillage.getY()) - (size / 2)
 
-        $mapData.loadTownDataAsync(x, y, size, size, function () {})
+        mapData.loadTownDataAsync(x, y, size, size, function () {})
     }
 
     var cacheVillages = function (villages) {
@@ -417,7 +415,7 @@ define('two/minimap', [
         }
 
         eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_HOVER, {
-            village: $mapData.getTownAt(coords.x, coords.y),
+            village: mapData.getTownAt(coords.x, coords.y),
             event: event
         })
 
@@ -459,14 +457,14 @@ define('two/minimap', [
         var i
 
         for (i = 0; i < villages.length; i++) {
-            _villages.push($mapData.getTownAt(villages[i][0], villages[i][1]))
+            _villages.push(mapData.getTownAt(villages[i][0], villages[i][1]))
         }
 
         drawVillages(_villages)
     }
 
     var quickHighlight = function (coords) {
-        var village = $mapData.getTownAt(coords.x, coords.y)
+        var village = mapData.getTownAt(coords.x, coords.y)
         var action = settings[SETTINGS.RIGHT_CLICK_ACTION]
         var type
         var id
@@ -545,7 +543,7 @@ define('two/minimap', [
 
             if (coords.x in cache.village) {
                 if (coords.y in cache.village[coords.x]) {
-                    village = $mapData.getTownAt(coords.x, coords.y)
+                    village = mapData.getTownAt(coords.x, coords.y)
 
                     // ignore barbarian villages
                     if (!settings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
@@ -768,7 +766,7 @@ define('two/minimap', [
         if (gameVersion.product.major === 1 && gameVersion.product.minor < 94) {
             view = window.twx.game.map.engine.getView()
         } else {
-            view = $mapData.getMap().engine.getView()
+            view = mapData.getMap().engine.getView()
         }
 
         return convert([
@@ -914,7 +912,7 @@ define('two/minimap', [
             }
 
             drawLoadedVillages()
-            cacheVillages($mapData.getTowns())
+            cacheVillages(mapData.getTowns())
             renderStep()
 
             $cross.addEventListener('mousedown', eventHandlers.onCrossMouseDown)
