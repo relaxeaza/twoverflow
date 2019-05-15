@@ -1,4 +1,4 @@
-define('two/minimap/Events', [], function () {
+define('two/minimap/events', [], function () {
     angular.extend(eventTypeProvider, {
         MINIMAP_SETTINGS_RESET: 'minimap_settings_reset',
         MINIMAP_SETTINGS_SAVE: 'minimap_settings_save',

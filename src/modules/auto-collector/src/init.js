@@ -2,14 +2,16 @@ require([
     'two/language',
     'two/ready',
     'two/autoCollector',
+    'two/autoCollector/ui',
     'Lockr',
     'queues/EventQueue',
     'two/autoCollector/secondVillage',
-    'two/autoCollector/ui'
+    'two/autoCollector/events'
 ], function (
     twoLanguage,
     ready,
     autoCollector,
+    autoCollectorInterface,
     Lockr,
     eventQueue
 ) {
@@ -21,7 +23,7 @@ require([
         twoLanguage.add('__auto_collector_id', __auto_collector_locale)
         autoCollector.init()
         autoCollector.secondVillage.init()
-        autoCollector.interface()
+        autoCollectorInterface()
         
         ready(function () {
             if (Lockr.get('collector-active', false, true)) {
@@ -29,11 +31,11 @@ require([
                 autoCollector.secondVillage.start()
             }
 
-            eventQueue.register('Collector/started', function () {
+            eventQueue.register(eventTypeProvider.AUTO_COLLECTOR_STARTED, function () {
                 Lockr.set('collector-active', true)
             })
 
-            eventQueue.register('Collector/stopped', function () {
+            eventQueue.register(eventTypeProvider.AUTO_COLLECTOR_STOPPED, function () {
                 Lockr.set('collector-active', false)
             })
         }, ['initial_village'])

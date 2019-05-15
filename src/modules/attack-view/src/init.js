@@ -3,7 +3,7 @@ require([
     'two/ready',
     'two/attackView',
     'two/attackView/ui',
-    'two/attackView/Events'
+    'two/attackView/events'
 ], function (
     twoLanguage,
     ready,

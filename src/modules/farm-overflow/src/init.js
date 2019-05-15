@@ -3,7 +3,7 @@ require([
     'two/ready',
     'two/farmOverflow',
     'two/farmOverflow/ui',
-    'two/farmOverflow/Events'
+    'two/farmOverflow/events'
 ], function (
     twoLanguage,
     ready,

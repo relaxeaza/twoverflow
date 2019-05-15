@@ -71,29 +71,34 @@ define('two/autoCollector', [
      * é disparado.
      */
     var analyse = function () {
+        var data
+        var current
+        var collectible
+        var ready
+        
         if (!running) {
             return false
         }
 
-        var data = modelDataService.getSelectedCharacter().getResourceDeposit()
+        data = modelDataService.getSelectedCharacter().getResourceDeposit()
 
         if (!data) {
             return false
         }
 
-        var current = data.getCurrentJob()
+        current = data.getCurrentJob()
 
         if (current) {
             return false
         }
 
-        var collectible = data.getCollectibleJobs()
+        collectible = data.getCollectibleJobs()
 
         if (collectible) {
             return finalizeJob(collectible.shift())
         }
 
-        var ready = data.getReadyJobs()
+        ready = data.getReadyJobs()
 
         if (ready) {
             return startJob(getFastestJob(ready))
@@ -166,7 +171,7 @@ define('two/autoCollector', [
      * Inicia a analise dos trabalhos.
      */
     autoCollector.start = function () {
-        eventQueue.trigger('Collector/started')
+        eventQueue.trigger(eventTypeProvider.AUTO_COLLECTOR_STARTED)
         running = true
         analyse()
     }
@@ -175,7 +180,7 @@ define('two/autoCollector', [
      * Para a analise dos trabalhos.
      */
     autoCollector.stop = function () {
-        eventQueue.trigger('Collector/stopped')
+        eventQueue.trigger(eventTypeProvider.AUTO_COLLECTOR_STOPPED)
         running = false
     }
 

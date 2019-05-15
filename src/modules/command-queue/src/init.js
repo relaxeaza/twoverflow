@@ -3,7 +3,7 @@ require([
     'two/ready',
     'two/commandQueue',
     'two/commandQueue/ui',
-    'two/commandQueue/Events'
+    'two/commandQueue/events'
 ], function (
     twoLanguage,
     ready,

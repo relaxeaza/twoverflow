@@ -1,4 +1,4 @@
-define('two/attackView/Events', [], function () {
+define('two/attackView/events', [], function () {
     angular.extend(eventTypeProvider, {
         ATTACK_VIEW_FILTERS_CHANGED: 'attack_view_filters_changed',
         ATTACK_VIEW_SORTING_CHANGED: 'attack_view_sorting_changed',

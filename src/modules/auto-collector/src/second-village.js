@@ -15,8 +15,9 @@ define('two/autoCollector/secondVillage', [
 
     var getRunningJob = function (jobs) {
         var now = Date.now()
+        var id
 
-        for (var id in jobs) {
+        for (id in jobs) {
             if (jobs[id].time_started && jobs[id].time_completed) {
                 if (now < $timeHelper.server2ClientTime(jobs[id].time_completed)) {
                     return jobs[id]
@@ -29,8 +30,9 @@ define('two/autoCollector/secondVillage', [
 
     var getCollectibleJob = function (jobs) {
         var now = Date.now()
+        var id
 
-        for (var id in jobs) {
+        for (id in jobs) {
             if (jobs[id].time_started && jobs[id].time_completed) {
                 if ((now >= $timeHelper.server2ClientTime(jobs[id].time_completed)) && !jobs[id].collected) {
                     return id
@@ -56,7 +58,9 @@ define('two/autoCollector/secondVillage', [
     }
 
     var getFirstJob = function (jobs) {
-        for (var id in jobs) {
+        var id
+
+        for (id in jobs) {
             return id
         }
 
@@ -64,8 +68,10 @@ define('two/autoCollector/secondVillage', [
     }
 
     var updateSecondVillageInfo = function (callback) {
+        var model
+
         socketService.emit(routeProvider.SECOND_VILLAGE_GET_INFO, {}, function (data) {
-            var model = new SecondVillageModel(data)
+            model = new SecondVillageModel(data)
             modelDataService.getSelectedCharacter().setSecondVillage(model)
             callback()
         })
@@ -77,42 +83,80 @@ define('two/autoCollector/secondVillage', [
 
     var analyse = function () {
         var secondVillage = modelDataService.getSelectedCharacter().getSecondVillage()
+        var current
+        var completed
+        var nextRun
+        var collectible
+        var currentDayJobs
+        var collectedJobs
+        var resources
+        var availableJobs
+        var firstJob
+        var job
+
 
         if (!running || !secondVillage || !secondVillage.isAvailable()) {
             return false
         }
 
-        var current = getRunningJob(secondVillage.data.jobs)
+        current = getRunningJob(secondVillage.data.jobs)
 
         if (current) {
-            var completed = $timeHelper.server2ClientTime(current.time_completed)
-            var nextRun = completed - Date.now() + 1000
+            completed = $timeHelper.server2ClientTime(current.time_completed)
+            nextRun = completed - Date.now() + 1000
             setTimeout(updateAndAnalyse, nextRun)
             return false
         }
 
-        var collectible = getCollectibleJob(secondVillage.data.jobs)
+        collectible = getCollectibleJob(secondVillage.data.jobs)
         
         if (collectible) {
             return finalizeJob(collectible)
         }
 
-        var currentDayJobs = secondVillageService.getCurrentDayJobs(secondVillage.data.jobs, secondVillage.data.day)
-        var collectedJobs = secondVillageService.getCollectedJobs(secondVillage.data.jobs)
-        var resources = modelDataService.getSelectedVillage().getResources().getResources()
-        var availableJobs = secondVillageService.getAvailableJobs(currentDayJobs, collectedJobs, resources, [])
+        currentDayJobs = secondVillageService.getCurrentDayJobs(secondVillage.data.jobs, secondVillage.data.day)
+        collectedJobs = secondVillageService.getCollectedJobs(secondVillage.data.jobs)
+        resources = modelDataService.getSelectedVillage().getResources().getResources()
+        availableJobs = secondVillageService.getAvailableJobs(currentDayJobs, collectedJobs, resources, [])
 
         if (availableJobs) {
-            var firstJob = getFirstJob(availableJobs)
+            firstJob = getFirstJob(availableJobs)
 
             startJob(firstJob, function () {
-                var job = availableJobs[firstJob]
+                job = availableJobs[firstJob]
                 setTimeout(updateAndAnalyse, (job.duration * 1000) + 1000)
             })
         }
     }
 
     var secondVillageCollector = {}
+
+    secondVillageCollector.start = function () {
+        if (!initialized) {
+            return false
+        }
+
+        eventQueue.trigger(eventTypeProvider.AUTO_COLLECTOR_SECONDVILLAGE_STARTED)
+        running = true
+        updateAndAnalyse()
+    }
+
+    secondVillageCollector.stop = function () {
+        if (!initialized) {
+            return false
+        }
+
+        eventQueue.trigger(eventTypeProvider.AUTO_COLLECTOR_SECONDVILLAGE_STOPPED)
+        running = false
+    }
+
+    secondVillageCollector.isRunning = function () {
+        return running
+    }
+
+    secondVillageCollector.isInitialized = function () {
+        return initialized
+    }
 
     secondVillageCollector.init = function () {
         if (!secondVillageService.isFeatureActive()) {
@@ -124,33 +168,6 @@ define('two/autoCollector/secondVillage', [
         $rootScope.$on(eventTypeProvider.SECOND_VILLAGE_VILLAGE_CREATED, updateAndAnalyse)
         $rootScope.$on(eventTypeProvider.SECOND_VILLAGE_JOB_COLLECTED, updateAndAnalyse)
         $rootScope.$on(eventTypeProvider.SECOND_VILLAGE_VILLAGE_CREATED, updateAndAnalyse)
-    }
-
-    secondVillageCollector.start = function () {
-        if (!initialized) {
-            return false
-        }
-
-        eventQueue.trigger('Collector/secondVillage/started')
-        running = true
-        updateAndAnalyse()
-    }
-
-    secondVillageCollector.stop = function () {
-        if (!initialized) {
-            return false
-        }
-
-        eventQueue.trigger('Collector/secondVillage/stopped')
-        running = false
-    }
-
-    secondVillageCollector.isRunning = function () {
-        return running
-    }
-
-    secondVillageCollector.isInitialized = function () {
-        return initialized
     }
 
     autoCollector.secondVillage = secondVillageCollector
