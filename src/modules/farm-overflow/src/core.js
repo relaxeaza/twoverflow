@@ -1923,31 +1923,6 @@ define('two/farmOverflow', [
 
     var farmOverflow = {}
 
-    farmOverflow.init = function () {
-        initialized = true
-        $player = modelDataService.getSelectedCharacter()
-        $gameState = modelDataService.getGameState()
-        logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
-        lastActivity = Lockr.get(STORAGE_KEYS.LAST_ACTIVITY, timeHelper.gameTime(), true)
-        lastAttack = Lockr.get(STORAGE_KEYS.LAST_ATTACK, -1, true)
-        targetIndexes = Lockr.get(STORAGE_KEYS.INDEXES, {}, true)
-        commander = new Commander()
-        loadSettings()
-        updateExceptionGroups()
-        updateExceptionVillages()
-        updatePlayerVillages()
-        updatePresets()
-        reportListener()
-        messageListener()
-        groupListener()
-        presetListener()
-        villageListener()
-        generalListeners()
-        bindEvents()
-        initPersistentRunning()
-        initTargetsProof()
-    }
-
     farmOverflow.start = function (_manual) {
         if (!selectedPresets.length) {
             eventQueue.trigger(eventTypeProvider.FARM_ERROR, [ERROR_TYPES.PRESET_FIRST, _manual])
@@ -2118,6 +2093,31 @@ define('two/farmOverflow', [
 
     farmOverflow.getSettings = function () {
         return settings
+    }
+
+    farmOverflow.init = function () {
+        initialized = true
+        $player = modelDataService.getSelectedCharacter()
+        $gameState = modelDataService.getGameState()
+        logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
+        lastActivity = Lockr.get(STORAGE_KEYS.LAST_ACTIVITY, timeHelper.gameTime(), true)
+        lastAttack = Lockr.get(STORAGE_KEYS.LAST_ATTACK, -1, true)
+        targetIndexes = Lockr.get(STORAGE_KEYS.INDEXES, {}, true)
+        commander = new Commander()
+        loadSettings()
+        updateExceptionGroups()
+        updateExceptionVillages()
+        updatePlayerVillages()
+        updatePresets()
+        reportListener()
+        messageListener()
+        groupListener()
+        presetListener()
+        villageListener()
+        generalListeners()
+        bindEvents()
+        initPersistentRunning()
+        initTargetsProof()
     }
 
     return farmOverflow
