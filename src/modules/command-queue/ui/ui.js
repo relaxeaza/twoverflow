@@ -584,12 +584,16 @@ define('two/commandQueue/ui', [
         $scope.autoCompleteOrigin = {
             type: ['village'],
             placeholder: $filter('i18n')('add_village_search', $rootScope.loc.ale, textObject),
-            onEnter: eventHandlers.onAutoCompleteOrigin
+            onEnter: eventHandlers.onAutoCompleteOrigin,
+            tooltip: $filter('i18n')('add_origin', $rootScope.loc.ale, textObject),
+            dropDown: true
         }
         $scope.autoCompleteTarget = {
             type: ['village'],
             placeholder: $filter('i18n')('add_village_search', $rootScope.loc.ale, textObject),
-            onEnter: eventHandlers.onAutoCompleteTarget
+            onEnter: eventHandlers.onAutoCompleteTarget,
+            tooltip: $filter('i18n')('add_target', $rootScope.loc.ale, textObject),
+            dropDown: true
         }
         $scope.showCatapultSelect = !!commandData.units.catapult
         $scope.attackableBuildings = attackableBuildingsList
