@@ -28,8 +28,9 @@
     "grunt-replace": "^1.0.1"
   },
   "scripts": {
-    "release": "node scripts/release.js",
-    "release-testing": "node scripts/release.js --testing"
+    "build": "grunt build --minify",
+    "release": "grunt build --minify && node scripts/release.js",
+    "release-testing": "grunt build --minify && node scripts/release.js --testing"
   },
   "dependencies": {
     "hoek": "^5.0.3",
