@@ -1,14 +1,13 @@
 define('two/commandQueue/ui', [
     'two/commandQueue',
-    'two/ui2',
-    'two/FrontButton',
+    'two/ui',
+    'two/ui/button',
     'two/utils',
     'queues/EventQueue',
     'helper/time',
     'helper/util',
     'two/utils',
     'two/EventScope',
-    'two/ui/autoComplete',
     'two/commandQueue/dateTypes',
     'two/commandQueue/eventCodes',
     'two/commandQueue/filterTypes',
@@ -23,7 +22,6 @@ define('two/commandQueue/ui', [
     util,
     utils,
     EventScope,
-    autoComplete,
     DATE_TYPES,
     EVENT_CODES,
     FILTER_TYPES,
@@ -315,36 +313,6 @@ define('two/commandQueue/ui', [
         $scope.showCatapultSelect = false
     }
 
-    var searchVillage = function (type) {
-        var $elem
-        var model
-        var type
-
-        switch (type) {
-        case 'origin':
-            $elem = document.querySelector('#two-command-queue .village-origin')
-
-            break
-        case 'target':
-            $elem = document.querySelector('#two-command-queue .village-target')
-
-            break
-        default:
-            return false
-            break
-        }
-
-        if ($scope.searchQuery[type].length < 2) {
-            return autoComplete.hide()
-        }
-
-        autoComplete.search($scope.searchQuery[type], function (data) {
-            if (data.length) {
-                autoComplete.show(data, $elem, 'commandqueue_village_search', type)
-            }
-        }, ['village'])
-    }
-
     var addCommand = function (type) {
         var copy = angular.copy(commandData)
         copy.type = type
@@ -489,6 +457,22 @@ define('two/commandQueue/ui', [
         stop: function (event) {
             $scope.running = commandQueue.isRunning()
             utils.emitNotif('success', genNotifText('title', 'deactivated'))
+        },
+        onAutoCompleteOrigin: function (data) {
+            commandData.origin = {
+                id: data.id,
+                x: data.x,
+                y: data.y,
+                name: data.name
+            }
+        },
+        onAutoCompleteTarget: function (data) {
+            commandData.target = {
+                id: data.id,
+                x: data.x,
+                y: data.y,
+                name: data.name
+            }
         }
     }
 
@@ -599,6 +583,16 @@ define('two/commandQueue/ui', [
             name: $filter('i18n')(DEFAULT_CATAPULT_TARGET, $rootScope.loc.ale, 'building_names'),
             value: DEFAULT_CATAPULT_TARGET
         }
+        $scope.autoCompleteOrigin = {
+            type: ['village'],
+            placeholder: $filter('i18n')('add_village_search', $rootScope.loc.ale, textObject),
+            onEnter: eventHandlers.onAutoCompleteOrigin
+        }
+        $scope.autoCompleteTarget = {
+            type: ['village'],
+            placeholder: $filter('i18n')('add_village_search', $rootScope.loc.ale, textObject),
+            onEnter: eventHandlers.onAutoCompleteTarget
+        }
         $scope.showCatapultSelect = !!commandData.units.catapult
         $scope.attackableBuildings = attackableBuildingsList
         $scope.commandData = commandData
@@ -625,7 +619,6 @@ define('two/commandQueue/ui', [
         $scope.incrementDate = incrementDate
         $scope.reduceDate = reduceDate
         $scope.cleanUnitInputs = cleanUnitInputs
-        $scope.searchVillage = searchVillage
         $scope.addCommand = addCommand
         $scope.clearRegisters = clearRegisters
         $scope.switchCommandQueue = switchCommandQueue

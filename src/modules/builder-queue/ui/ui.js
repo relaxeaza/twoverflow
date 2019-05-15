@@ -1,7 +1,7 @@
 define('two/builderQueue/ui', [
     'two/builderQueue',
-    'two/ui2',
-    'two/FrontButton',
+    'two/ui',
+    'two/ui/button',
     'queues/EventQueue',
     'two/utils',
     'conf/buildingTypes',

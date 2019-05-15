@@ -49,9 +49,7 @@
                                 </colgroup>
                                 <tbody>
                                     <tr>
-                                        <td>
-                                            <input type="text" ng-model="searchQuery.origin" class="textfield-border village-origin" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" tooltip="" tooltip-content="{{ 'add_origin' | i18n:loc.ale:textObject }}" ng-keyup="searchVillage('origin')">
-                                        </td>
+                                        <td><div auto-complete="autoCompleteOrigin"></div></td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
                                         <td ng-if="!commandData.origin">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
                                         <td ng-if="commandData.origin">{{ commandData.origin.name }} ({{ commandData.origin.x }}|{{ commandData.origin.y }})</td>
@@ -61,9 +59,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td>
-                                            <input type="text" ng-model="searchQuery.target" class="textfield-border village-target" placeholder="{{ 'add_village_search' | i18n:loc.ale:textObject }}" tooltip="" tooltip-content="{{ 'add_target' | i18n:loc.ale:textObject }}" ng-keyup="searchVillage('target')">
-                                        </td>
+                                        <td><div auto-complete="autoCompleteTarget"></div></td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
                                         <td ng-if="!commandData.target">{{ 'add_no_village' | i18n:loc.ale:textObject }}</td>
                                         <td ng-if="commandData.target">{{ commandData.target.name }} ({{ commandData.target.x }}|{{ commandData.target.y }})</td>

@@ -1,6 +1,6 @@
 define('two/autoCollector/ui', [
     'two/autoCollector',
-    'two/FrontButton',
+    'two/ui/button',
     'two/utils',
     'two/eventQueue'
 ], function (

@@ -1,7 +1,7 @@
 define('two/attackView/ui', [
     'two/attackView',
-    'two/ui2',
-    'two/FrontButton',
+    'two/ui',
+    'two/ui/button',
     'two/utils',
     'queues/EventQueue',
     'helper/time',

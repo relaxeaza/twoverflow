@@ -1,4 +1,4 @@
-define('two/FrontButton', [], function () {
+define('two/ui/button', [], function () {
     function FrontButton (label, options) {
         this.options = options = angular.merge({
             label: label,

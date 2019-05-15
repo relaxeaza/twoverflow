@@ -1,4 +1,4 @@
-define('two/ui2', [
+define('two/ui', [
     'conf/conf',
     'conf/cdn'
 ], function (

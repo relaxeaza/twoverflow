@@ -1,5 +1,5 @@
 require([
-    'two/ui2'
+    'two/ui'
 ], function (
     interfaceOverflow
 ) {
