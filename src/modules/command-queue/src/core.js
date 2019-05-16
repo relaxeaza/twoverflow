@@ -134,19 +134,19 @@ define('two/commandQueue', [
     }
 
     var storeWaitingQueue = function () {
-        Lockr.set('queue-commands', waitingCommands)
+        Lockr.set(STORAGE_KEYS.QUEUE_COMMANDS, waitingCommands)
     }
 
     var storeSentQueue = function () {
-        Lockr.set('queue-sent', sentCommands)
+        Lockr.set(STORAGE_KEYS.QUEUE_SENT, sentCommands)
     }
 
     var storeExpiredQueue = function () {
-        Lockr.set('queue-expired', expiredCommands)
+        Lockr.set(STORAGE_KEYS.QUEUE_EXPIRED, expiredCommands)
     }
 
     var loadStoredCommands = function () {
-        var storedQueue = Lockr.get('queue-commands', [], true)
+        var storedQueue = Lockr.get(STORAGE_KEYS.QUEUE_COMMANDS, [], true)
 
         if (storedQueue.length) {
             for (var i = 0; i < storedQueue.length; i++) {
@@ -245,8 +245,8 @@ define('two/commandQueue', [
 
         commandQueue.initialized = true
 
-        sentCommands = Lockr.get('queue-sent', [], true)
-        expiredCommands = Lockr.get('queue-expired', [], true)
+        sentCommands = Lockr.get(STORAGE_KEYS.QUEUE_SENT, [], true)
+        expiredCommands = Lockr.get(STORAGE_KEYS.QUEUE_EXPIRED, [], true)
 
         loadStoredCommands()
         listenCommands()
@@ -455,8 +455,8 @@ define('two/commandQueue', [
     }
 
     commandQueue.clearRegisters = function () {
-        Lockr.set('queue-expired', [])
-        Lockr.set('queue-sent', [])
+        Lockr.set(STORAGE_KEYS.QUEUE_EXPIRED, [])
+        Lockr.set(STORAGE_KEYS.QUEUE_SENT, [])
         expiredCommands = []
         sentCommands = []
     }
