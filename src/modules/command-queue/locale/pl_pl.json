@@ -1,6 +1,5 @@
 {
     "queue": {
-        "title": "Generał",
         "attack": "Atak",
         "support": "Wsparcie",
         "relocate": "przenieś",
@@ -22,12 +21,12 @@
         "add_current_date": "Obecny czas",
         "add_current_date_plus": "Zwiększ czas o 100 milisekund.",
         "add_current_date_minus": "Zmniejsz czas o 100 milisekund.",
-        "add_travel_times": "Czas podróży jendostek",
+        "add_travel_times": "Czas podróży jednostek",
         "add_date": "Czas/Data",
         "add_no_village": "Wybierz wioskę...",
         "add_village_search": "Znajdź wioskę...",
         "add_clear": "wyczyść",
-        "add_insert_preset": "Insert preset",
+        "add_insert_preset": "Wybierz szablon",
         "queue_waiting": "Rozkazy",
         "queue_none_added": "Brak dodanych rozkazów.",
         "queue_sent": "Rozkazy wysłane",
@@ -54,8 +53,8 @@
         "error_already_sent": "Ten rozkaz %{type} powinien zostać wysłany %{date}",
         "error_no_map_selected_village": "Nie zaznaczono wioski na mapie.",
         "error_remove_error": "Błąd usuwania rozkazu.",
-        "tab_add": "Add command",
-        "tab_waiting": "Queued commands",
-        "tab_logs": "Command logs"
+        "tab_add": "Dodaj rozkaz",
+        "tab_waiting": "Oczekujące",
+        "tab_logs": "Logi"
     }
 }

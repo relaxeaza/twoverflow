@@ -5,44 +5,44 @@
         "settings": "Ustawienia",
         "settings_village_groups": "Buduj w wioskach z grupy",
         "settings_building_sequence": "Szablon kolejki budowy",
-        "settings_building_sequence_final": "Buildings final levels",
+        "settings_building_sequence_final": "Finalne poziomy budynków",
         "settings_saved": "Ustawienia zapisane!",
         "logs_no_builds": "Nie rozpoczęto żadnej rozbudowy",
         "logs_clear": "Wyczyść logi",
-        "sequences": "Sequences",
-        "sequences_move_up": "Move up",
-        "sequences_move_down": "Move down",
-        "sequences_add_building": "Add building",
-        "sequences_select_edit": "Select a sequence to edit",
-        "sequences_edit_sequence": "Edit sequence",
-        "sequence_updated": "Building sequence %d updated",
-        "sequence_added": "Building sequence %d added",
-        "select_group": "Select a group",
-        "add_building_success": "%d has added at position %d",
-        "add_building_limit_exceeded": "%d reached maximum level (%d)",
-        "position": "Position",
-        "remove_building": "Remove building from list",
-        "clone": "Clone",
-        "tooltip_clone": "Crate a new sequence from the selected sequence",
-        "tooltip_remove_sequence": "Remove selected sequence",
+        "sequences": "Szablony",
+        "sequences_move_up": "Przesuń w górę",
+        "sequences_move_down": "Przesuń w dół",
+        "sequences_add_building": "Dodaj budynek",
+        "sequences_select_edit": "Wybierz szablon do edytowania",
+        "sequences_edit_sequence": "Edytuj szablon",
+        "sequence_updated": "Szablon budowy %d zaktualizowany",
+        "sequence_added": "Szablon budowy %d dodany",
+        "select_group": "Wybierz grupę",
+        "add_building_success": "%d dodany na pozycji %d",
+        "add_building_limit_exceeded": "%d osiągnął/eła maksymalny poziom (%d)",
+        "position": "Pozycja",
+        "remove_building": "Usuń budynek z listy",
+        "clone": "Klonuj",
+        "tooltip_clone": "Utwórz nowy szablon na podstawie wybranego szablonu",
+        "tooltip_remove_sequence": "Usuń wybrany szablon",
         "name_sequence_min_lenght": "The sequence name must have at least 3 character.",
-        "sequence_created": "New sequence %d created.",
-        "sequence_updated": "Sequence %d updated.",
-        "sequence_removed": "Sequence %d removed.",
-        "error_sequence_exists": "This sequence already exists.",
-        "error_sequence_no_exists": "This sequence not exists.",
-        "error_sequence_invalid": "Some sequence's value is invalid.",
-        "logs_cleared": "Logs cleared.",
-        "create_sequence": "Create a sequence"
+        "sequence_created": "Nowy szablon %d utworzony.",
+        "sequence_updated": "Szablon %d zaktualizowany.",
+        "sequence_removed": "Szablon %d usunięty.",
+        "error_sequence_exists": "Ten szablon już istnieje.",
+        "error_sequence_no_exists": "Ten szablon nie istnieje.",
+        "error_sequence_invalid": "Niektóre z wartości szablonu są niepoprawne.",
+        "logs_cleared": "Logi wyczyszczone.",
+        "create_sequence": "Utwórz szablon"
     },
     "builder_queue_add_building_modal": {
-        "title": "Add new building"
+        "title": "Dodaj nowy budynek"
     },
     "builder_queue_name_sequence_modal": {
-        "title": "Sequence name"
+        "title": "Nazwa szablonu"
     },
     "builder_queue_remove_sequence_modal": {
-        "title": "Remove sequence",
-        "text": "Are you sure to remove this sequence? If this sequence is the active one, another sequence will be selected and the BuilderQueue stopped."
+        "title": "Usuń szablon",
+        "text": "Jesteś pewny, że chcesz usunąć ten szablon? Jeśli ten szablon jest teraz aktywny, inny szablon zostanie wybrany i BuilderQueue zatrzyma się."
     }
 }
