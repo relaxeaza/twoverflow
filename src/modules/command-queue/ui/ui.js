@@ -29,7 +29,7 @@ define('two/commandQueue/ui', [
     util,
     Lockr
 ) {
-    var textObject = 'queue'
+    var textObject = 'command_queue'
     var textObjectCommon = 'common'
     var eventScope
     var $scope

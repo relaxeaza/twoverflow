@@ -10,7 +10,7 @@ define('two/autoCollector/ui', [
     eventQueue
 ) {
     var opener
-    var textObject = 'collector'
+    var textObject = 'auto_collector'
 
     var init = function () {
         opener = new FrontButton('Collector', {
