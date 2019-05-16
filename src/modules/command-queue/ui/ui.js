@@ -8,9 +8,11 @@ define('two/commandQueue/ui', [
     'two/commandQueue/eventCodes',
     'two/commandQueue/filterTypes',
     'two/commandQueue/commandTypes',
+    'two/commandQueue/storageKeys',
     'queues/EventQueue',
     'helper/time',
-    'helper/util'
+    'helper/util',
+    'Lockr'
 ], function (
     interfaceOverflow,
     FrontButton,
@@ -21,9 +23,11 @@ define('two/commandQueue/ui', [
     EVENT_CODES,
     FILTER_TYPES,
     COMMAND_TYPES,
+    STORAGE_KEYS,
     eventQueue,
     $timeHelper,
-    util
+    util,
+    Lockr
 ) {
     var textObject = 'queue'
     var textObjectCommon = 'common'
@@ -177,6 +181,7 @@ define('two/commandQueue/ui', [
 
     var updateDateType = function () {
         commandData.dateType = $scope.selectedDateType.value
+        Lockr.set(STORAGE_KEYS.LAST_DATE_TYPE, $scope.selectedDateType.value)
         updateTravelTimes()
     }
 
@@ -549,7 +554,9 @@ define('two/commandQueue/ui', [
     }
 
     var buildWindow = function () {
-        $scope = window.$scope = $rootScope.$new()
+        var lastDateType = Lockr.get(STORAGE_KEYS.LAST_DATE_TYPE, DATE_TYPES.OUT, true)
+
+        $scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.textObjectVillageInfo = 'screen_village_info'
@@ -567,11 +574,11 @@ define('two/commandQueue/ui', [
         }
         $scope.isValidDate = false
         $scope.dateTypes = util.toActionList(DATE_TYPES, function (actionType) {
-            return $filter('i18n')('add_' + actionType, $rootScope.loc.ale, textObject)
+            return $filter('i18n')(actionType, $rootScope.loc.ale, textObject)
         })
         $scope.selectedDateType = {
-            name: $filter('i18n')('add_out', $rootScope.loc.ale, textObject),
-            value: DATE_TYPES.OUT
+            name: $filter('i18n')(lastDateType, $rootScope.loc.ale, textObject),
+            value: lastDateType
         }
         $scope.selectedInsertPreset = {
             name: $filter('i18n')('add_insert_preset', $rootScope.loc.ale, textObject),

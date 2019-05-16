@@ -4,6 +4,7 @@ define('two/commandQueue', [
     'two/commandQueue/eventCodes',
     'two/commandQueue/filterTypes',
     'two/commandQueue/commandTypes',
+    'two/commandQueue/storageKeys',
     'queues/EventQueue',
     'helper/time',
     'helper/math',
@@ -15,6 +16,7 @@ define('two/commandQueue', [
     EVENT_CODES,
     FILTER_TYPES,
     COMMAND_TYPES,
+    STORAGE_KEYS,
     eventQueue,
     timeHelper,
     $math,
@@ -25,11 +27,6 @@ define('two/commandQueue', [
     var ERROR_CODES = {
         INVALID_ORIGIN: 'invalid_rigin',
         INVALID_TARGET: 'invalid_target'
-    }
-    var STORAGE_KEYS = {
-        QUEUE_COMMANDS: 'commander_queue_commands',
-        QUEUE_SENT: 'commander_queue_sent',
-        QUEUE_EXPIRED: 'commander_queue_expired'
     }
     var waitingCommands = []
     var waitingCommandsObject = {}

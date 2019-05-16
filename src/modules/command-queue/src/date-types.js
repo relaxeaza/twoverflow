@@ -1,6 +1,6 @@
 define('two/commandQueue/dateTypes', [], function () {
     return {
-        ARRIVE: 'arrive',
-        OUT: 'out'
+        ARRIVE: 'date_type_arrive',
+        OUT: 'date_type_out'
     }
 })
