@@ -25,7 +25,7 @@ define('two/farmOverflow/ui', [
 ) {
     var eventScope
     var $scope
-    var textObject = 'farm'
+    var textObject = 'farm_overflow'
     var textObjectCommon = 'common'
     var SELECT_SETTINGS = [
         SETTINGS.PRESETS,

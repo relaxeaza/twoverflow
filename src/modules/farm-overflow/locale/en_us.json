@@ -1,5 +1,5 @@
 {
-    "farm": {
+    "farm_overflow": {
         "attacking": "Attacking.",
         "paused": "Paused.",
         "command_limit": "Limit of 50 attacks reached, waiting return.",
@@ -34,10 +34,10 @@
         "random_base": "Random interval between attacks",
         "commands_per_village": "Commands limit per village",
         "priority_targets": "Prioritize targets with full loot",
-        "settings.ignoreOnLoss": "Ignore target that cause loss",
-        "settings.ignoreFullStorage": "Do not farm with villages with full storage",
+        "ignore_on_loss": "Ignore target that cause loss",
+        "ignore_full_storage": "Do not farm with villages with full storage",
         "step_cycle_header": "Step Cycle Settings",
-        "settings.stepCycle": "Enable Step Cycle",
+        "step_cycle": "Enable Step Cycle",
         "step_cycle_interval": "Interval between cycles (minutes)",
         "step_cycle_notifs": "Cycle notifications",
         "target_filters": "Target Filters",

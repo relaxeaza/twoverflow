@@ -1,5 +1,5 @@
 {
-    "farm": {
+    "farm_overflow": {
         "attacking": "Atakuje.",
         "paused": "Zatrzymany.",
         "command_limit": "Limit 50 ataków osiągnięty, oczekiwanie na powrót wojsk.",
@@ -34,10 +34,10 @@
         "random_base": "Domyślny odstęp (sek)",
         "commands_per_village": "Limit poleceń",
         "priority_targets": "Priorytyzuj cele",
-        "settings.ignoreOnLoss": "Pomijaj cele jeśli straty",
-        "settings.ignoreFullStorage": "Pomijaj wioski jeśli magazyn pełny",
+        "ignore_on_loss": "Pomijaj cele jeśli straty",
+        "ignore_full_storage": "Pomijaj wioski jeśli magazyn pełny",
         "step_cycle_header": "Cykl Farmienia",
-        "settings.stepCycle": "Włącz Cykl farmienia",
+        "step_cycle": "Włącz Cykl farmienia",
         "step_cycle_interval": "Odstęp między cyklami (minuty)",
         "step_cycle_notifs": "Powiadomienia",
         "target_filters": "Filtry celów",

@@ -1,5 +1,5 @@
 {
-    "farm": {
+    "farm_overflow": {
         "attacking": "Atacando.",
         "paused": "Pausado.",
         "command_limit": "Limite de 50 ataques atingido, aguardando retorno.",
