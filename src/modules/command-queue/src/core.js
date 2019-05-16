@@ -99,9 +99,11 @@ define('two/commandQueue', [
      */
     var cleanZeroUnits = function (units) {
         var cleanUnits = {}
+        var unit
+        var amount
 
-        for (var unit in units) {
-            var amount = units[unit]
+        for (unit in units) {
+            amount = units[unit]
 
             if (amount === '*' || amount !== 0) {
                 cleanUnits[unit] = amount
@@ -176,16 +178,20 @@ define('two/commandQueue', [
     var parseDynamicUnits = function (command) {
         var playerVillages = modelDataService.getVillages()
         var village = playerVillages[command.origin.id]
+        var villageUnits
+        var parsedUnits
+        var unit
+        var amount
 
         if (!village) {
             return EVENT_CODES.NOT_OWN_VILLAGE
         }
 
-        var villageUnits = village.unitInfo.units
-        var parsedUnits = {}
+        villageUnits = village.unitInfo.units
+        parsedUnits = {}
 
-        for (var unit in command.units) {
-            var amount = command.units[unit]
+        for (unit in command.units) {
+            amount = command.units[unit]
 
             if (amount === '*') {
                 amount = villageUnits[unit].available
