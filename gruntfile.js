@@ -192,6 +192,7 @@ module.exports = function (grunt) {
         'src/ready.js',
         'src/configs.js',
         'src/language.js',
+        'src/settings.js',
         'src/init.js'
     ])
 

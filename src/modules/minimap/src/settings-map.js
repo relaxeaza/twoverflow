@@ -9,6 +9,7 @@ define('two/minimap/settingsMap', [
         [SETTINGS.RIGHT_CLICK_ACTION]: {
             default: ACTION_TYPES.HIGHLIGHT_PLAYER,
             inputType: 'select',
+            disabledOption: false,
             update: false
         },
         // [SETTINGS.FLOATING_MINIMAP]: {
@@ -113,11 +114,6 @@ define('two/minimap/settingsMap', [
         },
         [SETTINGS.COLOR_FRIENDLY]: {
             default: '#BF4DA4',
-            inputType: 'color',
-            update: true
-        },
-        [SETTINGS.COLOR_UGLY]: {
-            default: '#A96534',
             inputType: 'color',
             update: true
         },

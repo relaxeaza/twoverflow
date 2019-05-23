@@ -7,6 +7,7 @@ define('two/minimap/ui', [
     'two/minimap/settings',
     'two/utils',
     'two/EventScope',
+    'two/Settings',
     'helper/util',
     'struct/MapData',
     'cdn',
@@ -20,6 +21,7 @@ define('two/minimap/ui', [
     SETTINGS,
     utils,
     EventScope,
+    Settings,
     util,
     mapData,
     cdn,
@@ -49,6 +51,7 @@ define('two/minimap/ui', [
         character: {},
         tribe: {}
     }
+    var settings
 
     var selectTab = function (tab) {
         $scope.selectedTab = tab
@@ -168,7 +171,7 @@ define('two/minimap/ui', [
 
         if (inputType === 'setting') {
             settingId = colorGroup
-            selectedColor = $scope.settings[settingId]
+            selectedColor = settings.getSetting(settingId)
             hideReset = false
 
             modalScope.submit = function () {
@@ -177,7 +180,7 @@ define('two/minimap/ui', [
             }
 
             modalScope.reset = function () {
-                $scope.settings[settingId] = SETTINGS_MAP[settingId].default
+                $scope.settings[settingId] = settings.getDefault(settingId)
                 modalScope.closeWindow()
             }
         } else if (inputType === 'add_custom_highlight') {
@@ -215,20 +218,8 @@ define('two/minimap/ui', [
     }
 
     var saveSettings = function () {
-        var settingsCopy = angular.copy($scope.settings)
-        settingsCopy[SETTINGS.RIGHT_CLICK_ACTION] = settingsCopy[SETTINGS.RIGHT_CLICK_ACTION].value
-        minimap.updateSettings(settingsCopy)
-    }
-
-    var parseSettings = function (rawSettings) {
-        var settings = angular.copy(rawSettings)
-
-        settings[SETTINGS.RIGHT_CLICK_ACTION] = {
-            value: settings[SETTINGS.RIGHT_CLICK_ACTION],
-            name: $filter('i18n')(settings[SETTINGS.RIGHT_CLICK_ACTION], $rootScope.loc.ale, textObject)
-        }
-
-        return settings
+        settings.setSettings(settings.decodeSettings($scope.settings))
+        utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
     }
 
     var resetSettings = function () {
@@ -242,7 +233,9 @@ define('two/minimap/ui', [
         modalScope.switchColors = true
 
         modalScope.submit = function submit() {
-            minimap.resetSettings()
+            settings.resetSettings()
+            $scope.settings = settings.encodeSettings(textObject)
+            utils.emitNotif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, textObject))
             modalScope.closeWindow()
         }
 
@@ -276,14 +269,6 @@ define('two/minimap/ui', [
                 name: item.name
             }
         },
-        settingsReset: function () {
-            $scope.settings = parseSettings(minimap.getSettings())
-
-            utils.emitNotif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, textObject))
-        },
-        settingsSave: function () {
-            utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
-        },
         highlightUpdate: function (event) {
             updateHighlightNames()
         },
@@ -316,9 +301,9 @@ define('two/minimap/ui', [
     }
 
     var init = function () {
-        var id
         var opener
 
+        settings = minimap.getSettings()
         MapController = transferredSharedDataService.getSharedData('MapController')
         $minimapCanvas = document.createElement('canvas')
         $minimapCanvas.className = 'minimap'
@@ -331,13 +316,6 @@ define('two/minimap/ui', [
         tooltipWrapper = document.querySelector('#map-tooltip')
         windowWrapper = document.querySelector('#wrapper')
         mapWrapper = document.querySelector('#map')
-
-        for (id in ACTION_TYPES) {
-            actionTypes.push({
-                value: ACTION_TYPES[id],
-                name: $filter('i18n')(ACTION_TYPES[id], $rootScope.loc.ale, textObject)
-            })
-        }
 
         opener = new FrontButton('Minimap', {
             classHover: false,
@@ -369,8 +347,8 @@ define('two/minimap/ui', [
         $scope.addHighlightColor = '#000000'
         $scope.highlights = minimap.getHighlights()
         $scope.highlightNames = highlightNames
-        $scope.settings = parseSettings(minimap.getSettings())
-        $scope.actionTypes = actionTypes
+        $scope.settings = settings.encodeSettings(textObject)
+        $scope.actionTypes = Settings.encodeList(ACTION_TYPES, false, textObject)
         $scope.autoComplete = {
             type: ['character', 'tribe', 'village'],
             placeholder: $filter('i18n')('placeholder_search', $rootScope.loc.ale, textObject),
@@ -388,8 +366,6 @@ define('two/minimap/ui', [
         $scope.openProfile = openProfile
 
         eventScope = new EventScope('twoverflow_minimap_window')
-        eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_RESET, eventHandlers.settingsReset)
-        eventScope.register(eventTypeProvider.MINIMAP_SETTINGS_SAVE, eventHandlers.settingsSave)
         eventScope.register(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.highlightUpdate, true)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_EXISTS, eventHandlers.highlightAddErrorExists)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY, eventHandlers.highlightAddErrorNoEntry)
