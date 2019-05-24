@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('__attack_view_id', __attack_view_locale)
+        twoLanguage.add('__attack_view_id', __attack_view_lang)
         attackView.init()
         attackViewInterface()
     })

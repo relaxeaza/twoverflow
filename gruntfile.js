@@ -16,7 +16,7 @@ var overflow = {
     html: {},
     css: {},
     replaces: [],
-    locales: {}
+    lang: {}
 }
 
 /**
@@ -30,10 +30,9 @@ var overflow = {
  *
  * Module optional folders/files
  * - /src/*.js
- * - /ui/ui.js
- * - /ui/*.html
- * - /ui/*.less
- * - /locale/*.json
+ * - /assets/*.html
+ * - /assets/*.less
+ * - /lang/*.json
  */
 var generateModule = function (moduleId, moduleDir) {
     var modulePath = `src/modules/${moduleDir}`
@@ -44,7 +43,7 @@ var generateModule = function (moduleId, moduleDir) {
         css: [],
         html: [],
         replaces: {},
-        locales: false
+        lang: false
     }
 
     // Load module info file
@@ -88,18 +87,13 @@ var generateModule = function (moduleId, moduleDir) {
         return console.error(`Module "${moduleId}" is missing "init.js"`)
     }
 
-    // Load the interface source, if exists
+    // Load assets, if exists
 
-    var hasInterfacePath = fs.existsSync(`${modulePath}/ui`)
-    var hasInterfaceFile = fs.existsSync(`${modulePath}/ui/ui.js`)
+    var hasInterfacePath = fs.existsSync(`${modulePath}/assets`)
 
     if (hasInterfacePath) {
-        if (hasInterfaceFile) {
-            data.js.push(`${modulePath}/ui/ui.js`)
-        }
-
-        data.html = glob.sync(`${modulePath}/ui/*.html`)
-        data.css = glob.sync(`${modulePath}/ui/*.less`)
+        data.html = glob.sync(`${modulePath}/assets/*.html`)
+        data.css = glob.sync(`${modulePath}/assets/*.less`)
 
         data.html.forEach(function (htmlPath) {
             var filename = path.basename(htmlPath, '.html')
@@ -112,10 +106,10 @@ var generateModule = function (moduleId, moduleDir) {
         })
     }
 
-    // Load the locale source, if exists
+    // Load languages, if exists
 
-    if (fs.existsSync(`${modulePath}/locale`)) {
-        data.locales = glob.sync(`${modulePath}/locale/*.json`)
+    if (fs.existsSync(`${modulePath}/lang`)) {
+        data.lang = glob.sync(`${modulePath}/lang/*.json`)
 
         generateLocaleFile(data)
     }
@@ -125,22 +119,22 @@ var generateModule = function (moduleId, moduleDir) {
 
 /**
  * generateLocaleFile will load generate a single .json file from
- * all .json inside the {module}/locales folder.
+ * all .json inside the {module}/lang folder.
  */
 var generateLocaleFile = function (module) {
-    var localeData = {}
+    var langData = {}
 
-    module.locales.forEach(function (localePath) {
-        var id = path.basename(localePath, '.json')
-        var data = JSON.parse(fs.readFileSync(localePath, 'utf8'))
+    module.lang.forEach(function (langPath) {
+        var id = path.basename(langPath, '.json')
+        var data = JSON.parse(fs.readFileSync(langPath, 'utf8'))
 
-        localeData[id] = data
+        langData[id] = data
     })
 
-    localeData = JSON.stringify(localeData)
+    langData = JSON.stringify(langData)
 
-    mkdirp.sync(`${temp}/src/modules/${module.dir}/locale`)
-    fs.writeFileSync(`${temp}/src/modules/${module.dir}/locale/locales.json`, localeData, 'utf8')
+    mkdirp.sync(`${temp}/src/modules/${module.dir}/lang`)
+    fs.writeFileSync(`${temp}/src/modules/${module.dir}/lang/lang.json`, langData, 'utf8')
 }
 
 /**
@@ -185,10 +179,8 @@ module.exports = function (grunt) {
     overflow.js = overflow.js.concat([
         'src/libs/lockr.js',
         'src/header.js',
-        'src/event-queue.js',
         'src/event-scope.js',
         'src/utils.js',
-        'src/locale.js',
         'src/ready.js',
         'src/configs.js',
         'src/language.js',
@@ -199,7 +191,7 @@ module.exports = function (grunt) {
     // Generate the common translations
 
     generateLocaleFile({
-        locales: glob.sync(`src/locale/*.json`),
+        lang: glob.sync(`src/lang/*.json`),
         dir: 'core'
     })
 
@@ -213,7 +205,7 @@ module.exports = function (grunt) {
             overflow_author_name: pkg.author.name,
             overflow_author_url: pkg.author.url,
             overflow_date: new Date().toLocaleString(),
-            overflow_locales: fs.readFileSync(`${temp}/src/modules/core/locale/locales.json`, 'utf8')
+            overflow_lang: fs.readFileSync(`${temp}/src/modules/core/lang/lang.json`, 'utf8')
         }
     })
 
@@ -237,10 +229,10 @@ module.exports = function (grunt) {
             overflow.css[`${temp}/${cssPath}`] = lessPath
         })
 
-        // locales
+        // lang
 
-        if (module.locales) {
-            module.replaces[`${module.id}_locale`] = `${temp}/src/modules/${module.dir}/locale/locales.json`
+        if (module.lang) {
+            module.replaces[`${module.id}_lang`] = `${temp}/src/modules/${module.dir}/lang/lang.json`
         }
 
         // replaces
@@ -260,8 +252,8 @@ module.exports = function (grunt) {
                     filePath = filePath.replace(/\.less$/, '.css')
                 }
 
-                // locale replaces already have the temporary path included.
-                if (id !== `${module.id}_locale`) {
+                // lang replaces already have the temporary path included.
+                if (id !== `${module.id}_lang`) {
                     filePath = `${temp}/${filePath}`
                 }
 
