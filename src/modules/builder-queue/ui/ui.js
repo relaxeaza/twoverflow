@@ -680,8 +680,6 @@ define('two/builderQueue/ui', [
         $scope.TAB_TYPES = TAB_TYPES
         $scope.SETTINGS = SETTINGS
         $scope.running = running
-        $scope.settings = settings.encodeSettings()
-
         $scope.pagination = {}
 
         $scope.editorView = editorView
@@ -703,6 +701,7 @@ define('two/builderQueue/ui', [
         $scope.createFirstSequence = createFirstSequence
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
 
+        settings.injectSettings($scope)
         eventHandlers.updateGroups()
         eventHandlers.updateSequences()
 
