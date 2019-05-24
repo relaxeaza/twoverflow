@@ -79,6 +79,7 @@
         "actions": "Ações",
         "remove": "Remover",
         "started_at": "Iniciado em",
-        "arrive": "Chegada"
+        "arrive": "Chegada",
+        "settings_saved": "Configurações salvas"
     }
 }

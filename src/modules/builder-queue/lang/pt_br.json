@@ -15,8 +15,6 @@
         "sequences_add_building": "Adicionar edifício",
         "sequences_select_edit": "Selecione uma sequência para editar",
         "sequences_edit_sequence": "Editar sequência",
-        "sequence_updated": "Sequência %d atualizada",
-        "sequence_added": "Sequência %d adicionada",
         "select_group": "Selecione um grupo",
         "add_building_success": "%d foi adicionado à posição %d",
         "add_building_limit_exceeded": "%d chegou ao nível máximo (%d)",

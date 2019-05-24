@@ -15,8 +15,6 @@
         "sequences_add_building": "Dodaj budynek",
         "sequences_select_edit": "Wybierz szablon do edytowania",
         "sequences_edit_sequence": "Edytuj szablon",
-        "sequence_updated": "Szablon budowy %d zaktualizowany",
-        "sequence_added": "Szablon budowy %d dodany",
         "select_group": "Wybierz grupę",
         "add_building_success": "%d dodany na pozycji %d",
         "add_building_limit_exceeded": "%d osiągnął/eła maksymalny poziom (%d)",
