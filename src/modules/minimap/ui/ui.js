@@ -234,7 +234,6 @@ define('two/minimap/ui', [
 
         modalScope.submit = function submit() {
             settings.resetSettings()
-            $scope.settings = settings.encodeSettings(textObject)
             utils.emitNotif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, textObject))
             modalScope.closeWindow()
         }

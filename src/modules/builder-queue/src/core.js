@@ -285,7 +285,9 @@ define('two/builderQueue', [
         }
 
         sequences[id] = sequence
-        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences)
+        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences, {
+            quiet: true
+        })
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, id)
 
         return true
@@ -303,7 +305,9 @@ define('two/builderQueue', [
         }
 
         sequences[id] = sequence
-        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences)
+        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences, {
+            quiet: true
+        })
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_UPDATED, id)
 
         return true
@@ -317,7 +321,9 @@ define('two/builderQueue', [
         }
 
         delete sequences[id]
-        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences)
+        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences, {
+            quiet: true
+        })
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, id)
     }
 
@@ -335,8 +341,10 @@ define('two/builderQueue', [
             storageKey: STORAGE_KEYS.SETTINGS
         })
 
-        settings.onSettingsChange(function (changes, update) {
-            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
+        settings.onSettingsChange(function (changes, update, opt) {
+            if (!opt.quiet) {
+                eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
+            }
         })
 
         for (buildingName in BUILDING_TYPES) {

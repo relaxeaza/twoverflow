@@ -621,8 +621,10 @@ define('two/builderQueue/ui', [
             eventHandlers.updateSequences()
             editorView.generateBuildingSequence()
 
-            if ($scope.settings[SETTINGS.ACTIVE_SEQUENCE].value === sequenceId) {
-                $scope.settings[SETTINGS.ACTIVE_SEQUENCE] = { name: substituteSequence, value: substituteSequence }
+            if (settings.getSetting(SETTINGS.ACTIVE_SEQUENCE) === sequenceId) {
+                settings.setSetting(SETTINGS.ACTIVE_SEQUENCE, substituteSequence, {
+                    quiet: true
+                })
                 settingsView.generateSequences()
             }
 
@@ -673,7 +675,7 @@ define('two/builderQueue/ui', [
     var buildWindow = function () {
         var activeSequence = settings.getSetting(SETTINGS.ACTIVE_SEQUENCE)
 
-        $scope = window.$scope = $rootScope.$new()
+        $scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.selectedTab = TAB_TYPES.SETTINGS

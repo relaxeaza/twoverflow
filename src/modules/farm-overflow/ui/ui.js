@@ -184,7 +184,7 @@ define('two/farmOverflow/ui', [
     }
 
     var init = function () {
-        settings = window.settings = farmOverflow.getSettings()
+        settings = farmOverflow.getSettings()
 
         var opener = new FrontButton('Farmer', {
             classHover: false,

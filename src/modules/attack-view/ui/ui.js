@@ -111,7 +111,7 @@ define('two/attackView/ui', [
     }
 
     var buildWindow = function () {
-        $scope = window.$scope = $rootScope.$new()
+        $scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
         $scope.commandQueueEnabled = attackView.commandQueueEnabled()
