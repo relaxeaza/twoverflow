@@ -1,5 +1,6 @@
 {
     "command_queue": {
+        "title": "CommandQueue",
         "attack": "Atak",
         "support": "Wsparcie",
         "relocate": "przenieś",
