@@ -50,6 +50,7 @@ define('two/Settings', [
         this.events = {
             settingsChange: noop
         }
+        this.injected = false
     }
 
     Settings.prototype.getSetting = function (id) {
@@ -68,7 +69,7 @@ define('two/Settings', [
         Lockr.set(this.storageKey, this.settings)
     }
 
-    Settings.prototype.setSetting = function (id, value) {
+    Settings.prototype.setSetting = function (id, value, opt) {
         var changes
         var before
         var after
@@ -85,7 +86,8 @@ define('two/Settings', [
             }
 
             this.store()
-            this.events.settingsChange(changes, update)
+            this.updateInjectedScope()
+            this.events.settingsChange(changes, update, opt || {})
 
             return true
         }
@@ -93,7 +95,7 @@ define('two/Settings', [
         return false
     }
 
-    Settings.prototype.setSettings = function (values) {
+    Settings.prototype.setSettings = function (values, opt) {
         var changes
         var before = angular.copy(this.settings)
         var after
@@ -114,19 +116,20 @@ define('two/Settings', [
         changes = generateDiff(before, after)
 
         this.store()
-        this.events.settingsChange(changes, update)
+        this.updateInjectedScope()
+        this.events.settingsChange(changes, update, opt || {})
 
         return true
     }
 
-    Settings.prototype.resetSetting = function (id) {
-        this.setSetting(id, this.defaults[id])
+    Settings.prototype.resetSetting = function (id, opt) {
+        this.setSetting(id, this.defaults[id], opt)
 
         return true
     }
 
-    Settings.prototype.resetSettings = function () {
-        this.setSettings(angular.copy(this.defaults))
+    Settings.prototype.resetSettings = function (opt) {
+        this.setSettings(angular.copy(this.defaults), opt)
 
         return true
     }
@@ -157,6 +160,11 @@ define('two/Settings', [
         var id
         var map
 
+        this.injected = {
+            $scope: $scope,
+            opt: opt
+        }
+
         $scope.settings = this.encodeSettings(opt)
 
         angular.forEach(this.settingsMap, function (map, id) {
@@ -174,6 +182,14 @@ define('two/Settings', [
                 }, true)
             }
         })
+    }
+
+    Settings.prototype.updateInjectedScope = function () {
+        if (!this.injected) {
+            return false
+        }
+        
+        this.injected.$scope.settings = this.encodeSettings(this.injected.opt)
     }
 
     Settings.prototype.encodeSettings = function (opt) {
@@ -315,51 +331,50 @@ define('two/Settings', [
             encoded.push(disabledOption())
         }
 
-        if (opt.type) {
-            switch (opt.type) {
-            case 'keys':
-                for (prop in list) {
-                    value = list[prop]
+        switch (opt.type) {
+        case 'keys':
+            for (prop in list) {
+                value = list[prop]
 
-                    encoded.push({
-                        name: prop,
-                        value: prop
-                    })
-                }
+                encoded.push({
+                    name: prop,
+                    value: prop
+                })
+            }
 
-                break
-            case 'groups':
-                for (prop in list) {
-                    value = list[prop]
+            break
+        case 'groups':
+            for (prop in list) {
+                value = list[prop]
 
-                    encoded.push({
-                        name: value.name,
-                        value: value.id,
-                        leftIcon: value.icon
-                    })
-                }
+                encoded.push({
+                    name: value.name,
+                    value: value.id,
+                    leftIcon: value.icon
+                })
+            }
 
-                break
-            case 'presets':
-                for (prop in list) {
-                    value = list[prop]
+            break
+        case 'presets':
+            for (prop in list) {
+                value = list[prop]
 
-                    encoded.push({
-                        name: value.name,
-                        value: value.id
-                    })
-                }
+                encoded.push({
+                    name: value.name,
+                    value: value.id
+                })
+            }
 
-                break
-            default:
-                for (prop in list) {
-                    value = list[prop]
+            break
+        case 'values':
+        default:
+            for (prop in list) {
+                value = list[prop]
 
-                    encoded.push({
-                        name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
-                        value: value
-                    })
-                }
+                encoded.push({
+                    name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
+                    value: value
+                })
             }
         }
 
