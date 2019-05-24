@@ -8,19 +8,34 @@ define('two/farmOverflow/settingsMap', [
     return {
         [SETTINGS.PRESETS]: {
             default: [],
-            updates: [SETTINGS_UPDATE.PRESET]
+            updates: [SETTINGS_UPDATE.PRESET],
+            disabledOption: true,
+            inputType: 'select',
+            multiSelect: true,
+            type: 'presets'
         },
         [SETTINGS.GROUP_IGNORE]: {
             default: false,
-            updates: [SETTINGS_UPDATE.GROUPS]
+            updates: [SETTINGS_UPDATE.GROUPS],
+            disabledOption: true,
+            inputType: 'select',
+            type: 'groups'
         },
         [SETTINGS.GROUP_INCLUDE]: {
             default: [],
-            updates: [SETTINGS_UPDATE.GROUPS, SETTINGS_UPDATE.TARGETS]
+            updates: [SETTINGS_UPDATE.GROUPS, SETTINGS_UPDATE.TARGETS],
+            disabledOption: true,
+            inputType: 'select',
+            multiSelect: true,
+            type: 'groups'
         },
         [SETTINGS.GROUP_ONLY]: {
             default: [],
-            updates: [SETTINGS_UPDATE.GROUPS, SETTINGS_UPDATE.VILLAGES, SETTINGS_UPDATE.TARGETS]
+            updates: [SETTINGS_UPDATE.GROUPS, SETTINGS_UPDATE.VILLAGES, SETTINGS_UPDATE.TARGETS],
+            disabledOption: true,
+            inputType: 'select',
+            multiSelect: true,
+            type: 'groups'
         },
         [SETTINGS.RANDOM_BASE]: {
             default: 3,

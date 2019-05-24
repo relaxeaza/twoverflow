@@ -5,6 +5,7 @@ define('two/farmOverflow', [
     'two/farmOverflow/settingsMap',
     'two/farmOverflow/settingsUpdate',
     'two/farmOverflow/logTypes',
+    'two/Settings',
     'two/utils',
     'helper/math',
     'conf/conf',
@@ -21,6 +22,7 @@ define('two/farmOverflow', [
     SETTINGS_MAP,
     SETTINGS_UPDATE,
     LOG_TYPES,
+    Settings,
     utils,
     math,
     conf,
@@ -33,7 +35,7 @@ define('two/farmOverflow', [
 ) {
     var initialized = false
     var commander = null
-    var settings = {}
+    var settings
     var selectedTarget
     var selectedPresets = []
     var groupIgnore = false
@@ -187,11 +189,17 @@ define('two/farmOverflow', [
             return target.character_id && !includedVillages.includes(target.id)
         },
         function villagePoints (target) {
-            return target.points < settings[SETTINGS.MIN_POINTS] || target.points > settings[SETTINGS.MAX_POINTS]
+            var minPoints = settings.getSetting(SETTINGS.MIN_POINTS)
+            var maxPoints = settings.getSetting(SETTINGS.MAX_POINTS)
+
+            return target.points < minPoints || target.points > maxPoints
         },
         function villageDistance (target) {
             var distance = math.actualDistance(selectedVillage.position, target)
-            return distance < settings[SETTINGS.MIN_DISTANCE] || distance > settings[SETTINGS.MAX_DISTANCE]
+            var minDistance = settings.getSetting(SETTINGS.MIN_DISTANCE)
+            var maxDistance = settings.getSetting(SETTINGS.MAX_DISTANCE)
+
+            return distance < minDistance || distance > maxDistance
         }
     ]
 
@@ -214,19 +222,19 @@ define('two/farmOverflow', [
     }
 
     var updateExceptionGroups = function () {
-        if (!angular.isArray(settings[SETTINGS.GROUP_INCLUDE])) {
+        if (!angular.isArray(settings.getSetting(SETTINGS.GROUP_INCLUDE))) {
             console.error('groupInclude must be an Array')
             return false
         }
 
-        if (!angular.isArray(settings[SETTINGS.GROUP_ONLY])) {
+        if (!angular.isArray(settings.getSetting(SETTINGS.GROUP_ONLY))) {
             console.error('groupOnly must be an Array')
             return false
         }
 
-        groupIgnore = settings[SETTINGS.GROUP_IGNORE]
-        groupInclude = settings[SETTINGS.GROUP_INCLUDE]
-        groupOnly = settings[SETTINGS.GROUP_ONLY]
+        groupIgnore = settings.getSetting(SETTINGS.GROUP_IGNORE)
+        groupInclude = settings.getSetting(SETTINGS.GROUP_INCLUDE)
+        groupOnly = settings.getSetting(SETTINGS.GROUP_ONLY)
     }
 
     var updateExceptionVillages = function () {
@@ -314,7 +322,7 @@ define('two/farmOverflow', [
         var update = function (presetsObj) {
             selectedPresets = []
 
-            if (!settings[SETTINGS.PRESETS].length) {
+            if (!settings.getSetting(SETTINGS.PRESETS).length) {
                 if (callback) {
                     callback()
                 }
@@ -322,7 +330,7 @@ define('two/farmOverflow', [
                 return
             }
 
-            settings[SETTINGS.PRESETS].forEach(function (presetId) {
+            settings.getSetting(SETTINGS.PRESETS).forEach(function (presetId) {
                 selectedPresets.push({
                     id: presetId,
                     units: cleanPresetUnits(presetsObj[presetId].units)
@@ -419,11 +427,11 @@ define('two/farmOverflow', [
             }
 
             // data.result === 1 === 'nocasualties'
-            if (settings[SETTINGS.IGNORE_ON_LOSS] && data.result !== 1) {
+            if (settings.getSetting(SETTINGS.IGNORE_ON_LOSS) && data.result !== 1) {
                 ignoredTargetHandler(data)
             }
 
-            if (settings[SETTINGS.PRIORITY_TARGETS] && data.haul === 'full') {
+            if (settings.getSetting(SETTINGS.PRIORITY_TARGETS) && data.haul === 'full') {
                 if (windowManagerService.isTemplateOpen('report')) {
                     reportQueue.push(data)
                 } else {
@@ -454,7 +462,7 @@ define('two/farmOverflow', [
          * Check messages related to the remote controller.
          */
         var remoteHandler = function (event, data) {
-            var id = settings[SETTINGS.REMOTE_ID]
+            var id = settings.getSetting(SETTINGS.REMOTE_ID)
             var userMessage
 
             if (data.participants.length !== 1 || data.title !== id) {
@@ -564,7 +572,7 @@ define('two/farmOverflow', [
             if (globalWaiting) {
                 globalWaiting = false
 
-                if (settings[SETTINGS.STEP_CYCLE]) {
+                if (settings.getSetting(SETTINGS.STEP_CYCLE)) {
                     return false
                 }
 
@@ -844,8 +852,8 @@ define('two/farmOverflow', [
                 // If the step cycle setting is enabled, increase
                 // the tolerance time with the interval time between
                 // the cycles.
-                if (settings[SETTINGS.STEP_CYCLE] && cycle.intervalEnabled()) {
-                    toleranceTime += (settings[SETTINGS.STEP_CYCLE_INTERVAL] * 60) + (1000 * 60)
+                if (settings.getSetting(SETTINGS.STEP_CYCLE) && cycle.intervalEnabled()) {
+                    toleranceTime += (settings.getSetting(SETTINGS.STEP_CYCLE_INTERVAL) * 60) + (1000 * 60)
                 }
 
                 if (passedTime > toleranceTime) {
@@ -897,7 +905,7 @@ define('two/farmOverflow', [
         var message = []
 
         if (currentStatus === FARM_STATES.STEP_CYCLE_NEXT) {
-            next = timeHelper.gameTime() + (settings[SETTINGS.STEP_CYCLE_INTERVAL] * 60)
+            next = timeHelper.gameTime() + (settings.getSetting(SETTINGS.STEP_CYCLE_INTERVAL) * 60)
             statusReplace = utils.formatDate(next)
         }
 
@@ -918,9 +926,9 @@ define('two/farmOverflow', [
      */
     var isExpiredData = function () {
         var now = timeHelper.gameTime()
-        var cycleInterval = settings[SETTINGS.STEP_CYCLE_INTERVAL] * 60
+        var cycleInterval = settings.getSetting(SETTINGS.STEP_CYCLE_INTERVAL) * 60
 
-        if (settings[SETTINGS.STEP_CYCLE] && cycle.intervalEnabled()) {
+        if (settings.getSetting(SETTINGS.STEP_CYCLE) && cycle.intervalEnabled()) {
             if (now > (lastActivity + cycleInterval + (60 * 1000))) {
                 return true
             }
@@ -1033,20 +1041,6 @@ define('two/farmOverflow', [
         return processedTargets
     }
 
-    /**
-     * Load the local settings and merge with the defaults.
-     */
-    var loadSettings = function () {
-        var localSettings = Lockr.get(STORAGE_KEYS.SETTINGS, {}, true)
-        var key
-
-        for (key in SETTINGS_MAP) {
-            settings[key] = localSettings.hasOwnProperty(key)
-                ? localSettings[key]
-                : SETTINGS_MAP[key].default
-        }
-    }
-
     var updateCurrentStatus = function (status) {
         currentStatus = status
         eventQueue.trigger(eventTypeProvider.FARM_STATUS_CHANGE, status)
@@ -1056,7 +1050,7 @@ define('two/farmOverflow', [
         return playerVillages.filter(function (village) {
             if (waitingVillages[village.id]) {
                 return false
-            } else if (settings[SETTINGS.IGNORE_FULL_STORAGE]) {
+            } else if (settings.getSetting(SETTINGS.IGNORE_FULL_STORAGE)) {
                 if (isFullStorage(village)) {
                     waitingVillages[village.id] = WAITING_STATES.FULL_STORAGE
                     return false
@@ -1072,8 +1066,8 @@ define('two/farmOverflow', [
     }
 
     var setLogs = function (newLogs) {
-        if (newLogs.length > settings[SETTINGS.LOGS_LIMIT]) {
-            newLogs = newLogs.slice(0, settings[SETTINGS.LOGS_LIMIT])
+        if (newLogs.length > settings.getSetting(SETTINGS.LOGS_LIMIT)) {
+            newLogs = newLogs.slice(0, settings.getSetting(SETTINGS.LOGS_LIMIT))
         }
 
         logs = newLogs
@@ -1136,7 +1130,7 @@ define('two/farmOverflow', [
 
         villageTargets = villagesTargets[sid]
 
-        if (settings[SETTINGS.PRIORITY_TARGETS] && priorityTargets[sid]) {
+        if (settings.getSetting(SETTINGS.PRIORITY_TARGETS) && priorityTargets[sid]) {
             priorityId
 
             while (priorityId = priorityTargets[sid].shift()) {
@@ -1270,7 +1264,7 @@ define('two/farmOverflow', [
             return false
         }
 
-        if (settings[SETTINGS.STEP_CYCLE]) {
+        if (settings.getSetting(SETTINGS.STEP_CYCLE)) {
             return cycle.nextVillage()
         }
 
@@ -1433,7 +1427,7 @@ define('two/farmOverflow', [
                 return
             }
 
-            if (settings[SETTINGS.IGNORE_FULL_STORAGE] && isFullStorage()) {
+            if (settings.getSetting(SETTINGS.IGNORE_FULL_STORAGE) && isFullStorage()) {
                 if (nextVillage()) {
                     this.analyse()
                 } else {
@@ -1462,7 +1456,7 @@ define('two/farmOverflow', [
             }
 
             checkPresets(() => {
-                if (selectedVillage.countCommands() >= settings[SETTINGS.COMMANDS_PER_VILLAGE]) {
+                if (selectedVillage.countCommands() >= settings.getSetting(SETTINGS.COMMANDS_PER_VILLAGE)) {
                     return this.handleError(ERROR_TYPES.COMMAND_LIMIT)
                 }
 
@@ -1505,7 +1499,7 @@ define('two/farmOverflow', [
                     } else {
                         globalWaiting = true
 
-                        if (settings[SETTINGS.STEP_CYCLE]) {
+                        if (settings.getSetting(SETTINGS.STEP_CYCLE)) {
                             cycle.endStep()
                         }
                     }
@@ -1533,7 +1527,7 @@ define('two/farmOverflow', [
                     eventQueue.trigger(eventType, [selectedVillage])
                     globalWaiting = true
 
-                    if (settings[SETTINGS.STEP_CYCLE]) {
+                    if (settings.getSetting(SETTINGS.STEP_CYCLE)) {
                         return cycle.endStep()
                     }
                 }
@@ -1548,7 +1542,7 @@ define('two/farmOverflow', [
                 if (singleVillage) {
                     globalWaiting = true
 
-                    if (settings[SETTINGS.STEP_CYCLE]) {
+                    if (settings.getSetting(SETTINGS.STEP_CYCLE)) {
                         return cycle.endStep()
                     }
 
@@ -1635,7 +1629,7 @@ define('two/farmOverflow', [
          * @param {Object} preset
          */
         Commander.prototype.checkPresetTime = function (preset) {
-            var limitTime = settings[SETTINGS.MAX_TRAVEL_TIME] * 60
+            var limitTime = settings.getSetting(SETTINGS.MAX_TRAVEL_TIME) * 60
             var villagePosition = selectedVillage.position
             var distance = math.actualDistance(villagePosition, selectedTarget)
             var travelTime = armyService.calculateTravelTime(preset, {
@@ -1691,7 +1685,7 @@ define('two/farmOverflow', [
                 nextTarget()
 
                 // Minimum of 1 second to allow the interval values get updated.
-                interval = utils.randomSeconds(settings[SETTINGS.RANDOM_BASE])
+                interval = utils.randomSeconds(settings.getSetting(SETTINGS.RANDOM_BASE))
                 interval = 100 + (interval * 1000)
 
                 this.timeoutId = setTimeout(() => {
@@ -1812,7 +1806,7 @@ define('two/farmOverflow', [
         var cycle = {}
 
         cycle.intervalEnabled = function () {
-            return !!settings[SETTINGS.STEP_CYCLE_INTERVAL]
+            return !!settings.getSetting(SETTINGS.STEP_CYCLE_INTERVAL)
         }
 
         cycle.startContinuous = function (_manual) {
@@ -1889,7 +1883,7 @@ define('two/farmOverflow', [
         cycle.setNextCycle = function () {
             timeoutId = setTimeout(function () {
                 cycle.startStep()
-            }, settings[SETTINGS.STEP_CYCLE_INTERVAL] * 60)
+            }, settings.getSetting(SETTINGS.STEP_CYCLE_INTERVAL) * 60)
         }
 
         cycle.nextVillage = function () {
@@ -1948,7 +1942,7 @@ define('two/farmOverflow', [
             targetIndexes = {}
         }
 
-        if (settings[SETTINGS.STEP_CYCLE]) {
+        if (settings.getSetting(SETTINGS.STEP_CYCLE)) {
             cycle.startStep(_manual)
         } else {
             cycle.startContinuous(_manual)
@@ -1979,86 +1973,6 @@ define('two/farmOverflow', [
         } else {
             farmOverflow.start(_manual)
         }
-    }
-
-    /**
-     * Update the internal settings and reload the necessary
-     * information.
-     *
-     * @param {Object} changes
-     */
-    farmOverflow.updateSettings = function (changes) {
-        var modify = {}
-        var settingMap
-        var newValue
-        var vid
-        var key
-
-        for (key in changes) {
-            settingMap = SETTINGS_MAP[key]
-            newValue = changes[key]
-
-            if (!settingMap || newValue === settings[key]) {
-                continue
-            }
-
-            settingMap.updates.forEach(function (modifier) {
-                modify[modifier] = true
-            })
-
-            settings[key] = newValue
-        }
-
-        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
-
-        if (modify[SETTINGS_UPDATE.GROUPS]) {
-            updateExceptionGroups()
-            updateExceptionVillages()
-        }
-
-        if (modify[SETTINGS_UPDATE.VILLAGES]) {
-            updatePlayerVillages()
-        }
-
-        if (modify[SETTINGS_UPDATE.PRESET]) {
-            updatePresets()
-            resetWaitingVillages()
-        }
-
-        if (modify[SETTINGS_UPDATE.TARGETS]) {
-            villagesTargets = {}
-        }
-
-        if (modify[SETTINGS_UPDATE.LOGS]) {
-            // used to slice the event list in case the limit of logs
-            // have been reduced.
-            setLogs(logs)
-            eventQueue.trigger(eventTypeProvider.FARM_RESET_LOGS)
-        }
-
-        if (modify[SETTINGS_UPDATE.FULL_STORAGE]) {
-            for (vid in waitingVillages) {
-                if (waitingVillages[vid] === WAITING_STATES.FULL_STORAGE) {
-                    delete waitingVillages[vid]
-                }
-            }
-        }
-
-        if (modify[SETTINGS_UPDATE.WAITING_VILLAGES]) {
-            for (vid in waitingVillages) {
-                if (waitingVillages[vid] === WAITING_STATES.COMMANDS) {
-                    delete waitingVillages[vid]
-                }
-            }
-        }
-
-        if (commander.running) {
-            farmOverflow.restart()
-        }
-
-        eventQueue.trigger(eventTypeProvider.FARM_SETTINGS_CHANGE, [modify])
-
-        return true
     }
 
     farmOverflow.isInitialized = function () {
@@ -2096,7 +2010,6 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.init = function () {
-        initialized = true
         $player = modelDataService.getSelectedCharacter()
         $gameState = modelDataService.getGameState()
         logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
@@ -2104,7 +2017,67 @@ define('two/farmOverflow', [
         lastAttack = Lockr.get(STORAGE_KEYS.LAST_ATTACK, -1, true)
         targetIndexes = Lockr.get(STORAGE_KEYS.INDEXES, {}, true)
         commander = new Commander()
-        loadSettings()
+        settings = new Settings({
+            storageKey: STORAGE_KEYS.SETTINGS,
+            settingsMap: SETTINGS_MAP
+        })
+
+        settings.onSettingsChange(function (changes, update) {
+            var id
+            var modify = {}
+
+            for (id in changes) {
+                SETTINGS_MAP[id].updates.forEach(function (modifier) {
+                    modify[modifier] = true
+                })
+            }
+
+            if (modify[SETTINGS_UPDATE.GROUPS]) {
+                updateExceptionGroups()
+                updateExceptionVillages()
+            }
+
+            if (modify[SETTINGS_UPDATE.VILLAGES]) {
+                updatePlayerVillages()
+            }
+
+            if (modify[SETTINGS_UPDATE.PRESET]) {
+                updatePresets()
+                resetWaitingVillages()
+            }
+
+            if (modify[SETTINGS_UPDATE.TARGETS]) {
+                villagesTargets = {}
+            }
+
+            if (modify[SETTINGS_UPDATE.LOGS]) {
+                // used to slice the event list in case the limit of logs
+                // have been reduced.
+                setLogs(logs)
+                eventQueue.trigger(eventTypeProvider.FARM_RESET_LOGS)
+            }
+
+            if (modify[SETTINGS_UPDATE.FULL_STORAGE]) {
+                for (vid in waitingVillages) {
+                    if (waitingVillages[vid] === WAITING_STATES.FULL_STORAGE) {
+                        delete waitingVillages[vid]
+                    }
+                }
+            }
+
+            if (modify[SETTINGS_UPDATE.WAITING_VILLAGES]) {
+                for (vid in waitingVillages) {
+                    if (waitingVillages[vid] === WAITING_STATES.COMMANDS) {
+                        delete waitingVillages[vid]
+                    }
+                }
+            }
+
+            if (commander.running) {
+                farmOverflow.restart()
+            }
+        })
+
         updateExceptionGroups()
         updateExceptionVillages()
         updatePlayerVillages()

@@ -5,6 +5,7 @@ define('two/farmOverflow/ui', [
     'two/farmOverflow/errorTypes',
     'two/farmOverflow/logTypes',
     'two/farmOverflow/settings',
+    'two/Settings',
     'two/utils',
     'two/EventScope',
     'queues/EventQueue',
@@ -17,6 +18,7 @@ define('two/farmOverflow/ui', [
     ERROR_TYPES,
     LOG_TYPES,
     SETTINGS,
+    Settings,
     utils,
     EventScope,
     eventQueue,
@@ -39,18 +41,7 @@ define('two/farmOverflow/ui', [
     }
     var presetList = modelDataService.getPresetList()
     var groupList = modelDataService.getGroupList()
-
-    var disabledSelects = function (settings) {
-        SELECT_SETTINGS.forEach(function (item) {
-            if (angular.isArray(settings[item])) {
-                if (!settings[item].length) {
-                    settings[item] = [disabledOption()]
-                }
-            } else if (!settings[item]) {
-                settings[item] = disabledOption()
-            }
-        })
-    }
+    var settings
 
     var selectTab = function (tabType) {
         $scope.selectedTab = tabType
@@ -62,113 +53,9 @@ define('two/farmOverflow/ui', [
         farmOverflow.clearLogs()
     }
 
-    /**
-     * Convert the interface friendly settings data to the internal format
-     * and update the farmOverflow settings property.
-     */
     var saveSettings = function () {
-        var settings = angular.copy($scope.settings)
-
-        SELECT_SETTINGS.forEach(function (id) {
-            if (angular.isArray(settings[id])) {
-                // check if the selected value is not the "disabled" option
-                if (settings[id].length && settings[id][0].value) {
-                    settings[id] = settings[id].map(function (item) {
-                        return item.value
-                    })
-                } else {
-                    settings[id] = []
-                }
-            } else {
-                settings[id] = settings[id].value ? settings[id].value : false
-            }
-        })
-
-        farmOverflow.updateSettings(settings)
-    }
-
-    /**
-     * Parse the raw settings to be readable by the interface.
-     */
-    var parseSettings = function (rawSettings) {
-        var settings = angular.copy(rawSettings)
-        var groupsObject = {}
-        var presetsObject = {}
-        var groupId
-        var value
-
-        $scope.groups.forEach(function (group) {
-            groupsObject[group.value] = {
-                name: group.name,
-                leftIcon: group.leftIcon
-            }
-        })
-
-        $scope.presets.forEach(function (preset) {
-            presetsObject[preset.value] = preset.name
-        })
-
-        SELECT_SETTINGS.forEach(function (item) {
-            value = settings[item]
-
-            if (item === 'presets') {
-                settings[item] = value.map(function (presetId) {
-                    return {
-                        name: presetsObject[presetId],
-                        value: presetId
-                    }
-                })
-            } else {
-                if (angular.isArray(value)) {
-                    settings[item] = value.map(function (groupId) {
-                        return {
-                            name: groupsObject[groupId].name,
-                            value: groupId,
-                            leftIcon: groupsObject[groupId].leftIcon
-                        }
-                    })
-                } else if (value) {
-                    groupId = settings[item]
-                    settings[item] = {
-                        name: groupsObject[groupId].name,
-                        value: groupId,
-                        leftIcon: groupsObject[groupId].leftIcon
-                    }
-                }
-            }
-        })
-
-        disabledSelects(settings)
-
-        return settings
-    }
-
-    /**
-     * Used to set the "disabled" option for the select fields.
-     * Without these initial values, when all options are uncheck
-     * the default value of the select will fallback to the first
-     * option of the set.
-     *
-     * The interface is compiled and only after that,
-     * the $scope.settings is populated with the actual values.
-     */
-    var genInitialSelectValues = function () {
-        var obj = {}
-
-        SELECT_SETTINGS.forEach(function (item) {
-            obj[item] = item === 'groupIgnore'
-                ? disabledOption()
-                : [disabledOption()]
-        })
-
-        return obj
-    }
-
-    var disabledOption = function () {
-        return {
-            name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
-            value: false
-        }
+        settings.setSettings(settings.decodeSettings($scope.settings))
+        utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
     }
 
     var switchFarm = function () {
@@ -214,12 +101,21 @@ define('two/farmOverflow/ui', [
 
     var eventHandlers = {
         updatePresets: function () {
-            $scope.presets = utils.obj2selectOptions(presetList.getPresets())
+            $scope.presets = Settings.encodeList(presetList.getPresets(), {
+                disabled: false,
+                type: 'presets'
+            })
         },
         updateGroups: function () {
-            $scope.groups = utils.obj2selectOptions(groupList.getGroups(), true)
-            $scope.groupsWithDisabled = angular.copy($scope.groups)
-            $scope.groupsWithDisabled.unshift(disabledOption())
+            $scope.groups = Settings.encodeList(groupList.getGroups(), {
+                disabled: false,
+                type: 'groups'
+            })
+
+            $scope.groupsWithDisabled = Settings.encodeList(groupList.getGroups(), {
+                disabled: true,
+                type: 'groups'
+            })
         },
         start: function (event, _manual) {
             $scope.running = true
@@ -254,9 +150,7 @@ define('two/farmOverflow/ui', [
             utils.emitNotif('success', $filter('i18n')('reseted_logs', $rootScope.loc.ale, textObject))
         },
         stepCycleEndHandler: function () {
-            var settings = farmOverflow.getSettings()
-            
-            if (settings[SETTINGS.STEP_CYCLE_NOTIFS]) {
+            if (settings.getSetting(SETTINGS.STEP_CYCLE_NOTIFS)) {
                 utils.emitNotif('error', $filter('i18n')('step_cycle_end', $rootScope.loc.ale, textObject))
             }
         },
@@ -264,10 +158,8 @@ define('two/farmOverflow/ui', [
             utils.emitNotif('error', $filter('i18n')('step_cycle_end_no_villages', $rootScope.loc.ale, textObject))
         },
         stepCycleNextHandler: function () {
-            var settings = farmOverflow.getSettings()
-
-            if (settings[SETTINGS.STEP_CYCLE_NOTIFS]) {
-                var next = timeHelper.gameTime() + (settings[SETTINGS.STEP_CYCLE_INTERVAL] * 60)
+            if (settings.getSetting(SETTINGS.STEP_CYCLE_NOTIFS)) {
+                var next = timeHelper.gameTime() + (settings.getSetting(SETTINGS.STEP_CYCLE_INTERVAL) * 60)
 
                 utils.emitNotif('success', $filter('i18n')('step_cycle_next', $rootScope.loc.ale, textObject, utils.formatDate(next)))
             }
@@ -288,13 +180,12 @@ define('two/farmOverflow/ui', [
                 utils.emitNotif('error', $filter('i18n')('no_selected_village', $rootScope.loc.ale, textObject))
                 break
             }
-        },
-        saveSettingsHandler: function () {
-            utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
         }
     }
 
     var init = function () {
+        settings = window.settings = farmOverflow.getSettings()
+
         var opener = new FrontButton('Farmer', {
             classHover: false,
             classBlur: false,
@@ -322,11 +213,7 @@ define('two/farmOverflow/ui', [
         $scope.SETTINGS = SETTINGS
         $scope.TAB_TYPES = TAB_TYPES
         $scope.LOG_TYPES = LOG_TYPES
-        $scope.presets = []
-        $scope.groups = []
-        $scope.groupsWithDisabled = []
         $scope.selectedTab = TAB_TYPES.SETTINGS
-        $scope.settings = genInitialSelectValues()
         $scope.selectedVillage = farmOverflow.getSelectedVillage()
         $scope.lastAttack = farmOverflow.getLastAttack()
         $scope.running = farmOverflow.isRunning()
@@ -340,7 +227,8 @@ define('two/farmOverflow/ui', [
             loader: updateVisibleLogs,
             limit: storageService.getPaginationLimit()
         }
-        
+
+        settings.injectSettings($scope)
         eventHandlers.updatePresets()
         eventHandlers.updateGroups()
         eventHandlers.updateSelectedVillage()
@@ -375,10 +263,8 @@ define('two/farmOverflow/ui', [
         eventScope.register(eventTypeProvider.FARM_STEP_CYCLE_END_NO_VILLAGES, eventHandlers.stepCycleEndNoVillagesHandler)
         eventScope.register(eventTypeProvider.FARM_STEP_CYCLE_NEXT, eventHandlers.stepCycleNextHandler)
         eventScope.register(eventTypeProvider.FARM_ERROR, eventHandlers.errorHandler)
-        eventScope.register(eventTypeProvider.FARM_SETTINGS_CHANGE, eventHandlers.saveSettingsHandler)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_farm_window', $scope)
-        $scope.settings = parseSettings(farmOverflow.getSettings())
     }
 
     return init
