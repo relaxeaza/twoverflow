@@ -134,15 +134,15 @@ define('two/Settings', [
     Settings.prototype.eachSetting = function (callback) {
         var id
         var value
-        var type
+        var map
 
         for (id in this.settings) {
-            type = this.settingsMap[id].inputType
+            map = this.settingsMap[id]
 
-            if (type === 'checkbox') {
-                callback.call(this, id, !!this.settings[id], type)
+            if (map.inputType === 'checkbox') {
+                callback.call(this, id, !!this.settings[id], map)
             } else {
-                callback.call(this, id, this.settings[id], type)
+                callback.call(this, id, this.settings[id], map)
             }
         }
     }
@@ -153,40 +153,115 @@ define('two/Settings', [
         }
     }
 
+    Settings.prototype.injectSettings = function ($scope, opt) {
+        var id
+        var map
+
+        $scope.settings = this.encodeSettings(opt)
+
+        angular.forEach(this.settingsMap, function (map, id) {
+            if (map.inputType === 'select') {
+                $scope.$watch(function () {
+                    return $scope.settings[id]
+                }, function (value) {
+                    if (map.multiSelect) {
+                        if (!value.length) {
+                            $scope.settings[id] = [disabledOption()]
+                        }
+                    } else if (!value) {
+                        $scope.settings[id] = disabledOption()
+                    }
+                }, true)
+            }
+        })
+    }
+
     Settings.prototype.encodeSettings = function (opt) {
         var encoded = {}
-        var groupList = modelDataService.getGroupList()
-        var groups
+        var presets = modelDataService.getPresetList().getPresets()
+        var groups = modelDataService.getGroupList().getGroups()
+        var multiValues
 
         opt = opt || {}
 
-        this.eachSetting(function (id, value, type) {
-            if (type === 'select') {
-                if (this.settingsMap[id].disabledOption && !value) {
-                    encoded[id] = disabledOption()
-                } else {
-                    switch (this.settingsMap[id].type) {
-                    case 'groups':
-                        groups = groupList.getGroups()
+        this.eachSetting(function (id, value, map) {
+            if (map.inputType === 'select') {
+                if (!value && map.disabledOption) {
+                    encoded[id] = map.multiSelect ? [disabledOption()] : disabledOption()
+                    return
+                }
 
-                        if (!groups[value] && this.settingsMap[id].disabledOption) {
-                            encoded[id] = disabledOption()
-                        } else {
-                            encoded[id] = {
-                                name: groups[value].name,
-                                value: value
+                switch (map.type) {
+                case 'presets':
+                    if (map.multiSelect) {
+                        multiValues = []
+
+                        value.forEach(function (presetId) {
+                            if (!presets[presetId]) {
+                                return
                             }
+
+                            multiValues.push({
+                                name: presets[presetId].name,
+                                value: presetId
+                            })
+                        })
+
+                        encoded[id] = multiValues.length ? multiValues : [disabledOption()]
+                    } else {
+                        if (!presets[value] && map.disabledOption) {
+                            encoded[id] = disabledOption()
+                            return
                         }
 
-                        break
-                    default:
                         encoded[id] = {
-                            name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
+                            name: presets[value].name,
                             value: value
                         }
-
-                        break
                     }
+
+                    break
+                case 'groups':
+                    if (map.multiSelect) {
+                        multiValues = []
+
+                        value.forEach(function (groupId) {
+                            if (!groups[groupId]) {
+                                return
+                            }
+
+                            multiValues.push({
+                                name: groups[groupId].name,
+                                value: groupId,
+                                leftIcon: groups[groupId].icon
+                            })
+                        })
+
+                        encoded[id] = multiValues.length ? multiValues : [disabledOption()]
+                    } else {
+                        if (!groups[value] && map.disabledOption) {
+                            encoded[id] = disabledOption()
+                            return
+                        }
+
+                        encoded[id] = {
+                            name: groups[value].name,
+                            value: value
+                        }
+                    }
+
+                    break
+                default:
+                    encoded[id] = {
+                        name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
+                        value: value
+                    }
+
+                    if (opt.multiSelect) {
+                        encoded[id] = [encoded[id]]
+                    }
+
+                    break
                 }
             } else {
                 encoded[id] = value
@@ -199,10 +274,28 @@ define('two/Settings', [
     Settings.prototype.decodeSettings = function (encoded) {
         var id
         var decoded = {}
+        var multiValues
+        var map
 
         for (id in encoded) {
-            if (this.settingsMap[id].inputType === 'select') {
-                decoded[id] = encoded[id].value
+            map = this.settingsMap[id]
+
+            if (map.inputType === 'select') {
+                if (map.multiSelect) {
+                    if (encoded[id].length === 1 && encoded[id][0].value === false) {
+                        decoded[id] = []
+                    } else {
+                        multiValues = []
+
+                        encoded[id].forEach(function (item) {
+                            multiValues.push(item.value)
+                        })
+
+                        decoded[id] = multiValues
+                    }
+                } else {
+                    decoded[id] = encoded[id].value
+                }
             } else {
                 decoded[id] = encoded[id]
             }
@@ -242,7 +335,18 @@ define('two/Settings', [
                     encoded.push({
                         name: value.name,
                         value: value.id,
-                        icon: value.icon
+                        leftIcon: value.icon
+                    })
+                }
+
+                break
+            case 'presets':
+                for (prop in list) {
+                    value = list[prop]
+
+                    encoded.push({
+                        name: value.name,
+                        value: value.id
                     })
                 }
 
