@@ -30,6 +30,8 @@ define('two/language', ['helper/i18n'], function (i18n) {
         if (selectedLanguage in sharedLanguages) {
             selectedLanguage = sharedLanguages[selectedLanguage]
         }
+
+        return selectedLanguage
     }
 
     var twoLanguage = {}
@@ -58,7 +60,11 @@ define('two/language', ['helper/i18n'], function (i18n) {
         selectedLanguage = selectLanguage($rootScope.loc.ale)
 
         // trigger eventTypeProvider.LANGUAGE_SELECTED_CHANGED you dumb fucks
-        $rootScope.$watch('loc.ale', function () {
+        $rootScope.$watch('loc.ale', function (newValue, oldValue) {
+            if (newValue === oldValue) {
+                return false
+            }
+
             selectLanguage($rootScope.loc.ale)
 
             var moduleId
