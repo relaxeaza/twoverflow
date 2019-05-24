@@ -347,9 +347,6 @@ define('two/minimap/ui', [
         $scope.addHighlightColor = '#000000'
         $scope.highlights = minimap.getHighlights()
         $scope.highlightNames = highlightNames
-        $scope.settings = settings.encodeSettings({
-            textObject: textObject
-        })
         $scope.actionTypes = Settings.encodeList(ACTION_TYPES, {
             textObject: textObject,
             disabled: false
@@ -369,6 +366,10 @@ define('two/minimap/ui', [
         $scope.resetSettings = resetSettings
         $scope.highlightsCount = highlightsCount
         $scope.openProfile = openProfile
+
+        settings.injectSettings($scope, {
+            textObject: textObject
+        })
 
         eventScope = new EventScope('twoverflow_minimap_window')
         eventScope.register(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.highlightUpdate, true)
