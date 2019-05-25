@@ -45,7 +45,7 @@
         "command_out": "Saída na data",
         "command_time_left": "Tempo restante",
         "command_arrive": "Chegada na data",
-        "error_no_units_enough": "Sem unidades o sulficientes para enviar o comando!",
+        "error_no_units_enough": "Sem unidades o sulficiente para enviar o comando!",
         "error_not_own_village": "A aldeia de origem não pertence a você!",
         "error_origin": "Aldeia de origem inválida!",
         "error_target": "Aldeia alvo inválida!",
