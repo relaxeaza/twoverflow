@@ -51,7 +51,7 @@
         "error_target": "Nieprawidłowa wioska cel!",
         "error_no_units": "Nie wybrano jednostek!",
         "error_invalid_date": "Nieprawidłowy Czas",
-        "error_already_sent": "Ten rozkaz %{type} powinien zostać wysłany %{date}",
+        "error_already_sent": "Ten rozkaz %d powinien zostać wysłany %d",
         "error_no_map_selected_village": "Nie zaznaczono wioski na mapie.",
         "error_remove_error": "Błąd usuwania rozkazu.",
         "tab_add": "Dodaj rozkaz",

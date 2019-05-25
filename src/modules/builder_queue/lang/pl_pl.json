@@ -1,7 +1,7 @@
 {
     "builder_queue": {
-        "started": "BuilderQueue uruchomiony",
-        "stopped": "BuilderQueue zatrzymany",
+        "started": "BuilderQueue Uruchomiony",
+        "stopped": "BuilderQueue Zatrzymany",
         "settings": "Ustawienia",
         "settings_village_groups": "Buduj w wioskach z grupy",
         "settings_building_sequence": "Szablon kolejki budowy",
@@ -17,7 +17,7 @@
         "sequences_edit_sequence": "Edytuj szablon",
         "select_group": "Wybierz grupę",
         "add_building_success": "%d dodany na pozycji %d",
-        "add_building_limit_exceeded": "%d osiągnął/eła maksymalny poziom (%d)",
+        "add_building_limit_exceeded": "%d osiągnął\/eła maksymalny poziom (%d)",
         "position": "Pozycja",
         "remove_building": "Usuń budynek z listy",
         "clone": "Klonuj",
