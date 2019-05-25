@@ -25,7 +25,8 @@
     "grunt-contrib-uglify": "^2.2.0",
     "grunt-contrib-uglify-es": "^3.3.0",
     "grunt-eslint": "^19.0.0",
-    "grunt-replace": "^1.0.1"
+    "grunt-replace": "^1.0.1",
+    "unzip": "^0.1.11"
   },
   "scripts": {
     "build": "grunt build --minify",
