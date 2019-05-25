@@ -10,7 +10,7 @@ require([
     attackView,
     attackViewInterface
 ) {
-    if (attackView.initialized) {
+    if (attackView.isInitialized()) {
         return false
     }
 

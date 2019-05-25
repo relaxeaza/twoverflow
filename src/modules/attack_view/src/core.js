@@ -419,6 +419,10 @@ define('two/attackView', [
         return commandQueueEnabled
     }
 
+    attackView.isInitialized = function () {
+        return initialized
+    }
+
     attackView.init = function () {
         var defaultFilters
         var i
