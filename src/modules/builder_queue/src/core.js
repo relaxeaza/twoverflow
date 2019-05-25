@@ -24,12 +24,15 @@ define('two/builderQueue', [
     Lockr
 ) {
     var buildingService = injector.get('buildingService')
+    var premiumActionService = injector.get('premiumActionService')
+    var buildingQueueService = injector.get('buildingQueueService')
     var initialized = false
     var running = false
     var localSettings
     var intervalCheckId
     var buildingSequenceLimit
     var ANALYSES_PER_MINUTE = 1
+    var ANALYSES_PER_MINUTE_INSTANT_FINISH = 10
     var VILLAGE_BUILDINGS = {}
     var groupList
     var $player
@@ -46,9 +49,8 @@ define('two/builderQueue', [
      * for each village.
      */
     var analyseVillages = function () {
-        var villageIds = settings.getSetting(SETTINGS.GROUP_VILLAGES)
-            ? groupList.getGroupVillageIds(settings.getSetting(SETTINGS.GROUP_VILLAGES))
-            : getVillageIds()
+        var groupVillages = settings.getSetting(SETTINGS.GROUP_VILLAGES)
+        var villageIds = groupVillages ? groupList.getGroupVillageIds(groupVillages) : getVillageIds()
         var village
         var readyState
         var queue
@@ -58,12 +60,13 @@ define('two/builderQueue', [
             return false
         }
 
-        villageIds.forEach(function (id) {
-            village = $player.getVillage(id)
+        villageIds.forEach(function (villageId) {
+            village = $player.getVillage(villageId)
             readyState = village.checkReadyState()
             queue = village.buildingQueue
+            jobs = queue.getAmountJobs()
 
-            if (queue.getAmountJobs() === queue.getUnlockedSlots()) {
+            if (jobs === queue.getUnlockedSlots()) {
                 return false
             }
 
@@ -71,11 +74,44 @@ define('two/builderQueue', [
                 return false
             }
 
+            analyseVillageBuildings(village)
+        })
+    }
+
+    var analyseVillagesInstantFinish = function () {
+        var groupVillages = settings.getSetting(SETTINGS.GROUP_VILLAGES)
+        var villageIds = groupVillages ? groupList.getGroupVillageIds(groupVillages) : getVillageIds()
+        var village
+        var queue
+        var jobs
+
+        villageIds.forEach(function (villageId) {
+            village = $player.getVillage(villageId)
+            queue = village.buildingQueue
+
+            if (queue.getAmountJobs()) {
+                jobs = queue.getQueue()
+
+                jobs.forEach(function (job) {
+                    if (buildingQueueService.canBeFinishedForFree(job, village)) {
+                        premiumActionService.instantBuild(job, LOCATION_TYPES.MASS_SCREEN, true, villageId)
+                    }
+                })
+            }
+        })
+    }
+
+    var initializeAllVillages = function () {
+        var groupVillages = settings.getSetting(SETTINGS.GROUP_VILLAGES)
+        var villageIds = groupVillages ? groupList.getGroupVillageIds(groupVillages) : getVillageIds()
+        var village
+
+        villageIds.forEach(function (villageId) {
+            village = $player.getVillage(villageId)
+
             if (!village.isInitialized()) {
                 villageService.initializeVillage(village)
             }
-
-            analyseVillageBuildings(village)
         })
     }
 
@@ -108,7 +144,8 @@ define('two/builderQueue', [
         var now
         var logData
         var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
-        var activeSequence = sequences[SETTINGS.ACTIVE_SEQUENCE]
+        var activeSequenceId = settings.getSetting(SETTINGS.ACTIVE_SEQUENCE)
+        var activeSequence = sequences[activeSequenceId]
 
         currentQueue.forEach(function (job) {
             buildingLevels[job.building]++
@@ -124,6 +161,10 @@ define('two/builderQueue', [
 
                 upgradeBuilding(village, buildingName, function (jobAdded, data) {
                     if (jobAdded) {
+                        if (!data.job) {
+                            return false
+                        }
+
                         now = Date.now()
                         logData = [
                             {
@@ -241,13 +282,21 @@ define('two/builderQueue', [
 
         running = true
         intervalCheckId = setInterval(analyseVillages, 60000 / ANALYSES_PER_MINUTE)
-        ready(analyseVillages, ['all_villages_ready'])
+        intervalInstantCheckId = setInterval(analyseVillagesInstantFinish, 60000 / ANALYSES_PER_MINUTE_INSTANT_FINISH)
+        
+        ready(function () {
+            initializeAllVillages()
+            analyseVillages()
+            analyseVillagesInstantFinish()
+        }, ['all_villages_ready'])
+
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_START)
     }
 
     builderQueue.stop = function () {
         running = false
         clearInterval(intervalCheckId)
+        clearInterval(intervalInstantCheckId)
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_STOP)
     }
 
