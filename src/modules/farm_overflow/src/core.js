@@ -2010,6 +2010,7 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.init = function () {
+        initialized = true
         $player = modelDataService.getSelectedCharacter()
         $gameState = modelDataService.getGameState()
         logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
