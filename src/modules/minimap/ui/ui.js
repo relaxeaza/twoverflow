@@ -347,8 +347,13 @@ define('two/minimap/ui', [
         $scope.addHighlightColor = '#000000'
         $scope.highlights = minimap.getHighlights()
         $scope.highlightNames = highlightNames
-        $scope.settings = settings.encodeSettings(textObject)
-        $scope.actionTypes = Settings.encodeList(ACTION_TYPES, false, textObject)
+        $scope.settings = settings.encodeSettings({
+            textObject: textObject
+        })
+        $scope.actionTypes = Settings.encodeList(ACTION_TYPES, {
+            textObject: textObject,
+            disabled: false
+        })
         $scope.autoComplete = {
             type: ['character', 'tribe', 'village'],
             placeholder: $filter('i18n')('placeholder_search', $rootScope.loc.ale, textObject),

@@ -1,6 +1,7 @@
 define('two/builderQueue', [
     'two/ready',
     'two/utils',
+    'two/Settings',
     'two/builderQueue/settings',
     'two/builderQueue/settingsMap',
     'two/builderQueue/errorCodes',
@@ -12,6 +13,7 @@ define('two/builderQueue', [
 ], function (
     ready,
     utils,
+    Settings,
     SETTINGS,
     SETTINGS_MAP,
     ERROR_CODES,
@@ -33,7 +35,7 @@ define('two/builderQueue', [
     var $player
     var logs
     var sequencesAvail = true
-    var settings = {}
+    var settings
     var STORAGE_KEYS = {
         LOGS: 'builder_queue_log',
         SETTINGS: 'builder_queue_settings'
@@ -44,8 +46,8 @@ define('two/builderQueue', [
      * for each village.
      */
     var analyseVillages = function () {
-        var villageIds = settings[SETTINGS.GROUP_VILLAGES]
-            ? groupList.getGroupVillageIds(settings[SETTINGS.GROUP_VILLAGES])
+        var villageIds = settings.getSetting(SETTINGS.GROUP_VILLAGES)
+            ? groupList.getGroupVillageIds(settings.getSetting(SETTINGS.GROUP_VILLAGES))
             : getVillageIds()
         var village
         var readyState
@@ -105,6 +107,8 @@ define('two/builderQueue', [
         var sequence = angular.copy(VILLAGE_BUILDINGS)
         var now
         var logData
+        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+        var activeSequence = sequences[SETTINGS.ACTIVE_SEQUENCE]
 
         currentQueue.forEach(function (job) {
             buildingLevels[job.building]++
@@ -114,7 +118,7 @@ define('two/builderQueue', [
             return false
         }
 
-        settings[SETTINGS.BUILDING_SEQUENCES][settings[SETTINGS.ACTIVE_SEQUENCE]].some(function (buildingName) {
+        activeSequence.some(function (buildingName) {
             if (++sequence[buildingName] > buildingLevels[buildingName]) {
                 buildingService.compute(village)
 
@@ -216,7 +220,8 @@ define('two/builderQueue', [
      * @return {Object} Maximum level for each building.
      */
     var getSequenceLimit = function (sequenceId) {
-        var sequence = settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
+        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+        var sequence = sequences[sequenceId]
         var sequenceLimit = angular.copy(VILLAGE_BUILDINGS)
 
         sequence.forEach(function (buildingName) {
@@ -254,37 +259,6 @@ define('two/builderQueue', [
         return initialized
     }
 
-    builderQueue.updateSettings = function (changes, _quiet) {
-        var newValue
-        var key
-
-        for (key in changes) {
-            if (!SETTINGS_MAP[key]) {
-                eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_UNKNOWN_SETTING, [key])
-
-                return false
-            }
-
-            newValue = changes[key]
-
-            if (angular.equals(settings[key], newValue)) {
-                continue
-            }
-
-            settings[key] = newValue
-        }
-
-        sequencesAvail = Object.keys(settings[SETTINGS.BUILDING_SEQUENCES]).length
-        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE]) : false
-        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
-
-        if (!_quiet) {
-            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
-        }
-
-        return true
-    }
-
     builderQueue.getSettings = function () {
         return settings
     }
@@ -300,7 +274,9 @@ define('two/builderQueue', [
     }
 
     builderQueue.addBuildingSequence = function (id, sequence) {
-        if (id in settings[SETTINGS.BUILDING_SEQUENCES]) {
+        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+
+        if (id in sequences) {
             return ERROR_CODES.SEQUENCE_EXISTS
         }
 
@@ -308,15 +284,17 @@ define('two/builderQueue', [
             return ERROR_CODES.SEQUENCE_INVALID
         }
 
-        settings[SETTINGS.BUILDING_SEQUENCES][id] = sequence
-        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
+        sequences[id] = sequence
+        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences)
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, id)
 
         return true
     }
 
     builderQueue.updateBuildingSequence = function (id, sequence) {
-        if (!(id in settings[SETTINGS.BUILDING_SEQUENCES])) {
+        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+
+        if (!(id in sequences)) {
             return ERROR_CODES.SEQUENCE_NO_EXISTS
         }
 
@@ -324,46 +302,49 @@ define('two/builderQueue', [
             return ERROR_CODES.SEQUENCE_INVALID
         }
 
-        settings[SETTINGS.BUILDING_SEQUENCES][id] = sequence
-        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
+        sequences[id] = sequence
+        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences)
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_UPDATED, id)
 
         return true
     }
 
     builderQueue.removeSequence = function (id) {
-        if (!(id in settings[SETTINGS.BUILDING_SEQUENCES])) {
+        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+
+        if (!(id in sequences)) {
             return ERROR_CODES.SEQUENCE_NO_EXISTS
         }
 
-        delete settings[SETTINGS.BUILDING_SEQUENCES][id]
-        Lockr.set(STORAGE_KEYS.SETTINGS, settings)
+        delete sequences[id]
+        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences)
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, id)
     }
 
     builderQueue.init = function () {
-        var key
-        var defaultValue
         var buildingName
         var village
 
         initialized = true
-        localSettings = Lockr.get(STORAGE_KEYS.SETTINGS, {}, true)
         logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
         $player = modelDataService.getSelectedCharacter()
         groupList = modelDataService.getGroupList()
+        
+        settings = new Settings({
+            settingsMap: SETTINGS_MAP,
+            storageKey: STORAGE_KEYS.SETTINGS
+        })
 
-        for (key in SETTINGS_MAP) {
-            defaultValue = SETTINGS_MAP[key].default
-            settings[key] = localSettings.hasOwnProperty(key) ? localSettings[key] : defaultValue
-        }
+        settings.onSettingsChange(function (changes, update) {
+            eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
+        })
 
         for (buildingName in BUILDING_TYPES) {
             VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
         }
 
-        sequencesAvail = Object.keys(settings[SETTINGS.BUILDING_SEQUENCES]).length
-        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings[SETTINGS.ACTIVE_SEQUENCE]) : false
+        sequencesAvail = Object.keys(settings.getSetting(SETTINGS.BUILDING_SEQUENCES)).length
+        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings.getSetting(SETTINGS.ACTIVE_SEQUENCE)) : false
 
         $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
             if (!running) {

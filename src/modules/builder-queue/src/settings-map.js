@@ -7,8 +7,10 @@ define('two/builderQueue/settingsMap', [
 ) {
     return {
         [SETTINGS.GROUP_VILLAGES]: {
-            default: '',
-            inputType: 'select'
+            default: false,
+            inputType: 'select',
+            disabledOption: true,
+            type: 'groups'
         },
         [SETTINGS.ACTIVE_SEQUENCE]: {
             default: 'Essential',

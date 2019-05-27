@@ -7,6 +7,41 @@ define('two/Settings', [
     var noop = function () {}
     var hasOwn = Object.prototype.hasOwnProperty
 
+    var generateDiff = function (before, after) {
+        var changes = {}
+        var id
+
+        for (id in before) {
+            if (hasOwn.call(after, id)) {
+                if (!angular.equals(before[id], after[id])) {
+                    changes[id] = after[id]
+                }
+            } else {
+                changes[id] = before[id]
+            }
+        }
+
+        return changes
+    }
+
+    var generateDefaults = function (map) {
+        var key
+        var defaults = {}
+
+        for (key in map) {
+            defaults[key] = map[key].default
+        }
+
+        return defaults
+    }
+
+    var disabledOption = function () {
+        return {
+            name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
+            value: false
+        }
+    }
+
     var Settings = function (configs) {
         this.settingsMap = configs.settingsMap
         this.storageKey = configs.storageKey
@@ -17,86 +52,20 @@ define('two/Settings', [
         }
     }
 
-    Settings.prototype.onSettingsChange = function (callback) {
-        if (typeof callback === 'function') {
-            this.events.settingsChange = callback
-        }
-    }
-
-    Settings.prototype.eachSetting = function (callback) {
-        var id
-        var value
-        var type
-
-        for (id in this.settings) {
-            type = this.settingsMap[id].inputType
-
-            if (type === 'checkbox') {
-                callback.call(this, id, !!this.settings[id], type)
-            } else {
-                callback.call(this, id, this.settings[id], type)
-            }
-        }
-    }
-
-    Settings.prototype.encodeSettings = function (textObject) {
-        var encoded = {}
-
-        this.eachSetting(function (id, value, type) {
-            if (type === 'select') {
-                if (this.settingsMap[id].disabledOption && !value) {
-                    encoded[id] = disabledOption()
-                } else {
-                    encoded[id] = {
-                        name: textObject ? $filter('i18n')(value, $rootScope.loc.ale, textObject) : value,
-                        value: value
-                    }
-                }
-            } else {
-                encoded[id] = value
-            }
-        })
-
-        return encoded
-    }
-
-    Settings.prototype.resetSetting = function (id) {
-        this.setSetting(id, this.defaults[id])
-
-        return true
-    }
-
-    Settings.prototype.resetSettings = function () {
-        this.setSettings(angular.copy(this.defaults))
-
-        return true
-    }
-
-    Settings.prototype.decodeSettings = function (encoded) {
-        var id
-        var decoded = {}
-
-        for (id in encoded) {
-            if (this.settingsMap[id].inputType === 'select') {
-                decoded[id] = encoded[id].value
-            } else {
-                decoded[id] = encoded[id]
-            }
-        }
-
-        return decoded
+    Settings.prototype.getSetting = function (id) {
+        return this.settings[id]
     }
 
     Settings.prototype.getSettings = function () {
         return this.settings
     }
 
-    Settings.prototype.getSetting = function (id) {
-        return this.settings[id]
-    }
-
     Settings.prototype.getDefault = function (id) {
         return hasOwn.call(this.defaults, id) ? this.defaults[id] : undefined
+    }
+
+    Settings.prototype.store = function () {
+        Lockr.set(this.storageKey, this.settings)
     }
 
     Settings.prototype.setSetting = function (id, value) {
@@ -150,66 +119,150 @@ define('two/Settings', [
         return true
     }
 
-    Settings.prototype.store = function () {
-        Lockr.set(this.storageKey, this.settings)
+    Settings.prototype.resetSetting = function (id) {
+        this.setSetting(id, this.defaults[id])
+
+        return true
     }
 
-    Settings.encodeList = function (list, disabled, textObject) {
-        var encoded = []
-        var i
+    Settings.prototype.resetSettings = function () {
+        this.setSettings(angular.copy(this.defaults))
 
-        if (disabled) {
+        return true
+    }
+
+    Settings.prototype.eachSetting = function (callback) {
+        var id
+        var value
+        var type
+
+        for (id in this.settings) {
+            type = this.settingsMap[id].inputType
+
+            if (type === 'checkbox') {
+                callback.call(this, id, !!this.settings[id], type)
+            } else {
+                callback.call(this, id, this.settings[id], type)
+            }
+        }
+    }
+
+    Settings.prototype.onSettingsChange = function (callback) {
+        if (typeof callback === 'function') {
+            this.events.settingsChange = callback
+        }
+    }
+
+    Settings.prototype.encodeSettings = function (opt) {
+        var encoded = {}
+        var groupList = modelDataService.getGroupList()
+        var groups
+
+        opt = opt || {}
+
+        this.eachSetting(function (id, value, type) {
+            if (type === 'select') {
+                if (this.settingsMap[id].disabledOption && !value) {
+                    encoded[id] = disabledOption()
+                } else {
+                    switch (this.settingsMap[id].type) {
+                    case 'groups':
+                        groups = groupList.getGroups()
+
+                        if (!groups[value] && this.settingsMap[id].disabledOption) {
+                            encoded[id] = disabledOption()
+                        } else {
+                            encoded[id] = {
+                                name: groups[value].name,
+                                value: value
+                            }
+                        }
+
+                        break
+                    default:
+                        encoded[id] = {
+                            name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
+                            value: value
+                        }
+
+                        break
+                    }
+                }
+            } else {
+                encoded[id] = value
+            }
+        })
+
+        return encoded
+    }
+
+    Settings.prototype.decodeSettings = function (encoded) {
+        var id
+        var decoded = {}
+
+        for (id in encoded) {
+            if (this.settingsMap[id].inputType === 'select') {
+                decoded[id] = encoded[id].value
+            } else {
+                decoded[id] = encoded[id]
+            }
+        }
+
+        return decoded
+    }
+
+    Settings.encodeList = function (list, opt) {
+        var encoded = []
+        var prop
+        var value
+
+        opt = opt || {}
+
+        if (opt.disabled) {
             encoded.push(disabledOption())
         }
 
-        for (i in list) {
-            encoded.push({
-                name: textObject ? $filter('i18n')(list[i], $rootScope.loc.ale, textObject) : list[i],
-                value: list[i]
-            })
+        if (opt.type) {
+            switch (opt.type) {
+            case 'keys':
+                for (prop in list) {
+                    value = list[prop]
+
+                    encoded.push({
+                        name: prop,
+                        value: prop
+                    })
+                }
+
+                break
+            case 'groups':
+                for (prop in list) {
+                    value = list[prop]
+
+                    encoded.push({
+                        name: value.name,
+                        value: value.id,
+                        icon: value.icon
+                    })
+                }
+
+                break
+            default:
+                for (prop in list) {
+                    value = list[prop]
+
+                    encoded.push({
+                        name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
+                        value: value
+                    })
+                }
+            }
         }
 
         return encoded
     }
 
-    var generateDiff = function (before, after) {
-        var changes = {}
-        var id
-
-        for (id in before) {
-            if (hasOwn.call(after, id)) {
-                if (!angular.equals(before[id], after[id])) {
-                    changes[id] = after[id]
-                }
-            } else {
-                changes[id] = before[id]
-            }
-        }
-
-        return changes
-    }
-
-    var generateDefaults = function (map) {
-        var key
-        var defaults = {}
-
-        for (key in map) {
-            defaults[key] = map[key].default
-        }
-
-        return defaults
-    }
-
-    var storeSettings = function (key, settings) {
-        Lockr.set(key, settings)
-    }
-
-    var disabledOption = function () {
-        return {
-            name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
-            value: false
-        }
-    }
+    Settings.disabledOption = disabledOption
 
     return Settings
 })
