@@ -98,11 +98,13 @@ define('two/mapData', [
         })
 
         if (!requests.length) {
-            return callback()
+            return callback(villages)
         }
 
         Promise.all(requests)
-        .then(callback)
+        .then(function () {
+            callback(villages)
+        })
         .catch(function (error) {
             console.error(error.message)
         })
