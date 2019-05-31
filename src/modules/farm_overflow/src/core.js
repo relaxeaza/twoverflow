@@ -6,7 +6,8 @@ define('two/farmOverflow', [
     'two/farmOverflow/settingsUpdate',
     'two/farmOverflow/logTypes',
     'two/mapData',
-    'helper/math'
+    'helper/math',
+    'queues/EventQueue'
 ], function (
     Settings,
     ERROR_TYPES,
@@ -15,16 +16,16 @@ define('two/farmOverflow', [
     SETTINGS_UPDATE,
     LOG_TYPES,
     mapData,
-    math
+    math,
+    eventQueue
 ) {
     var $player = modelDataService.getSelectedCharacter()
-
-    var farmOverflow = {}
-    var Farmer
     var initialized = false
+    var running = false
     var settings
     var farmers = window.farmers = {}
     var includedVillages = []
+    var noop = function () {}
 
     var STORAGE_KEYS = {
         INDEXES: 'farm_overflow_indexes',
@@ -32,37 +33,6 @@ define('two/farmOverflow', [
         LAST_ATTACK: 'farm_overflow_last_attack',
         LAST_ACTIVITY: 'farm_overflow_last_activity',
         SETTINGS: 'farm_overflow_settings'
-    }
-
-    // return true = village filtered
-    var targetFilters = [
-        function ownPlayer (target) {
-            return target.character_id === $player.getId()
-        },
-        function included (target) {
-            return target.character_id && !includedVillages.includes(target.id)
-        },
-        function ignored (target) {
-            return ignoredVillages.includes(target.id)
-        },
-        function distance (target, village) {
-            var distance = math.actualDistance(village.getPosition(), {
-                x: target.x,
-                y: target.y
-            })
-            var minDistance = settings.getSetting(SETTINGS.MIN_DISTANCE)
-            var maxDistance = settings.getSetting(SETTINGS.MAX_DISTANCE)
-
-            return distance < minDistance || distance > maxDistance
-        }
-    ]
-
-    var filterTargets = function (targets, village) {
-        return targets.filter(function (target) {
-            return targetFilters.every(function (fn) {
-                return !fn(target, village)
-            })
-        })
     }
 
     var updateIncludedVillage = function () {
@@ -97,39 +67,145 @@ define('two/farmOverflow', [
         })
     }
 
-    Farmer = (function () {
-        var loadTargets = function (village, callback) {
-            mapData.load(village.getX(), village.getY(), function (targets) {
-                targets = filterTargets(targets, village)
-                callback(targets)
+    var Farmer = (function () {
+        // return true = village filtered
+        var targetFilters = [
+            function ownPlayer (target) {
+                return target.character_id === $player.getId()
+            },
+            function included (target) {
+                return target.character_id && !includedVillages.includes(target.id)
+            },
+            function ignored (target) {
+                return ignoredVillages.includes(target.id)
+            },
+            function distance (target, village) {
+                var distance = math.actualDistance(village.getPosition(), {
+                    x: target.x,
+                    y: target.y
+                })
+                var minDistance = settings.getSetting(SETTINGS.MIN_DISTANCE)
+                var maxDistance = settings.getSetting(SETTINGS.MAX_DISTANCE)
 
-                console.log('load targets ok', village.getId())
+                return distance < minDistance || distance > maxDistance
+            }
+        ]
+
+        var filterTargets = function (targets, village) {
+            return targets.filter(function (target) {
+                return targetFilters.every(function (fn) {
+                    return !fn(target, village)
+                })
             })
         }
 
-        var Farmer = function (villageId) {
-            this.village = $player.getVillage(villageId)
+        var Farmer = function (villageId, _options) {
+            var village = $player.getVillage(villageId)
+            var index = 0
+            var running = false
+            var ready = false
+            var targets = []
 
-            if (!this.village) {
-                throw new Error('Village ' + villageId + ' does not exist.')
+            _options = _options || {}
+
+            if (!village) {
+                throw new Error(`Village ${villageId} does not exist`)
             }
 
-            loadTargets(this.village, (targets) => {
-                this.villages = targets
-            })
+            this.init = function (callback) {
+                callback = callback || noop
+
+                this.loadTargets(function () {
+                    ready = true
+                    eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, villageId)
+                    callback()
+                })
+            }
+
+            this.start = function () {
+                if (!ready) {
+                    eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, villageId)
+                    return false
+                }
+
+                if (!targets.length) {
+                    eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS, villageId)
+                    return false
+                }
+
+                running = true
+
+                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, villageId)
+
+                return true
+            }
+
+            this.stop = function () {
+                running = false
+
+                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, villageId)
+            }
+
+            this.loadTargets = function (callback) {
+                mapData.load(village.getX(), village.getY(), function (loadedTargets) {
+                    targets = filterTargets(loadedTargets, village)
+                    callback(targets)
+                })
+            }
+
+            this.getTargets = function () {
+                return targets
+            }
+
+            this.isRunning = function () {
+                return running
+            }
+
+            if (_options.autoStart) {
+                this.init(() => {
+                    this.start()
+                })
+            }
+
+            return this
         }
 
         return Farmer
     })()
 
+    var farmOverflow = {}
+
     farmOverflow.start = function () {
         var villages = $player.getVillages()
+        var farmer
 
         angular.forEach(villages, function (village, villageId) {
-            farmers[villageId] = new Farmer(villageId)
+            farmer = farmOverflow.createFarmer(villageId)
+
+            farmer.init(function () {
+                farmer.start()
+            })
         })
 
-        console.log('ok')
+        running = true
+
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_START)
+    }
+
+    farmOverflow.createFarmer = function (villageId) {
+        return farmers[villageId] = new Farmer(villageId)
+    }
+
+    farmOverflow.stop = function () {
+        running = false
+
+        angular.each(farmers, function (farmer) {
+            if(farmer.isRunning()) {
+                farmer.stop()
+            }
+        })
+
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP)
     }
 
     farmOverflow.getSettings = function () {
