@@ -9,6 +9,7 @@ define('two/mapData', [
     var width = 306
     var height = 306
     var grid = []
+    var loadingQueue = {}
 
     var init = function () {
         setupGrid()
@@ -40,7 +41,9 @@ define('two/mapData', [
                     x: chunkX,
                     y: chunkY,
                     width: chunkWidth,
-                    height: chunkHeight
+                    height: chunkHeight,
+                    loaded: false,
+                    loading: false
                 })
             }
         }
@@ -72,29 +75,59 @@ define('two/mapData', [
         return cells
     }
 
+    var genLoadingId = function (cells) {
+        var id = []
+
+        cells.forEach(function (cell) {
+            id.push(cell.x.toString() + cell.y.toString())
+        })
+
+        return id.join('')
+    }
+
     var mapData = {}
 
     mapData.load = function (x, y, callback, _error) {
         var cells = getVisibleGridCells(x, y)
+        var loadId = genLoadingId(cells)
         var requests = []
+        var promise
+        var alreadyLoading = cells.every(function (cell) {
+            return cell.loading
+        })
+
+        loadingQueue[loadId] = loadingQueue[loadId] || []
+        loadingQueue[loadId].push(callback)
+
+        if (alreadyLoading) {
+            return
+        }
 
         cells.forEach(function (cell) {
-            if (cell.loaded) {
+            if (cell.loaded || cell.loading) {
                 return
             }
 
-            cell.loaded = true
+            cell.loading = true
 
-            requests.push(new Promise(function (resolve, reject) {
+            promise = new Promise(function (resolve, reject) {
                 socketService.emit(routeProvider.MAP_GET_MINIMAP_VILLAGES, cell, function (data) {
-                    if (!data.villages) {
-                        return reject(data)
+                    cell.loaded = true
+                    cell.loading = false
+
+                    if (data.message) {
+                        return reject(data.message)
                     }
 
-                    villages = villages.concat(data.villages)
-                    resolve()
+                    if (data.villages.length) {
+                        villages = villages.concat(data.villages)
+                    }
+
+                    resolve(cell)
                 })
-            }))
+            })
+
+            requests.push(promise)
         })
 
         if (!requests.length) {
@@ -102,8 +135,14 @@ define('two/mapData', [
         }
 
         Promise.all(requests)
-        .then(function () {
-            callback(villages)
+        .then(function (cells) {
+            var loadId = genLoadingId(cells)
+
+            loadingQueue[loadId].forEach(function (handler) {
+                handler(villages)
+            })
+
+            delete loadingQueue[loadId]
         })
         .catch(function (error) {
             console.error(error.message)
