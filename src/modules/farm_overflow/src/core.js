@@ -225,6 +225,10 @@ define('two/farmOverflow', [
         var villages = $player.getVillages()
 
         angular.forEach(villages, function (village, villageId) {
+            if (ignoredVillages.includes(villageId)) {
+                return
+            }
+
             var farmer = farmOverflow.create(villageId)
 
             if (farmer.isInitialized()) {
