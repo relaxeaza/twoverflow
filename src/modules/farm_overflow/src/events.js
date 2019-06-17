@@ -43,6 +43,7 @@ define('two/farmOverflow/events', [], function () {
         FARM_OVERFLOW_INSTANCE_START: 'farm_overflow_instance_start',
         FARM_OVERFLOW_INSTANCE_STOP: 'farm_overflow_instance_stop',
         FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS: 'farm_overflow_instance_error_no_targets',
-        FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY: 'farm_overflow_instance_error_not_ready'
+        FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY: 'farm_overflow_instance_error_not_ready',
+        FARM_OVERFLOW_PRESETS_LOADED: 'farm_overflow_presets_loaded'
     })
 })

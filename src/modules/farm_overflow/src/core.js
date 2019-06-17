@@ -26,6 +26,7 @@ define('two/farmOverflow', [
     var farmers = window.farmers = {}
     var includedVillages = []
     var noop = function () {}
+    var selectedPresets = []
 
     var STORAGE_KEYS = {
         INDEXES: 'farm_overflow_indexes',
@@ -65,6 +66,34 @@ define('two/farmOverflow', [
             groups = groupList.getGroupVillageIds(groupId)
             ignoredVillages = ignoredVillages.concat(groups)
         })
+    }
+
+    var updatePresets = function () {
+        var handler = function () {
+            selectedPresets = []
+
+            var playerPresets = modelDataService.getPresetList().getPresets()
+            var activePresets = settings.getSetting(SETTINGS.PRESETS)
+
+            activePresets.forEach(function (presetId) {
+                selectedPresets.push(playerPresets[presetId])
+            })
+        }
+
+        if (modelDataService.getPresetList().isLoaded()) {
+            handler()
+        } else {
+            socketService.emit(routeProvider.GET_PRESETS, {}, handler)
+        }
+    }
+
+    var presetListener = function () {
+        updatePresets()
+
+        if (running && !selectedPresets.length) {
+            farmOverflow.stop()
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, ERROR_TYPES.NO_PRESETS)
+        }
     }
 
     var Farmer = (function () {
@@ -144,6 +173,8 @@ define('two/farmOverflow', [
 
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, villageId)
 
+
+
                 return true
             }
 
@@ -218,7 +249,7 @@ define('two/farmOverflow', [
         return farmers[villageId]
     }
 
-    farmOverflow.stop = function () {
+    farmOverflow.stop = function (_reason) {
         running = false
 
         angular.each(farmers, function (farmer) {
@@ -227,7 +258,7 @@ define('two/farmOverflow', [
             }
         })
 
-        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP)
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, _reason)
     }
 
     farmOverflow.getSettings = function () {
@@ -247,6 +278,10 @@ define('two/farmOverflow', [
 
         updateIncludedVillage()
         updateIgnoredVillage()
+        updatePresets()
+
+        $rootScope.$on(eventTypeProvider.ARMY_PRESET_UPDATE, presetListener)
+        $rootScope.$on(eventTypeProvider.ARMY_PRESET_DELETED, presetListener)
     }
 
     return farmOverflow
