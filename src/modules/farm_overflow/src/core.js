@@ -103,6 +103,7 @@ define('two/farmOverflow', [
             var village = $player.getVillage(villageId)
             var index = 0
             var running = false
+            var initialized = false
             var ready = false
             var targets = []
 
@@ -114,6 +115,12 @@ define('two/farmOverflow', [
 
             this.init = function (callback) {
                 callback = callback || noop
+
+                if (initialized) {
+                    throw new Error(`Farmer ${villageId} already initialized`)
+                }
+
+                initialized = true
 
                 this.loadTargets(function () {
                     ready = true
@@ -161,6 +168,10 @@ define('two/farmOverflow', [
                 return running
             }
 
+            this.isInitialized = function () {
+                return initialized
+            }
+
             if (_options.autoStart) {
                 this.init(() => {
                     this.start()
@@ -176,15 +187,22 @@ define('two/farmOverflow', [
     var farmOverflow = {}
 
     farmOverflow.start = function () {
+        if (running) {
+            return false
+        }
+
         var villages = $player.getVillages()
-        var farmer
 
         angular.forEach(villages, function (village, villageId) {
-            farmer = farmOverflow.createFarmer(villageId)
+            var farmer = farmOverflow.create(villageId)
 
-            farmer.init(function () {
+            if (farmer.isInitialized()) {
                 farmer.start()
-            })
+            } else {
+                farmer.init(function () {
+                    farmer.start()
+                })
+            }
         })
 
         running = true
@@ -192,8 +210,12 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_START)
     }
 
-    farmOverflow.createFarmer = function (villageId) {
-        return farmers[villageId] = new Farmer(villageId)
+    farmOverflow.create = function (villageId) {
+        if (!farmers.hasOwnProperty(villageId)) {
+            farmers[villageId] = new Farmer(villageId)
+        }
+
+        return farmers[villageId]
     }
 
     farmOverflow.stop = function () {
