@@ -24,8 +24,9 @@ See [https://gitlab.com/relaxeaza/twoverflow/wikis/Testing-version](https://gitl
 - English
 - Português
 - Polish
+- Deutsch
 
-Please help to translate the TWOverflow here: [https://crowdin.com/project/twoverflow](https://crowdin.com/project/twoverflow).
+Please help to translate TWOverflow on [Crowdin](https://crowdin.com/project/twoverflow).
 
 ## Creating your own modules
 
