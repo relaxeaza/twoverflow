@@ -59,4 +59,4 @@ You can use some flags to customize the resulting file.
 - `--ignore` to ignore specific modules by ID (check _module.json_ for ID).
 - `--only` compile only a specific module by ID (check _module.json_ for ID).
 
-Example: `grunt build --ignore=farm,minimap --minify` ignores both modules farm and minimap and will generate an minified file.
+Example: `grunt build --ignore=farm_overflow,minimap --minify` ignores both modules farm_overflow and minimap and will generate an minified file.
