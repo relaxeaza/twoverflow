@@ -192,6 +192,14 @@ define('two/farmOverflow', [
         }
     }
 
+    var removedGroupListener = function () {
+        updateGroupVillages()
+
+        farmOverflow.flush()
+        reloadTargets()
+        farmOverflow.createAll()
+    }
+
     var updatePresets = function () {
         var handler = function () {
             selectedPresets = []
@@ -238,7 +246,8 @@ define('two/farmOverflow', [
             callback = callback || noop
 
             if (initialized) {
-                throw new Error(`Farmer ${villageId} already initialized`)
+                callback()
+                return true
             }
 
             initialized = true
@@ -292,6 +301,10 @@ define('two/farmOverflow', [
             return targets
         }
 
+        this.getVillage = function () {
+            return village
+        }
+
         this.isRunning = function () {
             return running
         }
@@ -333,21 +346,7 @@ define('two/farmOverflow', [
             return false
         }
 
-        angular.forEach($player.getVillages(), function (village, villageId) {
-            var farmer
-
-            villageId = parseInt(villageId, 10)
-
-            if (ignoredVillages.includes(villageId)) {
-                return
-            }
-
-            farmer = farmOverflow.create(villageId)
-
-            if (!farmer) {
-                return
-            }
-
+        angular.forEach(farmers, function (farmer) {
             if (farmer.isInitialized()) {
                 farmer.start()
             } else {
@@ -362,10 +361,32 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_START)
     }
 
+    farmOverflow.createAll = function () {
+        angular.forEach($player.getVillages(), function (village, villageId) {
+            var farmer = farmOverflow.create(villageId)
+
+            if (!farmer) {
+                return
+            }
+
+            farmer.init(function () {
+                if (running) {
+                    farmer.start()
+                }
+            })
+        })
+    }
+
     farmOverflow.create = function (villageId) {
         var groupsOnly = settings.getSetting(SETTINGS.GROUP_ONLY)
 
+        villageId = parseInt(villageId, 10)
+
         if (groupsOnly.length && !onlyVillages.includes(villageId)) {
+            return false
+        }
+
+        if (ignoredVillages.includes(villageId)) {
             return false
         }
 
@@ -374,6 +395,23 @@ define('two/farmOverflow', [
         }
 
         return farmers[villageId]
+    }
+
+    farmOverflow.flush = function () {
+        var groupsOnly = settings.getSetting(SETTINGS.GROUP_ONLY)
+        var villageId
+
+        angular.forEach(farmers, function (farmer) {
+            villageId = farmer.getVillage().getId()
+
+            if (groupsOnly.length && !onlyVillages.includes(villageId)) {
+                farmer.destroy()
+            }
+
+            if (ignoredVillages.includes(villageId)) {
+                farmer.destroy()
+            }
+        })
     }
 
     farmOverflow.stop = function (_reason) {
@@ -405,11 +443,13 @@ define('two/farmOverflow', [
 
         updateGroupVillages()
         updatePresets()
+        farmOverflow.createAll()
 
         $rootScope.$on(eventTypeProvider.ARMY_PRESET_UPDATE, presetListener)
         $rootScope.$on(eventTypeProvider.ARMY_PRESET_DELETED, presetListener)
         $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_LINKED, villageGroupLink)
         $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_UNLINKED, villageGroupUnlink)
+        $rootScope.$on(eventTypeProvider.GROUPS_DESTROYED, removedGroupListener)
     }
 
     return farmOverflow

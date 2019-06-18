@@ -17,7 +17,7 @@ require([
     ready(function () {
         twoLanguage.add('__farm_overflow_id', __farm_overflow_lang)
         farmOverflow.init()
-        farmOverflow.start()
+        // farmOverflow.start()
 
         // farmOverflowInterface()
     }, ['map'])
