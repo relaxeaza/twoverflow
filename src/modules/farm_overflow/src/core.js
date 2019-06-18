@@ -133,6 +133,12 @@ define('two/farmOverflow', [
         }
     }
 
+    var reloadTargets = function () {
+        angular.forEach(farmers, function (farmer) {
+            farmer.loadTargets()
+        })
+    }
+
     var villageGroupLink = function (event, data) {
         var groupsInclude = settings.getSetting(SETTINGS.GROUP_INCLUDE)
         var groupIgnore = settings.getSetting(SETTINGS.GROUP_IGNORE)
@@ -157,9 +163,7 @@ define('two/farmOverflow', [
         }
 
         if (groupsInclude.includes(data.group_id) && !isOwnVillage) {
-            farmers.forEach(function (farmer) {
-                farmer.loadedTargets()
-            })
+            reloadTargets()
         }
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
@@ -169,6 +173,41 @@ define('two/farmOverflow', [
                     farmer.start()
                 }
             })
+        }
+    }
+
+    var villageGroupUnlink = function (event, data) {
+        var groupsInclude = settings.getSetting(SETTINGS.GROUP_INCLUDE)
+        var groupIgnore = settings.getSetting(SETTINGS.GROUP_IGNORE)
+        var groupsOnly = settings.getSetting(SETTINGS.GROUP_ONLY)
+        var isOwnVillage = $player.getVillage(data.village_id)
+        var farmer
+
+        updateGroupVillages()
+
+        if (groupIgnore === data.group_id) {
+            if (isOwnVillage) {
+                farmer = farmOverflow.create(data.village_id)
+                farmer.init(function () {
+                    if (running) {
+                        farmer.start()
+                    }
+                })
+            } else {
+                reloadTargets()
+            }
+        }
+
+        if (groupsInclude.includes(data.group_id) && !isOwnVillage) {
+            reloadTargets()
+        }
+
+        if (groupsOnly.includes(data.group_id) && isOwnVillage) {
+            farmer = farmers[data.village_id]
+
+            if (farmer) {
+                farmer.destroy()
+            }
         }
     }
 
@@ -370,6 +409,7 @@ define('two/farmOverflow', [
         $rootScope.$on(eventTypeProvider.ARMY_PRESET_UPDATE, presetListener)
         $rootScope.$on(eventTypeProvider.ARMY_PRESET_DELETED, presetListener)
         $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_LINKED, villageGroupLink)
+        $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_UNLINKED, villageGroupUnlink)
     }
 
     return farmOverflow

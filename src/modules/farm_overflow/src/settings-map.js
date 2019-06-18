@@ -24,7 +24,8 @@ define('two/farmOverflow/settingsMap', [
             type: 'groups'
         },
         [SETTINGS.GROUP_INCLUDE]: {
-            default: [],
+            // default: [],
+            default: [5487],
             updates: [SETTINGS_UPDATE.GROUPS, SETTINGS_UPDATE.TARGETS],
             disabledOption: true,
             inputType: 'select',
