@@ -26,16 +26,14 @@
     "grunt-contrib-uglify-es": "^3.3.0",
     "grunt-eslint": "^19.0.0",
     "grunt-replace": "^1.0.1",
-    "unzip": "^0.1.11"
+    "hoek": "^5.0.3",
+    "http-server": "^0.11.1",
+    "lodash": "^4.17.11",
+    "unzipper": "^0.10.1"
   },
   "scripts": {
     "build": "grunt build --minify",
     "release": "grunt build --minify && node scripts/release.js",
     "release-testing": "grunt build --minify && node scripts/release.js --testing"
-  },
-  "dependencies": {
-    "hoek": "^5.0.3",
-    "http-server": "^0.11.1",
-    "lodash": "^4.17.11"
   }
 }
