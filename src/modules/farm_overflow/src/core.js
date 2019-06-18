@@ -75,6 +75,12 @@ define('two/farmOverflow', [
         })
     }
 
+    var reloadTargets = function () {
+        angular.forEach(farmers, function (farmer) {
+            farmer.loadTargets()
+        })
+    }
+
     var updateIncludedVillage = function () {
         var groupsInclude = settings.getSetting(SETTINGS.GROUP_INCLUDE)
         var groupVillages
@@ -112,31 +118,6 @@ define('two/farmOverflow', [
         updateIncludedVillage()
         updateIgnoredVillage()
         updateOnlyVillage()
-    }
-
-    var updatePresets = function () {
-        var handler = function () {
-            selectedPresets = []
-
-            var playerPresets = modelDataService.getPresetList().getPresets()
-            var activePresets = settings.getSetting(SETTINGS.PRESETS)
-
-            activePresets.forEach(function (presetId) {
-                selectedPresets.push(playerPresets[presetId])
-            })
-        }
-
-        if (modelDataService.getPresetList().isLoaded()) {
-            handler()
-        } else {
-            socketService.emit(routeProvider.GET_PRESETS, {}, handler)
-        }
-    }
-
-    var reloadTargets = function () {
-        angular.forEach(farmers, function (farmer) {
-            farmer.loadTargets()
-        })
     }
 
     var villageGroupLink = function (event, data) {
@@ -208,6 +189,25 @@ define('two/farmOverflow', [
             if (farmer) {
                 farmer.destroy()
             }
+        }
+    }
+
+    var updatePresets = function () {
+        var handler = function () {
+            selectedPresets = []
+
+            var playerPresets = modelDataService.getPresetList().getPresets()
+            var activePresets = settings.getSetting(SETTINGS.PRESETS)
+
+            activePresets.forEach(function (presetId) {
+                selectedPresets.push(playerPresets[presetId])
+            })
+        }
+
+        if (modelDataService.getPresetList().isLoaded()) {
+            handler()
+        } else {
+            socketService.emit(routeProvider.GET_PRESETS, {}, handler)
         }
     }
 
