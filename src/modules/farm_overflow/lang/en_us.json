@@ -59,6 +59,8 @@
         "attack": "attack",
         "no_logs": "No logs registered",
         "clear_logs": "Clear logs",
-        "reseted_logs": "Registered logs reseted."
+        "reseted_logs": "Registered logs reseted.",
+
+        "stop_no_presets": "FarmOverflow stopped: No presets available."
     }
 }
