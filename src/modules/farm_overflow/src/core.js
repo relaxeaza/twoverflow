@@ -5,8 +5,9 @@ define('two/farmOverflow', [
     'two/farmOverflow/settingsMap',
     'two/farmOverflow/settingsUpdate',
     'two/farmOverflow/logTypes',
-    'two/farmOverflow/eventStates',
+    'two/farmOverflow/stopReason',
     'two/mapData',
+    'two/utils',
     'helper/math',
     'queues/EventQueue'
 ], function (
@@ -16,8 +17,9 @@ define('two/farmOverflow', [
     SETTINGS_MAP,
     SETTINGS_UPDATE,
     LOG_TYPES,
-    EVENT_STATES,
+    STOP_REASON,
     mapData,
+    utils,
     math,
     eventQueue
 ) {
@@ -25,12 +27,16 @@ define('two/farmOverflow', [
     var initialized = false
     var running = false
     var settings
-    var farmers = window.farmers = {}
+    var farmers = window.farmers = []
     var includedVillages = []
     var ignoredVillages = []
     var onlyVillages = []
     var selectedPresets = []
-    
+    var activeFarmer = false
+    var sendingCommand = false
+    var currentTarget = false
+    var farmerIndex = 0
+    var farmerCycle = []
     var noop = function () {}
 
     var STORAGE_KEYS = {
@@ -76,7 +82,7 @@ define('two/farmOverflow', [
     }
 
     var reloadTargets = function () {
-        angular.forEach(farmers, function (farmer) {
+        farmers.forEach(function (farmer) {
             farmer.loadTargets()
         })
     }
@@ -131,13 +137,9 @@ define('two/farmOverflow', [
 
         if (groupIgnore === data.group_id) {
             if (isOwnVillage) {
-                farmer = farmers[data.village_id]
-
-                if (farmer) {
-                    farmer.destroy()
-                }
+                farmOverflow.destroyFarmerById(data.village_id)
             } else {
-                angular.forEach(farmers, function (farmer) {
+                farmers.forEach(function (farmer) {
                     farmer.removeTarget(data.village_id)
                 })
             }
@@ -149,7 +151,7 @@ define('two/farmOverflow', [
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
             farmer = farmOverflow.create(data.village_id)
-            farmer.init(function () {
+            farmer.init().then(function () {
                 if (running) {
                     farmer.start()
                 }
@@ -169,7 +171,7 @@ define('two/farmOverflow', [
         if (groupIgnore === data.group_id) {
             if (isOwnVillage) {
                 farmer = farmOverflow.create(data.village_id)
-                farmer.init(function () {
+                farmer.init().then(function () {
                     if (running) {
                         farmer.start()
                     }
@@ -184,11 +186,7 @@ define('two/farmOverflow', [
         }
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
-            farmer = farmers[data.village_id]
-
-            if (farmer) {
-                farmer.destroy()
-            }
+            farmOverflow.destroyFarmerById(data.village_id)
         }
     }
 
@@ -224,68 +222,166 @@ define('two/farmOverflow', [
 
         if (running && !selectedPresets.length) {
             farmOverflow.stop()
-            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, EVENT_STATES.STOP_NO_PRESETS)
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
+                reason: STOP_REASON.NO_PRESETS
+            })
         }
     }
 
+    var commandSentListener = function (event, data) {
+        if (!activeFarmer || !currentTarget) {
+            return
+        }
+
+        console.log('commandSentListener', data)
+
+        if (data.origin.id !== activeFarmer.getVillage().getId()) {
+            return
+        }
+
+        if (data.target.id !== currentTarget.id) {
+            return
+        }
+
+        if (data.direction === 'forward' && data.type === 'attack') {
+            activeFarmer.commandSent(data)
+        }
+    }
+
+    var commandErrorListener = function (event, data) {
+        if (!activeFarmer || !sendingCommand || !currentTarget) {
+            return
+        }
+
+        console.log('commandErrorListener', data)
+
+        if (data.cause === 'Command/sendPreset') {
+            activeFarmer.commandError(data)
+        }
+    }
+
+    var assignPresets = function (villageId, presetIds, callback) {
+        socketService.emit(routeProvider.ASSIGN_PRESETS, {
+            village_id: villageId,
+            preset_ids: presetIds
+        }, callback)
+    }
+
+    var checkPresetTime = function (preset, village, target) {
+        var limitTime = settings.getSetting(SETTINGS.MAX_TRAVEL_TIME) * 60
+        var position = village.getPosition()
+        var distance = math.actualDistance(position, target)
+        var travelTime = armyService.calculateTravelTime(preset, {
+            barbarian: !target.id,
+            officers: false
+        })
+        var totalTravelTime = armyService.getTravelTimeForDistance(preset, travelTime, distance, 'attack')
+
+        return limitTime > totalTravelTime
+    }
+
     var Farmer = function (villageId, _options) {
+        var self = this
         var village = $player.getVillage(villageId)
         var index = 0
         var running = false
         var initialized = false
         var ready = false
         var targets = []
+        var timeoutId
+        var cycleEndHandler = noop
 
         _options = _options || {}
 
         if (!village) {
-            throw new Error(`Village ${villageId} does not exist`)
+            throw new Error(`new Farmer -> Village ${villageId} doesn't exist.`)
         }
 
-        this.init = function (callback) {
-            callback = callback || noop
+        self.init = function () {
+            return new Promise(function (resolve) {
+                if (self.isReady()) {
+                    return resolve()
+                }
 
-            if (initialized) {
-                callback()
-                return true
-            }
+                initialized = true
 
-            initialized = true
-
-            this.loadTargets(function () {
-                ready = true
-                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, villageId)
-                callback()
+                self.loadTargets(function () {
+                    ready = true
+                    eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, {
+                        villageId: villageId
+                    })
+                    resolve()
+                })
             })
         }
 
-        this.start = function () {
+        self.start = function () {
+            console.log('farmer.start()', 'ready', ready)
+
+            var interval
+            var target
+
             if (!ready) {
-                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, villageId)
+                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, {
+                    villageId: villageId
+                })
                 return false
             }
 
             if (!targets.length) {
-                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS, villageId)
+                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS, {
+                    villageId: villageId
+                })
                 return false
             }
 
             running = true
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, {
+                villageId: villageId
+            })
 
-            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, villageId)
-
-
+            targetStep({
+                delay: false
+            })
 
             return true
         }
 
-        this.stop = function () {
-            running = false
+        self.stop = function (reason, data) {
+            console.log('farmer.stop()')
 
-            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, villageId)
+            running = false
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
+                villageId: villageId,
+                reason: reason,
+                data: data
+            })
+            clearTimeout(timeoutId)
+            cycleEndHandler(reason)
+            cycleEndHandler = noop
         }
 
-        this.loadTargets = function (_callback) {
+        self.commandSent = function (data) {
+            sendingCommand = false
+            currentTarget = false
+
+            targetStep({
+                delay: true
+            })
+        }
+
+        self.commandError = function (data) {
+            sendingCommand = false
+            currentTarget = false
+
+            self.stop(STOP_REASON.ERROR, data)
+        }
+
+        self.onceCycleEnd = function (handler) {
+            cycleEndHandler = handler
+        }
+
+        self.loadTargets = function (_callback) {
             var villagePosition = village.getPosition()
 
             mapData.load(village.getX(), village.getY(), function (loadedTargets) {
@@ -297,28 +393,23 @@ define('two/farmOverflow', [
             })
         }
 
-        this.getTargets = function () {
+        self.getTargets = function () {
             return targets
         }
 
-        this.getVillage = function () {
+        self.getVillage = function () {
             return village
         }
 
-        this.isRunning = function () {
+        self.isRunning = function () {
             return running
         }
 
-        this.isInitialized = function () {
-            return initialized
+        self.isReady = function () {
+            return initialized && ready
         }
 
-        this.destroy = function () {
-            this.stop()
-            delete farmers[villageId]
-        }
-
-        this.removeTarget = function (targetId) {
+        self.removeTarget = function (targetId) {
             if (typeof targetId !== 'number') {
                 return false
             }
@@ -330,109 +421,157 @@ define('two/farmOverflow', [
             return true
         }
 
-        if (_options.autoStart) {
-            this.init(() => {
-                this.start()
+        // private functions
+
+        var genPresetList = function () {
+            var villagePresets = modelDataService.getPresetList().getPresetsByVillageId(village.getId())
+            var needAssign = false
+            var which = []
+            var id
+
+            selectedPresets.forEach(function (preset) {
+                if (!villagePresets.hasOwnProperty(preset.id)) {
+                    needAssign = true
+                    which.push(preset.id)
+                }
+            })
+
+            if (needAssign) {
+                for (id in villagePresets) {
+                    which.push(id)
+                }
+
+                return which
+            }
+
+            return false
+        }
+
+        var targetStep = function (_delay) {
+            console.log('farmer.targetStep()')
+
+            var preset
+            var delayTime = 0
+            var target
+            var targetStatus = checkTargets()
+            var checkPresets
+            var neededPresets
+
+            if (targetStatus !== true) {
+                return self.stop(targetStatus)
+            }
+
+            checkPresets = new Promise(function (resolve) {
+                neededPresets = genPresetList()
+
+                if (neededPresets) {
+                    assignPresets(village.getId(), neededPresets, resolve)
+                } else {
+                    resolve()
+                }
+            })
+
+            checkPresets.then(function () {
+                target = getTarget()
+                preset = getPreset(target)
+
+                if (typeof preset === 'string') {
+                    switch (preset) {
+                    case ERROR_TYPES.TIME_LIMIT:
+                        targetStep(_delay)
+                        break
+                    case ERROR_TYPES.NO_UNITS:
+                        self.stop(STOP_REASON.NO_UNITS)
+                        break
+                    }
+
+                    return
+                }
+
+                if (_delay) {
+                    delayTime = utils.randomSeconds(settings.getSetting(SETTINGS.RANDOM_BASE))
+                    delayTime = 100 + (delayTime * 1000)
+                }
+
+                timeoutId = setTimeout(function() {
+                    attackTarget(target, preset)
+                }, delayTime)
             })
         }
 
-        return this
+        var checkTargets = function () {
+            if (!targets.length) {
+                return STOP_REASON.NO_TARGETS
+            }
+
+            if (index > targets.length || !targets[index]) {
+                return STOP_REASON.TARGET_CYCLE_END
+            }
+
+            return true
+        }
+
+        var attackTarget = function (target, preset) {
+            console.log('attackTarget()', running)
+
+            if (!running) {
+                return false
+            }
+
+            sendingCommand = true
+            currentTarget = target
+
+            socketService.emit(routeProvider.SEND_PRESET, {
+                start_village: village.getId(),
+                target_village: target.id,
+                army_preset_id: preset.id,
+                type: 'attack'
+            })
+
+            console.log('emit routeProvider.SEND_PRESET')
+        }
+
+        var getTarget = function () {
+            return targets[index++]
+        }
+
+        var getPreset = function (target) {
+            var timeLimit = false
+            var units = village.getUnitInfo().getUnits()
+            var selectedPreset = false
+            var avail
+            var unit
+            var i
+            var preset
+
+            for (i = 0; i < selectedPresets.length; i++) {
+                preset = selectedPresets[i]
+                avail = true
+
+                for (unit in preset.units) {
+                    if (!preset.units[unit]) {
+                        continue
+                    }
+
+                    if (units[unit].in_town < preset.units[unit]) {
+                        avail = false
+                    }
+                }
+
+                if (avail) {
+                    if (checkPresetTime(preset, village, target)) {
+                        return preset
+                    } else {
+                        return ERROR_TYPES.TIME_LIMIT
+                    }
+                }
+            }
+
+            return ERROR_TYPES.NO_UNITS
+        }
     }
 
     var farmOverflow = {}
-
-    farmOverflow.start = function () {
-        if (running) {
-            return false
-        }
-
-        angular.forEach(farmers, function (farmer) {
-            if (farmer.isInitialized()) {
-                farmer.start()
-            } else {
-                farmer.init(function () {
-                    farmer.start()
-                })
-            }
-        })
-
-        running = true
-
-        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_START)
-    }
-
-    farmOverflow.createAll = function () {
-        angular.forEach($player.getVillages(), function (village, villageId) {
-            var farmer = farmOverflow.create(villageId)
-
-            if (!farmer) {
-                return
-            }
-
-            farmer.init(function () {
-                if (running) {
-                    farmer.start()
-                }
-            })
-        })
-    }
-
-    farmOverflow.create = function (villageId) {
-        var groupsOnly = settings.getSetting(SETTINGS.GROUP_ONLY)
-
-        villageId = parseInt(villageId, 10)
-
-        if (groupsOnly.length && !onlyVillages.includes(villageId)) {
-            return false
-        }
-
-        if (ignoredVillages.includes(villageId)) {
-            return false
-        }
-
-        if (!farmers.hasOwnProperty(villageId)) {
-            farmers[villageId] = new Farmer(villageId)
-        }
-
-        return farmers[villageId]
-    }
-
-    farmOverflow.flush = function () {
-        var groupsOnly = settings.getSetting(SETTINGS.GROUP_ONLY)
-        var villageId
-
-        angular.forEach(farmers, function (farmer) {
-            villageId = farmer.getVillage().getId()
-
-            if (groupsOnly.length && !onlyVillages.includes(villageId)) {
-                farmer.destroy()
-            }
-
-            if (ignoredVillages.includes(villageId)) {
-                farmer.destroy()
-            }
-        })
-    }
-
-    farmOverflow.stop = function (_reason) {
-        running = false
-
-        angular.each(farmers, function (farmer) {
-            if(farmer.isRunning()) {
-                farmer.stop()
-            }
-        })
-
-        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, _reason)
-    }
-
-    farmOverflow.getSettings = function () {
-        return settings
-    }
-
-    farmOverflow.isInitialized = function () {
-        return initialized
-    }
 
     farmOverflow.init = function () {
         initialized = true
@@ -450,6 +589,159 @@ define('two/farmOverflow', [
         $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_LINKED, villageGroupLink)
         $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_UNLINKED, villageGroupUnlink)
         $rootScope.$on(eventTypeProvider.GROUPS_DESTROYED, removedGroupListener)
+        $rootScope.$on(eventTypeProvider.COMMAND_SENT, commandSentListener)
+        $rootScope.$on(eventTypeProvider.MESSAGE_ERROR, commandErrorListener)
+
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_STOP, function () { console.log('FARM_OVERFLOW_STOP') })
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, function () { console.log('FARM_OVERFLOW_INSTANCE_READY') })
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, function () { console.log('FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY') })
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS, function () { console.log('FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS') })
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, function () { console.log('FARM_OVERFLOW_INSTANCE_START') })
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, function () { console.log('FARM_OVERFLOW_INSTANCE_STOP') })
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_START, function () { console.log('FARM_OVERFLOW_START') })
+    }
+
+    farmOverflow.start = function () {
+        var readyFarmers
+
+        if (running) {
+            return false
+        }
+
+        running = true
+        readyFarmers = []
+
+        farmers.forEach(function (farmer) {
+            readyFarmers.push(new Promise(function (resolve) {
+                farmer.init().then(resolve)
+            }))
+        })
+
+        Promise.all(readyFarmers).then(function () {
+            farmOverflow.farmerStep()
+        })
+
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_START)
+    }
+
+    farmOverflow.stop = function (reason) {
+        console.log('farmOverflow.stop()', reason)
+
+        running = false
+        reason = reason || STOP_REASON.USER
+
+        if (activeFarmer) {
+            activeFarmer.stop(reason)
+        }
+
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
+            reason: reason
+        })
+    }
+
+    farmOverflow.createAll = function () {
+        angular.forEach($player.getVillages(), function (village, villageId) {
+            farmOverflow.create(villageId)
+        })
+    }
+
+    farmOverflow.create = function (villageId) {
+        var groupsOnly = settings.getSetting(SETTINGS.GROUP_ONLY)
+
+        villageId = parseInt(villageId, 10)
+
+        if (groupsOnly.length && !onlyVillages.includes(villageId)) {
+            return false
+        }
+
+        if (ignoredVillages.includes(villageId)) {
+            return false
+        }
+
+        if (!farmOverflow.getFarmerById(villageId)) {
+            farmers.push(new Farmer(villageId))
+        }
+
+        return farmOverflow.getFarmerById(villageId)
+    }
+
+    farmOverflow.flush = function () {
+        var groupsOnly = settings.getSetting(SETTINGS.GROUP_ONLY)
+        var villageId
+
+        farmers.forEach(function (farmer) {
+            villageId = farmer.getVillage().getId()
+
+            if (groupsOnly.length && !onlyVillages.includes(villageId)) {
+                farmOverflow.destroyFarmerById(villageId)
+            }
+
+            if (ignoredVillages.includes(villageId)) {
+                farmOverflow.destroyFarmerById(villageId)
+            }
+        })
+    }
+
+    farmOverflow.getFarmerById = function (farmerId) {
+        var i
+
+        for (i = 0; i < farmers.length; i++) {
+            if (farmers[i].getVillage().getId() === farmerId) {
+                return farmers[i]
+            }
+        }
+
+        return false
+    }
+
+    farmOverflow.destroyFarmerById = function () {
+        var i
+
+        for (i = 0; i < farmers.length; i++) {
+            if (farmers[i].getVillage().getId() === farmerId) {
+                farmers[i].stop()
+                farmers.splice(i, i + 1)
+
+                return true
+            }
+        }
+
+        return false
+    }
+
+    farmOverflow.getFarmer = function () {
+        if (!farmers.length) {
+            return false
+        }
+
+        if (farmerIndex >= farmers.length) {
+            farmerIndex = 0
+            return false
+        }
+
+        return farmers[farmerIndex++]
+    }
+
+    farmOverflow.farmerStep = function () {
+        activeFarmer = farmOverflow.getFarmer()
+
+        if (!activeFarmer) {
+            return farmOverflow.stop(STOP_REASON.FARMER_CYCLE_END)
+        }
+
+        activeFarmer.onceCycleEnd(function () {
+            farmOverflow.farmerStep()
+        })
+
+        activeFarmer.start()
+    }
+
+    farmOverflow.getSettings = function () {
+        return settings
+    }
+
+    farmOverflow.isInitialized = function () {
+        return initialized
     }
 
     return farmOverflow
