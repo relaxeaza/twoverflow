@@ -617,6 +617,10 @@ define('two/farmOverflow', [
             }))
         })
 
+        if (!readyFarmers.length) {
+            return false
+        }
+
         Promise.all(readyFarmers).then(function () {
             farmOverflow.farmerStep()
         })
