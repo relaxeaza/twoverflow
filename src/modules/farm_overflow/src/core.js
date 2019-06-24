@@ -245,7 +245,7 @@ define('two/farmOverflow', [
             return
         }
 
-        if (data.direction === 'forward' && data.type === 'attack') {
+        if (data.direction === 'forward' && data.type === COMMAND_TYPES.TYPES.ATTACK) {
             activeFarmer.commandSent(data)
         }
     }
@@ -277,7 +277,7 @@ define('two/farmOverflow', [
             barbarian: !target.id,
             officers: false
         })
-        var totalTravelTime = armyService.getTravelTimeForDistance(preset, travelTime, distance, 'attack')
+        var totalTravelTime = armyService.getTravelTimeForDistance(preset, travelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
 
         return limitTime > totalTravelTime
     }
@@ -602,7 +602,7 @@ define('two/farmOverflow', [
                 start_village: village.getId(),
                 target_village: target.id,
                 army_preset_id: preset.id,
-                type: 'attack'
+                type: COMMAND_TYPES.TYPES.ATTACK
             })
 
             console.log('emit routeProvider.SEND_PRESET')
