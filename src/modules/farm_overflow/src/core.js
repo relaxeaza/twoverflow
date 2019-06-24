@@ -282,6 +282,20 @@ define('two/farmOverflow', [
         return limitTime > totalTravelTime
     }
 
+    var checkFullStorage = function(village) {
+        if (!village.isReady()) {
+            return false
+        }
+
+        var resources = village.getResources()
+        var computed = resources.getComputed()
+        var maxStorage = resources.getMaxStorage()
+
+        return ['wood', 'clay', 'iron'].every(function (type) {
+            return computed[type].currentStock === maxStorage
+        })
+    }
+
     var Farmer = function (villageId, _options) {
         var self = this
         var village = $player.getVillage(villageId)
@@ -464,6 +478,16 @@ define('two/farmOverflow', [
             var prepareAttack
             var onError
 
+            checkStorage = function() {
+                return new Promise(function(resolve) {
+                    if (settings.getSetting(SETTINGS.IGNORE_FULL_STORAGE) && checkFullStorage(village)) {
+                        return onError(ERROR_TYPES.FULL_STORAGE)
+                    }
+
+                    resolve()
+                })
+            }
+
             checkTargets = function() {
                 return new Promise(function(resolve) {
                     if (!targets.length) {
@@ -574,13 +598,15 @@ define('two/farmOverflow', [
                 case ERROR_TYPES.NO_UNITS:
                 case ERROR_TYPES.NO_TARGETS:
                 case ERROR_TYPES.TARGET_CYCLE_END:
+                case ERROR_TYPES.FULL_STORAGE:
                     self.stop(error)
 
                     break
                 }
             }
 
-            checkTargets()
+            checkStorage()
+                .then(checkTargets)
                 .then(checkVillagePresets)
                 .then(checkPreset)
                 .then(checkTarget)

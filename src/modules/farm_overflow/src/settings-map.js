@@ -69,10 +69,10 @@ define('two/farmOverflow/settingsMap', [
         //     default: true,
         //     updates: []
         // },
-        // [SETTINGS.IGNORE_FULL_STORAGE]: {
-        //     default: true,
-        //     updates: [SETTINGS_UPDATE.FULL_STORAGE]
-        // },
+        [SETTINGS.IGNORE_FULL_STORAGE]: {
+            default: true,
+            updates: []
+        },
         // [SETTINGS.STEP_CYCLE]: {
         //     default: false,
         //     updates: [SETTINGS_UPDATE.VILLAGES]
