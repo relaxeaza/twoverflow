@@ -26,6 +26,7 @@ define('two/farmOverflow', [
     COMMAND_TYPES
 ) {
     var $player = modelDataService.getSelectedCharacter()
+    var VILLAGE_COMMAND_LIMIT = 50
     var initialized = false
     var running = false
     var settings
@@ -470,6 +471,9 @@ define('two/farmOverflow', [
             var delayTime = 0
             var target
             var neededPresets
+
+            var checkCommandLimit
+            var checkStorage
             var checkTargets
             var checkVillagePresets
             var checkPreset
@@ -477,6 +481,20 @@ define('two/farmOverflow', [
             var checkCommands
             var prepareAttack
             var onError
+
+            checkCommandLimit = function() {
+                return new Promise(function(resolve) {
+                    var commandList = village.getCommandListModel()
+                    var commands = commandList.getOutgoingCommands(true, true)
+                    var limit = VILLAGE_COMMAND_LIMIT - settings.getSetting(SETTINGS.PRESERVE_COMMAND_SLOTS)
+
+                    if (commands.length >= limit) {
+                        return onError(ERROR_TYPES.COMMAND_LIMIT)
+                    }
+
+                    resolve()
+                })
+            }
 
             checkStorage = function() {
                 return new Promise(function(resolve) {
@@ -599,13 +617,15 @@ define('two/farmOverflow', [
                 case ERROR_TYPES.NO_TARGETS:
                 case ERROR_TYPES.TARGET_CYCLE_END:
                 case ERROR_TYPES.FULL_STORAGE:
+                case ERROR_TYPES.COMMAND_LIMIT:
                     self.stop(error)
 
                     break
                 }
             }
 
-            checkStorage()
+            checkCommandLimit()
+                .then(checkStorage)
                 .then(checkTargets)
                 .then(checkVillagePresets)
                 .then(checkPreset)

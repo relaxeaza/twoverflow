@@ -57,10 +57,10 @@ define('two/farmOverflow/settingsMap', [
             updates: [],
             inputType: 'checkbox'
         },
-        // [SETTINGS.COMMANDS_PER_VILLAGE]: {
-        //     default: 48,
-        //     updates: [SETTINGS_UPDATE.WAITING_VILLAGES]
-        // },
+        [SETTINGS.PRESERVE_COMMAND_SLOTS]: {
+            default: 5,
+            updates: []
+        },
         // [SETTINGS.PRIORITY_TARGETS]: {
         //     default: true,
         //     updates: []

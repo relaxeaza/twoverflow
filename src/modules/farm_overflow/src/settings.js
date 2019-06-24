@@ -9,8 +9,8 @@ define('two/farmOverflow/settings', [], function () {
         IGNORE_FULL_STORAGE: 'ignore_full_storage',        
         RANDOM_BASE: 'random_base',
         MAX_TRAVEL_TIME: 'max_travel_time',
-        TARGET_SINGLE_ATTACK: 'target_single_attack'
-        // COMMANDS_PER_VILLAGE: 'commands_per_village',
+        TARGET_SINGLE_ATTACK: 'target_single_attack',
+        PRESERVE_COMMAND_SLOTS: 'preserve_command_slots'
         // PRIORITY_TARGETS: 'priority_targets',
         // IGNORE_ON_LOSS: 'ignore_on_loss',
         // STEP_CYCLE: 'step_cycle',
