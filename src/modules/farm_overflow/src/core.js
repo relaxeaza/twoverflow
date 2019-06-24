@@ -257,7 +257,7 @@ define('two/farmOverflow', [
 
         console.log('commandErrorListener', data)
 
-        if (data.cause === 'Command/sendPreset') {
+        if (data.cause === routeProvider.SEND_PRESET.type) {
             activeFarmer.commandError(data)
         }
     }
