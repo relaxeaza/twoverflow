@@ -455,8 +455,8 @@ define('two/farmOverflow', [
             var preset
             var delayTime = 0
             var target
-            var targetStatus = checkTargets()
             var neededPresets
+            var checkTargets
             var checkVillagePresets
             var checkPreset
             var checkTarget
@@ -464,8 +464,18 @@ define('two/farmOverflow', [
             var prepareAttack
             var onError
 
-            if (targetStatus !== true) {
-                return self.stop(targetStatus)
+            checkTargets = function() {
+                return new Promise(function(resolve) {
+                    if (!targets.length) {
+                        return onError(ERROR_TYPES.NO_TARGETS)
+                    }
+
+                    if (index > targets.length || !targets[index]) {
+                        return onError(ERROR_TYPES.TARGET_CYCLE_END)
+                    }
+
+                    resolve()
+                })
             }
 
             checkVillagePresets = function() {
@@ -562,29 +572,20 @@ define('two/farmOverflow', [
 
                     break
                 case ERROR_TYPES.NO_UNITS:
-                    self.stop(STOP_REASON.NO_UNITS)
+                case ERROR_TYPES.NO_TARGETS:
+                case ERROR_TYPES.TARGET_CYCLE_END:
+                    self.stop(error)
 
                     break
                 }
             }
 
-            checkVillagePresets()
+            checkTargets()
+                .then(checkVillagePresets)
                 .then(checkPreset)
                 .then(checkTarget)
                 .then(checkCommands)
                 .then(prepareAttack)
-        }
-
-        var checkTargets = function () {
-            if (!targets.length) {
-                return STOP_REASON.NO_TARGETS
-            }
-
-            if (index > targets.length || !targets[index]) {
-                return STOP_REASON.TARGET_CYCLE_END
-            }
-
-            return true
         }
 
         var attackTarget = function (target, preset) {

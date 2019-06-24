@@ -8,6 +8,8 @@ define('two/farmOverflow/errorTypes', [], function () {
         NO_SELECTED_VILLAGE: 'no_selected_village',
         ABANDONED_CONQUERED: 'abandoned_conquered',
         PROTECTED_VILLAGE: 'protected_village',
-        SINGLE_COMMAND_FILLED: 'single_command_filled'
+        SINGLE_COMMAND_FILLED: 'single_command_filled',
+        NO_TARGETS: 'no_targets',
+        TARGET_CYCLE_END: 'target_cycle_end'
     }
 })
