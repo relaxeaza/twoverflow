@@ -52,6 +52,11 @@ define('two/farmOverflow/settingsMap', [
             default: 0,
             updates: []
         },
+        [SETTINGS.TARGET_SINGLE_ATTACK]: {
+            default: true,
+            updates: [],
+            inputType: 'checkbox'
+        },
         // [SETTINGS.COMMANDS_PER_VILLAGE]: {
         //     default: 48,
         //     updates: [SETTINGS_UPDATE.WAITING_VILLAGES]

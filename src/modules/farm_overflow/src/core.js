@@ -9,7 +9,8 @@ define('two/farmOverflow', [
     'two/mapData',
     'two/utils',
     'helper/math',
-    'queues/EventQueue'
+    'queues/EventQueue',
+    'conf/commandTypes'
 ], function (
     Settings,
     ERROR_TYPES,
@@ -21,7 +22,8 @@ define('two/farmOverflow', [
     mapData,
     utils,
     math,
-    eventQueue
+    eventQueue,
+    COMMAND_TYPES
 ) {
     var $player = modelDataService.getSelectedCharacter()
     var initialized = false
@@ -497,26 +499,57 @@ define('two/farmOverflow', [
 
                         // abandoned village conquered by some noob.
                         if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
-                            return reject(ERROR_TYPES.ABANDONED_CONQUERED)
+                            reject(ERROR_TYPES.ABANDONED_CONQUERED)
+                        } else if (target.attack_protection) {
+                            reject(ERROR_TYPES.PROTECTED_VILLAGE)
+                        } else {
+                            resolve()
                         }
-
-                        if (target.attack_protection) {
-                            return reject(ERROR_TYPES.PROTECTED_VILLAGE)
-                        }
-
-                        resolve()
                     })
                 })
 
                 checkTarget.then(function() {
-                    if (_delay) {
-                        delayTime = utils.randomSeconds(settings.getSetting(SETTINGS.RANDOM_BASE))
-                        delayTime = 100 + (delayTime * 1000)
-                    }
+                    checkTargetCommands = new Promise(function(resolve, reject) {
+                        if (!settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)) {
+                            return resolve()
+                        }
 
-                    timeoutId = setTimeout(function() {
-                        attackTarget(target, preset)
-                    }, delayTime)
+                        socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
+                            my_village_id: villageId,
+                            village_id: target.id,
+                            num_reports: 0
+                        }, function(data) {
+                            var busy = data.commands.own.some(function(command) {
+                                if (command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward') {
+                                    return true
+                                }
+                            })
+
+                            if (busy) {
+                                reject()
+                            } else {
+                                resolve()
+                            }
+                        })
+                    })
+
+                    checkTargetCommands.then(function() {
+                        if (_delay) {
+                            delayTime = utils.randomSeconds(settings.getSetting(SETTINGS.RANDOM_BASE))
+                            delayTime = 100 + (delayTime * 1000)
+                        }
+
+                        timeoutId = setTimeout(function() {
+                            attackTarget(target, preset)
+                        }, delayTime)
+                    }).catch(function () {
+                        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_COMMAND_ERROR, {
+                            villageId: villageId,
+                            error: ERROR_TYPES.SINGLE_COMMAND_FILLED
+                        })
+
+                        targetStep(_delay)
+                    })
                 }).catch(function(error) {
                     eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_COMMAND_ERROR, {
                         villageId: villageId,
@@ -626,8 +659,9 @@ define('two/farmOverflow', [
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, function () { console.log('FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY') })
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS, function () { console.log('FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS') })
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, function () { console.log('FARM_OVERFLOW_INSTANCE_START') })
-        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, function () { console.log('FARM_OVERFLOW_INSTANCE_STOP') })
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, function (event, data) { console.log('FARM_OVERFLOW_INSTANCE_STOP', data.reason) })
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_START, function () { console.log('FARM_OVERFLOW_START') })
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_COMMAND_ERROR, function (event, data) { console.log('FARM_OVERFLOW_INSTANCE_COMMAND_ERROR', data.error) })
     }
 
     farmOverflow.start = function () {
