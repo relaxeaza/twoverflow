@@ -53,7 +53,7 @@ define('two/farmOverflow/settingsMap', [
             updates: []
         },
         [SETTINGS.TARGET_SINGLE_ATTACK]: {
-            default: false,
+            default: true,
             updates: [],
             inputType: 'checkbox'
         },
@@ -86,7 +86,7 @@ define('two/farmOverflow/settingsMap', [
             updates: []
         },
         [SETTINGS.MAX_DISTANCE]: {
-            default: 10,
+            default: 30,
             updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MIN_DISTANCE]: {

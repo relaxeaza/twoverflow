@@ -28,11 +28,8 @@ define('two/farmOverflow/ui', [
 
     var init = function () {
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_START, function (data) {
-            var title = $filter('i18n')('title', $rootScope.loc.ale, textObject)
-            var started = $filter('i18n')('started', $rootScope.loc.ale, textObjectCommon)
-
             $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                message: title + ' ' + started
+                message: $filter('i18n')('farm_started', $rootScope.loc.ale, textObject)
             })
         })
 
