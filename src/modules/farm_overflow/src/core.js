@@ -43,15 +43,11 @@ define('two/farmOverflow', [
     var currentTarget = false
     var farmerIndex = 0
     var farmerCycle = []
-    window.indexes = {}
-    var lastActivity
+    var farmerTimeoutId
     var noop = function () {}
 
     var STORAGE_KEYS = {
-        INDEXES: 'farm_overflow_indexes',
         LOGS: 'farm_overflow_logs',
-        LAST_ATTACK: 'farm_overflow_last_attack',
-        LAST_ACTIVITY: 'farm_overflow_last_activity',
         SETTINGS: 'farm_overflow_settings'
     }
 
@@ -241,8 +237,6 @@ define('two/farmOverflow', [
             return
         }
 
-        console.log('commandSentListener', data)
-
         if (data.origin.id !== activeFarmer.getVillage().getId()) {
             return
         }
@@ -260,8 +254,6 @@ define('two/farmOverflow', [
         if (!activeFarmer || !sendingCommand || !currentTarget) {
             return
         }
-
-        console.log('commandErrorListener', data)
 
         if (data.cause === routeProvider.SEND_PRESET.type) {
             activeFarmer.commandError(data)
@@ -302,32 +294,17 @@ define('two/farmOverflow', [
         })
     }
 
-    var updateIndexes = function() {
-        var now = Date.now()
-        var retentionTime = INDEX_RETENTION_TIME * 60 * 1000
-
-        if (now - lastActivity > retentionTime) {
-            indexes = {}
-            Lockr.set(STORAGE_KEYS.INDEXES, indexes)
-        }
-    }
-
-    var updateActivity = function() {
-        lastActivity = Date.now()
-        Lockr.set(STORAGE_KEYS.LAST_ACTIVITY, lastActivity)
-    }
-
     var Farmer = function (villageId, _options) {
         var self = this
         var village = $player.getVillage(villageId)
-        var index = indexes[villageId] || 0
+        var index = 0
         var running = false
         var initialized = false
         var ready = false
         var targets = []
-        var timeoutId
         var cycleEndHandler = noop
         var loadPromises
+        var targetTimeoutId
 
         _options = _options || {}
 
@@ -368,8 +345,6 @@ define('two/farmOverflow', [
         }
 
         self.start = function () {
-            console.log('farmer.start()', 'ready', ready)
-
             var interval
             var target
 
@@ -405,15 +380,13 @@ define('two/farmOverflow', [
         }
 
         self.stop = function (reason, data) {
-            console.log('farmer.stop()')
-
             running = false
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
                 villageId: villageId,
                 reason: reason,
                 data: data
             })
-            clearTimeout(timeoutId)
+            clearTimeout(targetTimeoutId)
             cycleEndHandler(reason)
             cycleEndHandler = noop
         }
@@ -505,14 +478,12 @@ define('two/farmOverflow', [
         }
 
         var targetStep = function (options) {
-            console.log('farmer.targetStep()')
-
             options = options || {}
+
             var preset
             var delayTime = 0
             var target
             var neededPresets
-
             var checkCommandLimit
             var checkStorage
             var checkTargets
@@ -591,8 +562,6 @@ define('two/farmOverflow', [
                     socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
                         target_id: target.id
                     }, function(data) {
-                        console.log('GET_ATTACKING_FACTOR', data)
-
                         // abandoned village conquered by some noob.
                         if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
                             onError(ERROR_TYPES.ABANDONED_CONQUERED)
@@ -637,7 +606,7 @@ define('two/farmOverflow', [
                     delayTime = 100 + (delayTime * 1000)
                 }
 
-                timeoutId = setTimeout(function() {
+                targetTimeoutId = setTimeout(function() {
                     attackTarget(target, preset)
                 }, delayTime)
             }
@@ -662,16 +631,12 @@ define('two/farmOverflow', [
 
                     break
                 case ERROR_TYPES.TARGET_CYCLE_END:
-                    console.log('INDEX RESETED!!')
                     self.stop(error)
                     index = 0
 
                     break
                 }
             }
-
-            updateIndexes()
-            updateActivity()
 
             checkCommandLimit()
                 .then(checkStorage)
@@ -684,8 +649,6 @@ define('two/farmOverflow', [
         }
 
         var attackTarget = function (target, preset) {
-            console.log('attackTarget()', running)
-
             if (!running) {
                 return false
             }
@@ -699,19 +662,10 @@ define('two/farmOverflow', [
                 army_preset_id: preset.id,
                 type: COMMAND_TYPES.TYPES.ATTACK
             })
-
-            console.log('emit routeProvider.SEND_PRESET')
         }
 
         var getTarget = function () {
-            var target
-
-            target = targets[index++]
-            indexes[villageId] = index
-
-            Lockr.set(STORAGE_KEYS.INDEXES, indexes)
-
-            return target
+            return targets[index++]
         }
 
         var getPreset = function (target) {
@@ -758,10 +712,7 @@ define('two/farmOverflow', [
             settingsMap: SETTINGS_MAP,
             storageKey: STORAGE_KEYS.SETTINGS
         })
-        indexes = Lockr.get(STORAGE_KEYS.INDEXES, {})
-        lastActivity = Lockr.get(STORAGE_KEYS.LAST_ACTIVITY, Date.now())
-
-        updateIndexes()
+        
         updateGroupVillages()
         updatePresets()
         farmOverflow.createAll()
@@ -773,15 +724,6 @@ define('two/farmOverflow', [
         $rootScope.$on(eventTypeProvider.GROUPS_DESTROYED, removedGroupListener)
         $rootScope.$on(eventTypeProvider.COMMAND_SENT, commandSentListener)
         $rootScope.$on(eventTypeProvider.MESSAGE_ERROR, commandErrorListener)
-
-        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_STOP, function () { console.log('FARM_OVERFLOW_STOP') })
-        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, function () { console.log('FARM_OVERFLOW_INSTANCE_READY') })
-        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, function () { console.log('FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY') })
-        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS, function () { console.log('FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS') })
-        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, function () { console.log('FARM_OVERFLOW_INSTANCE_START') })
-        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, function (event, data) { console.log('FARM_OVERFLOW_INSTANCE_STOP', data.reason) })
-        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_START, function () { console.log('FARM_OVERFLOW_START') })
-        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, function (event, data) { console.log('FARM_OVERFLOW_INSTANCE_STEP_ERROR', data.error) })
     }
 
     farmOverflow.start = function () {
@@ -805,22 +747,21 @@ define('two/farmOverflow', [
         }
 
         Promise.all(readyFarmers).then(function () {
-            // farmOverflow.farmerStep()
-            console.log('OK')
+            farmOverflow.farmerStep()
         })
 
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_START)
     }
 
     farmOverflow.stop = function (reason) {
-        console.log('farmOverflow.stop()', reason)
-
         running = false
         reason = reason || STOP_REASON.USER
 
         if (activeFarmer) {
             activeFarmer.stop(reason)
         }
+
+        clearTimeout(farmerTimeoutId)
 
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
             reason: reason
@@ -914,7 +855,13 @@ define('two/farmOverflow', [
         activeFarmer = farmOverflow.getOne()
 
         if (!activeFarmer) {
-            return farmOverflow.stop(STOP_REASON.FARMER_CYCLE_END)
+            farmOverflow.stop(STOP_REASON.FARMER_CYCLE_END)
+
+            farmerTimeoutId = setTimeout(function() {
+                farmOverflow.farmerStep()
+            }, settings.getSetting(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000)
+
+            return
         }
 
         activeFarmer.onceCycleEnd(function () {
