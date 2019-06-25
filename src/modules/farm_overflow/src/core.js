@@ -29,6 +29,7 @@ define('two/farmOverflow', [
 ) {
     var $player = modelDataService.getSelectedCharacter()
     var VILLAGE_COMMAND_LIMIT = 50
+    var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
     var initialized = false
     var running = false
     var settings
@@ -888,14 +889,19 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.farmerStep = function () {
+        var interval
+
         activeFarmer = farmOverflow.getOne()
 
         if (!activeFarmer) {
             farmOverflow.stop(ERROR_TYPES.FARMER_CYCLE_END)
 
+            interval = settings.getSetting(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
+            interval += MINIMUM_FARMER_CYCLE_INTERVAL
+
             farmerTimeoutId = setTimeout(function() {
                 farmOverflow.farmerStep()
-            }, settings.getSetting(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000)
+            }, interval)
 
             return
         }
