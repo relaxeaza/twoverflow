@@ -53,7 +53,7 @@ define('two/farmOverflow/settingsMap', [
             updates: []
         },
         [SETTINGS.TARGET_SINGLE_ATTACK]: {
-            default: true,
+            default: false,
             updates: [],
             inputType: 'checkbox'
         },
@@ -82,7 +82,7 @@ define('two/farmOverflow/settingsMap', [
         //     updates: []
         // },
         [SETTINGS.FARMER_CYCLE_INTERVAL]: {
-            default: 5,
+            default: 0,
             updates: []
         },
         [SETTINGS.MAX_DISTANCE]: {
@@ -105,10 +105,10 @@ define('two/farmOverflow/settingsMap', [
             default: 60,
             updates: []
         },
-        // [SETTINGS.LOGS_LIMIT]: {
-        //     default: 500,
-        //     updates: [SETTINGS_UPDATE.LOGS]
-        // },
+        [SETTINGS.LOGS_LIMIT]: {
+            default: 500,
+            updates: [SETTINGS_UPDATE.LOGS]
+        },
         // [SETTINGS.EVENT_ATTACK]: {
         //     default: true,
         //     updates: [SETTINGS_UPDATE.LOGS]

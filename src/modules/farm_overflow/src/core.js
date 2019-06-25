@@ -8,6 +8,7 @@ define('two/farmOverflow', [
     'two/mapData',
     'two/utils',
     'helper/math',
+    'helper/time',
     'queues/EventQueue',
     'conf/commandTypes',
     'Lockr'
@@ -21,6 +22,7 @@ define('two/farmOverflow', [
     mapData,
     utils,
     math,
+    timeHelper,
     eventQueue,
     COMMAND_TYPES,
     Lockr
@@ -41,6 +43,7 @@ define('two/farmOverflow', [
     var farmerIndex = 0
     var farmerCycle = []
     var farmerTimeoutId
+    var logs = []
     var noop = function () {}
 
     var STORAGE_KEYS = {
@@ -291,6 +294,30 @@ define('two/farmOverflow', [
         })
     }
 
+    var addLog = function(data) {
+        if (!angular.isObject(data)) {
+            return false
+        }
+
+        if (typeof data.originId !== 'number' || typeof data.targetId !== 'number' || !data.type) {
+            return false
+        }
+
+        var limit = settings.getSetting(SETTINGS.LOGS_LIMIT)
+
+        data.time = timeHelper.gameTime()
+        logs.push(data)
+
+        if (logs.length > limit) {
+            logs = logs.slice(logs.length - limit, logs.length)
+        }
+
+        Lockr.set(STORAGE_KEYS.LOGS, logs)
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_LOGS_UPDATED)
+
+        return true
+    }
+
     var Farmer = function (villageId, _options) {
         var self = this
         var village = $player.getVillage(villageId)
@@ -342,6 +369,8 @@ define('two/farmOverflow', [
         }
 
         self.start = function () {
+            console.log('farmer.start()', village.getName())
+
             var interval
             var target
 
@@ -377,6 +406,8 @@ define('two/farmOverflow', [
         }
 
         self.stop = function (reason) {
+            console.log('farmer.stop()', village.getName(), 'reason', reason)
+
             running = false
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
                 villageId: villageId,
@@ -388,8 +419,16 @@ define('two/farmOverflow', [
         }
 
         self.commandSent = function (data) {
+            console.log('farmer.commandSent()', village.getName())
+
             sendingCommand = false
             currentTarget = false
+
+            addLog({
+                originId: data.origin.id,
+                targetId: data.target.id,
+                type: LOG_TYPES.ATTACK
+            })
 
             targetStep({
                 delay: true
@@ -708,6 +747,7 @@ define('two/farmOverflow', [
             settingsMap: SETTINGS_MAP,
             storageKey: STORAGE_KEYS.SETTINGS
         })
+        logs = Lockr.get(STORAGE_KEYS.LOGS, [])
         
         updateGroupVillages()
         updatePresets()
@@ -844,7 +884,7 @@ define('two/farmOverflow', [
             return false
         }
 
-        return farmers[farmerIndex++]   
+        return farmers[farmerIndex++]
     }
 
     farmOverflow.farmerStep = function () {

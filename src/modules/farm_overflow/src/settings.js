@@ -10,7 +10,8 @@ define('two/farmOverflow/settings', [], function () {
         RANDOM_BASE: 'random_base',
         MAX_TRAVEL_TIME: 'max_travel_time',
         TARGET_SINGLE_ATTACK: 'target_single_attack',
-        PRESERVE_COMMAND_SLOTS: 'preserve_command_slots'
+        PRESERVE_COMMAND_SLOTS: 'preserve_command_slots',
+        FARMER_CYCLE_INTERVAL: 'farmer_cycle_interval'
         // PRIORITY_TARGETS: 'priority_targets',
         // IGNORE_ON_LOSS: 'ignore_on_loss',
         // STEP_CYCLE: 'step_cycle',

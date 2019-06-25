@@ -16,7 +16,6 @@ define('two/farmOverflow/events', [], function () {
         // FARM_REMOTE_COMMAND: 'farmoverflow_remote_command',
         // FARM_PRESETS_CHANGE: 'farmoverflow_presets_change',
         // FARM_GROUPS_CHANGED: 'farmoverflow_groups_changed',
-        // FARM_LOGS_UPDATED: 'farmoverflow_logs_updated',
         // FARM_LOGS_RESETED: 'farmoverflow_logs_reseted',
         // FARM_IGNORED_VILLAGE: 'farmoverflow_ignored_village',
         // FARM_LOADING_TARGETS_START: 'farmoverflow_loading_targets_start',
@@ -46,5 +45,6 @@ define('two/farmOverflow/events', [], function () {
         FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY: 'farm_overflow_instance_error_not_ready',
         FARM_OVERFLOW_INSTANCE_STEP_ERROR: 'farm_overflow_instance_command_error',
         FARM_OVERFLOW_PRESETS_LOADED: 'farm_overflow_presets_loaded',
+        FARM_OVERFLOW_LOGS_UPDATED: 'farm_overflow_log_updated',
     })
 })
