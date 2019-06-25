@@ -10,7 +10,8 @@ define('two/farmOverflow', [
     'two/utils',
     'helper/math',
     'queues/EventQueue',
-    'conf/commandTypes'
+    'conf/commandTypes',
+    'Lockr'
 ], function (
     Settings,
     ERROR_TYPES,
@@ -23,10 +24,12 @@ define('two/farmOverflow', [
     utils,
     math,
     eventQueue,
-    COMMAND_TYPES
+    COMMAND_TYPES,
+    Lockr
 ) {
     var $player = modelDataService.getSelectedCharacter()
     var VILLAGE_COMMAND_LIMIT = 50
+    var INDEX_RETENTION_TIME = 1 // minutes
     var initialized = false
     var running = false
     var settings
@@ -40,6 +43,8 @@ define('two/farmOverflow', [
     var currentTarget = false
     var farmerIndex = 0
     var farmerCycle = []
+    window.indexes = {}
+    var lastActivity
     var noop = function () {}
 
     var STORAGE_KEYS = {
@@ -297,10 +302,25 @@ define('two/farmOverflow', [
         })
     }
 
+    var updateIndexes = function() {
+        var now = Date.now()
+        var retentionTime = INDEX_RETENTION_TIME * 60 * 1000
+
+        if (now - lastActivity > retentionTime) {
+            indexes = {}
+            Lockr.set(STORAGE_KEYS.INDEXES, indexes)
+        }
+    }
+
+    var updateActivity = function() {
+        lastActivity = Date.now()
+        Lockr.set(STORAGE_KEYS.LAST_ACTIVITY, lastActivity)
+    }
+
     var Farmer = function (villageId, _options) {
         var self = this
         var village = $player.getVillage(villageId)
-        var index = 0
+        var index = indexes[villageId] || 0
         var running = false
         var initialized = false
         var ready = false
@@ -643,6 +663,9 @@ define('two/farmOverflow', [
                 }
             }
 
+            updateIndexes()
+            updateActivity()
+
             checkCommandLimit()
                 .then(checkStorage)
                 .then(checkTargets)
@@ -674,7 +697,14 @@ define('two/farmOverflow', [
         }
 
         var getTarget = function () {
-            return targets[index++]
+            var target
+
+            target = targets[index++]
+            indexes[villageId] = index
+
+            Lockr.set(STORAGE_KEYS.INDEXES, indexes)
+
+            return target
         }
 
         var getPreset = function (target) {
@@ -721,7 +751,10 @@ define('two/farmOverflow', [
             settingsMap: SETTINGS_MAP,
             storageKey: STORAGE_KEYS.SETTINGS
         })
+        indexes = Lockr.get(STORAGE_KEYS.INDEXES, {})
+        lastActivity = Lockr.get(STORAGE_KEYS.LAST_ACTIVITY, Date.now())
 
+        updateIndexes()
         updateGroupVillages()
         updatePresets()
         farmOverflow.createAll()
