@@ -307,6 +307,7 @@ define('two/farmOverflow', [
         var targets = []
         var timeoutId
         var cycleEndHandler = noop
+        var loadPromises
 
         _options = _options || {}
 
@@ -315,20 +316,34 @@ define('two/farmOverflow', [
         }
 
         self.init = function () {
-            return new Promise(function (resolve) {
-                if (self.isReady()) {
-                    return resolve()
-                }
+            loadPromises = []
+            initialized = true
 
-                initialized = true
+            if (!self.isReady()) {
+                loadPromises.push(new Promise(function(resolve) {
+                    if (self.isReady()) {
+                        return resolve()
+                    }
 
-                self.loadTargets(function () {
-                    ready = true
-                    eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, {
-                        villageId: villageId
+                    villageService.ensureVillageDataLoaded(village.getId(), resolve)
+                }))
+
+                loadPromises.push(new Promise(function (resolve) {
+                    if (self.isReady()) {
+                        return resolve()
+                    }
+
+                    self.loadTargets(function () {
+                        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, {
+                            villageId: villageId
+                        })
+                        resolve()
                     })
-                    resolve()
-                })
+                }))
+            }
+
+            return Promise.all(loadPromises).then(function() {
+                ready = true
             })
         }
 
