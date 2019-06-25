@@ -65,10 +65,10 @@ define('two/farmOverflow/settingsMap', [
         //     default: true,
         //     updates: []
         // },
-        // [SETTINGS.IGNORE_ON_LOSS]: {
-        //     default: true,
-        //     updates: []
-        // },
+        [SETTINGS.IGNORE_ON_LOSS]: {
+            default: true,
+            updates: []
+        },
         [SETTINGS.IGNORE_FULL_STORAGE]: {
             default: true,
             updates: []

@@ -223,6 +223,23 @@ define('two/farmOverflow', [
         }
     }
 
+    var ignoreVillage = function (villageId) {
+        var groupIgnore = settings.getSetting(SETTINGS.GROUP_IGNORE)
+
+        if (!groupIgnore) {
+            return false
+        }
+
+        socketService.emit(routeProvider.GROUPS_LINK_VILLAGE, {
+            group_id: groupIgnore,
+            village_id: villageId
+        }, function () {
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_VILLAGE_IGNORED, villageId)
+        })
+
+        return true
+    }
+
     var presetListener = function () {
         updatePresets()
 
@@ -231,6 +248,25 @@ define('two/farmOverflow', [
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
                 reason: ERROR_TYPES.NO_PRESETS
             })
+        }
+    }
+
+    var reportListener = function (event, data) {
+        if (!settings.getSetting(SETTINGS.IGNORE_ON_LOSS) || !settings.getSetting(SETTINGS.GROUP_IGNORE)) {
+            return
+        }
+
+        if (!running || data.type !== COMMAND_TYPES.TYPES.ATTACK) {
+            return
+        }
+
+        var target
+
+        // 1 = nocasualties
+        // 2 = casualties
+        // 3 = defeat
+        if (data.result !== 1 && farmOverflow.isTarget(data.target_village_id)) {
+            ignoreVillage(data.target_village_id)
         }
     }
 
@@ -762,6 +798,7 @@ define('two/farmOverflow', [
         $rootScope.$on(eventTypeProvider.GROUPS_DESTROYED, removedGroupListener)
         $rootScope.$on(eventTypeProvider.COMMAND_SENT, commandSentListener)
         $rootScope.$on(eventTypeProvider.MESSAGE_ERROR, commandErrorListener)
+        $rootScope.$on(eventTypeProvider.REPORT_NEW, reportListener)
     }
 
     farmOverflow.start = function () {
@@ -912,6 +949,29 @@ define('two/farmOverflow', [
         })
 
         activeFarmer.start()
+    }
+
+    farmOverflow.isTarget = function (targetId) {
+        var i
+        var j
+        var farmer
+        var targets
+        var target
+
+        for (i = 0; i < farmers.length; i++) {
+            farmer = farmers[i]
+            targets = farmer.getTargets()
+
+            for (j = 0; j < targets.length; j++) {
+                target = targets[j]
+
+                if (target.id === targetId) {
+                    return true
+                }
+            }
+        }
+
+        return false
     }
 
     farmOverflow.getSettings = function () {
