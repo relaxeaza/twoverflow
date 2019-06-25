@@ -391,6 +391,7 @@ define('two/farmOverflow', [
                 return false
             }
 
+            activeFarmer = this
             running = true
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, {
                 villageId: villageId
@@ -503,9 +504,10 @@ define('two/farmOverflow', [
             return false
         }
 
-        var targetStep = function (_delay) {
+        var targetStep = function (options) {
             console.log('farmer.targetStep()')
 
+            options = options || {}
             var preset
             var delayTime = 0
             var target
@@ -630,7 +632,7 @@ define('two/farmOverflow', [
             }
 
             prepareAttack = function() {
-                if (_delay) {
+                if (options.delay) {
                     delayTime = utils.randomSeconds(settings.getSetting(SETTINGS.RANDOM_BASE))
                     delayTime = 100 + (delayTime * 1000)
                 }
@@ -649,15 +651,20 @@ define('two/farmOverflow', [
                 switch (error) {
                 case ERROR_TYPES.TIME_LIMIT:
                 case ERROR_TYPES.SINGLE_COMMAND_FILLED:
-                    targetStep(_delay)
+                    targetStep(options)
 
                     break
                 case ERROR_TYPES.NO_UNITS:
                 case ERROR_TYPES.NO_TARGETS:
-                case ERROR_TYPES.TARGET_CYCLE_END:
                 case ERROR_TYPES.FULL_STORAGE:
                 case ERROR_TYPES.COMMAND_LIMIT:
                     self.stop(error)
+
+                    break
+                case ERROR_TYPES.TARGET_CYCLE_END:
+                    console.log('INDEX RESETED!!')
+                    self.stop(error)
+                    index = 0
 
                     break
                 }
@@ -798,7 +805,8 @@ define('two/farmOverflow', [
         }
 
         Promise.all(readyFarmers).then(function () {
-            farmOverflow.farmerStep()
+            // farmOverflow.farmerStep()
+            console.log('OK')
         })
 
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_START)
