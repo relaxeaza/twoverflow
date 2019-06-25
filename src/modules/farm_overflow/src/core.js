@@ -30,6 +30,7 @@ define('two/farmOverflow', [
     var $player = modelDataService.getSelectedCharacter()
     var VILLAGE_COMMAND_LIMIT = 50
     var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
+    var MINIMUM_ATTACK_INTERVAL = 1 * 1000
     var initialized = false
     var running = false
     var settings
@@ -639,7 +640,7 @@ define('two/farmOverflow', [
             prepareAttack = function() {
                 if (options.delay) {
                     delayTime = utils.randomSeconds(settings.getSetting(SETTINGS.RANDOM_BASE))
-                    delayTime = 100 + (delayTime * 1000)
+                    delayTime = MINIMUM_ATTACK_INTERVAL + (delayTime * 1000)
                 }
 
                 targetTimeoutId = setTimeout(function() {
