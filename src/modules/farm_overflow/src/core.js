@@ -338,6 +338,10 @@ define('two/farmOverflow', [
             var interval
             var target
 
+            if (running) {
+                return false
+            }
+
             if (!ready) {
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, {
                     villageId: villageId
