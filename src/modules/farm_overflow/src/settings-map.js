@@ -53,7 +53,7 @@ define('two/farmOverflow/settingsMap', [
             updates: []
         },
         [SETTINGS.TARGET_SINGLE_ATTACK]: {
-            default: false,
+            default: true,
             updates: [],
             inputType: 'checkbox'
         },

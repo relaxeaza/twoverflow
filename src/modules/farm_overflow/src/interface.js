@@ -4,11 +4,9 @@ define('two/farmOverflow/ui', [
     'two/farmOverflow',
     'two/farmOverflow/errorTypes',
     'two/farmOverflow/logTypes',
-    'two/farmOverflow/stopReason',
     'two/farmOverflow/settings',
     'two/Settings',
     'two/utils',
-    'two/EventScope',
     'queues/EventQueue',
     'struct/MapData',
     'helper/time',
@@ -18,21 +16,29 @@ define('two/farmOverflow/ui', [
     farmOverflow,
     ERROR_TYPES,
     LOG_TYPES,
-    STOP_REASON,
     SETTINGS,
     Settings,
     utils,
-    EventScope,
     eventQueue,
     mapData,
     timeHelper
 ) {
     var textObject = 'farm_overflow'
+    var textObjectCommon = 'common'
 
     var init = function () {
-        eventQueue.bind(eventTypeProvider.FARM_OVERFLOW_STOP, function (reason) {
-            switch (reason) {
-            case EVENT_STATES.STOP_NO_PRESETS:
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_START, function (data) {
+            var title = $filter('i18n')('title', $rootScope.loc.ale, textObject)
+            var started = $filter('i18n')('started', $rootScope.loc.ale, textObjectCommon)
+
+            $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
+                message: title + ' ' + started
+            })
+        })
+
+        eventQueue.register(eventTypeProvider.FARM_OVERFLOW_STOP, function (data) {
+            switch (data.reason) {
+            case ERROR_TYPES.NO_PRESETS:
                 $rootScope.$broadcast(eventTypeProvider.MESSAGE_ERROR, {
                     message: $filter('i18n')('stop_no_presets', $rootScope.loc.ale, textObject)
                 })

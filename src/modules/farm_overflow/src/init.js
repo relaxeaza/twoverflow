@@ -19,6 +19,6 @@ require([
         farmOverflow.init()
         farmOverflow.start()
 
-        // farmOverflowInterface()
+        farmOverflowInterface()
     }, ['map'])
 })

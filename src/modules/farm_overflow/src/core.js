@@ -5,7 +5,6 @@ define('two/farmOverflow', [
     'two/farmOverflow/settingsMap',
     'two/farmOverflow/settingsUpdate',
     'two/farmOverflow/logTypes',
-    'two/farmOverflow/stopReason',
     'two/mapData',
     'two/utils',
     'helper/math',
@@ -19,7 +18,6 @@ define('two/farmOverflow', [
     SETTINGS_MAP,
     SETTINGS_UPDATE,
     LOG_TYPES,
-    STOP_REASON,
     mapData,
     utils,
     math,
@@ -29,7 +27,6 @@ define('two/farmOverflow', [
 ) {
     var $player = modelDataService.getSelectedCharacter()
     var VILLAGE_COMMAND_LIMIT = 50
-    var INDEX_RETENTION_TIME = 1 // minutes
     var initialized = false
     var running = false
     var settings
@@ -227,7 +224,7 @@ define('two/farmOverflow', [
         if (running && !selectedPresets.length) {
             farmOverflow.stop()
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
-                reason: STOP_REASON.NO_PRESETS
+                reason: ERROR_TYPES.NO_PRESETS
             })
         }
     }
@@ -379,12 +376,11 @@ define('two/farmOverflow', [
             return true
         }
 
-        self.stop = function (reason, data) {
+        self.stop = function (reason) {
             running = false
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
                 villageId: villageId,
-                reason: reason,
-                data: data
+                reason: reason
             })
             clearTimeout(targetTimeoutId)
             cycleEndHandler(reason)
@@ -404,7 +400,7 @@ define('two/farmOverflow', [
             sendingCommand = false
             currentTarget = false
 
-            self.stop(STOP_REASON.ERROR, data)
+            self.stop(ERROR_TYPES.COMMAND_ERROR)
         }
 
         self.onceCycleEnd = function (handler) {
@@ -755,7 +751,7 @@ define('two/farmOverflow', [
 
     farmOverflow.stop = function (reason) {
         running = false
-        reason = reason || STOP_REASON.USER
+        reason = reason || ERROR_TYPES.USER_STOP
 
         if (activeFarmer) {
             activeFarmer.stop(reason)
@@ -855,7 +851,7 @@ define('two/farmOverflow', [
         activeFarmer = farmOverflow.getOne()
 
         if (!activeFarmer) {
-            farmOverflow.stop(STOP_REASON.FARMER_CYCLE_END)
+            farmOverflow.stop(ERROR_TYPES.FARMER_CYCLE_END)
 
             farmerTimeoutId = setTimeout(function() {
                 farmOverflow.farmerStep()
