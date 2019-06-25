@@ -140,7 +140,7 @@ define('two/farmOverflow', [
 
         if (groupIgnore === data.group_id) {
             if (isOwnVillage) {
-                farmOverflow.destroyFarmerById(data.village_id)
+                farmOverflow.removeById(data.village_id)
             } else {
                 farmers.forEach(function (farmer) {
                     farmer.removeTarget(data.village_id)
@@ -189,7 +189,7 @@ define('two/farmOverflow', [
         }
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
-            farmOverflow.destroyFarmerById(data.village_id)
+            farmOverflow.removeById(data.village_id)
         }
     }
 
@@ -790,11 +790,11 @@ define('two/farmOverflow', [
             return false
         }
 
-        if (!farmOverflow.getFarmerById(villageId)) {
+        if (!farmOverflow.getById(villageId)) {
             farmers.push(new Farmer(villageId))
         }
 
-        return farmOverflow.getFarmerById(villageId)
+        return farmOverflow.getById(villageId)
     }
 
     farmOverflow.flush = function () {
@@ -805,16 +805,16 @@ define('two/farmOverflow', [
             villageId = farmer.getVillage().getId()
 
             if (groupsOnly.length && !onlyVillages.includes(villageId)) {
-                farmOverflow.destroyFarmerById(villageId)
+                farmOverflow.removeById(villageId)
             }
 
             if (ignoredVillages.includes(villageId)) {
-                farmOverflow.destroyFarmerById(villageId)
+                farmOverflow.removeById(villageId)
             }
         })
     }
 
-    farmOverflow.getFarmerById = function (farmerId) {
+    farmOverflow.getById = function (farmerId) {
         var i
 
         for (i = 0; i < farmers.length; i++) {
@@ -826,7 +826,7 @@ define('two/farmOverflow', [
         return false
     }
 
-    farmOverflow.destroyFarmerById = function () {
+    farmOverflow.removeById = function () {
         var i
 
         for (i = 0; i < farmers.length; i++) {
@@ -841,7 +841,7 @@ define('two/farmOverflow', [
         return false
     }
 
-    farmOverflow.getFarmer = function () {
+    farmOverflow.getOne = function () {
         if (!farmers.length) {
             return false
         }
@@ -851,11 +851,11 @@ define('two/farmOverflow', [
             return false
         }
 
-        return farmers[farmerIndex++]
+        return farmers[farmerIndex++]   
     }
 
     farmOverflow.farmerStep = function () {
-        activeFarmer = farmOverflow.getFarmer()
+        activeFarmer = farmOverflow.getOne()
 
         if (!activeFarmer) {
             return farmOverflow.stop(STOP_REASON.FARMER_CYCLE_END)
