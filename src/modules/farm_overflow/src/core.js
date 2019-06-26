@@ -310,7 +310,7 @@ define('two/farmOverflow', [
         var position = village.getPosition()
         var distance = math.actualDistance(position, target)
         var travelTime = armyService.calculateTravelTime(preset, {
-            barbarian: !target.id,
+            barbarian: !target.character_id,
             officers: false
         })
         var totalTravelTime = armyService.getTravelTimeForDistance(preset, travelTime, distance, COMMAND_TYPES.TYPES.ATTACK)

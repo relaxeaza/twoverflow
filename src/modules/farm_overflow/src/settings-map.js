@@ -102,7 +102,7 @@ define('two/farmOverflow/settingsMap', [
         //     updates: [SETTINGS_UPDATE.TARGETS]
         // },
         [SETTINGS.MAX_TRAVEL_TIME]: {
-            default: 60,
+            default: 120,
             updates: []
         },
         [SETTINGS.LOGS_LIMIT]: {
