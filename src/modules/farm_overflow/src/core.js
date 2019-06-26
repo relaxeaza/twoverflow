@@ -573,13 +573,13 @@ define('two/farmOverflow', [
             var neededPresets
 
             function checkCommandLimit () {
-                return new Promise(function(resolve) {
+                return new Promise(function (resolve, reject) {
                     var commandList = village.getCommandListModel()
                     var commands = commandList.getOutgoingCommands(true, true)
                     var limit = VILLAGE_COMMAND_LIMIT - settings.getSetting(SETTINGS.PRESERVE_COMMAND_SLOTS)
 
                     if (commands.length >= limit) {
-                        return onError(ERROR_TYPES.COMMAND_LIMIT)
+                        return reject(ERROR_TYPES.COMMAND_LIMIT)
                     }
 
                     resolve()
@@ -587,9 +587,9 @@ define('two/farmOverflow', [
             }
 
             function checkStorage () {
-                return new Promise(function(resolve) {
+                return new Promise(function (resolve, reject) {
                     if (settings.getSetting(SETTINGS.IGNORE_FULL_STORAGE) && checkFullStorage(village)) {
-                        return onError(ERROR_TYPES.FULL_STORAGE)
+                        return reject(ERROR_TYPES.FULL_STORAGE)
                     }
 
                     resolve()
@@ -597,11 +597,11 @@ define('two/farmOverflow', [
             }
 
             function checkTargets () {
-                return new Promise(function(resolve) {
+                return new Promise(function (resolve, reject) {
                     if (!targets.length) {
-                        onError(ERROR_TYPES.NO_TARGETS)
+                        reject(ERROR_TYPES.NO_TARGETS)
                     } else if (index > targets.length || !targets[index]) {
-                        onError(ERROR_TYPES.TARGET_CYCLE_END)
+                        reject(ERROR_TYPES.TARGET_CYCLE_END)
                     } else {
                         resolve()
                     }
@@ -621,12 +621,12 @@ define('two/farmOverflow', [
             }
 
             function checkPreset () {
-                return new Promise(function(resolve) {
+                return new Promise(function (resolve, reject) {
                     target = getTarget()
                     preset = getPreset(target)
 
                     if (typeof preset === 'string') {
-                        return onError(preset)
+                        return reject(preset)
                     }
 
                     resolve()
@@ -634,15 +634,15 @@ define('two/farmOverflow', [
             }
 
             function checkTarget () {
-                return new Promise(function(resolve) {
+                return new Promise(function (resolve, reject) {
                     socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
                         target_id: target.id
                     }, function(data) {
                         // abandoned village conquered by some noob.
                         if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
-                            onError(ERROR_TYPES.ABANDONED_CONQUERED)
+                            reject(ERROR_TYPES.ABANDONED_CONQUERED)
                         } else if (target.attack_protection) {
-                            onError(ERROR_TYPES.PROTECTED_VILLAGE)
+                            reject(ERROR_TYPES.PROTECTED_VILLAGE)
                         } else {
                             resolve()
                         }
@@ -651,7 +651,7 @@ define('two/farmOverflow', [
             }
 
             function loadTargetData () {
-                return new Promise(function(resolve) {
+                return new Promise(function (resolve, reject) {
                     socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
                         my_village_id: villageId,
                         village_id: target.id,
@@ -664,12 +664,12 @@ define('two/farmOverflow', [
             }
 
             function checkVillagePoints () {
-                return new Promise(function(resolve) {
+                return new Promise(function (resolve, reject) {
                     var min = settings.getSetting(SETTINGS.MIN_POINTS)
                     var max = settings.getSetting(SETTINGS.MAX_POINTS)
 
                     if (!targetData.points.between(min, max)) {
-                        return onError(ERROR_TYPES.NOT_ALLOWED_POINTS)
+                        return reject(ERROR_TYPES.NOT_ALLOWED_POINTS)
                     }
 
                     resolve()
@@ -677,7 +677,7 @@ define('two/farmOverflow', [
             }
 
             function checkCommands () {
-                return new Promise(function(resolve) {
+                return new Promise(function (resolve, reject) {
                     if (!settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)) {
                         return resolve()
                     }
@@ -689,7 +689,7 @@ define('two/farmOverflow', [
                     })
 
                     if (busy) {
-                        return onError(ERROR_TYPES.SINGLE_COMMAND_FILLED)
+                        return reject(ERROR_TYPES.SINGLE_COMMAND_FILLED)
                     }
                     
                     resolve()
@@ -707,7 +707,17 @@ define('two/farmOverflow', [
                 }, delayTime)
             }
 
-            function onError (error) {
+            checkCommandLimit()
+            .then(checkStorage)
+            .then(checkTargets)
+            .then(checkVillagePresets)
+            .then(checkPreset)
+            .then(checkTarget)
+            .then(loadTargetData)
+            .then(checkVillagePoints)
+            .then(checkCommands)
+            .then(prepareAttack)
+            .catch(function (error) {
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
                     villageId: villageId,
                     error: error
@@ -736,18 +746,7 @@ define('two/farmOverflow', [
                     index = 0
                     break
                 }
-            }
-
-            checkCommandLimit()
-            .then(checkStorage)
-            .then(checkTargets)
-            .then(checkVillagePresets)
-            .then(checkPreset)
-            .then(checkTarget)
-            .then(loadTargetData)
-            .then(checkVillagePoints)
-            .then(checkCommands)
-            .then(prepareAttack)
+            })
         }
 
         var attackTarget = function (target, preset) {
