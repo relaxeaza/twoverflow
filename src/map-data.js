@@ -49,7 +49,7 @@ define('two/mapData', [
         }
     }
 
-    var getVisibleGridCells = function (x, y) {
+    var getVisibleGridCells = function (origin) {
         var cells = []
         var cell
         var gridX
@@ -60,10 +60,10 @@ define('two/mapData', [
                 cell = grid[gridX][gridY]
 
                 if (
-                    Math.abs(x) + width <= cell.x ||
-                    Math.abs(y) + height <= cell.y ||
-                    Math.abs(x) >= cell.x + cell.width ||
-                    Math.abs(y) >= cell.y + cell.height
+                    Math.abs(origin.x) + width <= cell.x ||
+                    Math.abs(origin.y) + height <= cell.y ||
+                    Math.abs(origin.x) >= cell.x + cell.width ||
+                    Math.abs(origin.y) >= cell.y + cell.height
                 ) {
                     continue
                 }
@@ -87,8 +87,8 @@ define('two/mapData', [
 
     var mapData = {}
 
-    mapData.load = function (x, y, callback, _error) {
-        var cells = getVisibleGridCells(x, y)
+    mapData.load = function (origin, callback, _error) {
+        var cells = getVisibleGridCells(origin)
         var loadId = genLoadingId(cells)
         var requests = []
         var promise

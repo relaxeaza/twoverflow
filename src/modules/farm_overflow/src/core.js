@@ -54,6 +54,12 @@ define('two/farmOverflow', [
     }
 
     var villageFilters = {
+        distance: function (target) {
+            return !target.distance.between(
+                settings.getSetting(SETTINGS.MIN_DISTANCE),
+                settings.getSetting(SETTINGS.MAX_DISTANCE)
+            )
+        },
         ownPlayer: function (target) {
             return target.character_id === $player.getId()
         },
@@ -62,28 +68,34 @@ define('two/farmOverflow', [
         },
         ignored: function (target) {
             return ignoredVillages.includes(target.id)
-        },
-        distance: function (target, village) {
-            var distance = math.actualDistance(village, target)
-            var minDistance = settings.getSetting(SETTINGS.MIN_DISTANCE)
-            var maxDistance = settings.getSetting(SETTINGS.MAX_DISTANCE)
-
-            return distance < minDistance || distance > maxDistance
         }
     }
 
     var targetFilters = [
+        villageFilters.distance,
         villageFilters.ownPlayer,
         villageFilters.included,
-        villageFilters.ignored,
-        villageFilters.distance
+        villageFilters.ignored
     ]
 
-    var filterTargets = function (targets, village) {
+    var calcDistances = function (targets, origin) {
+        return targets.map(function (target) {
+            target.distance = math.actualDistance(origin, target)
+            return target
+        })
+    }
+
+    var filterTargets = function (targets) {
         return targets.filter(function (target) {
             return targetFilters.every(function (fn) {
-                return !fn(target, village)
+                return !fn(target)
             })
+        })
+    }
+
+    var sortTargets = function (targets) {
+        return targets.sort(function (a, b) {
+            return a.distance - b.distance
         })
     }
 
@@ -485,10 +497,12 @@ define('two/farmOverflow', [
         }
 
         self.loadTargets = function (_callback) {
-            var villagePosition = village.getPosition()
+            var pos = village.getPosition()
 
-            mapData.load(village.getX(), village.getY(), function (loadedTargets) {
-                targets = filterTargets(loadedTargets, villagePosition)
+            mapData.load(pos, function (targets) {
+                targets = calcDistances(targets, pos)
+                targets = filterTargets(targets, pos)
+                targets = sortTargets(targets)
 
                 if (typeof _callback === 'function') {
                     _callback(targets)
