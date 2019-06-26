@@ -499,8 +499,8 @@ define('two/farmOverflow', [
         self.loadTargets = function (_callback) {
             var pos = village.getPosition()
 
-            mapData.load(pos, function (targets) {
-                targets = calcDistances(targets, pos)
+            mapData.load(pos, function (loadedTargets) {
+                targets = calcDistances(loadedTargets, pos)
                 targets = filterTargets(targets, pos)
                 targets = sortTargets(targets)
 
