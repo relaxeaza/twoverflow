@@ -564,24 +564,15 @@ define('two/farmOverflow', [
             return false
         }
 
-        var targetStep = function (options) {
-            options = options || {}
-
+        var targetStep = function (_options) {
+            var options = _options || {}
             var preset
             var delayTime = 0
             var target
+            var targetData
             var neededPresets
-            var checkCommandLimit
-            var checkStorage
-            var checkTargets
-            var checkVillagePresets
-            var checkPreset
-            var checkTarget
-            var checkCommands
-            var prepareAttack
-            var onError
 
-            checkCommandLimit = function() {
+            function checkCommandLimit () {
                 return new Promise(function(resolve) {
                     var commandList = village.getCommandListModel()
                     var commands = commandList.getOutgoingCommands(true, true)
@@ -595,7 +586,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            checkStorage = function() {
+            function checkStorage () {
                 return new Promise(function(resolve) {
                     if (settings.getSetting(SETTINGS.IGNORE_FULL_STORAGE) && checkFullStorage(village)) {
                         return onError(ERROR_TYPES.FULL_STORAGE)
@@ -605,21 +596,19 @@ define('two/farmOverflow', [
                 })
             }
 
-            checkTargets = function() {
+            function checkTargets () {
                 return new Promise(function(resolve) {
                     if (!targets.length) {
-                        return onError(ERROR_TYPES.NO_TARGETS)
+                        onError(ERROR_TYPES.NO_TARGETS)
+                    } else if (index > targets.length || !targets[index]) {
+                        onError(ERROR_TYPES.TARGET_CYCLE_END)
+                    } else {
+                        resolve()
                     }
-
-                    if (index > targets.length || !targets[index]) {
-                        return onError(ERROR_TYPES.TARGET_CYCLE_END)
-                    }
-
-                    resolve()
                 })
             }
 
-            checkVillagePresets = function() {
+            function checkVillagePresets () {
                 return new Promise(function (resolve) {
                     neededPresets = genPresetList()
 
@@ -631,7 +620,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            checkPreset = function() {
+            function checkPreset () {
                 return new Promise(function(resolve) {
                     target = getTarget()
                     preset = getPreset(target)
@@ -644,7 +633,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            checkTarget = function() {
+            function checkTarget () {
                 return new Promise(function(resolve) {
                     socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
                         target_id: target.id
@@ -661,33 +650,53 @@ define('two/farmOverflow', [
                 })
             }
 
-            checkCommands = function() {
+            function loadTargetData () {
                 return new Promise(function(resolve) {
-                    if (!settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)) {
-                        return resolve()
-                    }
-
                     socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
                         my_village_id: villageId,
                         village_id: target.id,
                         num_reports: 0
                     }, function(data) {
-                        var busy = data.commands.own.some(function(command) {
-                            if (command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward') {
-                                return true
-                            }
-                        })
-
-                        if (busy) {
-                            onError(ERROR_TYPES.SINGLE_COMMAND_FILLED)
-                        } else {
-                            resolve()
-                        }
+                        targetData = data
+                        resolve()
                     })
                 })
             }
 
-            prepareAttack = function() {
+            function checkVillagePoints () {
+                return new Promise(function(resolve) {
+                    var min = settings.getSetting(SETTINGS.MIN_POINTS)
+                    var max = settings.getSetting(SETTINGS.MAX_POINTS)
+
+                    if (!targetData.points.between(min, max)) {
+                        return onError(ERROR_TYPES.NOT_ALLOWED_POINTS)
+                    }
+
+                    resolve()
+                })
+            }
+
+            function checkCommands () {
+                return new Promise(function(resolve) {
+                    if (!settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)) {
+                        return resolve()
+                    }
+
+                    var busy = targetData.commands.own.some(function(command) {
+                        if (command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward') {
+                            return true
+                        }
+                    })
+
+                    if (busy) {
+                        return onError(ERROR_TYPES.SINGLE_COMMAND_FILLED)
+                    }
+                    
+                    resolve()
+                })
+            }
+
+            function prepareAttack () {
                 if (options.delay) {
                     delayTime = utils.randomSeconds(settings.getSetting(SETTINGS.RANDOM_BASE))
                     delayTime = MINIMUM_ATTACK_INTERVAL + (delayTime * 1000)
@@ -698,7 +707,7 @@ define('two/farmOverflow', [
                 }, delayTime)
             }
 
-            onError = function(error) {
+            function onError (error) {
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
                     villageId: villageId,
                     error: error
@@ -708,31 +717,37 @@ define('two/farmOverflow', [
                 case ERROR_TYPES.TIME_LIMIT:
                 case ERROR_TYPES.SINGLE_COMMAND_FILLED:
                     targetStep(options)
-
                     break
+
+                case ERROR_TYPES.NOT_ALLOWED_POINTS:
+                    self.removeTarget(target.id)
+                    targetStep(options)
+                    break
+
                 case ERROR_TYPES.NO_UNITS:
                 case ERROR_TYPES.NO_TARGETS:
                 case ERROR_TYPES.FULL_STORAGE:
                 case ERROR_TYPES.COMMAND_LIMIT:
                     self.stop(error)
-
                     break
+
                 case ERROR_TYPES.TARGET_CYCLE_END:
                     self.stop(error)
                     index = 0
-
                     break
                 }
             }
 
             checkCommandLimit()
-                .then(checkStorage)
-                .then(checkTargets)
-                .then(checkVillagePresets)
-                .then(checkPreset)
-                .then(checkTarget)
-                .then(checkCommands)
-                .then(prepareAttack)
+            .then(checkStorage)
+            .then(checkTargets)
+            .then(checkVillagePresets)
+            .then(checkPreset)
+            .then(checkTarget)
+            .then(loadTargetData)
+            .then(checkVillagePoints)
+            .then(checkCommands)
+            .then(prepareAttack)
         }
 
         var attackTarget = function (target, preset) {

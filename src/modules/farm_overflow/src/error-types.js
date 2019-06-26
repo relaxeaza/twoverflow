@@ -14,6 +14,7 @@ define('two/farmOverflow/errorTypes', [], function () {
         TARGET_CYCLE_END: 'target_cycle_end',
         FARMER_CYCLE_END: 'farmer_cycle_end',
         COMMAND_ERROR: 'command_error',
-        USER_STOP: 'user_stop'
+        USER_STOP: 'user_stop',
+        NOT_ALLOWED_POINTS: 'not_allowed_points'
     }
 })

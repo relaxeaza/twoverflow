@@ -93,14 +93,14 @@ define('two/farmOverflow/settingsMap', [
             default: 0,
             updates: [SETTINGS_UPDATE.TARGETS]
         },
-        // [SETTINGS.MIN_POINTS]: {
-        //     default: 0,
-        //     updates: [SETTINGS_UPDATE.TARGETS]
-        // },
-        // [SETTINGS.MAX_POINTS]: {
-        //     default: 12500,
-        //     updates: [SETTINGS_UPDATE.TARGETS]
-        // },
+        [SETTINGS.MIN_POINTS]: {
+            default: 0,
+            updates: [SETTINGS_UPDATE.TARGETS]
+        },
+        [SETTINGS.MAX_POINTS]: {
+            default: 12500,
+            updates: [SETTINGS_UPDATE.TARGETS]
+        },
         [SETTINGS.MAX_TRAVEL_TIME]: {
             default: 120,
             updates: []
