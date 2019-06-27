@@ -11,6 +11,7 @@ define('two/farmOverflow', [
     'helper/time',
     'queues/EventQueue',
     'conf/commandTypes',
+    'conf/village',
     'Lockr'
 ], function (
     Settings,
@@ -25,6 +26,7 @@ define('two/farmOverflow', [
     timeHelper,
     eventQueue,
     COMMAND_TYPES,
+    VILLAGE_CONFIG,
     Lockr
 ) {
     var $player = modelDataService.getSelectedCharacter()
@@ -32,7 +34,6 @@ define('two/farmOverflow', [
     var VILLAGE_COMMAND_LIMIT = 50
     var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000 // 5 seconds
     var MINIMUM_ATTACK_INTERVAL = 1 * 1000 // 1 second
-    var CACHE_IGNORE_COMMANDS_TIME = 5 * 60 * 1000 // 5 min
     var initialized = false
     var running = false
     var settings
@@ -408,7 +409,6 @@ define('two/farmOverflow', [
         var cycleEndHandler = noop
         var loadPromises
         var targetTimeoutId
-        var ignoreCommandsTime = {}
 
         if (!village) {
             throw new Error(`new Farmer -> Village ${villageId} doesn't exist.`)
@@ -685,27 +685,46 @@ define('two/farmOverflow', [
 
             function checkVillageCommands () {
                 return new Promise(function (resolve, reject) {
-                    if (!settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)) {
-                        var thisFarmerAttacking = villageCommands.some(function (command) {
-                            return command.data.target.id === target.id && command.data.direction === 'forward'
-                        })
+                    if (settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)) {
+                        return resolve()
+                    }
 
-                        if (thisFarmerAttacking && settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)) {
-                            return reject(ERROR_TYPES.BUSY_TARGET)
-                        }
+                    var attacking = villageCommands.some(function (command) {
+                        return command.data.target.id === target.id && command.data.direction === 'forward'
+                    })
+
+                    if (attacking && settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)) {
+                        return reject(ERROR_TYPES.BUSY_TARGET)
                     }
 
                     resolve()
                 })
             }
 
-            function checkCachedIgnore () {
-                var now = timeHelper.gameTime()
-                var ignoredTime = ignoreCommandsTime[target.id]
-                
+            function checkOtherVillagesCommands () {
                 return new Promise(function (resolve, reject) {
-                    if (ignoredTime && now - ignoredTime < CACHE_IGNORE_COMMANDS_TIME) {
-                        return reject(ERROR_TYPES.CACHED_IGNORE)
+                    if (!settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)) {
+                        return resolve()
+                    }
+
+                    var villages = $player.getVillageList()
+                    var commands
+                    var attacked
+                    var i
+
+                    for (i = 0; i < villages.length; i++) {
+                        if (!villages[i].isReady(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS)) {
+                            return resolve()
+                        }
+
+                        commands = villages[i].getCommandListModel().getOutgoingCommands(true, true)
+                        attacked = commands.some(function (command) {
+                            return command.data.target.id === target.id && command.data.direction === 'forward'
+                        })
+
+                        if (attacked) {
+                            return reject(ERROR_TYPES.BUSY_TARGET)
+                        }
                     }
 
                     resolve()
@@ -787,8 +806,8 @@ define('two/farmOverflow', [
             .then(checkVillagePresets)
             .then(checkPreset)
             .then(checkTarget)
-            .then(checkCachedIgnore)
             .then(checkVillageCommands)
+            .then(checkOtherVillagesCommands)
             .then(loadTargetData)
             .then(checkVillagePoints)
             .then(checkTargetCommands)
@@ -807,7 +826,6 @@ define('two/farmOverflow', [
                     break
 
                 case ERROR_TYPES.BUSY_TARGET:
-                    ignoreCommandsTime[target.id] = timeHelper.gameTime()
                     targetStep(options)
                     break
 

@@ -62,7 +62,7 @@ define('two/farmOverflow/settingsMap', [
             inputType: 'checkbox'
         },
         [SETTINGS.TARGET_MULTIPLE_FARMERS]: {
-            default: false,
+            default: true,
             updates: [],
             inputType: 'checkbox'
         },
@@ -79,7 +79,7 @@ define('two/farmOverflow/settingsMap', [
             updates: []
         },
         [SETTINGS.MAX_DISTANCE]: {
-            default: 5,
+            default: 10,
             updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MIN_DISTANCE]: {

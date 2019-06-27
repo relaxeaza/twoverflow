@@ -16,7 +16,6 @@ define('two/farmOverflow/errorTypes', [], function () {
         COMMAND_ERROR: 'command_error',
         USER_STOP: 'user_stop',
         NOT_ALLOWED_POINTS: 'not_allowed_points',
-        UNKNOWN: 'unknown',
-        CACHED_IGNORE: 'cached_ignore'
+        UNKNOWN: 'unknown'
     }
 })
