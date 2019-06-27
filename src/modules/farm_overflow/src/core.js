@@ -267,6 +267,11 @@ define('two/farmOverflow', [
             group_id: groupIgnore,
             village_id: villageId
         }, function () {
+            addLog({
+                ignoredId: villageId,
+                type: LOG_TYPES.IGNORED_VILLAGE
+            })
+
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_VILLAGE_IGNORED, villageId)
         })
 
