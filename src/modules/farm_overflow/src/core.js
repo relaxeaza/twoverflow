@@ -604,14 +604,14 @@ define('two/farmOverflow', [
             var targetPoints
             var targetCommands
             var neededPresets
+            var commandList = village.getCommandListModel()
+            var villageCommands = commandList.getOutgoingCommands(true, true)
 
             function checkCommandLimit () {
                 return new Promise(function (resolve, reject) {
-                    var commandList = village.getCommandListModel()
-                    var commands = commandList.getOutgoingCommands(true, true)
                     var limit = VILLAGE_COMMAND_LIMIT - settings.getSetting(SETTINGS.PRESERVE_COMMAND_SLOTS)
 
-                    if (commands.length >= limit) {
+                    if (villageCommands.length >= limit) {
                         return reject(ERROR_TYPES.COMMAND_LIMIT)
                     }
 
@@ -680,6 +680,22 @@ define('two/farmOverflow', [
                             resolve()
                         }
                     })
+                })
+            }
+
+            function checkVillageCommands () {
+                return new Promise(function (resolve, reject) {
+                    if (!settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)) {
+                        var thisFarmerAttacking = villageCommands.some(function (command) {
+                            return command.data.target.id === target.id && command.data.direction === 'forward'
+                        })
+
+                        if (thisFarmerAttacking && settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)) {
+                            return reject(ERROR_TYPES.BUSY_TARGET)
+                        }
+                    }
+
+                    resolve()
                 })
             }
 
@@ -772,6 +788,7 @@ define('two/farmOverflow', [
             .then(checkPreset)
             .then(checkTarget)
             .then(checkCachedIgnore)
+            .then(checkVillageCommands)
             .then(loadTargetData)
             .then(checkVillagePoints)
             .then(checkTargetCommands)
