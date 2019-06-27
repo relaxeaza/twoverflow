@@ -28,6 +28,7 @@ define('two/farmOverflow', [
     Lockr
 ) {
     var $player = modelDataService.getSelectedCharacter()
+    var unitsData = modelDataService.getGameData().getUnitsObject()
     var VILLAGE_COMMAND_LIMIT = 50
     var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000 // 5 seconds
     var MINIMUM_ATTACK_INTERVAL = 1 * 1000 // 1 second
@@ -218,21 +219,30 @@ define('two/farmOverflow', [
     }
 
     var updatePresets = function () {
-        var handler = function () {
-            selectedPresets = []
+        var playerPresets
+        var activePresets
 
-            var playerPresets = modelDataService.getPresetList().getPresets()
-            var activePresets = settings.getSetting(SETTINGS.PRESETS)
+        function processPresets () {
+            selectedPresets = []
+            playerPresets = modelDataService.getPresetList().getPresets()
+            activePresets = settings.getSetting(SETTINGS.PRESETS)
 
             activePresets.forEach(function (presetId) {
-                selectedPresets.push(playerPresets[presetId])
+                preset = playerPresets[presetId]
+                preset.load = getPresetHaul(preset)
+                preset.travelTime = getPresetTimeTravel(preset, false)
+                selectedPresets.push(preset)
+            })
+
+            selectedPresets = selectedPresets.sort(function (a, b) {
+                return a.travelTime - b.travelTime || b.load - a.load
             })
         }
 
         if (modelDataService.getPresetList().isLoaded()) {
-            handler()
+            processPresets()
         } else {
-            socketService.emit(routeProvider.GET_PRESETS, {}, handler)
+            socketService.emit(routeProvider.GET_PRESETS, {}, processPresets)
         }
     }
 
@@ -318,14 +328,30 @@ define('two/farmOverflow', [
         }, callback)
     }
 
+    var getPresetHaul = function (preset) {
+        var haul = 0
+
+        angular.forEach(preset.units, function (unitAmount, unitName) {
+            if (unitAmount) {
+                haul += unitsData[unitName].load * unitAmount
+            }
+        })
+
+        return haul
+    }
+
+    var getPresetTimeTravel = function (preset, barbarian) {
+        return armyService.calculateTravelTime(preset, {
+            barbarian: barbarian,
+            officers: false
+        })
+    }
+
     var checkPresetTime = function (preset, village, target) {
         var limitTime = settings.getSetting(SETTINGS.MAX_TRAVEL_TIME) * 60
         var position = village.getPosition()
         var distance = math.actualDistance(position, target)
-        var travelTime = armyService.calculateTravelTime(preset, {
-            barbarian: !target.character_id,
-            officers: false
-        })
+        var travelTime = getPresetTimeTravel(preset, !target.character_id)
         var totalTravelTime = armyService.getTravelTimeForDistance(preset, travelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
 
         return limitTime > totalTravelTime
