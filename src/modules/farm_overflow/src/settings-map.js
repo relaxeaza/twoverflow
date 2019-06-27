@@ -75,7 +75,7 @@ define('two/farmOverflow/settingsMap', [
             updates: []
         },
         [SETTINGS.IGNORE_FULL_STORAGE]: {
-            default: true,
+            default: false,
             updates: []
         },
         [SETTINGS.MAX_DISTANCE]: {
