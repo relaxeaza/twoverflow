@@ -8,7 +8,7 @@ define('two/farmOverflow/settingsMap', [
     return {
         [SETTINGS.PRESETS]: {
             // default: [],
-            default: [843831, 3578472, 9737990],
+            default: [843831, 3578472, 9737990, 13099375],
             updates: [SETTINGS_UPDATE.PRESET],
             disabledOption: true,
             inputType: 'select',
@@ -17,7 +17,7 @@ define('two/farmOverflow/settingsMap', [
         },
         [SETTINGS.GROUP_IGNORE]: {
             // default: false,
-            default: 12440,
+            default: 12999,
             updates: [SETTINGS_UPDATE.GROUPS],
             disabledOption: true,
             inputType: 'select',
@@ -25,7 +25,7 @@ define('two/farmOverflow/settingsMap', [
         },
         [SETTINGS.GROUP_INCLUDE]: {
             // default: [],
-            default: [5487],
+            default: [13000],
             updates: [
                 SETTINGS_UPDATE.GROUPS,
                 SETTINGS_UPDATE.TARGETS
