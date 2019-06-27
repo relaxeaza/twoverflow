@@ -728,7 +728,7 @@ define('two/farmOverflow', [
 
             function prepareAttack () {
                 if (options.delay) {
-                    delayTime = utils.randomSeconds(settings.getSetting(SETTINGS.RANDOM_BASE))
+                    delayTime = utils.randomSeconds(settings.getSetting(SETTINGS.ATTACK_INTERVAL))
                     delayTime = MINIMUM_ATTACK_INTERVAL + (delayTime * 1000)
                 }
 

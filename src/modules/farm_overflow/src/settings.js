@@ -7,7 +7,7 @@ define('two/farmOverflow/settings', [], function () {
         MAX_DISTANCE: 'max_distance',
         MIN_DISTANCE: 'min_distance',
         IGNORE_FULL_STORAGE: 'ignore_full_storage',        
-        RANDOM_BASE: 'random_base',
+        ATTACK_INTERVAL: 'attack_interval',
         MAX_TRAVEL_TIME: 'max_travel_time',
         TARGET_SINGLE_ATTACK: 'target_single_attack',
         TARGET_MULTIPLE_FARMERS: 'target_multiple_farmers',

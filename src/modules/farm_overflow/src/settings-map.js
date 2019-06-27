@@ -48,7 +48,7 @@ define('two/farmOverflow/settingsMap', [
             multiSelect: true,
             type: 'groups'
         },
-        [SETTINGS.RANDOM_BASE]: {
+        [SETTINGS.ATTACK_INTERVAL]: {
             default: 0,
             updates: []
         },
