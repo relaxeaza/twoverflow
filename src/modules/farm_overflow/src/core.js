@@ -12,6 +12,7 @@ define('two/farmOverflow', [
     'queues/EventQueue',
     'conf/commandTypes',
     'conf/village',
+    'struct/MapData',
     'Lockr'
 ], function (
     Settings,
@@ -27,17 +28,19 @@ define('two/farmOverflow', [
     eventQueue,
     COMMAND_TYPES,
     VILLAGE_CONFIG,
+    $mapData,
     Lockr
 ) {
-    var $player = modelDataService.getSelectedCharacter()
-    var unitsData = modelDataService.getGameData().getUnitsObject()
-    var VILLAGE_COMMAND_LIMIT = 50
-    var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000 // 5 seconds
-    var MINIMUM_ATTACK_INTERVAL = 1 * 1000 // 1 second
+    /* debug vars */
+    var onlyOneFarmerCycle = false
+    var onlyOneTarget = { character_id: null, distance: 1.7, id: 11161, tribe_id: null, x: 557, y: 576 }
+    /* /debug vars */
+
     var initialized = false
     var running = false
     var settings
-    var farmers = window.farmers = []
+    var farmers = []
+    var logs = []
     var includedVillages = []
     var ignoredVillages = []
     var onlyVillages = []
@@ -48,8 +51,12 @@ define('two/farmOverflow', [
     var farmerIndex = 0
     var farmerCycle = []
     var farmerTimeoutId
-    var logs = []
-    var noop = function () {}
+
+    var $player = modelDataService.getSelectedCharacter()
+    var unitsData = modelDataService.getGameData().getUnitsObject()
+    var VILLAGE_COMMAND_LIMIT = 50
+    var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
+    var MINIMUM_ATTACK_INTERVAL = 1 * 1000
 
     var STORAGE_KEYS = {
         LOGS: 'farm_overflow_logs',
@@ -160,9 +167,7 @@ define('two/farmOverflow', [
             if (isOwnVillage) {
                 farmOverflow.removeById(data.village_id)
             } else {
-                farmers.forEach(function (farmer) {
-                    farmer.removeTarget(data.village_id)
-                })
+                farmOverflow.removeTarget(data.village_id)
             }
         }
 
@@ -447,7 +452,7 @@ define('two/farmOverflow', [
         }
 
         self.start = function () {
-            console.group('farmer.start()', village.getName())
+            console.group('start()', village.getName())
 
             var interval
             var target
@@ -484,7 +489,7 @@ define('two/farmOverflow', [
         }
 
         self.stop = function (reason) {
-            console.groupEnd('farmer.stop()', village.getName())
+            console.groupEnd('stop()')
 
             running = false
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
@@ -501,7 +506,7 @@ define('two/farmOverflow', [
         }
 
         self.commandSent = function (data) {
-            console.log('farmer.commandSent()', village.getName())
+            console.log('commandSent()')
 
             sendingCommand = false
             currentTarget = false
@@ -530,6 +535,16 @@ define('two/farmOverflow', [
 
         self.loadTargets = function (_callback) {
             var pos = village.getPosition()
+
+            if (onlyOneTarget) {
+                targets = [onlyOneTarget]
+
+                if (typeof _callback === 'function') {
+                    _callback(targets)
+                }
+
+                return
+            }
 
             mapData.load(pos, function (loadedTargets) {
                 targets = calcDistances(loadedTargets, pos)
@@ -596,16 +611,36 @@ define('two/farmOverflow', [
             return false
         }
 
+        var isTargetBusy = function (attacking, otherAttacking, allVillagesLoaded) {
+            var multipleFarmers = settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)
+            var singleAttack = settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)
+
+            if (multipleFarmers && allVillagesLoaded) {
+                if (singleAttack && attacking) {
+                    return true
+                }
+            } else if (singleAttack) {
+                if (attacking || otherAttacking) {
+                    return true
+                }
+            } else if (otherAttacking) {
+                return true
+            }
+
+            return false
+        }
+
         var targetStep = function (_options) {
             var options = _options || {}
             var preset
             var delayTime = 0
             var target
-            var targetPoints
-            var targetCommands
+            var targetPoints = false
+            var targetCommands = false
             var neededPresets
             var commandList = village.getCommandListModel()
             var villageCommands = commandList.getOutgoingCommands(true, true)
+            var checkedLocalCommands = false
 
             function checkCommandLimit () {
                 return new Promise(function (resolve, reject) {
@@ -683,55 +718,77 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkVillageCommands () {
+            function checkLocalCommands () {
                 return new Promise(function (resolve, reject) {
-                    if (settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)) {
-                        return resolve()
+                    var multipleFarmers = settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)
+                    var singleAttack = settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)
+                    var playerVillages = $player.getVillageList()
+                    var anotherVillageCommands
+                    var otherAttacking = false
+                    var attacking
+                    var allVillagesLoaded = playerVillages.every(function (anotherVillage) {
+                        return anotherVillage.isReady(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS)
+                    })
+
+                    if (allVillagesLoaded) {
+                        otherAttacking = playerVillages.some(function (anotherVillage) {
+                            if (anotherVillage.getId() === village.getId()) {
+                                return false
+                            }
+
+                            anotherVillageCommands = anotherVillage.getCommandListModel().getOutgoingCommands(true, true)
+
+                            return anotherVillageCommands.some(function (command) {
+                                return command.targetVillageId === target.id && command.data.direction === 'forward'
+                            })
+                        })
                     }
 
-                    var attacking = villageCommands.some(function (command) {
+                    attacking = villageCommands.some(function (command) {
                         return command.data.target.id === target.id && command.data.direction === 'forward'
                     })
 
-                    if (attacking && settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)) {
+
+                    if (isTargetBusy(attacking, otherAttacking, allVillagesLoaded)) {
                         return reject(ERROR_TYPES.BUSY_TARGET)
                     }
 
+                    if (allVillagesLoaded) {
+                        checkedLocalCommands = true
+                    }
+
                     resolve()
                 })
             }
 
-            function checkOtherVillagesCommands () {
+            function loadTargetPoints () {
                 return new Promise(function (resolve, reject) {
-                    if (!settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)) {
-                        return resolve()
-                    }
+                    $mapData.getTownAtAsync(target.x, target.y, function (data) {
+                        targetPoints = data.points
 
-                    var villages = $player.getVillageList()
-                    var commands
-                    var attacked
-                    var i
+                        resolve()
+                    })
+                })
+            }
 
-                    for (i = 0; i < villages.length; i++) {
-                        if (!villages[i].isReady(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS)) {
-                            return resolve()
-                        }
+            function checkTargetPoints () {
+                return new Promise(function (resolve, reject) {
+                    var min = settings.getSetting(SETTINGS.MIN_POINTS)
+                    var max = settings.getSetting(SETTINGS.MAX_POINTS)
 
-                        commands = villages[i].getCommandListModel().getOutgoingCommands(true, true)
-                        attacked = commands.some(function (command) {
-                            return command.data.target.id === target.id && command.data.direction === 'forward'
-                        })
-
-                        if (attacked) {
-                            return reject(ERROR_TYPES.BUSY_TARGET)
-                        }
+                    if (!targetPoints.between(min, max)) {
+                        return reject(ERROR_TYPES.NOT_ALLOWED_POINTS)
                     }
 
                     resolve()
                 })
             }
 
-            function loadTargetData () {
+            function loadTargetCommands () {
+                if (checkedLocalCommands) {
+                    return true
+                }
+
                 return new Promise(function (resolve, reject) {
                     socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
                         my_village_id: villageId,
@@ -748,40 +805,22 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkVillagePoints () {
-                return new Promise(function (resolve, reject) {
-                    var min = settings.getSetting(SETTINGS.MIN_POINTS)
-                    var max = settings.getSetting(SETTINGS.MAX_POINTS)
-
-                    if (!targetPoints.between(min, max)) {
-                        return reject(ERROR_TYPES.NOT_ALLOWED_POINTS)
-                    }
-
-                    resolve()
-                })
-            }
-
-            function checkTargetCommands () {
-                var allowMultipleFarmers = settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)
-                var onlyOneAttackPerFarmer = settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)
-                
-                var anotherFarmerAttacking = targetCommands.some(function (command) {
-                    return command.start_village_id !== villageId
-                })
-                var thisFarmerAttacking = targetCommands.some(function (command) {
-                    return command.start_village_id === villageId
-                })
+            function checkLoadedCommands () {
+                if (checkedLocalCommands) {
+                    return true
+                }
 
                 return new Promise(function (resolve, reject) {
-                    if (allowMultipleFarmers) {
-                        if (onlyOneAttackPerFarmer && thisFarmerAttacking) {
-                            return reject(ERROR_TYPES.BUSY_TARGET)
-                        }
-                    } else if (onlyOneAttackPerFarmer) {
-                        if (thisFarmerAttacking || anotherFarmerAttacking) {
-                            return reject(ERROR_TYPES.BUSY_TARGET)
-                        }
-                    } else if (anotherFarmerAttacking) {
+                    var multipleFarmers = settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)
+                    var singleAttack = settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)
+                    var otherAttacking = targetCommands.some(function (command) {
+                        return command.start_village_id !== villageId
+                    })
+                    var attacking = targetCommands.some(function (command) {
+                        return command.start_village_id === villageId
+                    })
+
+                    if (isTargetBusy(attacking, otherAttacking, true)) {
                         return reject(ERROR_TYPES.BUSY_TARGET)
                     }
 
@@ -806,14 +845,14 @@ define('two/farmOverflow', [
             .then(checkVillagePresets)
             .then(checkPreset)
             .then(checkTarget)
-            .then(checkVillageCommands)
-            .then(checkOtherVillagesCommands)
-            .then(loadTargetData)
-            .then(checkVillagePoints)
-            .then(checkTargetCommands)
+            .then(checkLocalCommands)
+            .then(loadTargetPoints)
+            .then(checkTargetPoints)
+            .then(loadTargetCommands)
+            .then(checkLoadedCommands)
             .then(prepareAttack)
             .catch(function (error) {
-                console.log('stepError:', error)
+                console.log('farmerStep error:', error)
 
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
                     villageId: villageId,
@@ -822,15 +861,12 @@ define('two/farmOverflow', [
 
                 switch (error) {
                 case ERROR_TYPES.TIME_LIMIT:
-                    targetStep(options)
-                    break
-
                 case ERROR_TYPES.BUSY_TARGET:
                     targetStep(options)
                     break
 
                 case ERROR_TYPES.NOT_ALLOWED_POINTS:
-                    self.removeTarget(target.id)
+                    farmOverflow.removeTarget(target.id)
                     targetStep(options)
                     break
 
@@ -1069,6 +1105,10 @@ define('two/farmOverflow', [
         if (!activeFarmer) {
             farmOverflow.stop(ERROR_TYPES.FARMER_CYCLE_END)
 
+            if (onlyOneFarmerCycle) {
+                return
+            }
+
             interval = settings.getSetting(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
             interval += MINIMUM_FARMER_CYCLE_INTERVAL
 
@@ -1107,6 +1147,12 @@ define('two/farmOverflow', [
         }
 
         return false
+    }
+
+    farmOverflow.removeTarget = function (targetId) {
+        farmers.forEach(function (farmer) {
+            farmer.removeTarget(targetId)
+        })
     }
 
     farmOverflow.getSettings = function () {
