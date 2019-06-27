@@ -49,6 +49,10 @@ define('two/farmOverflow/settingsMap', [
             type: 'groups'
         },
         [SETTINGS.ATTACK_INTERVAL]: {
+            default: 2,
+            updates: []
+        },
+        [SETTINGS.FARMER_CYCLE_INTERVAL]: {
             default: 0,
             updates: []
         },
@@ -66,28 +70,12 @@ define('two/farmOverflow/settingsMap', [
             default: 5,
             updates: []
         },
-        // [SETTINGS.PRIORITY_TARGETS]: {
-        //     default: true,
-        //     updates: []
-        // },
         [SETTINGS.IGNORE_ON_LOSS]: {
             default: true,
             updates: []
         },
         [SETTINGS.IGNORE_FULL_STORAGE]: {
             default: true,
-            updates: []
-        },
-        // [SETTINGS.STEP_CYCLE]: {
-        //     default: false,
-        //     updates: [SETTINGS_UPDATE.VILLAGES]
-        // },
-        // [SETTINGS.STEP_CYCLE_NOTIFS]: {
-        //     default: false,
-        //     updates: []
-        // },
-        [SETTINGS.FARMER_CYCLE_INTERVAL]: {
-            default: 0,
             updates: []
         },
         [SETTINGS.MAX_DISTANCE]: {
@@ -113,34 +101,6 @@ define('two/farmOverflow/settingsMap', [
         [SETTINGS.LOGS_LIMIT]: {
             default: 500,
             updates: [SETTINGS_UPDATE.LOGS]
-        },
-        // [SETTINGS.EVENT_ATTACK]: {
-        //     default: true,
-        //     updates: [SETTINGS_UPDATE.LOGS]
-        // },
-        // [SETTINGS.EVENT_VILLAGE_CHANGE]: {
-        //     default: true,
-        //     updates: [SETTINGS_UPDATE.LOGS]
-        // },
-        // [SETTINGS.EVENT_PRIORITY_ADD]: {
-        //     default: true,
-        //     updates: [SETTINGS_UPDATE.LOGS]
-        // },
-        // [SETTINGS.EVENT_IGNORED_VILLAGE]: {
-        //     default: true,
-        //     updates: [SETTINGS_UPDATE.LOGS]
-        // },
-        // [SETTINGS.REMOTE_ID]: {
-        //     default: 'remote',
-        //     updates: []
-        // },
-        // [SETTINGS.HOTKEY_SWITCH]: {
-        //     default: 'shift+z',
-        //     updates: []
-        // },
-        // [SETTINGS.HOTKEY_WINDOW]: {
-        //     default: 'z',
-        //     updates: []
-        // }
+        }
     }
 })

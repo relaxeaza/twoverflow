@@ -16,17 +16,6 @@ define('two/farmOverflow/settings', [], function () {
         MIN_POINTS: 'min_points',
         MAX_POINTS: 'max_points',
         LOGS_LIMIT: 'logs_limit',
-        // PRIORITY_TARGETS: 'priority_targets',
-        // IGNORE_ON_LOSS: 'ignore_on_loss',
-        // STEP_CYCLE: 'step_cycle',
-        // STEP_CYCLE_NOTIFS: 'step_cycle_notifs',
-        // STEP_CYCLE_INTERVAL: 'step_cycle_interval',
-        // EVENT_ATTACK: 'event_attack',
-        // EVENT_VILLAGE_CHANGE: 'event_village_change',
-        // EVENT_PRIORITY_ADD: 'event_priority_add',
-        // EVENT_IGNORED_VILLAGE: 'event_ignored_village',
-        // REMOTE_ID: 'remote_id',
-        // HOTKEY_SWITCH: 'hotkey_switch',
-        // HOTKEY_WINDOW: 'hotkey_window'
+        IGNORE_ON_LOSS: 'ignore_on_loss'
     }
 })
