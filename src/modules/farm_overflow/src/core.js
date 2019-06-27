@@ -283,8 +283,6 @@ define('two/farmOverflow', [
             return
         }
 
-        var target
-
         // 1 = nocasualties
         // 2 = casualties
         // 3 = defeat
@@ -924,11 +922,14 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.stop = function (reason) {
-        running = false
         reason = reason || ERROR_TYPES.USER_STOP
 
         if (activeFarmer) {
             activeFarmer.stop(reason)
+        }
+
+        if (reason !== ERROR_TYPES.FARMER_CYCLE_END) {
+            running = false
         }
 
         clearTimeout(farmerTimeoutId)
@@ -1075,6 +1076,10 @@ define('two/farmOverflow', [
 
     farmOverflow.isInitialized = function () {
         return initialized
+    }
+
+    farmOverflow.isRunning = function () {
+        return running
     }
 
     return farmOverflow

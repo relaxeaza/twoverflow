@@ -79,7 +79,7 @@ define('two/farmOverflow/settingsMap', [
             updates: []
         },
         [SETTINGS.MAX_DISTANCE]: {
-            default: 30,
+            default: 5,
             updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MIN_DISTANCE]: {

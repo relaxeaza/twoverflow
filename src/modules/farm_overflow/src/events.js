@@ -11,6 +11,7 @@ define('two/farmOverflow/events', [], function () {
         FARM_OVERFLOW_PRESETS_LOADED: 'farm_overflow_presets_loaded',
         FARM_OVERFLOW_LOGS_UPDATED: 'farm_overflow_log_updated',
         FARM_OVERFLOW_COMMAND_SENT: 'farm_overflow_command_sent',
-        FARM_OVERFLOW_IGNORED_TARGET: 'farm_overflow_ignored_target'
+        FARM_OVERFLOW_IGNORED_TARGET: 'farm_overflow_ignored_target',
+        FARM_OVERFLOW_VILLAGE_IGNORED: 'farm_overflow_village_ignored'
     })
 })
