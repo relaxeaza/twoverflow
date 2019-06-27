@@ -463,8 +463,12 @@ define('two/farmOverflow', [
                 villageId: villageId,
                 reason: reason
             })
+
+            if (reason !== ERROR_TYPES.USER_STOP) {
+                cycleEndHandler(reason)
+            }
+
             clearTimeout(targetTimeoutId)
-            cycleEndHandler(reason)
             cycleEndHandler = noop
         }
 
