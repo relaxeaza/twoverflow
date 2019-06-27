@@ -228,6 +228,10 @@ define('two/farmOverflow', [
             activePresets = settings.getSetting(SETTINGS.PRESETS)
 
             activePresets.forEach(function (presetId) {
+                if (!playerPresets.hasOwnProperty(presetId)) {
+                    return
+                }
+
                 preset = playerPresets[presetId]
                 preset.load = getPresetHaul(preset)
                 preset.travelTime = getPresetTimeTravel(preset, false)
