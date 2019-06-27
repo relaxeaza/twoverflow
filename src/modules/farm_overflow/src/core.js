@@ -419,7 +419,7 @@ define('two/farmOverflow', [
         }
 
         self.start = function () {
-            console.log('farmer.start()', village.getName())
+            console.group('farmer.start()', village.getName())
 
             var interval
             var target
@@ -456,7 +456,7 @@ define('two/farmOverflow', [
         }
 
         self.stop = function (reason) {
-            console.log('farmer.stop()', village.getName())
+            console.groupEnd('farmer.stop()', village.getName())
 
             running = false
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
@@ -967,7 +967,7 @@ define('two/farmOverflow', [
         return false
     }
 
-    farmOverflow.removeById = function () {
+    farmOverflow.removeById = function (farmerId) {
         var i
 
         for (i = 0; i < farmers.length; i++) {
