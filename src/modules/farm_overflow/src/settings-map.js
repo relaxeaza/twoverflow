@@ -57,6 +57,11 @@ define('two/farmOverflow/settingsMap', [
             updates: [],
             inputType: 'checkbox'
         },
+        [SETTINGS.TARGET_MULTIPLE_FARMERS]: {
+            default: true,
+            updates: [],
+            inputType: 'checkbox'
+        },
         [SETTINGS.PRESERVE_COMMAND_SLOTS]: {
             default: 5,
             updates: []

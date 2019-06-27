@@ -29,8 +29,9 @@ define('two/farmOverflow', [
 ) {
     var $player = modelDataService.getSelectedCharacter()
     var VILLAGE_COMMAND_LIMIT = 50
-    var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
-    var MINIMUM_ATTACK_INTERVAL = 1 * 1000
+    var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000 // 5 seconds
+    var MINIMUM_ATTACK_INTERVAL = 1 * 1000 // 1 second
+    var CACHE_IGNORE_COMMANDS_TIME = 5 * 60 * 1000 // 5 min
     var initialized = false
     var running = false
     var settings
@@ -368,7 +369,7 @@ define('two/farmOverflow', [
         return true
     }
 
-    var Farmer = function (villageId, _options) {
+    var Farmer = function (villageId) {
         var self = this
         var village = $player.getVillage(villageId)
         var index = 0
@@ -379,8 +380,7 @@ define('two/farmOverflow', [
         var cycleEndHandler = noop
         var loadPromises
         var targetTimeoutId
-
-        _options = _options || {}
+        var ignoreCommandsTime = {}
 
         if (!village) {
             throw new Error(`new Farmer -> Village ${villageId} doesn't exist.`)
@@ -456,7 +456,7 @@ define('two/farmOverflow', [
         }
 
         self.stop = function (reason) {
-            console.log('farmer.stop()', village.getName(), 'reason', reason)
+            console.log('farmer.stop()', village.getName())
 
             running = false
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
@@ -569,7 +569,8 @@ define('two/farmOverflow', [
             var preset
             var delayTime = 0
             var target
-            var targetData
+            var targetPoints
+            var targetCommands
             var neededPresets
 
             function checkCommandLimit () {
@@ -650,6 +651,19 @@ define('two/farmOverflow', [
                 })
             }
 
+            function checkCachedIgnore () {
+                var now = timeHelper.gameTime()
+                var ignoredTime = ignoreCommandsTime[target.id]
+                
+                return new Promise(function (resolve, reject) {
+                    if (ignoredTime && now - ignoredTime < CACHE_IGNORE_COMMANDS_TIME) {
+                        return reject(ERROR_TYPES.CACHED_IGNORE)
+                    }
+
+                    resolve()
+                })
+            }
+
             function loadTargetData () {
                 return new Promise(function (resolve, reject) {
                     socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
@@ -657,7 +671,11 @@ define('two/farmOverflow', [
                         village_id: target.id,
                         num_reports: 0
                     }, function(data) {
-                        targetData = data
+                        targetPoints = data.points
+                        targetCommands = data.commands.own.filter(function (command) {
+                            return command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward'
+                        })
+
                         resolve()
                     })
                 })
@@ -668,7 +686,7 @@ define('two/farmOverflow', [
                     var min = settings.getSetting(SETTINGS.MIN_POINTS)
                     var max = settings.getSetting(SETTINGS.MAX_POINTS)
 
-                    if (!targetData.points.between(min, max)) {
+                    if (!targetPoints.between(min, max)) {
                         return reject(ERROR_TYPES.NOT_ALLOWED_POINTS)
                     }
 
@@ -676,22 +694,30 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkCommands () {
+            function checkTargetCommands () {
+                var allowMultipleFarmers = settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)
+                var onlyOneAttackPerFarmer = settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)
+                
+                var anotherFarmerAttacking = targetCommands.some(function (command) {
+                    return command.start_village_id !== villageId
+                })
+                var thisFarmerAttacking = targetCommands.some(function (command) {
+                    return command.start_village_id === villageId
+                })
+
                 return new Promise(function (resolve, reject) {
-                    if (!settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)) {
-                        return resolve()
-                    }
-
-                    var busy = targetData.commands.own.some(function(command) {
-                        if (command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward') {
-                            return true
+                    if (allowMultipleFarmers) {
+                        if (onlyOneAttackPerFarmer && thisFarmerAttacking) {
+                            return reject(ERROR_TYPES.BUSY_TARGET)
                         }
-                    })
-
-                    if (busy) {
-                        return reject(ERROR_TYPES.SINGLE_COMMAND_FILLED)
+                    } else if (onlyOneAttackPerFarmer) {
+                        if (thisFarmerAttacking || anotherFarmerAttacking) {
+                            return reject(ERROR_TYPES.BUSY_TARGET)
+                        }
+                    } else if (anotherFarmerAttacking) {
+                        return reject(ERROR_TYPES.BUSY_TARGET)
                     }
-                    
+
                     resolve()
                 })
             }
@@ -713,11 +739,14 @@ define('two/farmOverflow', [
             .then(checkVillagePresets)
             .then(checkPreset)
             .then(checkTarget)
+            .then(checkCachedIgnore)
             .then(loadTargetData)
             .then(checkVillagePoints)
-            .then(checkCommands)
+            .then(checkTargetCommands)
             .then(prepareAttack)
             .catch(function (error) {
+                console.log('stepError:', error)
+
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
                     villageId: villageId,
                     error: error
@@ -725,7 +754,11 @@ define('two/farmOverflow', [
 
                 switch (error) {
                 case ERROR_TYPES.TIME_LIMIT:
-                case ERROR_TYPES.SINGLE_COMMAND_FILLED:
+                    targetStep(options)
+                    break
+
+                case ERROR_TYPES.BUSY_TARGET:
+                    ignoreCommandsTime[target.id] = timeHelper.gameTime()
                     targetStep(options)
                     break
 
@@ -744,6 +777,10 @@ define('two/farmOverflow', [
                 case ERROR_TYPES.TARGET_CYCLE_END:
                     self.stop(error)
                     index = 0
+                    break
+
+                default:
+                    self.stop(ERROR_TYPES.UNKNOWN)
                     break
                 }
             })
