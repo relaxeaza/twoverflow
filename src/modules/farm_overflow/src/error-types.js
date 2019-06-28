@@ -5,7 +5,6 @@ define('two/farmOverflow/errorTypes', [], function () {
         FULL_STORAGE: 'full_storage',
         NO_UNITS: 'no_units',
         NO_PRESETS: 'no_presets',
-        PRESET_FIRST: 'preset_first',
         NO_SELECTED_VILLAGE: 'no_selected_village',
         ABANDONED_CONQUERED: 'abandoned_conquered',
         PROTECTED_VILLAGE: 'protected_village',

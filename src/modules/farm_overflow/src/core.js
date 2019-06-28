@@ -33,7 +33,8 @@ define('two/farmOverflow', [
 ) {
     /* debug vars */
     var onlyOneFarmerCycle = false
-    var onlyOneTarget = { character_id: null, distance: 1.7, id: 11161, tribe_id: null, x: 557, y: 576 }
+    // var onlyOneTarget = { character_id: null, distance: 1.7, id: 11161, tribe_id: null, x: 557, y: 576 }
+    var onlyOneTarget = false
     /* /debug vars */
 
     var initialized = false
@@ -78,6 +79,12 @@ define('two/farmOverflow', [
         },
         ignored: function (target) {
             return ignoredVillages.includes(target.id)
+        },
+        points: function (points) {
+            return !points.between(
+                settings.getSetting(SETTINGS.MIN_POINTS),
+                settings.getSetting(SETTINGS.MAX_POINTS)
+            )
         }
     }
 
@@ -281,11 +288,14 @@ define('two/farmOverflow', [
     var presetListener = function () {
         updatePresets()
 
-        if (running && !selectedPresets.length) {
-            farmOverflow.stop()
+        if (!selectedPresets.length) {
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
                 reason: ERROR_TYPES.NO_PRESETS
             })
+
+            if (running) {
+                farmOverflow.stop()
+            }
         }
     }
 
@@ -640,9 +650,6 @@ define('two/farmOverflow', [
             var preset
             var delayTime = 0
             var target
-            var targetPoints = false
-            var targetCommands = false
-            var neededPresets
             var commandList = village.getCommandListModel()
             var villageCommands = commandList.getOutgoingCommands(true, true)
             var checkedLocalCommands = false
@@ -683,7 +690,7 @@ define('two/farmOverflow', [
 
             function checkVillagePresets () {
                 return new Promise(function (resolve) {
-                    neededPresets = genPresetList()
+                    var neededPresets = genPresetList()
 
                     if (neededPresets) {
                         assignPresets(village.getId(), neededPresets, resolve)
@@ -753,7 +760,6 @@ define('two/farmOverflow', [
                         return command.data.target.id === target.id && command.data.direction === 'forward'
                     })
 
-
                     if (isTargetBusy(attacking, otherAttacking, allVillagesLoaded)) {
                         return reject(ERROR_TYPES.BUSY_TARGET)
                     }
@@ -766,44 +772,12 @@ define('two/farmOverflow', [
                 })
             }
 
-            function loadTargetPoints () {
-                return new Promise(function (resolve, reject) {
-                    $mapData.getTownAtAsync(target.x, target.y, function (data) {
-                        targetPoints = data.points
-
-                        resolve()
-                    })
-                })
-            }
-
             function checkTargetPoints () {
                 return new Promise(function (resolve, reject) {
-                    var min = settings.getSetting(SETTINGS.MIN_POINTS)
-                    var max = settings.getSetting(SETTINGS.MAX_POINTS)
-
-                    if (!targetPoints.between(min, max)) {
-                        return reject(ERROR_TYPES.NOT_ALLOWED_POINTS)
-                    }
-
-                    resolve()
-                })
-            }
-
-            function loadTargetCommands () {
-                if (checkedLocalCommands) {
-                    return true
-                }
-
-                return new Promise(function (resolve, reject) {
-                    socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
-                        my_village_id: villageId,
-                        village_id: target.id,
-                        num_reports: 0
-                    }, function(data) {
-                        targetPoints = data.points
-                        targetCommands = data.commands.own.filter(function (command) {
-                            return command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward'
-                        })
+                    $mapData.getTownAtAsync(target.x, target.y, function (data) {
+                        if (villageFilters.points(data.points)) {
+                            return reject(ERROR_TYPES.NOT_ALLOWED_POINTS)
+                        }
 
                         resolve()
                     })
@@ -816,20 +790,29 @@ define('two/farmOverflow', [
                 }
 
                 return new Promise(function (resolve, reject) {
-                    var multipleFarmers = settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)
-                    var singleAttack = settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)
-                    var otherAttacking = targetCommands.some(function (command) {
-                        return command.start_village_id !== villageId
-                    })
-                    var attacking = targetCommands.some(function (command) {
-                        return command.start_village_id === villageId
-                    })
+                    socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
+                        my_village_id: villageId,
+                        village_id: target.id,
+                        num_reports: 0
+                    }, function (data) {
+                        var targetCommands = data.commands.own.filter(function (command) {
+                            return command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward'
+                        })
+                        var multipleFarmers = settings.getSetting(SETTINGS.TARGET_MULTIPLE_FARMERS)
+                        var singleAttack = settings.getSetting(SETTINGS.TARGET_SINGLE_ATTACK)
+                        var otherAttacking = targetCommands.some(function (command) {
+                            return command.start_village_id !== villageId
+                        })
+                        var attacking = targetCommands.some(function (command) {
+                            return command.start_village_id === villageId
+                        })
 
-                    if (isTargetBusy(attacking, otherAttacking, true)) {
-                        return reject(ERROR_TYPES.BUSY_TARGET)
-                    }
+                        if (isTargetBusy(attacking, otherAttacking, true)) {
+                            return reject(ERROR_TYPES.BUSY_TARGET)
+                        }
 
-                    resolve()
+                        resolve()
+                    })
                 })
             }
 
@@ -851,9 +834,7 @@ define('two/farmOverflow', [
             .then(checkPreset)
             .then(checkTarget)
             .then(checkLocalCommands)
-            .then(loadTargetPoints)
             .then(checkTargetPoints)
-            .then(loadTargetCommands)
             .then(checkLoadedCommands)
             .then(prepareAttack)
             .catch(function (error) {
@@ -981,6 +962,14 @@ define('two/farmOverflow', [
             return false
         }
 
+        if (!selectedPresets.length) {
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
+                reason: ERROR_TYPES.NO_PRESETS
+            })
+
+            return false
+        }
+
         running = true
         readyFarmers = []
 
@@ -991,6 +980,7 @@ define('two/farmOverflow', [
         })
 
         if (!readyFarmers.length) {
+            running = false
             return false
         }
 
