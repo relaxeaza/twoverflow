@@ -4,7 +4,7 @@ let path = require('path')
 let mkdirp = require('mkdirp')
 let https = require('https')
 let request = require('request')
-let unzip = require('unzip')
+let unzip = require('unzipper')
 
 let approvedMinRequired = false // %
 let translatedMinRequired = 40 // %
