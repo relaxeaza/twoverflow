@@ -398,13 +398,19 @@ define('two/farmOverflow', [
             return false
         }
 
-        var limit = settings.getSetting(SETTINGS.LOGS_LIMIT)
         var data = angular.isObject(_data) ? _data : {}
 
         data.time = timeHelper.gameTime()
         data.type = type
 
         logs.unshift(data)
+        trimAndSaveLogs()
+
+        return true
+    }
+
+    var trimAndSaveLogs = function () {
+        var limit = settings.getSetting(SETTINGS.LOGS_LIMIT)
 
         if (logs.length > limit) {
             logs.splice(logs.length - limit, logs.length)
@@ -412,8 +418,6 @@ define('two/farmOverflow', [
 
         Lockr.set(STORAGE_KEYS.LOGS, logs)
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_LOGS_UPDATED)
-
-        return true
     }
 
     var Farmer = function (villageId) {
@@ -519,7 +523,7 @@ define('two/farmOverflow', [
         }
 
         self.commandSent = function (data) {
-            console.log('commandSent()')
+            console.log('targetStep: command_sent')
 
             sendingCommand = false
             currentTarget = false
@@ -927,11 +931,45 @@ define('two/farmOverflow', [
 
     farmOverflow.init = function () {
         initialized = true
+        logs = Lockr.get(STORAGE_KEYS.LOGS, [])
+        
         settings = new Settings({
             settingsMap: SETTINGS_MAP,
             storageKey: STORAGE_KEYS.SETTINGS
         })
-        logs = Lockr.get(STORAGE_KEYS.LOGS, [])
+
+        settings.onSettingsChange(function (changes, update) {
+            var id
+            var modify = {}
+
+            for (id in changes) {
+                SETTINGS_MAP[id].updates.forEach(function (modifier) {
+                    modify[modifier] = true
+                })
+            }
+
+            if (modify[SETTINGS_UPDATE.PRESET]) {
+                updatePresets()
+            }
+
+            if (modify[SETTINGS_UPDATE.GROUPS]) {
+                updateGroupVillages()
+            }
+
+            if (modify[SETTINGS_UPDATE.TARGETS]) {
+                reloadTargets()
+            }
+
+            if (modify[SETTINGS_UPDATE.VILLAGES]) {
+                farmOverflow.flush()
+                farmOverflow.createAll()
+            }
+
+            if (modify[SETTINGS_UPDATE.LOGS]) {
+                trimAndSaveLogs()
+            }
+
+        })
         
         updateGroupVillages()
         updatePresets()
