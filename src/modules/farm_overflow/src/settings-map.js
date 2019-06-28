@@ -7,8 +7,7 @@ define('two/farmOverflow/settingsMap', [
 ) {
     return {
         [SETTINGS.PRESETS]: {
-            // default: [],
-            default: [843831, 3578472, 9737990, 13099375],
+            default: [],
             updates: [SETTINGS_UPDATE.PRESET],
             disabledOption: true,
             inputType: 'select',
@@ -16,16 +15,14 @@ define('two/farmOverflow/settingsMap', [
             type: 'presets'
         },
         [SETTINGS.GROUP_IGNORE]: {
-            // default: false,
-            default: 12999,
+            default: false,
             updates: [SETTINGS_UPDATE.GROUPS],
             disabledOption: true,
             inputType: 'select',
             type: 'groups'
         },
         [SETTINGS.GROUP_INCLUDE]: {
-            // default: [],
-            default: [13000],
+            default: [],
             updates: [
                 SETTINGS_UPDATE.GROUPS,
                 SETTINGS_UPDATE.TARGETS
@@ -36,8 +33,7 @@ define('two/farmOverflow/settingsMap', [
             type: 'groups'
         },
         [SETTINGS.GROUP_ONLY]: {
-            // default: [],
-            default: [12804],
+            default: [],
             updates: [
                 SETTINGS_UPDATE.GROUPS,
                 SETTINGS_UPDATE.VILLAGES,
@@ -53,7 +49,7 @@ define('two/farmOverflow/settingsMap', [
             updates: []
         },
         [SETTINGS.FARMER_CYCLE_INTERVAL]: {
-            default: 0,
+            default: 5,
             updates: []
         },
         [SETTINGS.TARGET_SINGLE_ATTACK]: {
@@ -72,18 +68,20 @@ define('two/farmOverflow/settingsMap', [
         },
         [SETTINGS.IGNORE_ON_LOSS]: {
             default: true,
-            updates: []
+            updates: [],
+            inputType: 'checkbox'
         },
         [SETTINGS.IGNORE_FULL_STORAGE]: {
-            default: false,
-            updates: []
+            default: true,
+            updates: [],
+            inputType: 'checkbox'
         },
         [SETTINGS.MIN_DISTANCE]: {
             default: 0,
             updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MAX_DISTANCE]: {
-            default: 20,
+            default: 15,
             updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MIN_POINTS]: {
