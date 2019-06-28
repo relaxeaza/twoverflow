@@ -49,7 +49,7 @@ define('two/builderQueue', [
      * for each village.
      */
     var analyseVillages = function () {
-        var groupVillages = settings.getSetting(SETTINGS.GROUP_VILLAGES)
+        var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
         var villageIds = groupVillages ? groupList.getGroupVillageIds(groupVillages) : getVillageIds()
         var village
         var readyState
@@ -79,7 +79,7 @@ define('two/builderQueue', [
     }
 
     var analyseVillagesInstantFinish = function () {
-        var groupVillages = settings.getSetting(SETTINGS.GROUP_VILLAGES)
+        var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
         var villageIds = groupVillages ? groupList.getGroupVillageIds(groupVillages) : getVillageIds()
         var village
         var queue
@@ -102,7 +102,7 @@ define('two/builderQueue', [
     }
 
     var initializeAllVillages = function () {
-        var groupVillages = settings.getSetting(SETTINGS.GROUP_VILLAGES)
+        var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
         var villageIds = groupVillages ? groupList.getGroupVillageIds(groupVillages) : getVillageIds()
         var village
 
@@ -143,8 +143,8 @@ define('two/builderQueue', [
         var sequence = angular.copy(VILLAGE_BUILDINGS)
         var now
         var logData
-        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
-        var activeSequenceId = settings.getSetting(SETTINGS.ACTIVE_SEQUENCE)
+        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        var activeSequenceId = settings.get(SETTINGS.ACTIVE_SEQUENCE)
         var activeSequence = sequences[activeSequenceId]
 
         currentQueue.forEach(function (job) {
@@ -261,7 +261,7 @@ define('two/builderQueue', [
      * @return {Object} Maximum level for each building.
      */
     var getSequenceLimit = function (sequenceId) {
-        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
         var sequence = sequences[sequenceId]
         var sequenceLimit = angular.copy(VILLAGE_BUILDINGS)
 
@@ -323,7 +323,7 @@ define('two/builderQueue', [
     }
 
     builderQueue.addBuildingSequence = function (id, sequence) {
-        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
 
         if (id in sequences) {
             return ERROR_CODES.SEQUENCE_EXISTS
@@ -334,7 +334,7 @@ define('two/builderQueue', [
         }
 
         sequences[id] = sequence
-        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences, {
+        settings.set(SETTINGS.BUILDING_SEQUENCES, sequences, {
             quiet: true
         })
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, id)
@@ -343,7 +343,7 @@ define('two/builderQueue', [
     }
 
     builderQueue.updateBuildingSequence = function (id, sequence) {
-        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
 
         if (!(id in sequences)) {
             return ERROR_CODES.SEQUENCE_NO_EXISTS
@@ -354,7 +354,7 @@ define('two/builderQueue', [
         }
 
         sequences[id] = sequence
-        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences, {
+        settings.set(SETTINGS.BUILDING_SEQUENCES, sequences, {
             quiet: true
         })
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_UPDATED, id)
@@ -363,14 +363,14 @@ define('two/builderQueue', [
     }
 
     builderQueue.removeSequence = function (id) {
-        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
 
         if (!(id in sequences)) {
             return ERROR_CODES.SEQUENCE_NO_EXISTS
         }
 
         delete sequences[id]
-        settings.setSetting(SETTINGS.BUILDING_SEQUENCES, sequences, {
+        settings.set(SETTINGS.BUILDING_SEQUENCES, sequences, {
             quiet: true
         })
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_REMOVED, id)
@@ -390,7 +390,7 @@ define('two/builderQueue', [
             storageKey: STORAGE_KEYS.SETTINGS
         })
 
-        settings.onSettingsChange(function (changes, update, opt) {
+        settings.onChange(function (changes, update, opt) {
             if (!opt.quiet) {
                 eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
             }
@@ -400,8 +400,8 @@ define('two/builderQueue', [
             VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
         }
 
-        sequencesAvail = Object.keys(settings.getSetting(SETTINGS.BUILDING_SEQUENCES)).length
-        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings.getSetting(SETTINGS.ACTIVE_SEQUENCE)) : false
+        sequencesAvail = Object.keys(settings.get(SETTINGS.BUILDING_SEQUENCES)).length
+        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings.get(SETTINGS.ACTIVE_SEQUENCE)) : false
 
         $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
             if (!running) {

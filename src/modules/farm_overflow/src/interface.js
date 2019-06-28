@@ -65,7 +65,7 @@ define('two/farmOverflow/ui', [
     }
 
     var saveSettings = function () {
-        settings.setSettings(settings.decodeSettings($scope.settings))
+        settings.setAll(settings.decode($scope.settings))
 
         $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
             message: $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject)
@@ -168,7 +168,7 @@ define('two/farmOverflow/ui', [
             limit: storageService.getPaginationLimit()
         }
 
-        settings.injectSettings($scope)
+        settings.injectScope($scope)
         eventHandlers.updatePresets()
         eventHandlers.updateGroups()
         updateVisibleLogs()

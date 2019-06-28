@@ -124,7 +124,7 @@ define('two/builderQueue/ui', [
     }
 
     settingsView.generateSequences = function () {
-        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
         var sequencesAvail = Object.keys(sequences).length
 
         settingsView.sequencesAvail = sequencesAvail
@@ -374,7 +374,7 @@ define('two/builderQueue/ui', [
     }
 
     editorView.generateBuildingSequence = function () {
-        var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
         var sequencesAvail = Object.keys(sequences).length
 
         editorView.sequencesAvail = sequencesAvail
@@ -555,7 +555,7 @@ define('two/builderQueue/ui', [
     }
 
     var saveSettings = function () {
-        settings.setSettings(settings.decodeSettings($scope.settings))
+        settings.setAll(settings.decode($scope.settings))
     }
 
     var switchBuilder = function () {
@@ -574,7 +574,7 @@ define('two/builderQueue/ui', [
             })
         },
         updateSequences: function () {
-            var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+            var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
             
             $scope.sequences = Settings.encodeList(sequences, {
                 type: 'keys',
@@ -596,7 +596,7 @@ define('two/builderQueue/ui', [
             eventHandlers.updateLogs()
         },
         buildingSequenceUpdate: function (event, sequenceId) {
-            var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+            var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
             $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId] = sequences[sequenceId]
 
             if ($scope.settings[SETTINGS.ACTIVE_SEQUENCE].value === sequenceId) {
@@ -606,7 +606,7 @@ define('two/builderQueue/ui', [
             utils.emitNotif('success', $filter('i18n')('sequence_updated', $rootScope.loc.ale, textObject, sequenceId))
         },
         buildingSequenceAdd: function (event, sequenceId) {
-            var sequences = settings.getSetting(SETTINGS.BUILDING_SEQUENCES)
+            var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
             $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId] = sequences[sequenceId]
             eventHandlers.updateSequences()
             utils.emitNotif('success', $filter('i18n')('sequence_created', $rootScope.loc.ale, textObject, sequenceId))
@@ -621,8 +621,8 @@ define('two/builderQueue/ui', [
             eventHandlers.updateSequences()
             editorView.generateBuildingSequence()
 
-            if (settings.getSetting(SETTINGS.ACTIVE_SEQUENCE) === sequenceId) {
-                settings.setSetting(SETTINGS.ACTIVE_SEQUENCE, substituteSequence, {
+            if (settings.get(SETTINGS.ACTIVE_SEQUENCE) === sequenceId) {
+                settings.set(SETTINGS.ACTIVE_SEQUENCE, substituteSequence, {
                     quiet: true
                 })
                 settingsView.generateSequences()
@@ -673,7 +673,7 @@ define('two/builderQueue/ui', [
     }
 
     var buildWindow = function () {
-        var activeSequence = settings.getSetting(SETTINGS.ACTIVE_SEQUENCE)
+        var activeSequence = settings.get(SETTINGS.ACTIVE_SEQUENCE)
 
         $scope = $rootScope.$new()
         $scope.textObject = textObject
@@ -703,7 +703,7 @@ define('two/builderQueue/ui', [
         $scope.createFirstSequence = createFirstSequence
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
 
-        settings.injectSettings($scope)
+        settings.injectScope($scope)
         eventHandlers.updateGroups()
         eventHandlers.updateSequences()
 

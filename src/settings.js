@@ -53,11 +53,11 @@ define('two/Settings', [
         this.injected = false
     }
 
-    Settings.prototype.getSetting = function (id) {
+    Settings.prototype.get = function (id) {
         return this.settings[id]
     }
 
-    Settings.prototype.getSettings = function () {
+    Settings.prototype.getAll = function () {
         return this.settings
     }
 
@@ -69,7 +69,7 @@ define('two/Settings', [
         Lockr.set(this.storageKey, this.settings)
     }
 
-    Settings.prototype.setSetting = function (id, value, opt) {
+    Settings.prototype.set = function (id, value, opt) {
         var changes
         var before
         var after
@@ -86,7 +86,7 @@ define('two/Settings', [
             }
 
             this.store()
-            this.updateInjectedScope()
+            this.updateScope()
             this.events.settingsChange(changes, update, opt || {})
 
             return true
@@ -95,7 +95,7 @@ define('two/Settings', [
         return false
     }
 
-    Settings.prototype.setSettings = function (values, opt) {
+    Settings.prototype.setAll = function (values, opt) {
         var changes
         var before = angular.copy(this.settings)
         var after
@@ -116,25 +116,25 @@ define('two/Settings', [
         changes = generateDiff(before, after)
 
         this.store()
-        this.updateInjectedScope()
+        this.updateScope()
         this.events.settingsChange(changes, update, opt || {})
 
         return true
     }
 
-    Settings.prototype.resetSetting = function (id, opt) {
-        this.setSetting(id, this.defaults[id], opt)
+    Settings.prototype.reset = function (id, opt) {
+        this.set(id, this.defaults[id], opt)
 
         return true
     }
 
-    Settings.prototype.resetSettings = function (opt) {
-        this.setSettings(angular.copy(this.defaults), opt)
+    Settings.prototype.resetAll = function (opt) {
+        this.setAll(angular.copy(this.defaults), opt)
 
         return true
     }
 
-    Settings.prototype.eachSetting = function (callback) {
+    Settings.prototype.each = function (callback) {
         var id
         var value
         var map
@@ -150,13 +150,13 @@ define('two/Settings', [
         }
     }
 
-    Settings.prototype.onSettingsChange = function (callback) {
+    Settings.prototype.onChange = function (callback) {
         if (typeof callback === 'function') {
             this.events.settingsChange = callback
         }
     }
 
-    Settings.prototype.injectSettings = function ($scope, opt) {
+    Settings.prototype.injectScope = function ($scope, opt) {
         var id
         var map
 
@@ -165,7 +165,7 @@ define('two/Settings', [
             opt: opt
         }
 
-        $scope.settings = this.encodeSettings(opt)
+        $scope.settings = this.encode(opt)
 
         angular.forEach(this.settingsMap, function (map, id) {
             if (map.inputType === 'select') {
@@ -184,15 +184,15 @@ define('two/Settings', [
         })
     }
 
-    Settings.prototype.updateInjectedScope = function () {
+    Settings.prototype.updateScope = function () {
         if (!this.injected) {
             return false
         }
         
-        this.injected.$scope.settings = this.encodeSettings(this.injected.opt)
+        this.injected.$scope.settings = this.encode(this.injected.opt)
     }
 
-    Settings.prototype.encodeSettings = function (opt) {
+    Settings.prototype.encode = function (opt) {
         var encoded = {}
         var presets = modelDataService.getPresetList().getPresets()
         var groups = modelDataService.getGroupList().getGroups()
@@ -200,7 +200,7 @@ define('two/Settings', [
 
         opt = opt || {}
 
-        this.eachSetting(function (id, value, map) {
+        this.each(function (id, value, map) {
             if (map.inputType === 'select') {
                 if (!value && map.disabledOption) {
                     encoded[id] = map.multiSelect ? [disabledOption()] : disabledOption()
@@ -287,7 +287,7 @@ define('two/Settings', [
         return encoded
     }
 
-    Settings.prototype.decodeSettings = function (encoded) {
+    Settings.prototype.decode = function (encoded) {
         var id
         var decoded = {}
         var multiValues

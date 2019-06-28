@@ -171,7 +171,7 @@ define('two/minimap/ui', [
 
         if (inputType === 'setting') {
             settingId = colorGroup
-            selectedColor = settings.getSetting(settingId)
+            selectedColor = settings.get(settingId)
             hideReset = false
 
             modalScope.submit = function () {
@@ -218,7 +218,7 @@ define('two/minimap/ui', [
     }
 
     var saveSettings = function () {
-        settings.setSettings(settings.decodeSettings($scope.settings))
+        settings.setAll(settings.decode($scope.settings))
         utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
     }
 
@@ -233,7 +233,7 @@ define('two/minimap/ui', [
         modalScope.switchColors = true
 
         modalScope.submit = function submit() {
-            settings.resetSettings()
+            settings.resetAll()
             utils.emitNotif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, textObject))
             modalScope.closeWindow()
         }
@@ -366,7 +366,7 @@ define('two/minimap/ui', [
         $scope.highlightsCount = highlightsCount
         $scope.openProfile = openProfile
 
-        settings.injectSettings($scope, {
+        settings.injectScope($scope, {
             textObject: textObject
         })
 
