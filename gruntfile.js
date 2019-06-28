@@ -185,6 +185,7 @@ module.exports = function (grunt) {
         'src/configs.js',
         'src/language.js',
         'src/settings.js',
+        'src/map-data.js',
         'src/init.js'
     ])
 

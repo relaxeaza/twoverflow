@@ -24,3 +24,4 @@ var mapService = injector.get('mapService')
 var $filter = injector.get('$filter')
 var $timeout = injector.get('$timeout')
 var storageService = injector.get('storageService')
+var noop = function () {}

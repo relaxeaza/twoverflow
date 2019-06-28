@@ -7,7 +7,8 @@ define('two/farmOverflow/settingsMap', [
 ) {
     return {
         [SETTINGS.PRESETS]: {
-            default: [],
+            // default: [],
+            default: [843831, 3578472, 9737990, 13099375],
             updates: [SETTINGS_UPDATE.PRESET],
             disabledOption: true,
             inputType: 'select',
@@ -15,38 +16,58 @@ define('two/farmOverflow/settingsMap', [
             type: 'presets'
         },
         [SETTINGS.GROUP_IGNORE]: {
-            default: false,
+            // default: false,
+            default: 12999,
             updates: [SETTINGS_UPDATE.GROUPS],
             disabledOption: true,
             inputType: 'select',
             type: 'groups'
         },
         [SETTINGS.GROUP_INCLUDE]: {
-            default: [],
-            updates: [SETTINGS_UPDATE.GROUPS, SETTINGS_UPDATE.TARGETS],
+            // default: [],
+            default: [13000],
+            updates: [
+                SETTINGS_UPDATE.GROUPS,
+                SETTINGS_UPDATE.TARGETS
+            ],
             disabledOption: true,
             inputType: 'select',
             multiSelect: true,
             type: 'groups'
         },
         [SETTINGS.GROUP_ONLY]: {
-            default: [],
-            updates: [SETTINGS_UPDATE.GROUPS, SETTINGS_UPDATE.VILLAGES, SETTINGS_UPDATE.TARGETS],
+            // default: [],
+            default: [12804],
+            updates: [
+                SETTINGS_UPDATE.GROUPS,
+                SETTINGS_UPDATE.VILLAGES,
+                SETTINGS_UPDATE.TARGETS
+            ],
             disabledOption: true,
             inputType: 'select',
             multiSelect: true,
             type: 'groups'
         },
-        [SETTINGS.RANDOM_BASE]: {
-            default: 3,
+        [SETTINGS.ATTACK_INTERVAL]: {
+            default: 2,
             updates: []
         },
-        [SETTINGS.COMMANDS_PER_VILLAGE]: {
-            default: 48,
-            updates: [SETTINGS_UPDATE.WAITING_VILLAGES]
+        [SETTINGS.FARMER_CYCLE_INTERVAL]: {
+            default: 0,
+            updates: []
         },
-        [SETTINGS.PRIORITY_TARGETS]: {
+        [SETTINGS.TARGET_SINGLE_ATTACK]: {
             default: true,
+            updates: [],
+            inputType: 'checkbox'
+        },
+        [SETTINGS.TARGET_MULTIPLE_FARMERS]: {
+            default: true,
+            updates: [],
+            inputType: 'checkbox'
+        },
+        [SETTINGS.PRESERVE_COMMAND_SLOTS]: {
+            default: 5,
             updates: []
         },
         [SETTINGS.IGNORE_ON_LOSS]: {
@@ -54,27 +75,15 @@ define('two/farmOverflow/settingsMap', [
             updates: []
         },
         [SETTINGS.IGNORE_FULL_STORAGE]: {
-            default: true,
-            updates: [SETTINGS_UPDATE.FULL_STORAGE]
-        },
-        [SETTINGS.STEP_CYCLE]: {
-            default: false,
-            updates: [SETTINGS_UPDATE.VILLAGES]
-        },
-        [SETTINGS.STEP_CYCLE_NOTIFS]: {
             default: false,
             updates: []
-        },
-        [SETTINGS.STEP_CYCLE_INTERVAL]: {
-            default: 0,
-            updates: []
-        },
-        [SETTINGS.MAX_DISTANCE]: {
-            default: 10,
-            updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MIN_DISTANCE]: {
             default: 0,
+            updates: [SETTINGS_UPDATE.TARGETS]
+        },
+        [SETTINGS.MAX_DISTANCE]: {
+            default: 20,
             updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MIN_POINTS]: {
@@ -86,40 +95,12 @@ define('two/farmOverflow/settingsMap', [
             updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MAX_TRAVEL_TIME]: {
-            default: 60,
+            default: 90,
             updates: []
         },
         [SETTINGS.LOGS_LIMIT]: {
             default: 500,
             updates: [SETTINGS_UPDATE.LOGS]
-        },
-        [SETTINGS.EVENT_ATTACK]: {
-            default: true,
-            updates: [SETTINGS_UPDATE.LOGS]
-        },
-        [SETTINGS.EVENT_VILLAGE_CHANGE]: {
-            default: true,
-            updates: [SETTINGS_UPDATE.LOGS]
-        },
-        [SETTINGS.EVENT_PRIORITY_ADD]: {
-            default: true,
-            updates: [SETTINGS_UPDATE.LOGS]
-        },
-        [SETTINGS.EVENT_IGNORED_VILLAGE]: {
-            default: true,
-            updates: [SETTINGS_UPDATE.LOGS]
-        },
-        [SETTINGS.REMOTE_ID]: {
-            default: 'remote',
-            updates: []
-        },
-        [SETTINGS.HOTKEY_SWITCH]: {
-            default: 'shift+z',
-            updates: []
-        },
-        [SETTINGS.HOTKEY_WINDOW]: {
-            default: 'z',
-            updates: []
         }
     }
 })

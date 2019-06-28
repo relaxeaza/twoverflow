@@ -14,6 +14,10 @@ define('two/utils', [
      * @param {Number} base - Número base para o calculo.
      */
     utils.randomSeconds = function (base) {
+        if (!base) {
+            return 0
+        }
+
         base = parseInt(base, 10)
 
         var max = base + (base / 2)
