@@ -46,9 +46,9 @@ define('two/farmOverflow/ui', [
 
     var switchFarm = function () {
         if (farmOverflow.isRunning()) {
-            farmOverflow.start()
-        } else {
             farmOverflow.stop()
+        } else {
+            farmOverflow.start()
         }
     }
 
@@ -89,7 +89,7 @@ define('two/farmOverflow/ui', [
                 message: $filter('i18n')('farm_started', $rootScope.loc.ale, textObject)
             })
         },
-        stop: function (event) {
+        stop: function (event, data) {
             $scope.running = false
 
             switch (data.reason) {

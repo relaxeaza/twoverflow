@@ -998,9 +998,7 @@ define('two/farmOverflow', [
             activeFarmer.stop(reason)
         }
 
-        if (reason !== ERROR_TYPES.FARMER_CYCLE_END) {
-            running = false
-        }
+        running = false
 
         clearTimeout(farmerTimeoutId)
 
@@ -1089,7 +1087,7 @@ define('two/farmOverflow', [
             return false
         }
 
-        return farmers[farmerIndex++]
+        return farmers[farmerIndex]
     }
 
     farmOverflow.farmerStep = function () {
@@ -1098,8 +1096,6 @@ define('two/farmOverflow', [
         activeFarmer = farmOverflow.getOne()
 
         if (!activeFarmer) {
-            farmOverflow.stop(ERROR_TYPES.FARMER_CYCLE_END)
-
             if (onlyOneFarmerCycle) {
                 return
             }
@@ -1108,6 +1104,7 @@ define('two/farmOverflow', [
             interval += MINIMUM_FARMER_CYCLE_INTERVAL
 
             farmerTimeoutId = setTimeout(function() {
+                farmerIndex++
                 farmOverflow.farmerStep()
             }, interval)
 
@@ -1115,6 +1112,7 @@ define('two/farmOverflow', [
         }
 
         activeFarmer.onceCycleEnd(function () {
+            farmerIndex++
             farmOverflow.farmerStep()
         })
 
