@@ -59,8 +59,6 @@
         "attack": "ataca",
         "no_logs": "Nenhum evento registrado",
         "clear_logs": "Limpar eventos",
-        "reseted_logs": "Registro de eventos resetado.",
-
-        "stop_no_presets": "FarmOverflow parado: Nemhuma predefinição disponível."
+        "reseted_logs": "Registro de eventos resetado."
     }
 }

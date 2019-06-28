@@ -17,13 +17,6 @@ require([
     ready(function () {
         twoLanguage.add('__farm_overflow_id', __farm_overflow_lang)
         farmOverflow.init()
-
-        // wait presets to load.
-        // temporary (not needed when started manually)
-        setTimeout(function () {
-            farmOverflow.start()
-        }, 1000)
-
         farmOverflowInterface()
     }, ['map'])
 })

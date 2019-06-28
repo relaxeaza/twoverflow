@@ -68,18 +68,14 @@
                             <th colspan="3">{{ 'misc' | i18n:loc.ale:textObject }}</th>
                         </tr>
                         <tr>
-                            <td><span class="ff-cell-fix">{{ 'random_base' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="30" value="settings[SETTINGS.RANDOM_BASE]" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.RANDOM_BASE]"></td>
+                            <td><span class="ff-cell-fix">{{ 'attack_interval' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="30" value="settings[SETTINGS.ATTACK_INTERVAL]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.ATTACK_INTERVAL]"></td>
                         </tr>
                         <tr>
-                            <td><span class="ff-cell-fix">{{ 'commands_per_village' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="50" value="settings[SETTINGS.COMMANDS_PER_VILLAGE]" enabled="true"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.COMMANDS_PER_VILLAGE]"></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"><span class="ff-cell-fix">{{ 'priority_targets' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.PRIORITY_TARGETS]" vertical="false" size="'56x28'"></div></td>
+                            <td><span class="ff-cell-fix">{{ 'preserve_command_slots' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="50" value="settings[SETTINGS.PRESERVE_COMMAND_SLOTS]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_COMMAND_SLOTS]"></td>
                         </tr>
                         <tr>
                             <td colspan="2"><span class="ff-cell-fix">{{ 'ignore_on_loss' | i18n:loc.ale:textObject }}</span></td>
@@ -101,17 +97,17 @@
                             <th colspan="3">{{ 'step_cycle_header' | i18n:loc.ale:textObject }}</th>
                         </tr>
                         <tr>
-                            <td colspan="2"><span class="ff-cell-fix">{{ 'step_cycle' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.STEP_CYCLE]" vertical="false" size="'56x28'"></div></td>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'target_single_attack' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.TARGET_SINGLE_ATTACK]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                         <tr>
-                            <td colspan="2"><span class="ff-cell-fix">{{ 'step_cycle_notifs' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="settings[SETTINGS.STEP_CYCLE]" border="true" value="settings[SETTINGS.STEP_CYCLE_NOTIFS]" vertical="false" size="'56x28'"></div></td>
+                            <td colspan="2"><span class="ff-cell-fix">{{ 'target_multiple_farmers' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.TARGET_MULTIPLE_FARMERS]" vertical="false" size="'56x28'"></div></td>
                         </tr>
                         <tr>
-                            <td><span class="ff-cell-fix">{{ 'step_cycle_interval' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div range-slider="" min="0" max="120" value="settings[SETTINGS.STEP_CYCLE_INTERVAL]" enabled="settings[SETTINGS.STEP_CYCLE]"></div></td>
-                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.STEP_CYCLE_INTERVAL]" ng-disabled="!settings[SETTINGS.STEP_CYCLE]"></td>
+                            <td><span class="ff-cell-fix">{{ 'farmer_cycle_interval' | i18n:loc.ale:textObject }}</span></td>
+                            <td><div range-slider="" min="0" max="120" value="settings[SETTINGS.FARMER_CYCLE_INTERVAL]" enabled="true"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.FARMER_CYCLE_INTERVAL]" ng-disabled="!settings[SETTINGS.STEP_CYCLE]"></td>
                         </tr>
                     </table>
 
@@ -158,50 +154,12 @@
                             <col width="60px">
                         </colgroup>
                         <tr>
-                            <th colspan="3">{{ TAB_TYPES.LOGS | i18n:loc.ale:textObjectCommon }}</th>
+                            <th colspan="3">{{ 'others' | i18n:loc.ale:textObjectCommon }}</th>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'logs_limit' | i18n:loc.ale:textObject }}</span></td>
                             <td><div range-slider="" min="0" max="1000" value="settings[SETTINGS.LOGS_LIMIT]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.LOGS_LIMIT]"></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"><span class="ff-cell-fix">{{ 'event_attack' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.EVENT_ATTACK]" vertical="false" size="'56x28'"></div></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"><span class="ff-cell-fix">{{ 'event_village_change' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.EVENT_VILLAGE_CHANGE]" vertical="false" size="'56x28'"></div></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"><span class="ff-cell-fix">{{ 'event_priority_add' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.EVENT_PRIORITY_ADD]" vertical="false" size="'56x28'"></div></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"><span class="ff-cell-fix">{{ 'event_ignored_village' | i18n:loc.ale:textObject }}</span></td>
-                            <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.EVENT_IGNORED_VILLAGE]" vertical="false" size="'56x28'"></div></td>
-                        </tr>
-                    </table>
-
-                    <table class="tbl-border-light tbl-content tbl-medium-height">
-                        <colgroup>
-                            <col>
-                            <col width="200px">
-                        </colgroup>
-                        <tr>
-                            <th colspan="2">{{ 'others' | i18n:loc.ale:textObjectCommon }}</th>
-                        </tr>
-                        <tr>
-                            <td><span class="ff-cell-fix">{{ 'remote' | i18n:loc.ale:textObject }}</span></td>
-                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.REMOTE_ID]"></td>
-                        </tr>
-                        <tr>
-                            <td><span class="ff-cell-fix">{{ 'hotkey_switch' | i18n:loc.ale:textObject }}</span></td>
-                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.HOTKEY_SWITCH]"></td>
-                        </tr>
-                        <tr>
-                            <td><span class="ff-cell-fix">{{ 'hotkey_window' | i18n:loc.ale:textObject }}</span></td>
-                            <td><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.HOTKEY_WINDOW]"></td>
                         </tr>
                     </table>
                 </div>
@@ -209,35 +167,6 @@
                 <!-- logs -->
 
                 <div class="logs rich-text" ng-show="selectedTab === TAB_TYPES.LOGS">
-                    <table class="status tbl-border-light">
-                        <colgroup>
-                            <col width="135px">
-                            <col width="*">
-                        </colgroup>
-                        <tbody>
-                            <tr>
-                                <td>{{ 'status' | i18n:loc.ale:textObjectCommon }}</td>
-                                <td>
-                                    <span>{{ currentStatus | i18n:loc.ale:textObject }}</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{{ 'selected_village' | i18n:loc.ale:textObject }}</td>
-                                <td>
-                                    <span ng-show="selectedVillage" class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(selectedVillage.id)">{{ selectedVillage.name }} ({{ selectedVillage.x }}|{{ selectedVillage.y }})</span>
-                                    <span ng-show="!selectedVillage">{{ 'none' | i18n:loc.ale:textObjectCommon }}</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{{ 'last_attack' | i18n:loc.ale:textObject }}</td>
-                                <td>
-                                    <span ng-show="lastAttack !== -1">{{ lastAttack | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</span>
-                                    <span ng-show="lastAttack === -1">{{ 'none' | i18n:loc.ale:textObjectCommon }}</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
                     <h5 class="twx-section">{{ TAB_TYPES.LOGS | i18n:loc.ale:textObjectCommon }}</h5>
 
                     <div class="page-wrap" pagination="pagination"></div>
@@ -253,23 +182,12 @@
                             <td><span class="icon-bg-black icon-26x26-{{ log.icon }}"></span></td>
                             
                             <td ng-if="log.type === LOG_TYPES.ATTACK">
-                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.origin.id)" tooltip="" tooltip-content="{{ villagesLabel[log.origin.coords] }}">{{ villagesLabel[log.origin.coords] }}</span>
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.originId)" tooltip="" tooltip-content="{{ villagesLabel[log.originId] }}">{{ originId }}</span>
                                 {{ 'attack' | i18n:loc.ale:textObject }}
-                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.target.id)" tooltip="" tooltip-content="{{ villagesLabel[log.target.coords] }}">{{ villagesLabel[log.target.coords] }}</span>
-                            </td>
-                            <td ng-if="log.type === LOG_TYPES.VILLAGE_SWITCH">
-                                {{ 'village_switch' | i18n:loc.ale:textObject }}
-                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.village.id)" tooltip="" tooltip-content="{{ villagesLabel[log.village.coords] }}">{{ villagesLabel[log.village.coords] }}</span>
-                            </td>
-                            <td ng-if="log.type === LOG_TYPES.NO_PRESET">
-                                {{ 'no_preset' | i18n:loc.ale:textObject }}
-                            </td>
-                            <td ng-if="log.type === LOG_TYPES.PRIORITY_TARGET">
-                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.village.id)" tooltip="" tooltip-content="{{ villagesLabel[log.village.coords] }}">{{ villagesLabel[log.village.coords] }}</span>
-                                {{ 'priority_target' | i18n:loc.ale:textObject }}
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.targetId)" tooltip="" tooltip-content="{{ villagesLabel[log.targetId] }}">{{ targetId }}</span>
                             </td>
                             <td ng-if="log.type === LOG_TYPES.IGNORED_VILLAGE">
-                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.village.id)" tooltip="" tooltip-content="{{ villagesLabel[log.village.coords] }}">{{ villagesLabel[log.village.coords] }}</span>
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.ignoredId)" tooltip="" tooltip-content="{{ ignoredId }}">{{ ignoredId }}</span>
                                 {{ 'ignored_village' | i18n:loc.ale:textObject }}
                             </td>
                         </tr>

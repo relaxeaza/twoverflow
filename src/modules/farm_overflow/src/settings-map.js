@@ -78,12 +78,12 @@ define('two/farmOverflow/settingsMap', [
             default: false,
             updates: []
         },
-        [SETTINGS.MAX_DISTANCE]: {
-            default: 20,
-            updates: [SETTINGS_UPDATE.TARGETS]
-        },
         [SETTINGS.MIN_DISTANCE]: {
             default: 0,
+            updates: [SETTINGS_UPDATE.TARGETS]
+        },
+        [SETTINGS.MAX_DISTANCE]: {
+            default: 20,
             updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MIN_POINTS]: {
@@ -95,7 +95,7 @@ define('two/farmOverflow/settingsMap', [
             updates: [SETTINGS_UPDATE.TARGETS]
         },
         [SETTINGS.MAX_TRAVEL_TIME]: {
-            default: 60,
+            default: 90,
             updates: []
         },
         [SETTINGS.LOGS_LIMIT]: {

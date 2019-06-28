@@ -1162,5 +1162,17 @@ define('two/farmOverflow', [
         return running
     }
 
+    farmOverflow.getLogs = function () {
+        return logs
+    }
+
+    farmOverflow.clearLogs = function () {
+        logs = []
+        Lockr.set(STORAGE_KEYS.LOGS, logs)
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_LOGS_UPDATED)
+
+        return logs
+    }
+
     return farmOverflow
 })
