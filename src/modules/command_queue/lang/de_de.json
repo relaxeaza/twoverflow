@@ -28,7 +28,7 @@
         "add_village_search": "Dorf suchen...",
         "add_clear": "Felder leeren",
         "add_insert_preset": "Vorlagen einfügen",
-        "queue_waiting": "Wartende Befehle",
+        "queue_waiting": "Ausstehende Befehle",
         "queue_none_added": "Es wurden keine Befehle hinzugefügt.",
         "queue_sent": "Befehle gesendet",
         "queue_none_sent": "Kein Befehl gesendet.",
@@ -45,7 +45,7 @@
         "command_out": "Ausgehend",
         "command_time_left": "Zeit verbleibend",
         "command_arrive": "Ankunftszeit",
-        "error_no_units_enough": "Nicht genug Einheiten für den Befehl!",
+        "error_no_units_enough": "Nicht genug Einheiten für diesen Befehl!",
         "error_not_own_village": "Du bist nicht im Besitz des Startdorfes!",
         "error_origin": "Startkoordinaten ungültig!",
         "error_target": "Zielkoordinaten ungültig!",
@@ -54,8 +54,8 @@
         "error_already_sent": "Diese %{type} hätten um %{date} rausgehen müssen",
         "error_no_map_selected_village": "Kein Dorf auf der Karte ausgewählt.",
         "error_remove_error": "Fehler beim Entfernen des Befehls.",
-        "tab_add": "Add command",
-        "tab_waiting": "Queued commands",
-        "tab_logs": "Command logs"
+        "tab_add": "Befehl hinzufügen",
+        "tab_waiting": "Befehle in Warteschleife",
+        "tab_logs": "Befehlsprotokoll"
     }
 }

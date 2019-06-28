@@ -31,13 +31,11 @@
         "group_ignored": "Ignore villages from group",
         "group_include": "Include villages from groups",
         "group_only": "Only attack with villages from groups",
-        
         "attack_interval": "Interval between attacks",
         "preserve_command_slots": "Preserve command slots",
         "target_single_attack": "Allow targets to receive only one attack per village",
         "target_multiple_farmers": "Allow targets to receive attacks from multiple villages",
         "farmer_cycle_interval": "Interval between farmer cycles (minutes)",
-
         "ignore_on_loss": "Ignore target that cause loss",
         "ignore_full_storage": "Do not farm with villages with full storage",
         "step_cycle_header": "Step Cycle Settings",
