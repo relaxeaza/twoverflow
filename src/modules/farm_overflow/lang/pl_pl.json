@@ -24,7 +24,7 @@
         "step_cycle_next": "Lista wiosek się skończyła, następny cykl: %d.",
         "step_cycle_next_no_villages": "Brak wioski do rozpoczęcia cyklu, następny cykl: %d.",
         "full_storage": "Magazyn w wiosce jest pełny",
-        "farm_paused": "Farmer zatrzymany",
+        "farm_stopped": "FarmOverflow stopped.",
         "farm_started": "Farmer uruchomiony",
         "groups_presets": "Grupy i szablony",
         "presets": "Szablony",

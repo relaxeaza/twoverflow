@@ -167,28 +167,29 @@
                 <!-- logs -->
 
                 <div class="logs rich-text" ng-show="selectedTab === TAB_TYPES.LOGS">
-                    <h5 class="twx-section">{{ TAB_TYPES.LOGS | i18n:loc.ale:textObjectCommon }}</h5>
-
                     <div class="page-wrap" pagination="pagination"></div>
                     <p class="text-center" ng-show="!visibleLogs.length">{{ 'no_logs' | i18n:loc.ale:textObject }}</p>
                     <table class="log-list tbl-border-light tbl-striped" ng-show="visibleLogs.length">
                         <colgroup>
-                            <col width="180px">
+                            <col width="100px">
                             <col width="30px">
                             <col>
                         </colgroup>
                         <tr ng-repeat="log in visibleLogs">
                             <td>{{ log.time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
-                            <td><span class="icon-bg-black icon-26x26-{{ log.icon }}"></span></td>
-                            
-                            <td ng-if="log.type === LOG_TYPES.ATTACK">
-                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.originId)" tooltip="" tooltip-content="{{ villagesLabel[log.originId] }}">{{ originId }}</span>
-                                {{ 'attack' | i18n:loc.ale:textObject }}
-                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.targetId)" tooltip="" tooltip-content="{{ villagesLabel[log.targetId] }}">{{ targetId }}</span>
-                            </td>
+                            <td><span class="icon-bg-black" ng-class="{'icon-26x26-dot-green': log.type === LOG_TYPES.FARM_START, 'icon-26x26-dot-red': log.type === LOG_TYPES.FARM_STOP, 'icon-26x26-check-negative': log.type === LOG_TYPES.IGNORED_VILLAGE}"></span></td>
+
                             <td ng-if="log.type === LOG_TYPES.IGNORED_VILLAGE">
-                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.ignoredId)" tooltip="" tooltip-content="{{ ignoredId }}">{{ ignoredId }}</span>
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.villageId)" tooltip="" tooltip-content="{{ villageLabel(log.villageId) }}">{{ villageLabel(log.villageId) }}</span>
                                 {{ 'ignored_village' | i18n:loc.ale:textObject }}
+                            </td>
+
+                            <td ng-if="log.type === LOG_TYPES.FARM_START">
+                                {{ 'farm_started' | i18n:loc.ale:textObject }}
+                            </td>
+
+                            <td ng-if="log.type === LOG_TYPES.FARM_STOP">
+                                {{ 'farm_stopped' | i18n:loc.ale:textObject }}
                             </td>
                         </tr>
                     </table>

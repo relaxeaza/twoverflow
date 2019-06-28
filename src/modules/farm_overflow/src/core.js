@@ -274,9 +274,8 @@ define('two/farmOverflow', [
             group_id: groupIgnore,
             village_id: villageId
         }, function () {
-            addLog({
-                ignoredId: villageId,
-                type: LOG_TYPES.IGNORED_VILLAGE
+            addLog(LOG_TYPES.IGNORED_VILLAGE, {
+                villageId: villageId
             })
 
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_VILLAGE_IGNORED, villageId)
@@ -394,18 +393,17 @@ define('two/farmOverflow', [
         })
     }
 
-    var addLog = function(data) {
-        if (!angular.isObject(data)) {
-            return false
-        }
-
-        if (typeof data.originId !== 'number' || typeof data.targetId !== 'number' || !data.type) {
+    var addLog = function(type, _data) {
+        if (typeof type !== 'string') {
             return false
         }
 
         var limit = settings.getSetting(SETTINGS.LOGS_LIMIT)
+        var data = angular.isObject(_data) ? _data : {}
 
         data.time = timeHelper.gameTime()
+        data.type = type
+
         logs.unshift(data)
 
         if (logs.length > limit) {
@@ -525,12 +523,6 @@ define('two/farmOverflow', [
 
             sendingCommand = false
             currentTarget = false
-
-            addLog({
-                originId: data.origin.id,
-                targetId: data.target.id,
-                type: LOG_TYPES.ATTACK
-            })
 
             targetStep({
                 delay: true
@@ -989,6 +981,8 @@ define('two/farmOverflow', [
         })
 
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_START)
+
+        addLog(LOG_TYPES.FARM_START)
     }
 
     farmOverflow.stop = function (reason) {
@@ -1005,6 +999,10 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
             reason: reason
         })
+
+        if (reason === ERROR_TYPES.USER_STOP) {
+            addLog(LOG_TYPES.FARM_STOP)
+        }
     }
 
     farmOverflow.createAll = function () {

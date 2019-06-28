@@ -1,6 +1,7 @@
 define('two/farmOverflow/logTypes', [], function () {
     return {
-        ATTACK: 'attack',
+        FARM_START: 'farm_start',
+        FARM_STOP: 'farm_stop',
         IGNORED_VILLAGE: 'ignored_village'
     }
 })

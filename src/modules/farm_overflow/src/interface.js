@@ -22,7 +22,7 @@ define('two/farmOverflow/ui', [
     EventScope,
     utils,
     eventQueue,
-    mapData,
+    $mapData,
     timeHelper
 ) {
     var textObject = 'farm_overflow'
@@ -42,6 +42,14 @@ define('two/farmOverflow/ui', [
         var limit = $scope.pagination.limit
 
         $scope.visibleLogs = $scope.logs.slice(offset, offset + limit)
+    }
+
+    var villageLabel = function (log) {
+        if (log.villageX) {
+            return `#${log.villageId} (${log.villageX}|${log.villageY})`
+        } else {
+            return '#' + log.villageId
+        }
     }
 
     var switchFarm = function () {
@@ -102,7 +110,7 @@ define('two/farmOverflow/ui', [
             default:
             case ERROR_TYPES.USER_STOP:
                 $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                    message: $filter('i18n')('farm_paused', $rootScope.loc.ale, textObject)
+                    message: $filter('i18n')('farm_stopped', $rootScope.loc.ale, textObject)
                 })
                 break
             }
@@ -172,6 +180,7 @@ define('two/farmOverflow/ui', [
         $scope.clearLogs = farmOverflow.clearLogs
         $scope.jumpToVillage = mapService.jumpToVillage
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
+        $scope.villageLabel = villageLabel
 
         eventScope = new EventScope('twoverflow_farm_overflow_window')
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)

@@ -24,7 +24,7 @@
         "step_cycle_next": "A lista de aldeias acabou, próximo ciclo: %d.",
         "step_cycle_next_no_villages": "Nenhuma aldeia disponível para iniciar o ciclo, próximo ciclo: %d.",
         "full_storage": "O armazém da aldeia está cheio.",
-        "farm_paused": "FarmOverflow pausado.",
+        "farm_stopped": "FarmOverflow parado.",
         "farm_started": "FarmOverflow iniciado.",
         "groups_presets": "Grupos & predefinições",
         "presets": "Atacar com as predefinições",
