@@ -838,7 +838,7 @@ define('two/farmOverflow', [
             .then(checkLoadedCommands)
             .then(prepareAttack)
             .catch(function (error) {
-                console.log('farmerStep error:', error)
+                console.log('targetStep:', error)
 
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
                     villageId: villageId,
@@ -1087,7 +1087,7 @@ define('two/farmOverflow', [
             return false
         }
 
-        return farmers[farmerIndex]
+        return farmers[farmerIndex++]
     }
 
     farmOverflow.farmerStep = function () {
@@ -1103,19 +1103,17 @@ define('two/farmOverflow', [
             interval = settings.getSetting(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
             interval += MINIMUM_FARMER_CYCLE_INTERVAL
 
+            console.log('farmerStep: next in', timeHelper.readableMilliseconds(interval))
+
             farmerTimeoutId = setTimeout(function() {
-                farmerIndex++
+                farmerIndex = 0
                 farmOverflow.farmerStep()
             }, interval)
 
             return
         }
 
-        activeFarmer.onceCycleEnd(function () {
-            farmerIndex++
-            farmOverflow.farmerStep()
-        })
-
+        activeFarmer.onceCycleEnd(farmOverflow.farmerStep)
         activeFarmer.start()
     }
 
