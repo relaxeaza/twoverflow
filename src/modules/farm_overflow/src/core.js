@@ -406,10 +406,10 @@ define('two/farmOverflow', [
         var limit = settings.getSetting(SETTINGS.LOGS_LIMIT)
 
         data.time = timeHelper.gameTime()
-        logs.push(data)
+        logs.unshift(data)
 
         if (logs.length > limit) {
-            logs = logs.slice(logs.length - limit, logs.length)
+            logs.splice(logs.length - limit, logs.length)
         }
 
         Lockr.set(STORAGE_KEYS.LOGS, logs)

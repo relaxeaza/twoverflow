@@ -151,12 +151,8 @@ define('two/farmOverflow/ui', [
         $scope.LOG_TYPES = LOG_TYPES
         $scope.running = farmOverflow.isRunning()
         $scope.selectedTab = TAB_TYPES.SETTINGS
-        // $scope.selectedVillage = farmOverflow.getSelectedVillage()
-        // $scope.lastAttack = farmOverflow.getLastAttack()
-        // $scope.currentStatus = farmOverflow.getCurrentStatus()
         $scope.logs = farmOverflow.getLogs()
         $scope.visibleLogs = []
-        // $scope.villagesLabel = {}
         $scope.pagination = {
             count: $scope.logs.length,
             offset: 0,
