@@ -718,7 +718,7 @@ define('two/builderQueue/ui', [
         }
 
         $scope.pagination.logs = {
-            count: $scope.length,
+            count: logsView.logs.length,
             offset: 0,
             loader: logsView.updateVisibleLogs,
             limit: storageService.getPaginationLimit()

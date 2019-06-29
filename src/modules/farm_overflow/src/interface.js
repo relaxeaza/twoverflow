@@ -41,6 +41,7 @@ define('two/farmOverflow/ui', [
         var limit = $scope.pagination.limit
 
         $scope.visibleLogs = $scope.logs.slice(offset, offset + limit)
+        $scope.pagination.count = $scope.logs.length
     }
 
     var villageLabel = function (log) {

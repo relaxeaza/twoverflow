@@ -174,7 +174,8 @@
 
                 <div ng-show="selectedTab === TAB_TYPES.LOGS" class="rich-text">
                     <div class="page-wrap" pagination="pagination.logs"></div>
-                    <table class="tbl-border-light tbl-striped header-center logs">
+                    <p class="text-center" ng-show="!logsView.logs.length">{{ 'logs_no_builds' | i18n:loc.ale:textObject }}</p>
+                    <table class="tbl-border-light tbl-striped header-center logs" ng-show="logsView.logs.length">
                         <colgroup>
                             <col width="40%">
                             <col width="30%">
@@ -191,9 +192,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-show="!logsView.logs.length">
-                                <td colspan="4">{{ 'logs_no_builds' | i18n:loc.ale:textObject }}</td>
-                            </tr>
                             <tr ng-repeat="log in logsView.logs">
                                 <td><span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log[0].id)">{{ log[0].name }} ({{ log[0].x }}|{{ log[0].y }})</span></td>
                                 <td><span class="building-icon icon-20x20-building-{{ log[1] }}"></span> {{ log[1] | i18n:loc.ale:'building_names' }}</td>
