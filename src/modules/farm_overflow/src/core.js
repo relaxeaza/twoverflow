@@ -51,7 +51,7 @@ define('two/farmOverflow', [
     var currentTarget = false
     var farmerIndex = 0
     var farmerCycle = []
-    var farmerTimeoutId
+    var farmerTimeoutId = null
 
     var $player = modelDataService.getSelectedCharacter()
     var unitsData = modelDataService.getGameData().getUnitsObject()
@@ -120,6 +120,15 @@ define('two/farmOverflow', [
         farmers.forEach(function (farmer) {
             farmer.loadTargets()
         })
+    }
+
+    var skipStepInterval = function () {
+        if (running && farmerTimeoutId) {
+            clearTimeout(farmerTimeoutId)
+            farmerTimeoutId = null
+            farmerIndex = 0
+            farmOverflow.farmerStep()
+        }
     }
 
     var updateIncludedVillage = function () {
@@ -941,6 +950,7 @@ define('two/farmOverflow', [
         settings.onChange(function (changes, update) {
             var id
             var modify = {}
+            var reloadStep = false
 
             for (id in changes) {
                 SETTINGS_MAP[id].updates.forEach(function (modifier) {
@@ -950,25 +960,32 @@ define('two/farmOverflow', [
 
             if (modify[SETTINGS_UPDATE.PRESET]) {
                 updatePresets()
+                reloadStep = true
             }
 
             if (modify[SETTINGS_UPDATE.GROUPS]) {
                 updateGroupVillages()
+                reloadStep = true
             }
 
             if (modify[SETTINGS_UPDATE.TARGETS]) {
                 reloadTargets()
+                reloadStep = true
             }
 
             if (modify[SETTINGS_UPDATE.VILLAGES]) {
                 farmOverflow.flush()
                 farmOverflow.createAll()
+                reloadStep = true
             }
 
             if (modify[SETTINGS_UPDATE.LOGS]) {
                 trimAndSaveLogs()
             }
 
+            if (reloadStep) {
+                skipStepInterval()
+            }
         })
         
         updateGroupVillages()
@@ -1033,6 +1050,7 @@ define('two/farmOverflow', [
         running = false
 
         clearTimeout(farmerTimeoutId)
+        farmerTimeoutId = null
 
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
             reason: reason
@@ -1142,6 +1160,7 @@ define('two/farmOverflow', [
             console.log('farmerStep: next in', timeHelper.readableMilliseconds(interval))
 
             farmerTimeoutId = setTimeout(function() {
+                farmerTimeoutId = null
                 farmerIndex = 0
                 farmOverflow.farmerStep()
             }, interval)
