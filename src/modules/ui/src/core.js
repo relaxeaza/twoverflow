@@ -8,6 +8,7 @@ define('two/ui', [
     var interfaceOverflow = {}
     var templates = {}
     var initialized = false
+    var containerCreated = false
 
     var $head = document.querySelector('head')
     var $wrapper = document.querySelector('#wrapper')
@@ -19,12 +20,11 @@ define('two/ui', [
     var $menu
     var $mainButton
 
-    var init = function () {
-        interfaceOverflow.addStyle('__interface_css_style')
-        buildMenuContainer()
-    }
-
     var buildMenuContainer = function () {
+        if (containerCreated) {
+            return true
+        }
+
         $container = document.createElement('div')
         $container.className = 'two-menu-container'
         $wrapper.appendChild($container)
@@ -36,6 +36,8 @@ define('two/ui', [
         $menu = document.createElement('div')
         $menu.className = 'two-menu'
         $container.appendChild($menu)
+
+        containerCreated = true
     }
 
     templateManagerService.load = function (templateName, onSuccess, opt_onError) {
@@ -52,6 +54,7 @@ define('two/ui', [
                 $rootScope.$apply()
             }
         }
+
         var error = function (data, status, headers, config) {
             if (angular.isFunction(opt_onError)) {
                 opt_onError(data, status, headers, config)
@@ -75,6 +78,15 @@ define('two/ui', [
         }
     }
 
+    interfaceOverflow.init = function () {
+        if (initialized) {
+            return false
+        }
+
+        initialized = true
+        interfaceOverflow.addStyle('__interface_css_style')
+    }
+
     interfaceOverflow.addTemplate = function (path, data) {
         templates[path] = data
     }
@@ -87,6 +99,8 @@ define('two/ui', [
     }
 
     interfaceOverflow.addMenuButton = function (label, order, _tooltip) {
+        buildMenuContainer()
+
         var $button = document.createElement('div')
         $button.className = 'btn-border btn-green button'
         $button.innerHTML = label
@@ -106,7 +120,9 @@ define('two/ui', [
         return $menu.appendChild($button)
     }
 
-    init()
+    interfaceOverflow.isInitialized = function () {
+        return initialized
+    }
 
     return interfaceOverflow
 })
