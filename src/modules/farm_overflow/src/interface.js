@@ -1,6 +1,5 @@
 define('two/farmOverflow/ui', [
     'two/ui',
-    'two/ui/button',
     'two/farmOverflow',
     'two/farmOverflow/errorTypes',
     'two/farmOverflow/logTypes',
@@ -13,7 +12,6 @@ define('two/farmOverflow/ui', [
     'helper/time',
 ], function (
     interfaceOverflow,
-    FrontButton,
     farmOverflow,
     ERROR_TYPES,
     LOG_TYPES,

@@ -1,25 +1,21 @@
 define('two/autoCollector/ui', [
+    'two/ui',
     'two/autoCollector',
-    'two/ui/button',
     'two/utils',
     'queues/EventQueue'
 ], function (
+    interfaceOverflow,
     autoCollector,
-    FrontButton,
     utils,
     eventQueue
 ) {
-    var opener
+    var $opener
     var textObject = 'auto_collector'
 
     var init = function () {
-        opener = new FrontButton('Collector', {
-            classHover: false,
-            classBlur: false,
-            tooltip: $filter('i18n')('description', $rootScope.loc.ale, textObject)
-        })
-
-        opener.click(function () {
+        $opener = interfaceOverflow.addMenuButton('Collector', 50, $filter('i18n')('description', $rootScope.loc.ale, textObject))
+        
+        $opener.addEventListener('click', function () {
             if (autoCollector.isRunning()) {
                 autoCollector.stop()
                 autoCollector.secondVillage.stop()
@@ -32,13 +28,13 @@ define('two/autoCollector/ui', [
         })
 
         eventQueue.register(eventTypeProvider.AUTO_COLLECTOR_STARTED, function () {
-            opener.$elem.classList.remove('btn-green')
-            opener.$elem.classList.add('btn-red')
+            $opener.classList.remove('btn-green')
+            $opener.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.AUTO_COLLECTOR_STOPPED, function () {
-            opener.$elem.classList.remove('btn-red')
-            opener.$elem.classList.add('btn-green')
+            $opener.classList.remove('btn-red')
+            $opener.classList.add('btn-green')
         })
 
         if (autoCollector.isRunning()) {

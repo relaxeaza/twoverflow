@@ -1,6 +1,5 @@
 define('two/minimap/ui', [
     'two/ui',
-    'two/ui/button',
     'two/minimap',
     'two/minimap/actionTypes',
     'two/minimap/settingsMap',
@@ -14,7 +13,6 @@ define('two/minimap/ui', [
     'conf/colors'
 ], function (
     interfaceOverflow,
-    FrontButton,
     minimap,
     ACTION_TYPES,
     SETTINGS_MAP,
@@ -36,6 +34,7 @@ define('two/minimap/ui', [
         SETTINGS: 'settings'
     }
     var DEFAULT_TAB = TAB_TYPES.MINIMAP
+    var $opener
     var $minimapCanvas
     var $crossCanvas
     var $minimapContainer
@@ -316,19 +315,16 @@ define('two/minimap/ui', [
         windowWrapper = document.querySelector('#wrapper')
         mapWrapper = document.querySelector('#map')
 
-        opener = new FrontButton('Minimap', {
-            classHover: false,
-            classBlur: false,
-            onClick: function () {
-                var current = minimap.getMapPosition()
+        $opener = interfaceOverflow.addMenuButton('Minimap', 50)
+        $opener.addEventListener('click', function () {
+            var current = minimap.getMapPosition()
 
-                if (!current) {
-                    return false
-                }
-
-                minimap.setCurrentPosition(current[0], current[1])
-                buildWindow()
+            if (!current) {
+                return false
             }
+
+            minimap.setCurrentPosition(current[0], current[1])
+            buildWindow()
         })
 
         interfaceOverflow.addTemplate('twoverflow_minimap_window', `__minimap_html_main`)

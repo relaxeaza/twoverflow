@@ -1,6 +1,5 @@
 define('two/builderQueue/ui', [
     'two/ui',
-    'two/ui/button',
     'two/builderQueue',
     'two/utils',
     'two/ready',
@@ -14,7 +13,6 @@ define('two/builderQueue/ui', [
     'helper/time'
 ], function (
     interfaceOverflow,
-    FrontButton,
     builderQueue,
     utils,
     ready,
@@ -31,6 +29,7 @@ define('two/builderQueue/ui', [
     var $scope
     var textObject = 'builder_queue'
     var textObjectCommon = 'common'
+    var $opener
     var groupList = modelDataService.getGroupList()
     var groups = []
     var buildingsLevelPoints = {}
@@ -646,23 +645,20 @@ define('two/builderQueue/ui', [
         settingsView.generateBuildingsLevelPoints()
         settings = builderQueue.getSettings()
 
-        var opener = new FrontButton('Builder', {
-            classHover: false,
-            classBlur: false,
-            onClick: buildWindow
-        })
+        $opener = interfaceOverflow.addMenuButton('Builder', 30)
+        $opener.addEventListener('click', buildWindow)
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_START, function () {
             running = true
-            opener.$elem.classList.remove('btn-green')
-            opener.$elem.classList.add('btn-red')
+            $opener.classList.remove('btn-green')
+            $opener.classList.add('btn-red')
             utils.emitNotif('success', $filter('i18n')('started', $rootScope.loc.ale, textObject))
         })
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_STOP, function () {
             running = false
-            opener.$elem.classList.remove('btn-red')
-            opener.$elem.classList.add('btn-green')
+            $opener.classList.remove('btn-red')
+            $opener.classList.add('btn-green')
             utils.emitNotif('success', $filter('i18n')('stopped', $rootScope.loc.ale, textObject))
         })
 

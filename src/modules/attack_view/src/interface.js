@@ -1,6 +1,5 @@
 define('two/attackView/ui', [
     'two/ui',
-    'two/ui/button',
     'two/attackView',
     'two/EventScope',
     'two/utils',
@@ -14,7 +13,6 @@ define('two/attackView/ui', [
     'battlecat'
 ], function (
     interfaceOverflow,
-    FrontButton,
     attackView,
     EventScope,
     utils,
@@ -31,6 +29,7 @@ define('two/attackView/ui', [
     var textObject = 'attack_view'
     var textObjectCommon = 'common'
     var eventScope
+    var $opener
 
     var nowSeconds = function () {
         return Date.now() / 1000
@@ -99,11 +98,8 @@ define('two/attackView/ui', [
     }
 
     var init = function () {
-        var opener = new FrontButton('AttackView', {
-            classHover: false,
-            classBlur: false,
-            onClick: buildWindow
-        })
+        $opener = interfaceOverflow.addMenuButton('AttackView', 40)
+        $opener.addEventListener('click', buildWindow)
 
         interfaceOverflow.addTemplate('twoverflow_attack_view_main', `__attack_view_html_main`)
         interfaceOverflow.addTemplate('twoverflow_attack_view_show_text_modal', `__attack_view_html_modal-show-text`)

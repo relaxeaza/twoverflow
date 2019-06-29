@@ -1,6 +1,5 @@
 define('two/commandQueue/ui', [
     'two/ui',
-    'two/ui/button',
     'two/commandQueue',
     'two/EventScope',
     'two/utils',
@@ -15,7 +14,6 @@ define('two/commandQueue/ui', [
     'Lockr'
 ], function (
     interfaceOverflow,
-    FrontButton,
     commandQueue,
     EventScope,
     utils,
@@ -33,6 +31,7 @@ define('two/commandQueue/ui', [
     var textObjectCommon = 'common'
     var eventScope
     var $scope
+    var $opener
     var $gameData = modelDataService.getGameData()
     var orderedUnitNames = $gameData.getOrderedUnitNames()
     var orderedOfficerNames = $gameData.getOrderedOfficerNames()
@@ -530,20 +529,16 @@ define('two/commandQueue/ui', [
             [FILTER_TYPES.TEXT_MATCH]: ''
         }
 
-        opener = new FrontButton('Commander', {
-            classHover: false,
-            classBlur: false,
-            onClick: buildWindow
-        })
+        $opener = interfaceOverflow.addMenuButton('Commander', 20)
 
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_START, function () {
-            opener.$elem.classList.remove('btn-green')
-            opener.$elem.classList.add('btn-red')
+            $opener.classList.remove('btn-green')
+            $opener.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_STOP, function () {
-            opener.$elem.classList.remove('btn-red')
-            opener.$elem.classList.add('btn-green')
+            $opener.classList.remove('btn-red')
+            $opener.classList.add('btn-green')
         })
 
         $rootScope.$on(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage)
