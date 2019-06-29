@@ -47,8 +47,8 @@ define('two/farmOverflow', [
     var farmerCycle = []
     var farmerTimeoutId = null
 
-    var $player = modelDataService.getSelectedCharacter()
-    var unitsData = modelDataService.getGameData().getUnitsObject()
+    var $player
+    var unitsData
     var VILLAGE_COMMAND_LIMIT = 50
     var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
     var MINIMUM_ATTACK_INTERVAL = 1 * 1000
@@ -917,6 +917,8 @@ define('two/farmOverflow', [
     farmOverflow.init = function () {
         initialized = true
         logs = Lockr.get(STORAGE_KEYS.LOGS, [])
+        $player = modelDataService.getSelectedCharacter()
+        unitsData = modelDataService.getGameData().getUnitsObject()
         
         settings = new Settings({
             settingsMap: SETTINGS_MAP,
