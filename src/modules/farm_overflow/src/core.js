@@ -31,12 +31,6 @@ define('two/farmOverflow', [
     $mapData,
     Lockr
 ) {
-    /* debug vars */
-    var onlyOneFarmerCycle = false
-    // var onlyOneTarget = { character_id: null, distance: 1.7, id: 11161, tribe_id: null, x: 557, y: 576 }
-    var onlyOneTarget = false
-    /* /debug vars */
-
     var initialized = false
     var running = false
     var settings
@@ -478,8 +472,6 @@ define('two/farmOverflow', [
         }
 
         self.start = function () {
-            console.group('start()', village.getName())
-
             var interval
             var target
 
@@ -515,8 +507,6 @@ define('two/farmOverflow', [
         }
 
         self.stop = function (reason) {
-            console.groupEnd('stop()')
-
             running = false
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
                 villageId: villageId,
@@ -532,8 +522,6 @@ define('two/farmOverflow', [
         }
 
         self.commandSent = function (data) {
-            console.log('targetStep: command_sent')
-
             sendingCommand = false
             currentTarget = false
 
@@ -555,16 +543,6 @@ define('two/farmOverflow', [
 
         self.loadTargets = function (_callback) {
             var pos = village.getPosition()
-
-            if (onlyOneTarget) {
-                targets = [onlyOneTarget]
-
-                if (typeof _callback === 'function') {
-                    _callback(targets)
-                }
-
-                return
-            }
 
             mapData.load(pos, function (loadedTargets) {
                 targets = calcDistances(loadedTargets, pos)
@@ -843,8 +821,6 @@ define('two/farmOverflow', [
             .then(checkLoadedCommands)
             .then(prepareAttack)
             .catch(function (error) {
-                console.log('targetStep:', error)
-
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
                     villageId: villageId,
                     error: error
@@ -1150,14 +1126,8 @@ define('two/farmOverflow', [
         activeFarmer = farmOverflow.getOne()
 
         if (!activeFarmer) {
-            if (onlyOneFarmerCycle) {
-                return
-            }
-
             interval = settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
             interval += MINIMUM_FARMER_CYCLE_INTERVAL
-
-            console.log('farmerStep: next in', timeHelper.readableMilliseconds(interval))
 
             farmerTimeoutId = setTimeout(function() {
                 farmerTimeoutId = null
