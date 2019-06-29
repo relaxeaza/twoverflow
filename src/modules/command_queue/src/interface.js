@@ -530,6 +530,7 @@ define('two/commandQueue/ui', [
         }
 
         $opener = interfaceOverflow.addMenuButton('Commander', 20)
+        $opener.addEventListener('click', buildWindow)
 
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_START, function () {
             $opener.classList.remove('btn-green')
