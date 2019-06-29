@@ -9,7 +9,7 @@ define('two/ui/button', [], function () {
             onClick: function() {}
         }, options)
 
-        this.buildWrapper()
+        // this.buildWrapper()
         this.appendButton()
 
         var $elem = this.$elem
@@ -76,25 +76,26 @@ define('two/ui/button', [], function () {
         this.$elem.addEventListener('click', handler)
     }
 
-    FrontButton.prototype.buildWrapper = function () {
-        var $wrapper = document.getElementById('two-bar')
+    // FrontButton.prototype.buildWrapper = function () {
+    //     var $wrapper = document.getElementById('two-bar')
 
-        if (!$wrapper) {
-            $wrapper = document.createElement('div')
-            $wrapper.id = 'two-bar'
-            document.querySelector('#wrapper').appendChild($wrapper)
-        }
+    //     if (!$wrapper) {
+    //         $wrapper = document.createElement('div')
+    //         $wrapper.id = 'two-bar'
+    //         document.querySelector('#wrapper').appendChild($wrapper)
+    //     }
 
-        this.$wrapper = $wrapper
-    }
+    //     this.$wrapper = $wrapper
+    // }
 
     FrontButton.prototype.appendButton = function () {
         var $container = document.createElement('div')
         $container.innerHTML = '<div class="btn-border btn-green button ' + this.options.className + '"><div class="top-left"></div><div class="top-right"></div><div class="middle-top"></div><div class="middle-bottom"></div><div class="middle-left"></div><div class="middle-right"></div><div class="bottom-left"></div><div class="bottom-right"></div><div class="label">' + this.options.label + '</div><div class="quickview"></div></div>'
-        var $elem = $container.children[0]
+        this.$elem = $container.children[0]
 
-        this.$wrapper.appendChild($elem)
-        this.$elem = $elem
+        document.querySelector('#two-bar').appendChild(this.$elem)
+
+        
     }
 
     FrontButton.prototype.destroy = function () {

@@ -33,43 +33,66 @@
 }
 
 #toolbar-left {
-    height: calc(100% - 390px) !important;
-    top: 275px !important;
+    height: calc(100% - 273px) !important;
+    top: 165px !important;
 }
 
-#two-bar {
+.two-menu-container {
     position: absolute;
-    top: 105px;
-    left: 5px;
-    margin-bottom: 7px;
+    top: 84px;
+    left: 0;
+    width: 90px;
     z-index: 10;
-    width: 100px;
+
+    &:hover {
+        .two-main-button {
+            background-position: 0 -75px;
+        }
+
+        .two-menu {
+            opacity: 1;
+            transition: opacity  .1s ease-in-out;
+        }
+    }
+}
+
+.two-main-button {
+    left: 0;
+    width: 75px;
+    height: 75px;
+    background-image: url(https://i.imgur.com/J0JFhf4.png);
+    background-position: 0 0;
+    z-index: 10;
+}
+
+.two-menu {
+    position: absolute;
+    top: 8px;
+    left: 85px;
+    width: 120px;
+    display: flex;
+    flex-flow: wrap;
+    opacity: 0;
+    z-index: 10;
 
     .button {
         white-space: nowrap;
-        position: relative;
-        top: -17px;
-        left: 0px;
         min-width: 70px;
         height: 24px;
         padding: 0 3px;
-    }
-
-    .label,
-    .quickview {
-        margin: 5px 0;
-        font-size: 12px;
-    }
-
-    .quickview {
-        display: none;
+        line-height: 21px;
+        margin-bottom: 8px;
     }
 }
 
-#wrapper.window-open #two-bar {
-    left: 719px;
-}
+#wrapper.window-open {
+    .two-menu-container {
+        left: 713px;
+    }
 
-#wrapper.window-open.window-fullsize #two-bar {
-    display: none;
+    &.window-fullsize {
+        .two-menu-container {
+            display: none !important;
+        }
+    }
 }

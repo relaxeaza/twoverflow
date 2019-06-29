@@ -31,6 +31,7 @@ define('two/farmOverflow/ui', [
     var settings
     var presetList = modelDataService.getPresetList()
     var groupList = modelDataService.getGroupList()
+    var $opener
 
     var TAB_TYPES = {
         SETTINGS: 'settings',
@@ -129,21 +130,20 @@ define('two/farmOverflow/ui', [
 
     var init = function () {
         settings = farmOverflow.getSettings()
+        $opener = interfaceOverflow.addMenuButton('Farmer', 10)
 
-        var opener = new FrontButton('Farmer', {
-            classHover: false,
-            classBlur: false,
-            onClick: buildWindow
+        $opener.addEventListener('click', function () {
+            buildWindow()
         })
 
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_START, function () {
-            opener.$elem.classList.remove('btn-green')
-            opener.$elem.classList.add('btn-red')
+            $opener.classList.remove('btn-green')
+            $opener.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_STOP, function () {
-            opener.$elem.classList.remove('btn-red')
-            opener.$elem.classList.add('btn-green')
+            $opener.classList.remove('btn-red')
+            $opener.classList.add('btn-green')
         })
 
         interfaceOverflow.addTemplate('twoverflow_farm_overflow_window', `__farm_overflow_html_main`)

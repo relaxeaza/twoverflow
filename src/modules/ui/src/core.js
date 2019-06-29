@@ -7,11 +7,36 @@ define('two/ui', [
 ) {
     var interfaceOverflow = {}
     var templates = {}
+    var initialized = false
 
     var $head = document.querySelector('head')
+    var $wrapper = document.querySelector('#wrapper')
     var httpService = injector.get('httpService')
     var templateManagerService = injector.get('templateManagerService')
     var $templateCache = injector.get('$templateCache')
+
+    var $container
+    var $menu
+    var $mainButton
+
+    var init = function () {
+        interfaceOverflow.addStyle('__interface_css_style')
+        buildMenuContainer()
+    }
+
+    var buildMenuContainer = function () {
+        $container = document.createElement('div')
+        $container.className = 'two-menu-container'
+        $wrapper.appendChild($container)
+
+        $mainButton = document.createElement('div')
+        $mainButton.className = 'two-main-button'
+        $container.appendChild($mainButton)
+
+        $menu = document.createElement('div')
+        $menu.className = 'two-menu'
+        $container.appendChild($menu)
+    }
 
     templateManagerService.load = function (templateName, onSuccess, opt_onError) {
         var path
@@ -60,6 +85,28 @@ define('two/ui', [
         $style.appendChild(document.createTextNode(styles))
         $head.appendChild($style)
     }
+
+    interfaceOverflow.addMenuButton = function (label, order, _tooltip) {
+        var $button = document.createElement('div')
+        $button.className = 'btn-border btn-green button'
+        $button.innerHTML = label
+        $button.style.order = order
+        $menu.appendChild($button)
+
+        if (typeof _tooltip === 'string') {
+            $button.addEventListener('mouseenter', function (event) {
+                $rootScope.$broadcast(eventTypeProvider.TOOLTIP_SHOW, 'twoverflow-tooltip', _tooltip, true, event)
+            })
+
+            $button.addEventListener('mouseleave', function () {
+                $rootScope.$broadcast(eventTypeProvider.TOOLTIP_HIDE, 'twoverflow-tooltip')
+            })
+        }
+
+        return $menu.appendChild($button)
+    }
+
+    init()
 
     return interfaceOverflow
 })
