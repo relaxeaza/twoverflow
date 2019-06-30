@@ -1,10 +1,11 @@
 define('two/minimap', [
-    'two/minimap/actionTypes',
+    'two/minimap/types/actions',
     'two/minimap/settings',
-    'two/minimap/settingsMap',
-    'two/minimap/settingsUpdate',
+    'two/minimap/settings/map',
+    'two/minimap/settings/updates',
     'two/utils',
     'two/ready',
+    'two/Settings',
     'queues/EventQueue',
     'Lockr',
     'struct/MapData',
@@ -13,15 +14,15 @@ define('two/minimap', [
     'conf/colors',
     'conf/colorGroups',
     'conf/conf',
-    'version',
-    'two/Settings'
+    'version'
 ], function (
     ACTION_TYPES,
     SETTINGS,
     SETTINGS_MAP,
-    SETTINGS_UPDATE,
+    UPDATES,
     utils,
     ready,
+    Settings,
     eventQueue,
     Lockr,
     mapData,
@@ -30,8 +31,7 @@ define('two/minimap', [
     colors,
     colorGroups,
     conf,
-    gameVersion,
-    Settings
+    gameVersion
 ) {
     var enableRendering = false
     var highlights = {}
@@ -821,7 +821,7 @@ define('two/minimap', [
         })
 
         settings.onChange(function (changes, updates) {
-            if (updates[SETTINGS_UPDATE.MINIMAP]) {
+            if (updates[UPDATES.MINIMAP]) {
                 minimap.update()
             }
         })

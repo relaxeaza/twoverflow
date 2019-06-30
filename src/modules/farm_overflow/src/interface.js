@@ -1,8 +1,8 @@
 define('two/farmOverflow/ui', [
     'two/ui',
     'two/farmOverflow',
-    'two/farmOverflow/errorTypes',
-    'two/farmOverflow/logTypes',
+    'two/farmOverflow/types/errors',
+    'two/farmOverflow/types/logs',
     'two/farmOverflow/settings',
     'two/Settings',
     'two/EventScope',

@@ -1,9 +1,9 @@
 define('two/attackView', [
     'two/ready',
     'two/utils',
-    'two/attackView/columnTypes',
-    'two/attackView/commandTypes',
-    'two/attackView/filterTypes',
+    'two/attackView/types/columns',
+    'two/attackView/types/commands',
+    'two/attackView/types/filters',
     'two/attackView/unitSpeedOrder',
     'conf/unitTypes',
     'Lockr',

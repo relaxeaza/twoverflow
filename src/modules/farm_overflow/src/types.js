@@ -1,4 +1,4 @@
-define('two/farmOverflow/errorTypes', [], function () {
+define('two/farmOverflow/types/errors', [], function () {
     return {
         TIME_LIMIT: 'time_limit',
         COMMAND_LIMIT: 'command_limit',
@@ -16,5 +16,13 @@ define('two/farmOverflow/errorTypes', [], function () {
         USER_STOP: 'user_stop',
         NOT_ALLOWED_POINTS: 'not_allowed_points',
         UNKNOWN: 'unknown'
+    }
+})
+
+define('two/farmOverflow/types/logs', [], function () {
+    return {
+        FARM_START: 'farm_start',
+        FARM_STOP: 'farm_stop',
+        IGNORED_VILLAGE: 'ignored_village'
     }
 })

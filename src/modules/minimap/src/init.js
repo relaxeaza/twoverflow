@@ -4,9 +4,10 @@ require([
     'two/minimap',
     'two/minimap/ui',
     'two/minimap/events',
-    'two/minimap/actionTypes',
+    'two/minimap/types/actions',
     'two/minimap/settings',
-    'two/minimap/settingsMap',
+    'two/minimap/settings/updates',
+    'two/minimap/settings/map'
 ], function (
     twoLanguage,
     ready,

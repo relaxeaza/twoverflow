@@ -1,9 +1,9 @@
 define('two/commandQueue', [
     'two/utils',
-    'two/commandQueue/dateTypes',
-    'two/commandQueue/eventCodes',
-    'two/commandQueue/filterTypes',
-    'two/commandQueue/commandTypes',
+    'two/commandQueue/types/dates',
+    'two/commandQueue/types/events',
+    'two/commandQueue/types/filters',
+    'two/commandQueue/types/commands',
     'two/commandQueue/storageKeys',
     'queues/EventQueue',
     'helper/time',
