@@ -63,7 +63,7 @@ define('two/Settings', [
         this.settingsMap = configs.settingsMap
         this.storageKey = configs.storageKey
         this.defaults = generateDefaults(this.settingsMap)
-        this.settings = Lockr.get(this.storageKey, this.defaults, true)
+        this.settings = angular.merge({}, this.defaults, Lockr.get(this.storageKey, {}))
         this.events = {
             settingsChange: noop
         }
