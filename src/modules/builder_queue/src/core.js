@@ -390,7 +390,7 @@ define('two/builderQueue', [
             storageKey: STORAGE_KEYS.SETTINGS
         })
 
-        settings.onChange(function (changes, update, opt) {
+        settings.onChange(function (changes, updates, opt) {
             if (!opt.quiet) {
                 eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
             }

@@ -2,6 +2,7 @@ define('two/minimap', [
     'two/minimap/actionTypes',
     'two/minimap/settings',
     'two/minimap/settingsMap',
+    'two/minimap/settingsUpdate',
     'two/utils',
     'two/ready',
     'queues/EventQueue',
@@ -18,6 +19,7 @@ define('two/minimap', [
     ACTION_TYPES,
     SETTINGS,
     SETTINGS_MAP,
+    SETTINGS_UPDATE,
     utils,
     ready,
     eventQueue,
@@ -818,8 +820,8 @@ define('two/minimap', [
             storageKey: STORAGE_KEYS.SETTINGS
         })
 
-        settings.onChange(function (changes, update) {
-            if (update) {
+        settings.onChange(function (changes, updates) {
+            if (updates[SETTINGS_UPDATE.MINIMAP]) {
                 minimap.update()
             }
         })

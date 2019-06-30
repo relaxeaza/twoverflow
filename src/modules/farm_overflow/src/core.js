@@ -925,39 +925,31 @@ define('two/farmOverflow', [
             storageKey: STORAGE_KEYS.SETTINGS
         })
 
-        settings.onChange(function (changes, update) {
-            var id
-            var modify = {}
+        settings.onChange(function (changes, updates) {
             var reloadStep = false
 
-            for (id in changes) {
-                SETTINGS_MAP[id].updates.forEach(function (modifier) {
-                    modify[modifier] = true
-                })
-            }
-
-            if (modify[SETTINGS_UPDATE.PRESET]) {
+            if (updates[SETTINGS_UPDATE.PRESET]) {
                 updatePresets()
                 reloadStep = true
             }
 
-            if (modify[SETTINGS_UPDATE.GROUPS]) {
+            if (updates[SETTINGS_UPDATE.GROUPS]) {
                 updateGroupVillages()
                 reloadStep = true
             }
 
-            if (modify[SETTINGS_UPDATE.TARGETS]) {
+            if (updates[SETTINGS_UPDATE.TARGETS]) {
                 reloadTargets()
                 reloadStep = true
             }
 
-            if (modify[SETTINGS_UPDATE.VILLAGES]) {
+            if (updates[SETTINGS_UPDATE.VILLAGES]) {
                 farmOverflow.flush()
                 farmOverflow.createAll()
                 reloadStep = true
             }
 
-            if (modify[SETTINGS_UPDATE.LOGS]) {
+            if (updates[SETTINGS_UPDATE.LOGS]) {
                 trimAndSaveLogs()
             }
 

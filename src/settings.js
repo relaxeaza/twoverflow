@@ -21,7 +21,7 @@ define('two/Settings', [
             }
         }
 
-        return changes
+        return angular.equals({}, changes) ? false : changes
     }
 
     var generateDefaults = function (map) {
@@ -40,6 +40,23 @@ define('two/Settings', [
             name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
             value: false
         }
+    }
+
+    var getUpdates = function (map, changes) {
+        var id
+        var updates = {}
+
+        for (id in changes) {
+            (map[id].updates || []).forEach(function (updateItem) {
+                updates[updateItem] = true
+            })
+        }
+
+        if (angular.equals(updates, {})) {
+            return false
+        }
+
+        return updates
     }
 
     var Settings = function (configs) {
@@ -73,51 +90,55 @@ define('two/Settings', [
         var changes
         var before
         var after
-        var update = false
+        var updates
 
-        if (hasOwn.call(this.settingsMap, id)) {
-            before = angular.copy(this.settings)
-            this.settings[id] = value
-            after = angular.copy(this.settings)
-            changes = generateDiff(before, after)
-
-            if (this.settingsMap[id].update) {
-                update = true
-            }
-
-            this.store()
-            this.updateScope()
-            this.events.settingsChange(changes, update, opt || {})
-
-            return true
+        if (!hasOwn.call(this.settingsMap, id)) {
+            return false
         }
 
-        return false
+        before = angular.copy(this.settings)
+        this.settings[id] = value
+        after = angular.copy(this.settings)
+        changes = generateDiff(before, after)
+
+        if (!changes) {
+            return false
+        }
+
+        updates = getUpdates(this.settingsMap, changes)
+
+        this.store()
+        this.updateScope()
+        this.events.settingsChange(changes, updates, opt || {})
+
+        return true
     }
 
     Settings.prototype.setAll = function (values, opt) {
-        var changes
         var before = angular.copy(this.settings)
         var after
-        var update = false
+        var changes
+        var updates
         var id
 
         for (id in values) {
             if (hasOwn.call(this.settingsMap, id)) {
                 this.settings[id] = values[id]
-
-                if (!update && this.settingsMap[id].update) {
-                    update = true
-                }
             }
         }
 
         after = angular.copy(this.settings)
         changes = generateDiff(before, after)
 
+        if (!changes) {
+            return false
+        }
+
+        updates = getUpdates(this.settingsMap, changes)
+
         this.store()
         this.updateScope()
-        this.events.settingsChange(changes, update, opt || {})
+        this.events.settingsChange(changes, updates, opt || {})
 
         return true
     }
