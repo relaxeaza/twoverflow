@@ -31,7 +31,8 @@
         "error_sequence_no_exists": "This sequence does not exist.",
         "error_sequence_invalid": "Some sequence's value is invalid.",
         "logs_cleared": "Logs cleared.",
-        "create_sequence": "Create a sequence"
+        "create_sequence": "Create a sequence",
+        "settings_preserve_resources": "Preserve village's resources"
     },
     "builder_queue_add_building_modal": {
         "title": "Add new building"

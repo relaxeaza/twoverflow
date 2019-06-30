@@ -52,7 +52,7 @@
                                 <td><div select="" list="sequences" selected="settings[SETTINGS.ACTIVE_SEQUENCE]" drop-down="true"></div></td>
                             </tr>
                             <tr>
-                                <td><span class="ff-cell-fix">Preserve village's resources</span></td>
+                                <td><span class="ff-cell-fix">{{ 'settings_preserve_resources' | i18n:loc.ale:textObject }}</span></td>
                                 <td>
                                     <span class="icon-26x26-resource-wood"></span>
                                     <input type="number" min="0" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_WOOD]">
