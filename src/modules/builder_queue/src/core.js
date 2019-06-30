@@ -4,6 +4,7 @@ define('two/builderQueue', [
     'two/Settings',
     'two/builderQueue/settings',
     'two/builderQueue/settings/map',
+    'two/builderQueue/settings/updates',
     'two/builderQueue/types/errors',
     'conf/upgradeabilityStates',
     'conf/buildingTypes',
@@ -16,6 +17,7 @@ define('two/builderQueue', [
     Settings,
     SETTINGS,
     SETTINGS_MAP,
+    UPDATES,
     ERROR_CODES,
     UPGRADEABILITY_STATES,
     BUILDING_TYPES,
@@ -436,6 +438,10 @@ define('two/builderQueue', [
         })
 
         settings.onChange(function (changes, updates, opt) {
+            if (updates[UPDATES.ANALYSE]) {
+                analyseVillages()
+            }
+
             if (!opt.quiet) {
                 eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_SETTINGS_CHANGE)
             }

@@ -10,41 +10,55 @@ define('two/builderQueue/settings', [], function () {
     }
 })
 
+define('two/builderQueue/settings/updates', [], function () {
+    return {
+        ANALYSE: 'analyse'
+    }
+})
+
 define('two/builderQueue/settings/map', [
     'two/builderQueue/defaultOrders',
-    'two/builderQueue/settings'
+    'two/builderQueue/settings',
+    'two/builderQueue/settings/updates'
 ], function (
     DEFAULT_ORDERS,
-    SETTINGS
+    SETTINGS,
+    UPDATES
 ) {
     return {
         [SETTINGS.GROUP_VILLAGES]: {
             default: false,
             inputType: 'select',
             disabledOption: true,
-            type: 'groups'
+            type: 'groups',
+            updates: [UPDATES.ANALYSE]
         },
         [SETTINGS.ACTIVE_SEQUENCE]: {
             default: 'Essential',
-            inputType: 'select'
+            inputType: 'select',
+            updates: [UPDATES.ANALYSE]
         },
         [SETTINGS.BUILDING_SEQUENCES]: {
             default: DEFAULT_ORDERS,
-            inputType: 'buildingOrder'
+            inputType: 'buildingOrder',
+            updates: [UPDATES.ANALYSE]
         },
         [SETTINGS.PRESERVE_WOOD]: {
-            default: 0
+            default: 0,
+            updates: [UPDATES.ANALYSE]
         },
         [SETTINGS.PRESERVE_CLAY]: {
             default: 0,
-            inputType: 'number'
+            updates: [UPDATES.ANALYSE]
         },
         [SETTINGS.PRESERVE_IRON]: {
-            default: 0
+            default: 0,
+            updates: [UPDATES.ANALYSE]
         },
         [SETTINGS.PRIORIZE_FARM]: {
             default: false,
-            inputType: 'checkbox'
+            inputType: 'checkbox',
+            updates: [UPDATES.ANALYSE]
         }
     }
 })
