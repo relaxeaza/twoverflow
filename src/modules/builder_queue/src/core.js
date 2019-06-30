@@ -50,7 +50,7 @@ define('two/builderQueue', [
      */
     var analyseVillages = function () {
         var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
-        var villageIds = groupVillages ? groupList.getGroupVillageIds(groupVillages) : getVillageIds()
+        var villageIds = getVillageIds()
         var village
         var readyState
         var queue
@@ -80,7 +80,7 @@ define('two/builderQueue', [
 
     var analyseVillagesInstantFinish = function () {
         var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
-        var villageIds = groupVillages ? groupList.getGroupVillageIds(groupVillages) : getVillageIds()
+        var villageIds = getVillageIds()
         var village
         var queue
         var jobs
@@ -103,7 +103,7 @@ define('two/builderQueue', [
 
     var initializeAllVillages = function () {
         var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
-        var villageIds = groupVillages ? groupList.getGroupVillageIds(groupVillages) : getVillageIds()
+        var villageIds = getVillageIds()
         var village
 
         villageIds.forEach(function (villageId) {
@@ -122,11 +122,13 @@ define('two/builderQueue', [
      */
     var getVillageIds = function () {
         var ids = []
-        var villages = $player.getVillages()
+        var villages = groupVillages ? groupList.getGroupVillageIds(groupVillages) : $player.getVillages()
         var id
 
         for (id in villages) {
-            ids.push(id)
+            if ($player.getVillage(id)) {
+                ids.push(id)
+            }
         }
 
         return ids
