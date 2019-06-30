@@ -49,7 +49,6 @@ define('two/builderQueue', [
      * for each village.
      */
     var analyseVillages = function () {
-        var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
         var villageIds = getVillageIds()
         var village
         var readyState
@@ -79,7 +78,6 @@ define('two/builderQueue', [
     }
 
     var analyseVillagesInstantFinish = function () {
-        var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
         var villageIds = getVillageIds()
         var village
         var queue
@@ -102,7 +100,6 @@ define('two/builderQueue', [
     }
 
     var initializeAllVillages = function () {
-        var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
         var villageIds = getVillageIds()
         var village
 
@@ -122,6 +119,7 @@ define('two/builderQueue', [
      */
     var getVillageIds = function () {
         var ids = []
+        var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
         var villages = groupVillages ? groupList.getGroupVillageIds(groupVillages) : $player.getVillages()
         var id
 
@@ -199,9 +197,10 @@ define('two/builderQueue', [
      * @param {Function} callback
      */
     var upgradeBuilding = function (village, buildingName, callback) {
-        var buildingData = village.getBuildingData().getDataForBuilding(buildingName)
+        var upgradeability = checkBuildingUpgradeability(village, buildingName)
+        console.log('upgradeability', upgradeability)
 
-        if (buildingData.upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
+        if (upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
             socketService.emit(routeProvider.VILLAGE_UPGRADE_BUILDING, {
                 building: buildingName,
                 village_id: village.getId(),
@@ -213,6 +212,30 @@ define('two/builderQueue', [
         } else {
             callback(false)
         }
+    }
+
+    /**
+     * Can't just use the .upgradeability value because of the preserve resources setting.
+     */
+    var checkBuildingUpgradeability = function (village, buildingName) {
+        var buildingData = village.getBuildingData().getDataForBuilding(buildingName)
+        var nextLevelCosts
+        var resources
+
+        if (buildingData.upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
+            nextLevelCosts = buildingData.nextLevelCosts
+            resources = selectedVillage.getResources().getComputed()
+
+            if (
+                resources.clay.currentStock - settings.get(SETTINGS.PRESERVE_CLAY) < nextLevelCosts.clay ||
+                resources.iron.currentStock - settings.get(SETTINGS.PRESERVE_IRON) < nextLevelCosts.iron ||
+                resources.wood.currentStock - settings.get(SETTINGS.PRESERVE_WOOD) < nextLevelCosts.wood
+            ) {
+                return UPGRADEABILITY_STATES.NOT_ENOUGH_RESOURCES
+            }
+        }
+
+        return buildingData.upgradeability
     }
 
     /**

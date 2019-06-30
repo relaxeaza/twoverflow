@@ -543,5 +543,38 @@ define('two/builderQueue/defaultOrders', [
         BUILDING_TYPES.WALL // 20
     ]
 
+    defaultSequences['Full Farm'] = [
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM,
+        BUILDING_TYPES.FARM // 30
+    ]
+
     return parseSequences(defaultSequences)
 })

@@ -37,9 +37,9 @@
             <div class="scroll-wrap">
                 <div ng-show="selectedTab === TAB_TYPES.SETTINGS">
                     <h5 class="twx-section">{{ 'settings' | i18n:loc.ale:textObject }}</h5>
-                    <table class="tbl-border-light tbl-striped">
+                    <table class="settings tbl-border-light tbl-striped">
                         <colgroup>
-                            <col width="50%">
+                            <col width="40%">
                             <col>
                         </colgroup>
                         <tbody>
@@ -50,6 +50,19 @@
                             <tr ng-show="settingsView.sequencesAvail">
                                 <td><span class="ff-cell-fix">{{ 'settings_building_sequence' | i18n:loc.ale:textObject }}</span></td>
                                 <td><div select="" list="sequences" selected="settings[SETTINGS.ACTIVE_SEQUENCE]" drop-down="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td><span class="ff-cell-fix">Preserve village's resources</span></td>
+                                <td>
+                                    <span class="icon-26x26-resource-wood"></span>
+                                    <input type="number" min="0" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_WOOD]">
+
+                                    <span class="icon-26x26-resource-clay"></span>
+                                    <input type="number" min="0" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_CLAY]">
+
+                                    <span class="icon-26x26-resource-iron"></span>
+                                    <input type="number" min="0" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_IRON]">
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -88,9 +101,9 @@
                                 <td>{{ item.duration }}</td>
                                 <td class="green">+{{ item.levelPoints }}</td>
                                 <td>
-                                    <span class="icon-26x26-resource-wood"></span> {{ item.price.wood }}
-                                    <span class="icon-26x26-resource-clay"></span> {{ item.price.clay }}
-                                    <span class="icon-26x26-resource-iron"></span> {{ item.price.iron }}
+                                    <span class="icon-26x26-resource-wood"></span>{{ item.price.wood }}
+                                    <span class="icon-26x26-resource-clay"></span>{{ item.price.clay }}
+                                    <span class="icon-26x26-resource-iron"></span>{{ item.price.iron }}
                                 </td>
                             </tr>
                         </table>

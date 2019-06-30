@@ -3,6 +3,9 @@ define('two/builderQueue/settings', [], function () {
         GROUP_VILLAGES: 'group_villages',
         ACTIVE_SEQUENCE: 'building_sequence',
         BUILDING_SEQUENCES: 'building_orders',
+        PRESERVE_WOOD: 'preserve_wood',
+        PRESERVE_CLAY: 'preserve_clay',
+        PRESERVE_IRON: 'preserve_iron'
     }
 })
 
@@ -27,6 +30,16 @@ define('two/builderQueue/settings/map', [
         [SETTINGS.BUILDING_SEQUENCES]: {
             default: DEFAULT_ORDERS,
             inputType: 'buildingOrder'
+        },
+        [SETTINGS.PRESERVE_WOOD]: {
+            default: 0
+        },
+        [SETTINGS.PRESERVE_CLAY]: {
+            default: 0,
+            inputType: 'number'
+        },
+        [SETTINGS.PRESERVE_IRON]: {
+            default: 0
         }
     }
 })
