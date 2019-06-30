@@ -120,16 +120,20 @@ define('two/builderQueue', [
     var getVillageIds = function () {
         var ids = []
         var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
-        var villages = groupVillages ? groupList.getGroupVillageIds(groupVillages) : $player.getVillages()
-        var id
+        var villages = []
 
-        for (id in villages) {
-            if ($player.getVillage(id)) {
-                ids.push(id)
-            }
+        if (groupVillages) {
+            villages = groupList.getGroupVillageIds(groupVillages)
+            villages = villages.filter(function (vid) {
+                return $player.getVillage(vid)
+            })
+        } else {
+            angular.forEach($player.getVillages(), function (village) {
+                villages.push(village.getId())
+            })
         }
 
-        return ids
+        return villages
     }
 
     /**
@@ -198,8 +202,6 @@ define('two/builderQueue', [
      */
     var upgradeBuilding = function (village, buildingName, callback) {
         var upgradeability = checkBuildingUpgradeability(village, buildingName)
-        console.log('upgradeability', upgradeability)
-
         if (upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
             socketService.emit(routeProvider.VILLAGE_UPGRADE_BUILDING, {
                 building: buildingName,
@@ -224,7 +226,7 @@ define('two/builderQueue', [
 
         if (buildingData.upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
             nextLevelCosts = buildingData.nextLevelCosts
-            resources = selectedVillage.getResources().getComputed()
+            resources = village.getResources().getComputed()
 
             if (
                 resources.clay.currentStock - settings.get(SETTINGS.PRESERVE_CLAY) < nextLevelCosts.clay ||
