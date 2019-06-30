@@ -6,6 +6,7 @@
         "settings_village_groups": "Construir apenas em aldeias do grupo",
         "settings_building_sequence": "Sequência de construções",
         "settings_building_sequence_final": "Nível final das construções",
+        "settings_priorize_farm": "Priorizar fazenda se estiver lotada",
         "settings_saved": "Configurações salvas!",
         "logs_no_builds": "Nenhuma construção iniciada",
         "logs_clear": "Limpar registros",

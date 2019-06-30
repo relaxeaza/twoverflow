@@ -163,7 +163,7 @@ define('two/builderQueue', [
             if (++sequence[buildingName] > buildingLevels[buildingName]) {
                 buildingService.compute(village)
 
-                upgradeBuilding(village, buildingName, function (jobAdded, data) {
+                checkAndUpgradeBuilding(village, buildingName, function (jobAdded, data) {
                     if (jobAdded) {
                         if (!data.job) {
                             return false
@@ -200,20 +200,38 @@ define('two/builderQueue', [
      * @param {String} buildingName - Building to be build.
      * @param {Function} callback
      */
-    var upgradeBuilding = function (village, buildingName, callback) {
+    var checkAndUpgradeBuilding = function (village, buildingName, callback) {
         var upgradeability = checkBuildingUpgradeability(village, buildingName)
+        var limitFarm
+        var currentFarm
+
         if (upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
-            socketService.emit(routeProvider.VILLAGE_UPGRADE_BUILDING, {
-                building: buildingName,
-                village_id: village.getId(),
-                location: LOCATION_TYPES.MASS_SCREEN,
-                premium: false
-            }, function (data, event) {
+            upgradeBuilding(village, buildingName, function (event, data) {
                 callback(true, data)
             })
-        } else {
-            callback(false)
+        } else if (upgradeability === UPGRADEABILITY_STATES.NOT_ENOUGH_FOOD) {
+            if (settings.get(SETTINGS.PRIORIZE_FARM)) {
+                limitFarm = buildingSequenceLimit[BUILDING_TYPES.FARM]
+                villageFarm = village.getBuildingData().getDataForBuilding(BUILDING_TYPES.FARM)
+
+                if (villageFarm.level < limitFarm) {
+                    upgradeBuilding(village, BUILDING_TYPES.FARM, function (event, data) {
+                        callback(true, data)
+                    })
+                }
+            }
         }
+
+        callback(false)
+    }
+
+    var upgradeBuilding = function (village, buildingName, callback) {
+        socketService.emit(routeProvider.VILLAGE_UPGRADE_BUILDING, {
+            building: buildingName,
+            village_id: village.getId(),
+            location: LOCATION_TYPES.MASS_SCREEN,
+            premium: false
+        }, callback)
     }
 
     /**

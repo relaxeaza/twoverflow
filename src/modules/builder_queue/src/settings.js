@@ -5,7 +5,8 @@ define('two/builderQueue/settings', [], function () {
         BUILDING_SEQUENCES: 'building_orders',
         PRESERVE_WOOD: 'preserve_wood',
         PRESERVE_CLAY: 'preserve_clay',
-        PRESERVE_IRON: 'preserve_iron'
+        PRESERVE_IRON: 'preserve_iron',
+        PRIORIZE_FARM: 'priorize_farm'
     }
 })
 
@@ -40,6 +41,10 @@ define('two/builderQueue/settings/map', [
         },
         [SETTINGS.PRESERVE_IRON]: {
             default: 0
+        },
+        [SETTINGS.PRIORIZE_FARM]: {
+            default: false,
+            inputType: 'checkbox'
         }
     }
 })

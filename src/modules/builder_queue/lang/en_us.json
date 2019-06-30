@@ -6,6 +6,7 @@
         "settings_village_groups": "Build only on villages with the group",
         "settings_building_sequence": "Building sequence",
         "settings_building_sequence_final": "Buildings final levels",
+        "settings_priorize_farm": "Priorize farm if it's full",
         "settings_saved": "Settings saved!",
         "logs_no_builds": "No builds started",
         "logs_clear": "Clear logs",
