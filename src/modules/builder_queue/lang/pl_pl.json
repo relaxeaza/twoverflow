@@ -28,10 +28,11 @@
         "sequence_updated": "Szablon %d zaktualizowany.",
         "sequence_removed": "Szablon %d usunięty.",
         "error_sequence_exists": "Ten szablon już istnieje.",
-        "error_sequence_no_exists": "Ten szablon nie istnieje.",
+        "error_sequence_no_exists": "This sequence does not exist.",
         "error_sequence_invalid": "Niektóre z wartości szablonu są niepoprawne.",
         "logs_cleared": "Logi wyczyszczone.",
-        "create_sequence": "Utwórz szablon"
+        "create_sequence": "Utwórz szablon",
+        "settings_preserve_resources": "Preserve village's resources"
     },
     "builder_queue_add_building_modal": {
         "title": "Dodaj nowy budynek"

@@ -28,10 +28,11 @@
         "sequence_updated": "Sequenz %d aktualisiert.",
         "sequence_removed": "Sequenz %d entfernt.",
         "error_sequence_exists": "Diese Sequenz existiert bereits.",
-        "error_sequence_no_exists": "Diese Sequenz exsistiert nicht.",
+        "error_sequence_no_exists": "This sequence does not exist.",
         "error_sequence_invalid": "Manche Werte dieser Sequenz sind ungültig.",
         "logs_cleared": "Protokoll gelöscht.",
-        "create_sequence": "Sequenz erstellen"
+        "create_sequence": "Sequenz erstellen",
+        "settings_preserve_resources": "Preserve village's resources"
     },
     "builder_queue_add_building_modal": {
         "title": "Neue Gebäudestufe hinzufügen"

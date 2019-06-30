@@ -28,10 +28,11 @@
         "sequence_updated": "Sequência %d atualizada.",
         "sequence_removed": "Sequência %d removida.",
         "error_sequence_exists": "Esta sequência já existe.",
-        "error_sequence_no_exists": "Esta sequência não existe.",
+        "error_sequence_no_exists": "Essa sequência não existe.",
         "error_sequence_invalid": "Algum valor da sequência é inválido.",
         "logs_cleared": "Registro limpo.",
-        "create_sequence": "Criar uma sequência"
+        "create_sequence": "Criar uma sequência",
+        "settings_preserve_resources": "Preservar recursos das aldeias"
     },
     "builder_queue_add_building_modal": {
         "title": "Adicionar novo edifício"

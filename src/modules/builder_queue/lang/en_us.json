@@ -28,7 +28,7 @@
         "sequence_updated": "Sequence %d updated.",
         "sequence_removed": "Sequence %d removed.",
         "error_sequence_exists": "This sequence already exists.",
-        "error_sequence_no_exists": "This sequence does not exist.",
+        "error_sequence_no_exists": "This sequence doesn't exist.",
         "error_sequence_invalid": "Some sequence's value is invalid.",
         "logs_cleared": "Logs cleared.",
         "create_sequence": "Create a sequence",
