@@ -185,16 +185,33 @@ define('two/builderQueue/ui', [
         var sequenceObj = {}
         var sequence = []
         var building
-
+        var costs
+        
         for (building in gameDataBuildings) {
             sequenceObj[building] = {
                 level: 0,
-                order: gameDataBuildings[building].order
+                order: gameDataBuildings[building].order,
+                resources: {
+                    wood: 0,
+                    clay: 0,
+                    iron: 0,
+                    food: 0
+                },
+                points: 0,
+                build_time: 0
             }
         }
 
         sequenceBuildings.forEach(function (building) {
-            sequenceObj[building].level++
+            level = ++sequenceObj[building].level
+            costs = gameDataBuildings[building].individual_level_costs[level]
+
+            sequenceObj[building].resources.wood += parseInt(costs.wood, 10)
+            sequenceObj[building].resources.clay += parseInt(costs.clay, 10)
+            sequenceObj[building].resources.iron += parseInt(costs.iron, 10)
+            sequenceObj[building].resources.food += parseInt(costs.food, 10)
+            sequenceObj[building].build_time += parseInt(costs.build_time, 10)
+            sequenceObj[building].points += buildingsLevelPoints[building][level - 1]
         })
 
         for (building in sequenceObj) {
@@ -202,7 +219,10 @@ define('two/builderQueue/ui', [
                 sequence.push({
                     building: building,
                     level: sequenceObj[building].level,
-                    order: sequenceObj[building].order
+                    order: sequenceObj[building].order,
+                    resources: sequenceObj[building].resources,
+                    points: sequenceObj[building].points,
+                    build_time: sequenceObj[building].build_time
                 })
             }
         }

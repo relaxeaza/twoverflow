@@ -113,18 +113,34 @@
                     <h5 ng-if="settingsView.sequencesAvail" class="twx-section">{{ 'settings_building_sequence_final' | i18n:loc.ale:textObject }}</h5>
                     <table ng-if="settingsView.sequencesAvail" class="tbl-border-light tbl-striped header-center building-sequence-final">
                         <colgroup>
-                            <col width="5%">
-                            <col width="70%">
-                            <col>
+                            <col> <!-- name -->
+                            <col width="5%"> <!-- level -->
+                            <col width="12%"> <!-- time -->
+                            <col width="8%"> <!-- points -->
+                            <col width="11%"> <!-- wood -->
+                            <col width="11%"> <!-- iron -->
+                            <col width="11%"> <!-- clay -->
+                            <col width="7%"> <!-- food -->
                         </colgroup>
                         <tr>
-                            <th colspan="2">{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'duration' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'points' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th><span class="icon-26x26-resource-wood"></span></th>
+                            <th><span class="icon-26x26-resource-clay"></span></th>
+                            <th><span class="icon-26x26-resource-iron"></span></th>
+                            <th><span class="icon-26x26-resource-food"></span></th>
                         </tr>
                         <tr ng-repeat="item in settingsView.buildingSequenceFinal | orderBy:'order'">
-                            <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span></td>
-                            <td>{{ item.building | i18n:loc.ale:'building_names' }}</td>
+                            <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span> {{ item.building | i18n:loc.ale:'building_names' }}</td>
                             <td>{{ item.level }}</td>
+                            <td>{{ item.build_time | readableSecondsFilter }}</td>
+                            <td class="green">+{{ item.points | number }}</td>
+                            <td>{{ item.resources.wood | number }}</td>
+                            <td>{{ item.resources.clay | number }}</td>
+                            <td>{{ item.resources.iron | number }}</td>
+                            <td>{{ item.resources.food | number }}</td>
                         </tr>
                     </table>
                 </div>
