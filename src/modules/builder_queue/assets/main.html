@@ -77,11 +77,14 @@
                         <table class="tbl-border-light header-center building-sequence">
                             <colgroup>
                                 <col width="5%">
-                                <col width="30%">
+                                <col>
                                 <col width="7%">
                                 <col width="13%">
                                 <col width="8%">
-                                <col>
+                                <col width="9%"> <!-- wood -->
+                                <col width="9%"> <!-- iron -->
+                                <col width="9%"> <!-- clay -->
+                                <col width="6%"> <!-- food -->
                             </colgroup>
                             <tr>
                                 <th tooltip="" tooltip-content="{{ 'position' | i18n:loc.ale:textObject }}">#</th>
@@ -89,7 +92,10 @@
                                 <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
                                 <th>{{ 'duration' | i18n:loc.ale:textObjectCommon }}</th>
                                 <th>{{ 'points' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'costs' | i18n:loc.ale:textObjectCommon }}</th>
+                                <th><span class="icon-26x26-resource-wood"></span></th>
+                                <th><span class="icon-26x26-resource-clay"></span></th>
+                                <th><span class="icon-26x26-resource-iron"></span></th>
+                                <th><span class="icon-26x26-resource-food"></span></th>
                             </tr>
                             <tr ng-repeat="item in settingsView.visibleBuildingSequence track by $index" class="{{ item.state }}">
                                 <td>{{ pagination.buildingSequence.offset + $index + 1 }}</td>
@@ -99,12 +105,11 @@
                                 </td>
                                 <td>{{ item.level }}</td>
                                 <td>{{ item.duration }}</td>
-                                <td class="green">+{{ item.levelPoints }}</td>
-                                <td>
-                                    <span class="icon-26x26-resource-wood"></span>{{ item.price.wood }}
-                                    <span class="icon-26x26-resource-clay"></span>{{ item.price.clay }}
-                                    <span class="icon-26x26-resource-iron"></span>{{ item.price.iron }}
-                                </td>
+                                <td class="green">+{{ item.levelPoints | number }}</td>
+                                <td>{{ item.price.wood | number }}</td>
+                                <td>{{ item.price.clay | number }}</td>
+                                <td>{{ item.price.iron | number }}</td>
+                                <td>{{ item.price.food | number }}</td>
                             </tr>
                         </table>
                         <div class="page-wrap" pagination="pagination.buildingSequence"></div>
