@@ -219,7 +219,7 @@
                             <col width="30px">
                             <col>
                         </colgroup>
-                        <tr ng-repeat="log in visibleLogs">
+                        <tr ng-repeat="log in visibleLogs track by $index">
                             <td>{{ log.time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
                             <td><span class="icon-bg-black" ng-class="{
                                 'icon-26x26-dot-green': log.type === LOG_TYPES.FARM_START,
