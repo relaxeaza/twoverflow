@@ -23,6 +23,9 @@ define('two/farmOverflow/types/logs', [], function () {
     return {
         FARM_START: 'farm_start',
         FARM_STOP: 'farm_stop',
-        IGNORED_VILLAGE: 'ignored_village'
+        IGNORED_VILLAGE: 'ignored_village',
+        INCLUDED_VILLAGE: 'included_village',
+        IGNORED_VILLAGE_REMOVED: 'ignored_village_removed',
+        INCLUDED_VILLAGE_REMOVED: 'included_village_removed'
     }
 })

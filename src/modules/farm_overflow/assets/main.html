@@ -221,11 +221,31 @@
                         </colgroup>
                         <tr ng-repeat="log in visibleLogs">
                             <td>{{ log.time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
-                            <td><span class="icon-bg-black" ng-class="{'icon-26x26-dot-green': log.type === LOG_TYPES.FARM_START, 'icon-26x26-dot-red': log.type === LOG_TYPES.FARM_STOP, 'icon-26x26-check-negative': log.type === LOG_TYPES.IGNORED_VILLAGE}"></span></td>
+                            <td><span class="icon-bg-black" ng-class="{
+                                'icon-26x26-dot-green': log.type === LOG_TYPES.FARM_START,
+                                'icon-26x26-dot-red': log.type === LOG_TYPES.FARM_STOP,
+                                'icon-26x26-check-negative': log.type === LOG_TYPES.IGNORED_VILLAGE || log.type === LOG_TYPES.INCLUDED_VILLAGE_REMOVED,
+                                'icon-26x26-check-positive': log.type === LOG_TYPES.INCLUDED_VILLAGE || log.type === LOG_TYPES.IGNORED_VILLAGE_REMOVED
+                            }"></span></td>
 
                             <td ng-if="log.type === LOG_TYPES.IGNORED_VILLAGE">
                                 <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.villageId)" tooltip="" tooltip-content="{{ villageLabel(log.villageId) }}">{{ villageLabel(log.villageId) }}</span>
                                 {{ 'ignored_village' | i18n:loc.ale:textObject }}
+                            </td>
+
+                            <td ng-if="log.type === LOG_TYPES.IGNORED_VILLAGE_REMOVED">
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.villageId)" tooltip="" tooltip-content="{{ villageLabel(log.villageId) }}">{{ villageLabel(log.villageId) }}</span>
+                                {{ 'ignored_village_removed' | i18n:loc.ale:textObject }}
+                            </td>
+
+                            <td ng-if="log.type === LOG_TYPES.INCLUDED_VILLAGE">
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.villageId)" tooltip="" tooltip-content="{{ villageLabel(log.villageId) }}">{{ villageLabel(log.villageId) }}</span>
+                                {{ 'included_village' | i18n:loc.ale:textObject }}
+                            </td>
+
+                            <td ng-if="log.type === LOG_TYPES.INCLUDED_VILLAGE_REMOVED">
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log.villageId)" tooltip="" tooltip-content="{{ villageLabel(log.villageId) }}">{{ villageLabel(log.villageId) }}</span>
+                                {{ 'included_village_removed' | i18n:loc.ale:textObject }}
                             </td>
 
                             <td ng-if="log.type === LOG_TYPES.FARM_START">

@@ -182,11 +182,19 @@ define('two/farmOverflow', [
                 farmerListUpdated = true
             } else {
                 farmOverflow.removeTarget(data.village_id)
+
+                addLog(LOG_TYPES.IGNORED_VILLAGE, {
+                    villageId: data.village_id
+                })
             }
         }
 
         if (groupsInclude.includes(data.group_id) && !isOwnVillage) {
             reloadTargets()
+
+            addLog(LOG_TYPES.INCLUDED_VILLAGE, {
+                villageId: data.village_id
+            })
         }
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
@@ -227,11 +235,19 @@ define('two/farmOverflow', [
                 farmerListUpdated = true
             } else {
                 reloadTargets()
+
+                addLog(LOG_TYPES.IGNORED_VILLAGE_REMOVED, {
+                    villageId: data.village_id
+                })
             }
         }
 
         if (groupsInclude.includes(data.group_id) && !isOwnVillage) {
             reloadTargets()
+
+            addLog(LOG_TYPES.INCLUDED_VILLAGE_REMOVED, {
+                villageId: data.village_id
+            })
         }
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
@@ -594,7 +610,7 @@ define('two/farmOverflow', [
         }
 
         self.removeTarget = function (targetId) {
-            if (typeof targetId !== 'number') {
+            if (typeof targetId !== 'number' || !targets) {
                 return false
             }
 
