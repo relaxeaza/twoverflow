@@ -46,6 +46,7 @@ define('two/farmOverflow', [
     var farmerIndex = 0
     var farmerCycle = []
     var farmerTimeoutId = null
+    var targetTimeoutId = null
 
     var $player
     var unitsData
@@ -117,7 +118,19 @@ define('two/farmOverflow', [
     }
 
     var skipStepInterval = function () {
-        if (running && farmerTimeoutId) {
+        if (!running) {
+            return
+        }
+
+        if (activeFarmer && targetTimeoutId) {
+            clearTimeout(targetTimeoutId)
+            targetTimeoutId = null
+            activeFarmer.targetStep({
+                delay: true
+            })
+        }
+
+        if (farmerTimeoutId) {
             clearTimeout(farmerTimeoutId)
             farmerTimeoutId = null
             farmerIndex = 0
@@ -467,7 +480,6 @@ define('two/farmOverflow', [
         var targets = false
         var cycleEndHandler = noop
         var loadPromises
-        var targetTimeoutId
 
         if (!village) {
             throw new Error(`new Farmer -> Village ${villageId} doesn't exist.`)
@@ -533,7 +545,7 @@ define('two/farmOverflow', [
                 villageId: villageId
             })
 
-            targetStep({
+            self.targetStep({
                 delay: false
             })
 
@@ -555,118 +567,7 @@ define('two/farmOverflow', [
             cycleEndHandler = noop
         }
 
-        self.commandSent = function (data) {
-            sendingCommand = false
-            currentTarget = false
-
-            targetStep({
-                delay: true
-            })
-        }
-
-        self.commandError = function (data) {
-            sendingCommand = false
-            currentTarget = false
-
-            self.stop(ERROR_TYPES.COMMAND_ERROR)
-        }
-
-        self.onceCycleEnd = function (handler) {
-            cycleEndHandler = handler
-        }
-
-        self.loadTargets = function (_callback) {
-            var pos = village.getPosition()
-
-            mapData.load(pos, function (loadedTargets) {
-                targets = calcDistances(loadedTargets, pos)
-                targets = filterTargets(targets, pos)
-                targets = sortTargets(targets)
-
-                if (typeof _callback === 'function') {
-                    _callback(targets)
-                }
-            })
-        }
-
-        self.getTargets = function () {
-            return targets
-        }
-
-        self.getIndex = function () {
-            return index
-        }
-
-        self.getVillage = function () {
-            return village
-        }
-
-        self.isRunning = function () {
-            return running
-        }
-
-        self.isReady = function () {
-            return initialized && ready
-        }
-
-        self.removeTarget = function (targetId) {
-            if (typeof targetId !== 'number' || !targets) {
-                return false
-            }
-
-            targets = targets.filter(function (target) {
-                return target.id !== targetId
-            })
-
-            return true
-        }
-
-        // private functions
-
-        var genPresetList = function () {
-            var villagePresets = modelDataService.getPresetList().getPresetsByVillageId(village.getId())
-            var needAssign = false
-            var which = []
-            var id
-
-            selectedPresets.forEach(function (preset) {
-                if (!villagePresets.hasOwnProperty(preset.id)) {
-                    needAssign = true
-                    which.push(preset.id)
-                }
-            })
-
-            if (needAssign) {
-                for (id in villagePresets) {
-                    which.push(id)
-                }
-
-                return which
-            }
-
-            return false
-        }
-
-        var isTargetBusy = function (attacking, otherAttacking, allVillagesLoaded) {
-            var multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-            var singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
-
-            if (multipleFarmers && allVillagesLoaded) {
-                if (singleAttack && attacking) {
-                    return true
-                }
-            } else if (singleAttack) {
-                if (attacking || otherAttacking) {
-                    return true
-                }
-            } else if (otherAttacking) {
-                return true
-            }
-
-            return false
-        }
-
-        var targetStep = function (_options) {
+        self.targetStep = function (_options) {
             var options = _options || {}
             var preset
             var delayTime = 0
@@ -724,6 +625,11 @@ define('two/farmOverflow', [
             function checkPreset () {
                 return new Promise(function (resolve, reject) {
                     target = getTarget()
+
+                    if (!target) {
+                        return reject(ERROR_TYPES.UNKNOWN)
+                    }
+
                     preset = getPreset(target)
 
                     if (typeof preset === 'string') {
@@ -864,15 +770,17 @@ define('two/farmOverflow', [
                     error: error
                 })
 
+                index++
+
                 switch (error) {
                 case ERROR_TYPES.TIME_LIMIT:
                 case ERROR_TYPES.BUSY_TARGET:
-                    targetStep(options)
+                    self.targetStep(options)
                     break
 
                 case ERROR_TYPES.NOT_ALLOWED_POINTS:
                     farmOverflow.removeTarget(target.id)
-                    targetStep(options)
+                    self.targetStep(options)
                     break
 
                 case ERROR_TYPES.NO_UNITS:
@@ -894,6 +802,117 @@ define('two/farmOverflow', [
             })
         }
 
+        self.commandSent = function (data) {
+            sendingCommand = false
+            currentTarget = false
+
+            self.targetStep({
+                delay: true
+            })
+        }
+
+        self.commandError = function (data) {
+            sendingCommand = false
+            currentTarget = false
+
+            self.stop(ERROR_TYPES.COMMAND_ERROR)
+        }
+
+        self.onceCycleEnd = function (handler) {
+            cycleEndHandler = handler
+        }
+
+        self.loadTargets = function (_callback) {
+            var pos = village.getPosition()
+
+            mapData.load(pos, function (loadedTargets) {
+                targets = calcDistances(loadedTargets, pos)
+                targets = filterTargets(targets, pos)
+                targets = sortTargets(targets)
+
+                if (typeof _callback === 'function') {
+                    _callback(targets)
+                }
+            })
+        }
+
+        self.getTargets = function () {
+            return targets
+        }
+
+        self.getIndex = function () {
+            return index
+        }
+
+        self.getVillage = function () {
+            return village
+        }
+
+        self.isRunning = function () {
+            return running
+        }
+
+        self.isReady = function () {
+            return initialized && ready
+        }
+
+        self.removeTarget = function (targetId) {
+            if (typeof targetId !== 'number' || !targets) {
+                return false
+            }
+
+            targets = targets.filter(function (target) {
+                return target.id !== targetId
+            })
+
+            return true
+        }
+
+        // private functions
+
+        var genPresetList = function () {
+            var villagePresets = modelDataService.getPresetList().getPresetsByVillageId(village.getId())
+            var needAssign = false
+            var which = []
+            var id
+
+            selectedPresets.forEach(function (preset) {
+                if (!villagePresets.hasOwnProperty(preset.id)) {
+                    needAssign = true
+                    which.push(preset.id)
+                }
+            })
+
+            if (needAssign) {
+                for (id in villagePresets) {
+                    which.push(id)
+                }
+
+                return which
+            }
+
+            return false
+        }
+
+        var isTargetBusy = function (attacking, otherAttacking, allVillagesLoaded) {
+            var multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
+            var singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
+
+            if (multipleFarmers && allVillagesLoaded) {
+                if (singleAttack && attacking) {
+                    return true
+                }
+            } else if (singleAttack) {
+                if (attacking || otherAttacking) {
+                    return true
+                }
+            } else if (otherAttacking) {
+                return true
+            }
+
+            return false
+        }
+
         var attackTarget = function (target, preset) {
             if (!running) {
                 return false
@@ -901,6 +920,7 @@ define('two/farmOverflow', [
 
             sendingCommand = true
             currentTarget = target
+            index++
 
             socketService.emit(routeProvider.SEND_PRESET, {
                 start_village: village.getId(),
@@ -911,7 +931,7 @@ define('two/farmOverflow', [
         }
 
         var getTarget = function () {
-            return targets[index++]
+            return targets[index]
         }
 
         var getPreset = function (target) {
@@ -964,34 +984,28 @@ define('two/farmOverflow', [
         })
 
         settings.onChange(function (changes, updates) {
-            var reloadStep = false
-
             if (updates[SETTINGS_UPDATE.PRESET]) {
                 updatePresets()
-                reloadStep = true
             }
 
             if (updates[SETTINGS_UPDATE.GROUPS]) {
                 updateGroupVillages()
-                reloadStep = true
             }
 
             if (updates[SETTINGS_UPDATE.TARGETS]) {
                 reloadTargets()
-                reloadStep = true
             }
 
             if (updates[SETTINGS_UPDATE.VILLAGES]) {
                 farmOverflow.flush()
                 farmOverflow.createAll()
-                reloadStep = true
             }
 
             if (updates[SETTINGS_UPDATE.LOGS]) {
                 trimAndSaveLogs()
             }
 
-            if (reloadStep) {
+            if (updates[SETTINGS_UPDATE.INTERVAL_TIMERS]) {
                 skipStepInterval()
             }
         })

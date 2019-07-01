@@ -28,7 +28,8 @@ define('two/farmOverflow/settings/updates', function () {
         VILLAGES: 'villages',
         WAITING_VILLAGES: 'waiting_villages',
         FULL_STORAGE: 'full_storage',
-        LOGS: 'logs'
+        LOGS: 'logs',
+        INTERVAL_TIMERS: 'interval_timers'
     }
 })
 
@@ -42,7 +43,10 @@ define('two/farmOverflow/settings/map', [
     return {
         [SETTINGS.PRESETS]: {
             default: [],
-            updates: [SETTINGS_UPDATE.PRESET],
+            updates: [
+                SETTINGS_UPDATE.PRESET,
+                SETTINGS_UPDATE.INTERVAL_TIMERS
+            ],
             disabledOption: true,
             inputType: 'select',
             multiSelect: true,
@@ -50,7 +54,10 @@ define('two/farmOverflow/settings/map', [
         },
         [SETTINGS.GROUP_IGNORE]: {
             default: false,
-            updates: [SETTINGS_UPDATE.GROUPS],
+            updates: [
+                SETTINGS_UPDATE.GROUPS,
+                SETTINGS_UPDATE.INTERVAL_TIMERS
+            ],
             disabledOption: true,
             inputType: 'select',
             type: 'groups'
@@ -59,7 +66,8 @@ define('two/farmOverflow/settings/map', [
             default: [],
             updates: [
                 SETTINGS_UPDATE.GROUPS,
-                SETTINGS_UPDATE.TARGETS
+                SETTINGS_UPDATE.TARGETS,
+                SETTINGS_UPDATE.INTERVAL_TIMERS
             ],
             disabledOption: true,
             inputType: 'select',
@@ -71,7 +79,8 @@ define('two/farmOverflow/settings/map', [
             updates: [
                 SETTINGS_UPDATE.GROUPS,
                 SETTINGS_UPDATE.VILLAGES,
-                SETTINGS_UPDATE.TARGETS
+                SETTINGS_UPDATE.TARGETS,
+                SETTINGS_UPDATE.INTERVAL_TIMERS
             ],
             disabledOption: true,
             inputType: 'select',
@@ -80,11 +89,11 @@ define('two/farmOverflow/settings/map', [
         },
         [SETTINGS.ATTACK_INTERVAL]: {
             default: 2,
-            updates: []
+            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS]
         },
         [SETTINGS.FARMER_CYCLE_INTERVAL]: {
             default: 5,
-            updates: []
+            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS]
         },
         [SETTINGS.TARGET_SINGLE_ATTACK]: {
             default: true,
@@ -93,7 +102,7 @@ define('two/farmOverflow/settings/map', [
         },
         [SETTINGS.TARGET_MULTIPLE_FARMERS]: {
             default: true,
-            updates: [],
+            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS],
             inputType: 'checkbox'
         },
         [SETTINGS.PRESERVE_COMMAND_SLOTS]: {
@@ -107,28 +116,40 @@ define('two/farmOverflow/settings/map', [
         },
         [SETTINGS.IGNORE_FULL_STORAGE]: {
             default: true,
-            updates: [],
+            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS],
             inputType: 'checkbox'
         },
         [SETTINGS.MIN_DISTANCE]: {
             default: 0,
-            updates: [SETTINGS_UPDATE.TARGETS]
+            updates: [
+                SETTINGS_UPDATE.TARGETS,
+                SETTINGS_UPDATE.INTERVAL_TIMERS
+            ]
         },
         [SETTINGS.MAX_DISTANCE]: {
             default: 15,
-            updates: [SETTINGS_UPDATE.TARGETS]
+            updates: [
+                SETTINGS_UPDATE.TARGETS,
+                SETTINGS_UPDATE.INTERVAL_TIMERS
+            ]
         },
         [SETTINGS.MIN_POINTS]: {
             default: 0,
-            updates: [SETTINGS_UPDATE.TARGETS]
+            updates: [
+                SETTINGS_UPDATE.TARGETS,
+                SETTINGS_UPDATE.INTERVAL_TIMERS
+            ]
         },
         [SETTINGS.MAX_POINTS]: {
             default: 12500,
-            updates: [SETTINGS_UPDATE.TARGETS]
+            updates: [
+                SETTINGS_UPDATE.TARGETS,
+                SETTINGS_UPDATE.INTERVAL_TIMERS
+            ]
         },
         [SETTINGS.MAX_TRAVEL_TIME]: {
             default: 90,
-            updates: []
+            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS]
         },
         [SETTINGS.LOGS_LIMIT]: {
             default: 500,
