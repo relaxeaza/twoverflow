@@ -5,6 +5,8 @@
         "no_ignored_targets": "Nothing ignored",
         "included_targets": "Included Targets",
         "no_included_targets": "Nothing included",
+        "farmer_villages": "Farmer Villages",
+        "no_farmer_villages": "No farmer villages",
         "attacking": "Attacking.",
         "paused": "Paused.",
         "command_limit": "Limit of 50 attacks reached, waiting return.",

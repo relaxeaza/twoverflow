@@ -171,8 +171,8 @@
 
                 <!-- villages -->
                 <div class="villages rich-text" ng-show="selectedTab === TAB_TYPES.VILLAGES">
-                    <h5 class="twx-section">Farmers</h5>
-                    <p ng-if="!farmers.length">No farmer villages</p>
+                    <h5 class="twx-section">{{ 'farmer_villages' | i18n:loc.ale:textObject }}</h5>
+                    <p ng-if="!farmers.length">{{ 'no_farmer_villages' | i18n:loc.ale:textObject }}</p>
                     <table class="tbl-border-light tbl-striped" ng-show="farmers.length">
                         <colgroup>
                             <col>
