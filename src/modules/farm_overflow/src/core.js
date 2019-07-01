@@ -19,7 +19,7 @@ define('two/farmOverflow', [
     ERROR_TYPES,
     SETTINGS,
     SETTINGS_MAP,
-    SETTINGS_UPDATE,
+    UPDATES,
     LOG_TYPES,
     mapData,
     utils,
@@ -984,28 +984,28 @@ define('two/farmOverflow', [
         })
 
         settings.onChange(function (changes, updates) {
-            if (updates[SETTINGS_UPDATE.PRESET]) {
+            if (updates[UPDATES.PRESET]) {
                 updatePresets()
             }
 
-            if (updates[SETTINGS_UPDATE.GROUPS]) {
+            if (updates[UPDATES.GROUPS]) {
                 updateGroupVillages()
             }
 
-            if (updates[SETTINGS_UPDATE.TARGETS]) {
+            if (updates[UPDATES.TARGETS]) {
                 reloadTargets()
             }
 
-            if (updates[SETTINGS_UPDATE.VILLAGES]) {
+            if (updates[UPDATES.VILLAGES]) {
                 farmOverflow.flush()
                 farmOverflow.createAll()
             }
 
-            if (updates[SETTINGS_UPDATE.LOGS]) {
+            if (updates[UPDATES.LOGS]) {
                 trimAndSaveLogs()
             }
 
-            if (updates[SETTINGS_UPDATE.INTERVAL_TIMERS]) {
+            if (updates[UPDATES.INTERVAL_TIMERS]) {
                 skipStepInterval()
             }
         })

@@ -38,14 +38,14 @@ define('two/farmOverflow/settings/map', [
     'two/farmOverflow/settings/updates'
 ], function (
     SETTINGS,
-    SETTINGS_UPDATE
+    UPDATES
 ) {
     return {
         [SETTINGS.PRESETS]: {
             default: [],
             updates: [
-                SETTINGS_UPDATE.PRESET,
-                SETTINGS_UPDATE.INTERVAL_TIMERS
+                UPDATES.PRESET,
+                UPDATES.INTERVAL_TIMERS
             ],
             disabledOption: true,
             inputType: 'select',
@@ -55,8 +55,8 @@ define('two/farmOverflow/settings/map', [
         [SETTINGS.GROUP_IGNORE]: {
             default: false,
             updates: [
-                SETTINGS_UPDATE.GROUPS,
-                SETTINGS_UPDATE.INTERVAL_TIMERS
+                UPDATES.GROUPS,
+                UPDATES.INTERVAL_TIMERS
             ],
             disabledOption: true,
             inputType: 'select',
@@ -65,9 +65,9 @@ define('two/farmOverflow/settings/map', [
         [SETTINGS.GROUP_INCLUDE]: {
             default: [],
             updates: [
-                SETTINGS_UPDATE.GROUPS,
-                SETTINGS_UPDATE.TARGETS,
-                SETTINGS_UPDATE.INTERVAL_TIMERS
+                UPDATES.GROUPS,
+                UPDATES.TARGETS,
+                UPDATES.INTERVAL_TIMERS
             ],
             disabledOption: true,
             inputType: 'select',
@@ -77,10 +77,10 @@ define('two/farmOverflow/settings/map', [
         [SETTINGS.GROUP_ONLY]: {
             default: [],
             updates: [
-                SETTINGS_UPDATE.GROUPS,
-                SETTINGS_UPDATE.VILLAGES,
-                SETTINGS_UPDATE.TARGETS,
-                SETTINGS_UPDATE.INTERVAL_TIMERS
+                UPDATES.GROUPS,
+                UPDATES.VILLAGES,
+                UPDATES.TARGETS,
+                UPDATES.INTERVAL_TIMERS
             ],
             disabledOption: true,
             inputType: 'select',
@@ -89,11 +89,11 @@ define('two/farmOverflow/settings/map', [
         },
         [SETTINGS.ATTACK_INTERVAL]: {
             default: 2,
-            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS]
+            updates: [UPDATES.INTERVAL_TIMERS]
         },
         [SETTINGS.FARMER_CYCLE_INTERVAL]: {
             default: 5,
-            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS]
+            updates: [UPDATES.INTERVAL_TIMERS]
         },
         [SETTINGS.TARGET_SINGLE_ATTACK]: {
             default: true,
@@ -102,7 +102,7 @@ define('two/farmOverflow/settings/map', [
         },
         [SETTINGS.TARGET_MULTIPLE_FARMERS]: {
             default: true,
-            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS],
+            updates: [UPDATES.INTERVAL_TIMERS],
             inputType: 'checkbox'
         },
         [SETTINGS.PRESERVE_COMMAND_SLOTS]: {
@@ -116,44 +116,44 @@ define('two/farmOverflow/settings/map', [
         },
         [SETTINGS.IGNORE_FULL_STORAGE]: {
             default: true,
-            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS],
+            updates: [UPDATES.INTERVAL_TIMERS],
             inputType: 'checkbox'
         },
         [SETTINGS.MIN_DISTANCE]: {
             default: 0,
             updates: [
-                SETTINGS_UPDATE.TARGETS,
-                SETTINGS_UPDATE.INTERVAL_TIMERS
+                UPDATES.TARGETS,
+                UPDATES.INTERVAL_TIMERS
             ]
         },
         [SETTINGS.MAX_DISTANCE]: {
             default: 15,
             updates: [
-                SETTINGS_UPDATE.TARGETS,
-                SETTINGS_UPDATE.INTERVAL_TIMERS
+                UPDATES.TARGETS,
+                UPDATES.INTERVAL_TIMERS
             ]
         },
         [SETTINGS.MIN_POINTS]: {
             default: 0,
             updates: [
-                SETTINGS_UPDATE.TARGETS,
-                SETTINGS_UPDATE.INTERVAL_TIMERS
+                UPDATES.TARGETS,
+                UPDATES.INTERVAL_TIMERS
             ]
         },
         [SETTINGS.MAX_POINTS]: {
             default: 12500,
             updates: [
-                SETTINGS_UPDATE.TARGETS,
-                SETTINGS_UPDATE.INTERVAL_TIMERS
+                UPDATES.TARGETS,
+                UPDATES.INTERVAL_TIMERS
             ]
         },
         [SETTINGS.MAX_TRAVEL_TIME]: {
             default: 90,
-            updates: [SETTINGS_UPDATE.INTERVAL_TIMERS]
+            updates: [UPDATES.INTERVAL_TIMERS]
         },
         [SETTINGS.LOGS_LIMIT]: {
             default: 500,
-            updates: [SETTINGS_UPDATE.LOGS]
+            updates: [UPDATES.LOGS]
         }
     }
 })
