@@ -1,5 +1,10 @@
 {
     "farm_overflow": {
+        "not_loaded": "Not loaded.",
+        "ignored_targets": "Ignored Targets",
+        "no_ignored_targets": "Nothing ignored",
+        "included_targets": "Included Targets",
+        "no_included_targets": "Nothing included",
         "attacking": "Im Angriff.",
         "paused": "Angehalten.",
         "command_limit": "Das Befehlslimit ist erreicht, bitte warte auf die Rückkehr einiger Trupps.",

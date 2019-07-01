@@ -5,7 +5,6 @@
         "no_ignored_targets": "Nada ignorado",
         "included_targets": "Alvos incluídos",
         "no_included_targets": "Nada incluído",
-
         "attacking": "Atacando.",
         "paused": "Pausado.",
         "command_limit": "Limite de 50 ataques atingido, aguardando retorno.",

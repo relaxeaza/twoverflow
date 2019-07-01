@@ -1,5 +1,10 @@
 {
     "farm_overflow": {
+        "not_loaded": "Not loaded.",
+        "ignored_targets": "Ignored Targets",
+        "no_ignored_targets": "Nothing ignored",
+        "included_targets": "Included Targets",
+        "no_included_targets": "Nothing included",
         "attacking": "Atakuje.",
         "paused": "Zatrzymany.",
         "command_limit": "Limit 50 ataków osiągnięty, oczekiwanie na powrót wojsk.",

@@ -28,7 +28,10 @@
         "units": "Unidades",
         "officers": "Oficiais",
         "origin": "Origem",
-        "target": "Alvo",
+        "target": [
+            "Alvo",
+            "Alvos"
+        ],
         "save": "Salvar",
         "logs": "Eventos",
         "headquarter": "Edifício Principal",
