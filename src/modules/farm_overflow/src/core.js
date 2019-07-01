@@ -1146,7 +1146,7 @@ define('two/farmOverflow', [
             return false
         }
 
-        return farmers[farmerIndex++]
+        return farmers[farmerIndex]
     }
 
     farmOverflow.farmerStep = function () {
@@ -1167,7 +1167,11 @@ define('two/farmOverflow', [
             return
         }
 
-        activeFarmer.onceCycleEnd(farmOverflow.farmerStep)
+        activeFarmer.onceCycleEnd(function () {
+            farmerIndex++
+            farmOverflow.farmerStep()
+        })
+        
         activeFarmer.start()
     }
 
