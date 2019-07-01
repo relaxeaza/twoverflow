@@ -1100,7 +1100,7 @@ define('two/farmOverflow', [
     farmOverflow.flush = function () {
         var groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
         var villageId
-        var removeIds
+        var removeIds = []
 
         farmers.forEach(function (farmer) {
             villageId = farmer.getVillage().getId()
