@@ -33,6 +33,7 @@ define('two/farmOverflow/ui', [
 
     var TAB_TYPES = {
         SETTINGS: 'settings',
+        VILLAGES: 'villages',
         LOGS: 'logs'
     }
 
@@ -124,6 +125,12 @@ define('two/farmOverflow/ui', [
                     message: $filter('i18n')('reseted_logs', $rootScope.loc.ale, textObject)
                 })
             }
+        },
+        ùpdateFarmerVillages: function () {
+            $scope.farmers = farmOverflow.getAll()
+        },
+        ùpdateExceptionVillages: function () {
+            $scope.exceptionVillages = farmOverflow.exceptionVillages()
         }
     }
 
@@ -159,6 +166,8 @@ define('two/farmOverflow/ui', [
         $scope.running = farmOverflow.isRunning()
         $scope.selectedTab = TAB_TYPES.SETTINGS
         $scope.logs = farmOverflow.getLogs()
+        $scope.exceptionVillages = farmOverflow.exceptionVillages()
+        $scope.farmers = farmOverflow.getAll()
         $scope.visibleLogs = []
         $scope.pagination = {
             count: $scope.logs.length,
@@ -190,6 +199,8 @@ define('two/farmOverflow/ui', [
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_START, eventHandlers.start)
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_STOP, eventHandlers.stop)
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_LOGS_UPDATED, eventHandlers.updateLogs)
+        eventScope.register(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED, eventHandlers.ùpdateFarmerVillages)
+        eventScope.register(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_VILLAGES_UPDATED, eventHandlers.ùpdateExceptionVillages)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_farm_overflow_window', $scope)
     }

@@ -162,6 +162,8 @@ define('two/farmOverflow', [
         updateIncludedVillage()
         updateIgnoredVillage()
         updateOnlyVillage()
+
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_VILLAGES_UPDATED)
     }
 
     var villageGroupLink = function (event, data) {
@@ -170,12 +172,14 @@ define('two/farmOverflow', [
         var groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
         var isOwnVillage = $player.getVillage(data.village_id)
         var farmer
+        var farmerListUpdated = false
 
         updateGroupVillages()
 
         if (groupIgnore === data.group_id) {
             if (isOwnVillage) {
                 farmOverflow.removeById(data.village_id)
+                farmerListUpdated = true
             } else {
                 farmOverflow.removeTarget(data.village_id)
             }
@@ -192,6 +196,12 @@ define('two/farmOverflow', [
                     farmer.start()
                 }
             })
+
+            farmerListUpdated = true
+        }
+
+        if (farmerListUpdated) {
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED)
         }
     }
 
@@ -201,6 +211,7 @@ define('two/farmOverflow', [
         var groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
         var isOwnVillage = $player.getVillage(data.village_id)
         var farmer
+        var farmerListUpdated = false
 
         updateGroupVillages()
 
@@ -212,6 +223,8 @@ define('two/farmOverflow', [
                         farmer.start()
                     }
                 })
+
+                farmerListUpdated = true
             } else {
                 reloadTargets()
             }
@@ -223,6 +236,11 @@ define('two/farmOverflow', [
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
             farmOverflow.removeById(data.village_id)
+            farmerListUpdated = true
+        }
+
+        if (farmerListUpdated) {
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED)
         }
     }
 
@@ -430,7 +448,7 @@ define('two/farmOverflow', [
         var running = false
         var initialized = false
         var ready = false
-        var targets = []
+        var targets = false
         var cycleEndHandler = noop
         var loadPromises
         var targetTimeoutId
@@ -557,6 +575,10 @@ define('two/farmOverflow', [
 
         self.getTargets = function () {
             return targets
+        }
+
+        self.getIndex = function () {
+            return index
         }
 
         self.getVillage = function () {
@@ -1035,6 +1057,8 @@ define('two/farmOverflow', [
         angular.forEach($player.getVillages(), function (village, villageId) {
             farmOverflow.create(villageId)
         })
+
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED)
     }
 
     farmOverflow.create = function (villageId) {
@@ -1060,18 +1084,25 @@ define('two/farmOverflow', [
     farmOverflow.flush = function () {
         var groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
         var villageId
+        var removeIds
 
         farmers.forEach(function (farmer) {
             villageId = farmer.getVillage().getId()
 
             if (groupsOnly.length && !onlyVillages.includes(villageId)) {
-                farmOverflow.removeById(villageId)
-            }
-
-            if (ignoredVillages.includes(villageId)) {
-                farmOverflow.removeById(villageId)
+                removeIds.push(villageId)
+            } else if (ignoredVillages.includes(villageId)) {
+                removeIds.push(villageId)
             }
         })
+
+        if (removeIds.length) {
+            removeIds.forEach(function (removeId) {
+                farmOverflow.removeById(removeId)
+            })
+
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED)
+        }
     }
 
     farmOverflow.getById = function (farmerId) {
@@ -1084,6 +1115,10 @@ define('two/farmOverflow', [
         }
 
         return false
+    }
+
+    farmOverflow.getAll = function () {
+        return farmers
     }
 
     farmOverflow.removeById = function (farmerId) {
@@ -1167,6 +1202,13 @@ define('two/farmOverflow', [
 
     farmOverflow.getSettings = function () {
         return settings
+    }
+
+    farmOverflow.exceptionVillages = function () {
+        return {
+            included: includedVillages,
+            ignored: ignoredVillages
+        }
     }
 
     farmOverflow.isInitialized = function () {

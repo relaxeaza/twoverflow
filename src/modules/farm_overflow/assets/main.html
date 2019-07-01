@@ -7,11 +7,18 @@
     </header>
     <div class="win-main" scrollbar="">
         <div class="tabs tabs-bg">
-            <div class="tabs-two-col">
+            <div class="tabs-three-col">
                 <div class="tab" ng-click="selectTab(TAB_TYPES.SETTINGS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.SETTINGS}">
                     <div class="tab-inner">
                         <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.SETTINGS}">
                             <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.SETTINGS}">{{ TAB_TYPES.SETTINGS | i18n:loc.ale:textObjectCommon }}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab" ng-click="selectTab(TAB_TYPES.VILLAGES)" ng-class="{'tab-active': selectedTab == TAB_TYPES.VILLAGES}">
+                    <div class="tab-inner">
+                        <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.VILLAGES}">
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.VILLAGES}">{{ TAB_TYPES.VILLAGES | i18n:loc.ale:textObjectCommon }}</a>
                         </div>
                     </div>
                 </div>
@@ -27,9 +34,7 @@
 
         <div class="box-paper footer">
             <div class="scroll-wrap">
-                
                 <!-- settings -->
-
                 <div class="settings" ng-show="selectedTab === TAB_TYPES.SETTINGS">
                     <table class="tbl-border-light tbl-content tbl-medium-height">
                         <colgroup>
@@ -164,8 +169,47 @@
                     </table>
                 </div>
 
-                <!-- logs -->
+                <!-- villages -->
+                <div class="villages rich-text" ng-show="selectedTab === TAB_TYPES.VILLAGES">
+                    <h5 class="twx-section">Farmers</h5>
+                    <p ng-if="!farmers.length">No farmer villages</p>
+                    <table class="tbl-border-light tbl-striped" ng-show="farmers.length">
+                        <colgroup>
+                            <col>
+                            <col width="20%">
+                        </colgroup>
+                        <tr>
+                            <th>{{ 'villages' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'target' | i18n:loc.ale:textObjectCommon:true }}</th>
+                        </tr>
+                        <tr ng-repeat="farmer in farmers">
+                            <td>
+                                <span ng-class="{true:'icon-26x26-dot-green', false:'icon-26x26-dot-red'}[farmer.isRunning()]"></span>
+                                <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(farmer.getVillage().getId())">{{ farmer.getVillage().getName() }} ({{ farmer.getVillage().getX() }}|{{ farmer.getVillage().getY() }})</span>
+                            </td>
+                            <td ng-if="farmer.getTargets()"><span ng-if="farmer.isRunning()">{{ farmer.getIndex() }} / </span><span>{{ farmer.getTargets().length }}</span></td>
+                            <td ng-if="!farmer.getTargets()"><span>{{ 'not_loaded' | i18n:loc.ale:textObject }}</span></td>
+                        </tr>
+                    </table>
 
+                    <h5 class="twx-section">{{ 'ignored_targets' | i18n:loc.ale:textObject }}</h5>
+                    <p ng-if="!exceptionVillages.ignored.length">{{ 'no_ignored_targets' | i18n:loc.ale:textObject }}</p>
+                    <table class="tbl-border-light tbl-striped" ng-show="exceptionVillages.ignored.length">
+                        <tr ng-repeat="village in exceptionVillages.ignored">
+                            <td><span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(village)">#{{ village }}</span></td>
+                        </tr>
+                    </table>
+
+                    <h5 class="twx-section">{{ 'included_targets' | i18n:loc.ale:textObject }}</h5>
+                    <p ng-if="!exceptionVillages.included.length">{{ 'no_included_targets' | i18n:loc.ale:textObject }}</p>
+                    <table class="tbl-border-light tbl-striped" ng-show="exceptionVillages.included.length">
+                        <tr ng-repeat="village in exceptionVillages.included">
+                            <td><span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(village)">#{{ village }}</span></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- logs -->
                 <div class="logs rich-text" ng-show="selectedTab === TAB_TYPES.LOGS">
                     <div class="page-wrap" pagination="pagination"></div>
                     <p class="text-center" ng-show="!visibleLogs.length">{{ 'no_logs' | i18n:loc.ale:textObject }}</p>

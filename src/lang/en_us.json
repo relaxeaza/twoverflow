@@ -28,7 +28,7 @@
         "units": "Units",
         "officers": "Officers",
         "origin": "Origin",
-        "target": "Target",
+        "target": ["Target", "Targets"],
         "save": "Save",
         "logs": "Logs",
         "headquarter": "Headquarters",
