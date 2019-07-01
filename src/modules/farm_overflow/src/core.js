@@ -1,6 +1,7 @@
 define('two/farmOverflow', [
     'two/Settings',
     'two/farmOverflow/types/errors',
+    'two/farmOverflow/types/status',
     'two/farmOverflow/settings',
     'two/farmOverflow/settings/map',
     'two/farmOverflow/settings/updates',
@@ -17,6 +18,7 @@ define('two/farmOverflow', [
 ], function (
     Settings,
     ERROR_TYPES,
+    STATUS,
     SETTINGS,
     SETTINGS_MAP,
     UPDATES,
@@ -480,6 +482,7 @@ define('two/farmOverflow', [
         var targets = false
         var cycleEndHandler = noop
         var loadPromises
+        var status = STATUS.WAITING_CYCLE
 
         if (!village) {
             throw new Error(`new Farmer -> Village ${villageId} doesn't exist.`)
@@ -581,7 +584,7 @@ define('two/farmOverflow', [
                     var limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
 
                     if (villageCommands.length >= limit) {
-                        return reject(ERROR_TYPES.COMMAND_LIMIT)
+                        return reject(STATUS.COMMAND_LIMIT)
                     }
 
                     resolve()
@@ -591,7 +594,7 @@ define('two/farmOverflow', [
             function checkStorage () {
                 return new Promise(function (resolve, reject) {
                     if (settings.get(SETTINGS.IGNORE_FULL_STORAGE) && checkFullStorage(village)) {
-                        return reject(ERROR_TYPES.FULL_STORAGE)
+                        return reject(STATUS.FULL_STORAGE)
                     }
 
                     resolve()
@@ -601,9 +604,9 @@ define('two/farmOverflow', [
             function checkTargets () {
                 return new Promise(function (resolve, reject) {
                     if (!targets.length) {
-                        reject(ERROR_TYPES.NO_TARGETS)
+                        reject(STATUS.NO_TARGETS)
                     } else if (index > targets.length || !targets[index]) {
-                        reject(ERROR_TYPES.TARGET_CYCLE_END)
+                        reject(STATUS.TARGET_CYCLE_END)
                     } else {
                         resolve()
                     }
@@ -627,7 +630,7 @@ define('two/farmOverflow', [
                     target = getTarget()
 
                     if (!target) {
-                        return reject(ERROR_TYPES.UNKNOWN)
+                        return reject(STATUS.UNKNOWN)
                     }
 
                     preset = getPreset(target)
@@ -647,9 +650,9 @@ define('two/farmOverflow', [
                     }, function(data) {
                         // abandoned village conquered by some noob.
                         if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
-                            reject(ERROR_TYPES.ABANDONED_CONQUERED)
+                            reject(STATUS.ABANDONED_CONQUERED)
                         } else if (target.attack_protection) {
-                            reject(ERROR_TYPES.PROTECTED_VILLAGE)
+                            reject(STATUS.PROTECTED_VILLAGE)
                         } else {
                             resolve()
                         }
@@ -688,7 +691,7 @@ define('two/farmOverflow', [
                     })
 
                     if (isTargetBusy(attacking, otherAttacking, allVillagesLoaded)) {
-                        return reject(ERROR_TYPES.BUSY_TARGET)
+                        return reject(STATUS.BUSY_TARGET)
                     }
 
                     if (allVillagesLoaded) {
@@ -703,7 +706,7 @@ define('two/farmOverflow', [
                 return new Promise(function (resolve, reject) {
                     $mapData.getTownAtAsync(target.x, target.y, function (data) {
                         if (villageFilters.points(data.points)) {
-                            return reject(ERROR_TYPES.NOT_ALLOWED_POINTS)
+                            return reject(STATUS.NOT_ALLOWED_POINTS)
                         }
 
                         resolve()
@@ -735,7 +738,7 @@ define('two/farmOverflow', [
                         })
 
                         if (isTargetBusy(attacking, otherAttacking, true)) {
-                            return reject(ERROR_TYPES.BUSY_TARGET)
+                            return reject(STATUS.BUSY_TARGET)
                         }
 
                         resolve()
@@ -748,6 +751,8 @@ define('two/farmOverflow', [
                     delayTime = utils.randomSeconds(settings.get(SETTINGS.ATTACK_INTERVAL))
                     delayTime = MINIMUM_ATTACK_INTERVAL + (delayTime * 1000)
                 }
+
+                self.setStatus(STATUS.ATTACKING)
 
                 targetTimeoutId = setTimeout(function() {
                     attackTarget(target, preset)
@@ -773,33 +778,48 @@ define('two/farmOverflow', [
                 index++
 
                 switch (error) {
-                case ERROR_TYPES.TIME_LIMIT:
-                case ERROR_TYPES.BUSY_TARGET:
+                case STATUS.TIME_LIMIT:
+                case STATUS.BUSY_TARGET:
+                case STATUS.ABANDONED_CONQUERED:
+                case STATUS.PROTECTED_VILLAGE:
+                    self.setStatus(error)
                     self.targetStep(options)
                     break
 
-                case ERROR_TYPES.NOT_ALLOWED_POINTS:
+                case STATUS.NOT_ALLOWED_POINTS:
+                    self.setStatus(error)
                     farmOverflow.removeTarget(target.id)
                     self.targetStep(options)
                     break
 
-                case ERROR_TYPES.NO_UNITS:
-                case ERROR_TYPES.NO_TARGETS:
-                case ERROR_TYPES.FULL_STORAGE:
-                case ERROR_TYPES.COMMAND_LIMIT:
+                case STATUS.NO_UNITS:
+                case STATUS.NO_TARGETS:
+                case STATUS.FULL_STORAGE:
+                case STATUS.COMMAND_LIMIT:
+                    self.setStatus(error)
                     self.stop(error)
                     break
 
-                case ERROR_TYPES.TARGET_CYCLE_END:
+                case STATUS.TARGET_CYCLE_END:
+                    self.setStatus(error)
                     self.stop(error)
                     index = 0
                     break
 
                 default:
-                    self.stop(ERROR_TYPES.UNKNOWN)
+                    self.setStatus(STATUS.UNKNOWN)
+                    self.stop(STATUS.UNKNOWN)
                     break
                 }
             })
+        }
+
+        self.setStatus = function (newStatus) {
+            status = newStatus
+        }
+
+        self.getStatus = function () {
+            return status || ''
         }
 
         self.commandSent = function (data) {
@@ -815,7 +835,7 @@ define('two/farmOverflow', [
             sendingCommand = false
             currentTarget = false
 
-            self.stop(ERROR_TYPES.COMMAND_ERROR)
+            self.stop(STATUS.COMMAND_ERROR)
         }
 
         self.onceCycleEnd = function (handler) {
@@ -961,12 +981,12 @@ define('two/farmOverflow', [
                     if (checkPresetTime(preset, village, target)) {
                         return preset
                     } else {
-                        return ERROR_TYPES.TIME_LIMIT
+                        return STATUS.TIME_LIMIT
                     }
                 }
             }
 
-            return ERROR_TYPES.NO_UNITS
+            return STATUS.NO_UNITS
         }
     }
 

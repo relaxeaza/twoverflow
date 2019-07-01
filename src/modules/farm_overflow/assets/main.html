@@ -176,10 +176,12 @@
                     <table class="tbl-border-light tbl-striped" ng-show="farmers.length">
                         <colgroup>
                             <col>
+                            <col width="40%">
                             <col width="20%">
                         </colgroup>
                         <tr>
                             <th>{{ 'villages' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'last_status' | i18n:loc.ale:textObject }}</th>
                             <th>{{ 'target' | i18n:loc.ale:textObjectCommon:2 }}</th>
                         </tr>
                         <tr ng-repeat="farmer in farmers">
@@ -187,8 +189,9 @@
                                 <span ng-class="{true:'icon-26x26-dot-green', false:'icon-26x26-dot-red'}[farmer.isRunning()]"></span>
                                 <span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(farmer.getVillage().getId())">{{ farmer.getVillage().getName() }} ({{ farmer.getVillage().getX() }}|{{ farmer.getVillage().getY() }})</span>
                             </td>
+                            <td>{{ 'status_' + farmer.getStatus() | i18n:loc.ale:textObject }}</td>
                             <td ng-if="farmer.getTargets()"><span ng-if="farmer.isRunning()">{{ farmer.getIndex() }} / </span><span>{{ farmer.getTargets().length }}</span></td>
-                            <td ng-if="!farmer.getTargets()"><span>{{ 'not_loaded' | i18n:loc.ale:textObject }}</span></td>
+                            <td ng-if="!farmer.getTargets()">{{ 'not_loaded' | i18n:loc.ale:textObject }}</td>
                         </tr>
                     </table>
 
