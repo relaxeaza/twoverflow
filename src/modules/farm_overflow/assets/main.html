@@ -172,7 +172,7 @@
                 <!-- villages -->
                 <div class="villages rich-text" ng-show="selectedTab === TAB_TYPES.VILLAGES">
                     <h5 class="twx-section">{{ 'farmer_villages' | i18n:loc.ale:textObject }}</h5>
-                    <p ng-if="!farmers.length">{{ 'no_farmer_villages' | i18n:loc.ale:textObject }}</p>
+                    <p ng-if="!farmers.length" class="text-center">{{ 'no_farmer_villages' | i18n:loc.ale:textObject }}</p>
                     <table class="tbl-border-light tbl-striped" ng-show="farmers.length">
                         <colgroup>
                             <col>
@@ -193,7 +193,7 @@
                     </table>
 
                     <h5 class="twx-section">{{ 'ignored_targets' | i18n:loc.ale:textObject }}</h5>
-                    <p ng-if="!exceptionVillages.ignored.length">{{ 'no_ignored_targets' | i18n:loc.ale:textObject }}</p>
+                    <p ng-if="!exceptionVillages.ignored.length" class="text-center">{{ 'no_ignored_targets' | i18n:loc.ale:textObject }}</p>
                     <table class="tbl-border-light tbl-striped" ng-show="exceptionVillages.ignored.length">
                         <tr ng-repeat="village in exceptionVillages.ignored">
                             <td><span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(village)">#{{ village }}</span></td>
@@ -201,7 +201,7 @@
                     </table>
 
                     <h5 class="twx-section">{{ 'included_targets' | i18n:loc.ale:textObject }}</h5>
-                    <p ng-if="!exceptionVillages.included.length">{{ 'no_included_targets' | i18n:loc.ale:textObject }}</p>
+                    <p ng-if="!exceptionVillages.included.length" class="text-center">{{ 'no_included_targets' | i18n:loc.ale:textObject }}</p>
                     <table class="tbl-border-light tbl-striped" ng-show="exceptionVillages.included.length">
                         <tr ng-repeat="village in exceptionVillages.included">
                             <td><span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(village)">#{{ village }}</span></td>
