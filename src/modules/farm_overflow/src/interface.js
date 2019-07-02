@@ -30,6 +30,8 @@ define('two/farmOverflow/ui', [
     var presetList = modelDataService.getPresetList()
     var groupList = modelDataService.getGroupList()
     var $opener
+    var villagesInfo = {}
+    var villagesLabel = {}
 
     var TAB_TYPES = {
         SETTINGS: 'settings',
@@ -43,14 +45,47 @@ define('two/farmOverflow/ui', [
 
         $scope.visibleLogs = $scope.logs.slice(offset, offset + limit)
         $scope.pagination.count = $scope.logs.length
+
+        $scope.visibleLogs.forEach(function (log) {
+            if (log.villageId) {
+                loadVillageInfo(log.villageId)
+            }
+        })
     }
 
-    var villageLabel = function (log) {
-        if (log.villageX) {
-            return `#${log.villageId} (${log.villageX}|${log.villageY})`
-        } else {
-            return '#' + log.villageId
+    var loadVillageInfo = function (villageId) {
+        var info
+
+        if (villagesInfo[villageId]) {
+            return villagesInfo[villageId]
         }
+
+        villagesInfo[villageId] = true
+        villagesLabel[villageId] = 'LOADING...'
+
+        socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
+            my_village_id: modelDataService.getSelectedVillage().getId(),
+            village_id: villageId,
+            num_reports: 1
+        }, function (data) {
+            villagesInfo[villageId] = {
+                x: data.village_x,
+                y: data.village_y,
+                name: data.village_name,
+                last_report: data.last_reports[0]
+            }
+
+            villagesLabel[villageId] = `${data.village_name} (${data.village_x}|${data.village_y})`
+        })
+    }
+
+    var loadExceptionsInfo = function () {
+        $scope.exceptionVillages.included.forEach(function (villageId) {
+            loadVillageInfo(villageId)
+        })
+        $scope.exceptionVillages.ignored.forEach(function (villageId) {
+            loadVillageInfo(villageId)
+        })
     }
 
     var switchFarm = function () {
@@ -126,11 +161,15 @@ define('two/farmOverflow/ui', [
                 })
             }
         },
-        ùpdateFarmerVillages: function () {
+        updateFarmerVillages: function () {
             $scope.farmers = farmOverflow.getAll()
         },
-        ùpdateExceptionVillages: function () {
-            $scope.exceptionVillages = farmOverflow.exceptionVillages()
+        updateExceptionVillages: function () {
+            $scope.exceptionVillages = farmOverflow.getExceptionVillages()
+            loadExceptionsInfo()
+        },
+        updateExceptionLogs: function () {
+            $scope.exceptionLogs = farmOverflow.getExceptionLogs()
         }
     }
 
@@ -165,10 +204,14 @@ define('two/farmOverflow/ui', [
         $scope.LOG_TYPES = LOG_TYPES
         $scope.running = farmOverflow.isRunning()
         $scope.selectedTab = TAB_TYPES.SETTINGS
-        $scope.logs = farmOverflow.getLogs()
-        $scope.exceptionVillages = farmOverflow.exceptionVillages()
         $scope.farmers = farmOverflow.getAll()
+        $scope.villagesLabel = villagesLabel
+        $scope.villagesInfo = villagesInfo
+        $scope.exceptionVillages = farmOverflow.getExceptionVillages()
+        $scope.exceptionLogs = farmOverflow.getExceptionLogs()
+        $scope.logs = farmOverflow.getLogs()
         $scope.visibleLogs = []
+
         $scope.pagination = {
             count: $scope.logs.length,
             offset: 0,
@@ -180,6 +223,7 @@ define('two/farmOverflow/ui', [
         eventHandlers.updatePresets()
         eventHandlers.updateGroups()
         updateVisibleLogs()
+        loadExceptionsInfo()
 
         // scope functions
         $scope.switchFarm = switchFarm
@@ -188,7 +232,7 @@ define('two/farmOverflow/ui', [
         $scope.clearLogs = farmOverflow.clearLogs
         $scope.jumpToVillage = mapService.jumpToVillage
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
-        $scope.villageLabel = villageLabel
+        $scope.showReport = reportService.showReport
 
         eventScope = new EventScope('twoverflow_farm_overflow_window')
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
@@ -199,8 +243,9 @@ define('two/farmOverflow/ui', [
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_START, eventHandlers.start)
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_STOP, eventHandlers.stop)
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_LOGS_UPDATED, eventHandlers.updateLogs)
-        eventScope.register(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED, eventHandlers.ùpdateFarmerVillages)
-        eventScope.register(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_VILLAGES_UPDATED, eventHandlers.ùpdateExceptionVillages)
+        eventScope.register(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED, eventHandlers.updateFarmerVillages)
+        eventScope.register(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_VILLAGES_UPDATED, eventHandlers.updateExceptionVillages)
+        eventScope.register(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED, eventHandlers.updateExceptionLogs)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_farm_overflow_window', $scope)
     }

@@ -49,6 +49,8 @@ define('two/farmOverflow', [
     var farmerCycle = []
     var farmerTimeoutId = null
     var targetTimeoutId = null
+    var exceptionLogs
+    var tempVillageReports = {}
 
     var $player
     var unitsData
@@ -58,7 +60,8 @@ define('two/farmOverflow', [
 
     var STORAGE_KEYS = {
         LOGS: 'farm_overflow_logs',
-        SETTINGS: 'farm_overflow_settings'
+        SETTINGS: 'farm_overflow_settings',
+        EXCEPTION_LOGS: 'farm_overflow_exception_logs'
     }
 
     var villageFilters = {
@@ -173,10 +176,40 @@ define('two/farmOverflow', [
         })
     }
 
+    var updateExceptionLogs = function () {
+        var exceptionVillages = ignoredVillages.concat(includedVillages)
+        var modified = false
+
+        exceptionVillages.forEach(function (villageId) {
+            if (!exceptionLogs.hasOwnProperty(villageId)) { 
+                exceptionLogs[villageId] = {
+                    time: timeHelper.gameTime(),
+                    report: false
+                }
+                modified = true
+            }
+        })
+
+        angular.forEach(exceptionLogs, function (time, villageId) {
+            villageId = parseInt(villageId, 10)
+            
+            if (!exceptionVillages.includes(villageId)) {
+                delete exceptionLogs[villageId]
+                modified = true
+            }
+        })
+
+        if (modified) {
+            Lockr.set(STORAGE_KEYS.EXCEPTION_LOGS, exceptionLogs)
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED)
+        }
+    }
+
     var updateGroupVillages = function () {
         updateIncludedVillage()
         updateIgnoredVillage()
         updateOnlyVillage()
+        updateExceptionLogs()
 
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_VILLAGES_UPDATED)
     }
@@ -201,6 +234,7 @@ define('two/farmOverflow', [
                 addLog(LOG_TYPES.IGNORED_VILLAGE, {
                     villageId: data.village_id
                 })
+                addExceptionLog(data.village_id)
             }
         }
 
@@ -210,6 +244,7 @@ define('two/farmOverflow', [
             addLog(LOG_TYPES.INCLUDED_VILLAGE, {
                 villageId: data.village_id
             })
+            addExceptionLog(data.village_id)
         }
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
@@ -325,12 +360,6 @@ define('two/farmOverflow', [
         socketService.emit(routeProvider.GROUPS_LINK_VILLAGE, {
             group_id: groupIgnore,
             village_id: villageId
-        }, function () {
-            addLog(LOG_TYPES.IGNORED_VILLAGE, {
-                villageId: villageId
-            })
-
-            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_VILLAGE_IGNORED, villageId)
         })
 
         return true
@@ -363,6 +392,13 @@ define('two/farmOverflow', [
         // 2 = casualties
         // 3 = defeat
         if (data.result !== 1 && farmOverflow.isTarget(data.target_village_id)) {
+            tempVillageReports[data.target_village_id] = {
+                haul: data.haul,
+                id: data.id,
+                result: data.result,
+                title: data.title
+            }
+
             ignoreVillage(data.target_village_id)
         }
     }
@@ -443,6 +479,18 @@ define('two/farmOverflow', [
         return ['wood', 'clay', 'iron'].every(function (type) {
             return computed[type].currentStock === maxStorage
         })
+    }
+
+    var addExceptionLog = function (villageId) {
+        exceptionLogs[villageId] = {
+            time: timeHelper.gameTime(),
+            report: tempVillageReports[villageId] || false
+        }
+
+        delete tempVillageReports[villageId]
+
+        Lockr.set(STORAGE_KEYS.EXCEPTION_LOGS, exceptionLogs)
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED)
     }
 
     var addLog = function(type, _data) {
@@ -995,6 +1043,7 @@ define('two/farmOverflow', [
     farmOverflow.init = function () {
         initialized = true
         logs = Lockr.get(STORAGE_KEYS.LOGS, [])
+        exceptionLogs = Lockr.get(STORAGE_KEYS.EXCEPTION_LOGS, {})
         $player = modelDataService.getSelectedCharacter()
         unitsData = modelDataService.getGameData().getUnitsObject()
         
@@ -1258,11 +1307,15 @@ define('two/farmOverflow', [
         return settings
     }
 
-    farmOverflow.exceptionVillages = function () {
+    farmOverflow.getExceptionVillages = function () {
         return {
             included: includedVillages,
             ignored: ignoredVillages
         }
+    }
+
+    farmOverflow.getExceptionLogs = function () {
+        return exceptionLogs
     }
 
     farmOverflow.isInitialized = function () {

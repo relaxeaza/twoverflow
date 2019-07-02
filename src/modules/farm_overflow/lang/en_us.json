@@ -1,5 +1,9 @@
 {
     "farm_overflow": {
+        "open_report": "Open report",
+        "no_report": "No report",
+        "reports": "Reports",
+        "date": "Date",
         "status_time_limit": "Target is too far",
         "status_command_limit": "Command limit",
         "status_full_storage": "Storage is full",
@@ -81,6 +85,7 @@
         "attack": "attack",
         "no_logs": "No logs registered",
         "clear_logs": "Clear logs",
-        "reseted_logs": "Registered logs reseted."
+        "reseted_logs": "Registered logs reseted.",
+        "date_added": "Date added"
     }
 }

@@ -1,5 +1,8 @@
 {
     "farm_overflow": {
+        "open_report": "Open report",
+        "no_report": "No report",
+        "date": "Date",
         "status_time_limit": "Target is too far",
         "status_command_limit": "Command limit",
         "status_full_storage": "Storage is full",
@@ -13,7 +16,7 @@
         "status_unknown": "Unknown status",
         "status_attacking": "Attacking",
         "status_waiting_cycle": "Waiting cycle",
-        "not_loaded": "Not loaded",
+        "not_loaded": "Not loaded.",
         "ignored_targets": "Ignored Targets",
         "no_ignored_targets": "Nothing ignored",
         "included_targets": "Included Targets",
@@ -81,6 +84,7 @@
         "attack": "atakuje",
         "no_logs": "Brak zarejestrowanych logów",
         "clear_logs": "Wyczyść logi",
-        "reseted_logs": "Zarejestrowane logi zostały wyczyszczone."
+        "reseted_logs": "Zarejestrowane logi zostały wyczyszczone.",
+        "date_added": "Date added"
     }
 }
