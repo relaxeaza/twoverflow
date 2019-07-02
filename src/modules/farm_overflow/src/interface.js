@@ -108,6 +108,36 @@ define('two/farmOverflow/ui', [
         })
     }
 
+    var removeIgnored = function (villageId) {
+        var groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
+        var groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupIgnore)
+
+        if (!groupVillages.includes(villageId)) {
+            return false
+        }
+
+        socketService.emit(routeProvider.GROUPS_UNLINK_VILLAGE, {
+            group_id: groupIgnore,
+            village_id: villageId
+        })
+    }
+
+    var removeIncluded = function (villageId) {
+        var groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
+        var groupVillages
+
+        groupsInclude.forEach(function (groupId) {
+            groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupId)
+
+            if (groupVillages.includes(villageId)) {
+                socketService.emit(routeProvider.GROUPS_UNLINK_VILLAGE, {
+                    group_id: groupId,
+                    village_id: villageId
+                })
+            }
+        })
+    }
+
     var eventHandlers = {
         updatePresets: function () {
             $scope.presets = Settings.encodeList(presetList.getPresets(), {
@@ -233,6 +263,8 @@ define('two/farmOverflow/ui', [
         $scope.jumpToVillage = mapService.jumpToVillage
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
         $scope.showReport = reportService.showReport
+        $scope.removeIgnored = removeIgnored
+        $scope.removeIncluded = removeIncluded
 
         eventScope = new EventScope('twoverflow_farm_overflow_window')
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)

@@ -202,13 +202,15 @@
                             <col>
                             <col width="15%">
                             <col width="15%">
+                            <col width="30px">
                         </colgroup>
                         <tr>
                             <th>{{ 'villages' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'date' | i18n:loc.ale:textObject }}</th>
                             <th>{{ 'reports' | i18n:loc.ale:textObject }}</th>
+                            <th></th>
                         </tr>
-                        <tr ng-repeat="villageId in exceptionVillages.ignored">
+                        <tr ng-repeat="villageId in exceptionVillages.ignored track by $index">
                             <td><a class="link" ng-click="openVillageInfo(villageId)"><span class="icon-20x20-village"></span> {{ villagesLabel[villageId] }}</a></td>
                             <td>{{ exceptionLogs[villageId].time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
                             <td>
@@ -219,6 +221,7 @@
                                 </span>
                                 <span ng-if="!exceptionLogs[villageId].report">{{ 'no_report' | i18n:loc.ale:textObject }}</span>
                             </td>
+                            <td><a href="#" class="size-20x20 btn-red icon-20x20-close" ng-click="removeIgnored(villageId)" tooltip="" tooltip-content=""></a></td>
                         </tr>
                     </table>
 
@@ -228,14 +231,17 @@
                         <colgroup>
                             <col>
                             <col width="15%">
+                            <col width="30px">
                         </colgroup>
                         <tr>
                             <th>{{ 'villages' | i18n:loc.ale:textObjectCommon }}</th>
                             <th>{{ 'date' | i18n:loc.ale:textObject }}</th>
+                            <th></th>
                         </tr>
-                        <tr ng-repeat="villageId in exceptionVillages.included">
+                        <tr ng-repeat="villageId in exceptionVillages.included track by $index">
                             <td><a class="link" ng-click="openVillageInfo(villageId)"><span class="icon-20x20-village"></span> {{ villagesLabel[villageId] }}</a></td>
                             <td>{{ exceptionLogs[villageId].time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
+                            <td><a href="#" class="size-20x20 btn-red icon-20x20-close" ng-click="removeIncluded(villageId)" tooltip="" tooltip-content=""></a></td>
                         </tr>
                     </table>
                 </div>
