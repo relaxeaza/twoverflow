@@ -117,12 +117,11 @@ define('two/builderQueue/defaultOrders', [
             BUILDING_TYPES.TIMBER_CAMP, // 8
             BUILDING_TYPES.CLAY_PIT, // 8
             BUILDING_TYPES.IRON_MINE, // 8
-
-            // Quest: The Wall
-            BUILDING_TYPES.WAREHOUSE, // 6
-            BUILDING_TYPES.HEADQUARTER, // 5
-            BUILDING_TYPES.WALL, // 1
         ],
+        // Quest: The Wall
+        BUILDING_TYPES.WAREHOUSE, // 6
+        BUILDING_TYPES.HEADQUARTER, // 5
+        BUILDING_TYPES.WALL, // 1
         [
             // Quest: Village Improvements
             BUILDING_TYPES.TIMBER_CAMP, // 9
