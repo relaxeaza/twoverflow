@@ -122,6 +122,12 @@ define('two/farmOverflow', [
         })
     }
 
+    var arrayUnique = function (array) {
+        return array.sort().filter(function (item, pos, ary) {
+            return !pos || item != ary[pos - 1]
+        })
+    }
+
     var skipStepInterval = function () {
         if (!running) {
             return
@@ -153,6 +159,8 @@ define('two/farmOverflow', [
             groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupId)
             includedVillages = includedVillages.concat(groupVillages)
         })
+
+        includedVillages = arrayUnique(includedVillages)
     }
 
     var updateIgnoredVillage = function () {
@@ -174,6 +182,8 @@ define('two/farmOverflow', [
 
             onlyVillages = onlyVillages.concat(groupVillages)
         })
+
+        onlyVillages = arrayUnique(onlyVillages)
     }
 
     var updateExceptionLogs = function () {
