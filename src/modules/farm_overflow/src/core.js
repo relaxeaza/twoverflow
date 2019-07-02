@@ -817,17 +817,9 @@ define('two/farmOverflow', [
                 }, delayTime)
             }
 
-            checkCommandLimit()
-            .then(checkStorage)
-            .then(checkTargets)
-            .then(checkVillagePresets)
-            .then(checkPreset)
-            .then(checkTarget)
-            .then(checkLocalCommands)
-            .then(checkTargetPoints)
-            .then(checkLoadedCommands)
-            .then(prepareAttack)
-            .catch(function (error) {
+            function onError (error) {
+                console.log(error)
+
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
                     villageId: villageId,
                     error: error
@@ -868,8 +860,19 @@ define('two/farmOverflow', [
                     self.setStatus(STATUS.UNKNOWN)
                     self.stop(STATUS.UNKNOWN)
                     break
-                }
-            })
+            }
+
+            checkCommandLimit()
+                .then(checkStorage)
+                .then(checkTargets)
+                .then(checkVillagePresets)
+                .then(checkPreset)
+                .then(checkTarget)
+                .then(checkLocalCommands)
+                .then(checkTargetPoints)
+                .then(checkLoadedCommands)
+                .then(prepareAttack)
+                .catch(onError)
         }
 
         self.setStatus = function (newStatus) {
