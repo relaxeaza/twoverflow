@@ -1,13 +1,13 @@
 const fs = require('fs')
 const glob = require('glob')
 const path = require('path')
-const pkg = require('./package.json')
-const parseOptions = require('./libs/parse-options.js')
+const pkg = require('../package.json')
+const parseOptions = require('./parse-options.js')
 const terser = require('terser')
 const less = require('less')
 const htmlMinifier = require('html-minifier').minify
 
-const distDir = './dist/'
+const distDir = '../dist'
 const tempDir = '/tmp'
 
 const terserOptions = {
@@ -39,13 +39,13 @@ async function init () {
 }
 
 async function concatCode (data) {
-    log('Concatenating .js', `${distDir}twoverflow.js`)
+    log('Concatenating .js', `${distDir}/twoverflow.js`)
 
     const code = data.map(function (file) {
         return fs.readFileSync(file, 'utf8')
     })
 
-    fs.writeFileSync(`${distDir}twoverflow.js`, code.join('\n'), 'utf8')
+    fs.writeFileSync(`${distDir}/twoverflow.js`, code.join('\n'), 'utf8')
 }
 
 async function compileLess (data) {
@@ -95,7 +95,7 @@ async function minifyHTML (data) {
 }
 
 async function replaceInFile (data) {
-    let target = fs.readFileSync(`${distDir}twoverflow.js`, 'utf8')
+    let target = fs.readFileSync(`${distDir}/twoverflow.js`, 'utf8')
 
     for (let search in data) {
         let replace = data[search]
@@ -111,18 +111,18 @@ async function replaceInFile (data) {
         target = target.replace(search, replace)
     }
 
-    fs.writeFileSync(`${distDir}twoverflow.js`, target, 'utf8')
+    fs.writeFileSync(`${distDir}/twoverflow.js`, target, 'utf8')
 }
 
 async function minifyCode (data) {
-    log('Minifying .js', `${distDir}twoverflow.min.js`)
+    log('Minifying .js', `${distDir}/twoverflow.min.js`)
 
 
     const minified = terser.minify({
-        'twoverflow.js': fs.readFileSync(`${distDir}twoverflow.js`, 'utf8')
+        'twoverflow.js': fs.readFileSync(`${distDir}/twoverflow.js`, 'utf8')
     }, terserOptions)
 
-    fs.writeFileSync(`${distDir}twoverflow.min.js`, minified.code, 'utf8')
+    fs.writeFileSync(`${distDir}/twoverflow.min.js`, minified.code, 'utf8')
 }
 
 /**

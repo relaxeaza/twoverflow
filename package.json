@@ -19,12 +19,11 @@
     "html-minifier": "^4.0.0",
     "http-server": "^0.11.1",
     "less": "^3.10.3",
-    "terser": "^4.4.2",
-    "unzipper": "^0.10.1"
+    "terser": "^4.4.2"
   },
   "scripts": {
-    "make": "node make.js --minify",
-    "release": "node make.js --minify && node scripts/release.js",
-    "release-testing": "node make.js --minify && node scripts/release.js --testing"
+    "make": "node scripts/make.js --minify",
+    "release": "node scripts/make.js --minify && node scripts/release.js",
+    "release-testing": "node scripts/make.js --minify && node scripts/release.js --testing"
   }
 }

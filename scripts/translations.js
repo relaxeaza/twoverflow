@@ -3,7 +3,7 @@ const glob = require('glob')
 const path = require('path')
 const https = require('https')
 const request = require('request')
-const parseOptions = require('../libs/parse-options.js')
+const parseOptions = require('./parse-options.js')
 
 const approvedMinRequired = false // %
 const translatedMinRequired = 40 // %
@@ -63,10 +63,12 @@ async function init () {
             let destPath
 
             if (moduleName === 'twoverflow') {
-                destPath = `../src/lang/${languageCode}.json`
+                destPath = `./src/lang/${languageCode}.json`
             } else {
-                destPath = `../src/modules/${moduleName}/lang/${languageCode}.json`
+                destPath = `./src/modules/${moduleName}/lang/${languageCode}.json`
             }
+
+
 
             fs.writeFileSync(destPath, languageStream, 'utf8')
         })

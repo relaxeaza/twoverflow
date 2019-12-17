@@ -7,7 +7,7 @@ if (!fs.existsSync('package.json')) {
 
 const package = JSON.parse(fs.readFileSync('package.json', 'utf8'))
 const git = require('git-promise')
-const parseOptions = require('../libs/parse-options.js')
+const parseOptions = require('./parse-options.js')
 
 const cdnPath = 'cdn'
 const releasesPath = `${cdnPath}/public/releases`
