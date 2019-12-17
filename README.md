@@ -44,7 +44,7 @@ cd twoverflow
 npm install
 ```
 
-To compile run `npm run build`. The script will be compiled inside `dist/`
+To compile run `npm run make` or `node scripts/make.js`. The script will be compiled inside `dist/`
 
 ### Compile flags
 
@@ -54,7 +54,7 @@ You can use some flags to customize the resulting file.
 - `--ignore` to ignore specific modules by ID (check _module.json_ for ID).
 - `--only` compile only a specific module by ID (check _module.json_ for ID).
 
-Example: `grunt build --ignore=farm_overflow,minimap --minify` ignores both modules farm_overflow and minimap and will generate an minified file.
+Example: `node scripts/make.js --ignore=farm_overflow,minimap --minify` ignores both modules farm_overflow and minimap and will generate an minified file.
 
 ### Sync translations from Crowdin
 
