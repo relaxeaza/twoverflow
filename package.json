@@ -15,25 +15,16 @@
   },
   "devDependencies": {
     "git-promise": "^0.3.1",
-    "grunt": "^1.0.3",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-clean": "^1.0.0",
-    "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-htmlmin": "^2.3.0",
-    "grunt-contrib-less": "^2.0.0",
-    "grunt-contrib-uglify": "^2.2.0",
-    "grunt-contrib-uglify-es": "^3.3.0",
-    "grunt-eslint": "^19.0.0",
-    "grunt-replace": "^1.0.1",
-    "hoek": "^5.0.3",
+    "glob": "^7.1.6",
+    "html-minifier": "^4.0.0",
     "http-server": "^0.11.1",
-    "lodash": "^4.17.11",
+    "less": "^3.10.3",
+    "terser": "^4.4.2",
     "unzipper": "^0.10.1"
   },
   "scripts": {
-    "build": "grunt build --minify",
-    "release": "grunt build --minify && node scripts/release.js",
-    "release-testing": "grunt build --minify && node scripts/release.js --testing"
+    "make": "node make.js --minify",
+    "release": "node make.js --minify && node scripts/release.js",
+    "release-testing": "node make.js --minify && node scripts/release.js --testing"
   }
 }

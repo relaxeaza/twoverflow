@@ -44,13 +44,7 @@ cd twoverflow
 npm install
 ```
 
-Install grunt globally.
-
-```bash
-npm install -g grunt-cli
-```
-
-To compile run `grunt build`. The script will be compiled inside `dist/`
+To compile run `npm run build`. The script will be compiled inside `dist/`
 
 ### Compile flags
 
