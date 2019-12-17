@@ -55,3 +55,12 @@ You can use some flags to customize the resulting file.
 - `--only` compile only a specific module by ID (check _module.json_ for ID).
 
 Example: `grunt build --ignore=farm_overflow,minimap --minify` ignores both modules farm_overflow and minimap and will generate an minified file.
+
+### Sync translations from Crowdin
+
+Run `node scripts/translations.js` with the fallowing parameters:
+
+- `--source` extracted directory of translations build from Crowdin.
+- `--api` Crowdin project key to access the language status.
+
+A language needs at least 40% of the words translated to be included in the script build.
