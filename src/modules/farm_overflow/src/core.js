@@ -860,6 +860,7 @@ define('two/farmOverflow', [
                     self.setStatus(STATUS.UNKNOWN)
                     self.stop(STATUS.UNKNOWN)
                     break
+                }
             }
 
             checkCommandLimit()
