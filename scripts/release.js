@@ -1,32 +1,48 @@
-let fs = require('fs')
-let mkdirp = require('mkdirp')
-let package = JSON.parse(fs.readFileSync(`package.json`, 'utf8'))
-let git = require('git-promise')
-let isTestingRelease = process.argv[2] === '--testing'
+const fs = require('fs')
 
-let cdnPath = 'cdn'
-let releasesPath = `${cdnPath}/public/releases`
-let testingPath = `${releasesPath}/testing`
+if (!fs.existsSync('package.json')) {
+    console.log('Run this script from project\'s root!')
+    process.exit()
+}
+
+const package = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+const git = require('git-promise')
+const parseOptions = require('../libs/parse-options.js')
+
+const cdnPath = 'cdn'
+const releasesPath = `${cdnPath}/public/releases`
+const testingPath = `${releasesPath}/testing`
+
+const gitOptions = {
+    cwd: `${cdnPath}/`
+}
+
+function run () {
+    const options = parseOptions()
+
+    if (options.testing) {
+        deployTesting()
+    } else if (options.production) {
+        deployProduction()
+    }
+}
 
 function copyFiles (files, ignoreSame) {
     if (!ignoreSame) {
         for (let original in files) {
-            let destination = files[original]
-            let originalBuffer = fs.readFileSync(original)
-            let destinationExists = fs.existsSync(destination)
+            const destination = files[original]
 
-            if (destinationExists) {
-                let destinationBuffer = fs.readFileSync(destination)
+            if (fs.existsSync(destination)) {
+                const originalBuffer = fs.readFileSync(original)
+                const destinationBuffer = fs.readFileSync(destination)
 
-                if (originalBuffer.equals(destinationBuffer)) {
-                    return false
-                }
+                return !originalBuffer.equals(destinationBuffer)
             }
         }
     }
 
     for (let original in files) {
-        let destination = files[original]
+        const destination = files[original]
         console.log(`Copying ${original} to ${destination}`)
         fs.copyFileSync(original, destination)
     }
@@ -34,44 +50,40 @@ function copyFiles (files, ignoreSame) {
     return true
 }
 
+function gitAdd () {
+    console.log('Running git add')
+
+    return git('add --all', gitOptions)
+        .fail(function () {
+            console.log('git add failed.')
+        })
+}
+
+function gitCommit (msg) {
+    console.log('Running git commit')
+
+    return git(`commit --message "${msg}"`, gitOptions)
+        .fail(function (error) {
+            console.log('git commit failed.')
+            console.log(error.stdout)
+        })
+}
+
+function gitPush () {
+    console.log('Running git push')
+    
+    return git('push', gitOptions)
+        .fail(function (error) {
+            console.log('git push fail')
+            console.log(error.stdout)
+        })
+}
+
 function gitDeploy (commitMsg) {
     console.log('')
 
-    let opt = {
-        cwd: `${cdnPath}/`
-    }
-
-    let add = function () {
-        console.log('Running git add')
-
-        return git('add --all', opt)
-            .fail(function () {
-                console.log('git add failed.')
-            })
-    }
-
-    let commit = function () {
-        console.log('Running git commit')
-
-        return git(`commit --message "${commitMsg}"`, opt)
-            .fail(function (error) {
-                console.log('git commit failed.')
-                console.log(error.stdout)
-            })
-    }
-
-    let push = function () {
-        console.log('Running git push')
-        
-        return git('push', opt)
-            .fail(function (error) {
-                console.log('git push fail')
-                console.log(error.stdout)
-            })
-    }
-
-    add()
-    .then(commit)
+    gitAdd()
+    .then(gitCommit)
     .then(push)
     .then(function () {
         console.log('')
@@ -80,8 +92,7 @@ function gitDeploy (commitMsg) {
 }
 
 function deployTesting () {
-    let copied = copyFiles({
-        'dist/tw2overflow.map': `${testingPath}/tw2overflow.map`,
+    const copied = copyFiles({
         'dist/tw2overflow.js': `${testingPath}/tw2overflow.js`,
         'dist/tw2overflow.min.js': `${testingPath}/tw2overflow.min.js`
     })
@@ -100,16 +111,17 @@ function deployProduction () {
     }
 
     console.log(`Creating directory ${releasesPath}/${package.version}`)
-    mkdirp.sync(`${releasesPath}/${package.version}`)
+
+    fs.mkdirSync(`${releasesPath}/${package.version}`, {
+        recursive: true
+    })
 
     copyFiles({
-        'dist/tw2overflow.map': `${releasesPath}/${package.version}/tw2overflow.map`,
         'dist/tw2overflow.js': `${releasesPath}/${package.version}/tw2overflow.js`,
         'dist/tw2overflow.min.js': `${releasesPath}/${package.version}/tw2overflow.min.js`
     }, true)
 
     copyFiles({
-        'dist/tw2overflow.map': `${releasesPath}/latest/tw2overflow.map`,
         'dist/tw2overflow.js': `${releasesPath}/latest/tw2overflow.js`,
         'dist/tw2overflow.min.js': `${releasesPath}/latest/tw2overflow.min.js`
     }, true)
@@ -117,8 +129,4 @@ function deployProduction () {
     gitDeploy(`v${package.version} release`)
 }
 
-if (isTestingRelease) {
-    deployTesting()
-} else {
-    deployProduction()
-}
+run()
