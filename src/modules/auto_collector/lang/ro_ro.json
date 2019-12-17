@@ -1,0 +1,7 @@
+{
+    "auto_collector": {
+        "description": "Automatic Resource Deposit/Second Village collector.",
+        "activated": "Collectorul automatic activat",
+        "deactivated": "Collectorul automatic deaktivat"
+    }
+}

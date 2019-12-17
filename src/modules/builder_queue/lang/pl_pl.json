@@ -18,7 +18,7 @@
         "sequences_edit_sequence": "Edytuj szablon",
         "select_group": "Wybierz grupę",
         "add_building_success": "%d dodany na pozycji %d",
-        "add_building_limit_exceeded": "%d osiągnął\/eła maksymalny poziom (%d)",
+        "add_building_limit_exceeded": "%d osiągnął/eła maksymalny poziom (%d)",
         "position": "Pozycja",
         "remove_building": "Usuń budynek z listy",
         "clone": "Klonuj",

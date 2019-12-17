@@ -2,6 +2,7 @@
     "farm_overflow": {
         "open_report": "Open report",
         "no_report": "No report",
+        "reports": "Reports",
         "date": "Date",
         "status_time_limit": "Target is too far",
         "status_command_limit": "Command limit",
