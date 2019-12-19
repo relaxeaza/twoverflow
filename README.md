@@ -61,6 +61,7 @@ Example: `node scripts/make.js --ignore=farm_overflow,minimap --minify` ignores 
 Run `node scripts/translations.js` with the fallowing parameters:
 
 - `--source` extracted directory of translations build from Crowdin.
-- `--api` Crowdin project key to access the language status.
+
+The project key is read from `keys/crowdin.key` file.
 
 A language needs at least 40% of the words translated to be included in the script build.

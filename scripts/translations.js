@@ -36,15 +36,17 @@ async function init () {
         return console.log('Missing/wrong translations directory --source')
     }
 
-    if (typeof options.api !== 'string') {
-        return console.log('Missing crowdin project api key --api')
-    }
-
     if (!validSource()) {
         return console.log('Invalid translation source')
     }
 
-    const translationStatus = await getTranslationStatus()
+    const crowdinKey = getCrowdinKey()
+
+    if (!crowdinKey) {
+        return console.log('Missing crowdin project api key (/keys/crowdin.key)')
+    }
+
+    const translationStatus = await getTranslationStatus(crowdinKey)
     const allowedTranslations = translationStatus.filter(function (item) {
         const approved = approvedMinRequired ? item.approved_progress < approvedMinRequired : true
         const translated = translatedMinRequired ? item.translated_progress < translatedMinRequired : true
@@ -75,8 +77,8 @@ async function init () {
     })
 }
 
-async function getTranslationStatus (callback) {
-    let url = `https://api.crowdin.com/api/project/twoverflow/status?key=${options.api}&json`
+async function getTranslationStatus (key) {
+    let url = `https://api.crowdin.com/api/project/twoverflow/status?key=${key}&json`
     
     return new Promise(function (resolve, reject) {
         https.get(url, {
@@ -101,6 +103,14 @@ async function getTranslationStatus (callback) {
             })
         })
     })
+}
+
+function getCrowdinKey () {
+    if (!fs.existsSync('./keys/crowdin.key')) {
+        return false
+    }
+
+    return fs.readFileSync('./keys/crowdin.key', 'utf8').trim()
 }
 
 function validSource () {
