@@ -4,7 +4,8 @@
   "description": "Tools for Tribal Wars 2",
   "author": {
     "name": "Relaxeaza",
-    "url": "https://gitlab.com/relaxeaza"
+    "url": "https://gitlab.com/relaxeaza",
+    "email": "twoverflow at outlook.com"
   },
   "private": true,
   "version": "1.0.7",

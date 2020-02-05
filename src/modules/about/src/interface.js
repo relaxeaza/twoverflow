@@ -3,8 +3,6 @@ define('two/about/ui', [
 ], function (
     interfaceOverflow
 ) {
-    var textObject = 'about'
-    var textObjectCommon = 'common'
     var $scope
     
     var selectTab = function (tabType) {
@@ -24,10 +22,6 @@ define('two/about/ui', [
 
     var buildWindow = function () {
         $scope = $rootScope.$new()
-        $scope.textObject = textObject
-        $scope.textObjectCommon = textObjectCommon
-        $scope.version = '{: overflow_version :}'
-
         $scope.selectTab = selectTab
 
         windowManagerService.getModal('!twoverflow_about_window', $scope)

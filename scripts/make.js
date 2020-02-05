@@ -332,6 +332,7 @@ function generateOverflowModule (options) {
     overflow.replaces['overflow_author'] = JSON.stringify(pkg.author)
     overflow.replaces['overflow_author_name'] = pkg.author.name
     overflow.replaces['overflow_author_url'] = pkg.author.url
+    overflow.replaces['overflow_author_email'] = pkg.author.email
     overflow.replaces['overflow_date'] = new Date().toLocaleString()
     overflow.replaces['overflow_lang'] = fs.readFileSync(`${tempDir}/src/modules/core/lang/lang.json`, 'utf8')
 

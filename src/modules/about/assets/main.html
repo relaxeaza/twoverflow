@@ -1,6 +1,6 @@
 <div id="two-about" class="win-content">
     <header class="win-head">
-        <h3>Tribal Wars Overflow v{: overflow_version :}</h3>
+        <h3>{: overflow_title :} v{: overflow_version :}</h3>
         <ul class="list-btn sprite">
             <li> <a href="#" class="btn-red icon-26x26-close" ng-click="closeWindow()"></a> </li>
         </ul>
@@ -14,28 +14,28 @@
 
                 <table class="tbl-border-light tbl-content tbl-medium-height">
                     <tr>
-                        <th colspan="2">Contact</th>
+                        <th colspan="2">{{ 'contact' | i18n:loc.ale:'about' }}</th>
                     </tr>
                     <tr>
-                        <td>E-mail</td>
-                        <td>twoverflow at outlook.com</td>
+                        <td>{{ 'email' | i18n:loc.ale:'about' }}</td>
+                        <td>{: overflow_author_email :}</td>
                     </tr>
                 </table>
 
                 <table class="tbl-border-light tbl-content tbl-medium-height">
                     <tr>
-                        <th colspan="2">Project links</th>
+                        <th colspan="2">{{ 'links' | i18n:loc.ale:'about' }}</th>
                     </tr>
                     <tr>
-                        <td>Source Code</td>
+                        <td>{{ 'source_code' | i18n:loc.ale:'about' }}</td>
                         <td><a href="https://gitlab.com/relaxeaza/twoverflow/" target="_blank">https://gitlab.com/relaxeaza/twoverflow/</a></td>
                     </tr>
                     <tr>
-                        <td>Issues/suggestions</td>
+                        <td>{{ 'issues_suggestions' | i18n:loc.ale:'about' }}</td>
                         <td><a href="https://gitlab.com/relaxeaza/twoverflow/issues" target="_blank">https://gitlab.com/relaxeaza/twoverflow/issues</a></td>
                     </tr>
                     <tr>
-                        <td>Translations</td>
+                        <td>{{ 'translations' | i18n:loc.ale:'about' }}</td>
                         <td><a href="https://crowdin.com/project/twoverflow" target="_blank">https://crowdin.com/project/twoverflow</a></td>
                     </tr>
                 </table>
