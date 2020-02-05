@@ -84,7 +84,7 @@ function gitDeploy (commitMsg) {
 
     gitAdd()
     .then(gitCommit)
-    .then(push)
+    .then(gitPush)
     .then(function () {
         console.log('')
         console.log('Done')
