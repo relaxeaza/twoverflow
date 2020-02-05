@@ -99,19 +99,39 @@ async function minifyHTML (data) {
 
 async function replaceInFile (data) {
     let target = fs.readFileSync(`${distDir}/tw2overflow.js`, 'utf8')
+    let search
+    let replace
+    let ordered = {
+        file: {},
+        text: {}
+    }
 
-    for (let search in data) {
-        let replace = data[search]
-
-        search = `${replaceOptions.delimiters[0]} ${search} ${replaceOptions.delimiters[1]}`
+    for (search in data) {
+        replace = data[search]
 
         if (replace.slice(0, 11) === '~read-file:') {
-            replace = fs.readFileSync(replace.slice(11), 'utf8')
+            ordered.file[search] = fs.readFileSync(replace.slice(11), 'utf8')
+        } else {
+            ordered.text[search] = replace
         }
+    }
+
+    for (search in ordered.file) {
+        replace = ordered.file[search]
+        search = `${replaceOptions.delimiters[0]} ${search} ${replaceOptions.delimiters[1]}`
 
         log('Replacing', search)
 
-        target = target.replace(search, replace)
+        target = replaceText(target, search, replace)
+    }
+
+    for (search in ordered.text) {
+        replace = ordered.text[search]
+        search = `${replaceOptions.delimiters[0]} ${search} ${replaceOptions.delimiters[1]}`
+
+        log('Replacing', search)
+
+        target = replaceText(target, search, replace)
     }
 
     fs.writeFileSync(`${distDir}/tw2overflow.js`, target, 'utf8')
@@ -371,6 +391,16 @@ function concatFiles (files) {
     return files.map(function (file) {
         return fs.readFileSync(file, 'utf8')
     }).join('\n')
+}
+
+function replaceText (source, token, replace) {
+    let index = 0
+
+    do {
+        source = source.replace(token, replace)
+    } while((index = source.indexOf(token, index + 1)) > -1)
+
+    return source
 }
 
 function log () {
