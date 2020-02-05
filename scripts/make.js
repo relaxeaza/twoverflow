@@ -308,7 +308,6 @@ function generateOverflowModule (options) {
     }
 
     overflow.js = overflow.js.concat([
-        'src/libs/lockr.js',
         'src/header.js',
         'src/event-scope.js',
         'src/utils.js',
@@ -317,7 +316,8 @@ function generateOverflowModule (options) {
         'src/language.js',
         'src/settings.js',
         'src/map-data.js',
-        'src/init.js'
+        'src/init.js',
+        'src/libs/lockr.js'
     ])
 
     // Generate the common translations
