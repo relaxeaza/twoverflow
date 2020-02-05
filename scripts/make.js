@@ -39,9 +39,9 @@ async function init () {
 }
 
 async function concatCode (data) {
-    log('Concatenating .js', `${distDir}/tw2overflow.js`)
-
     const code = data.map(function (file) {
+        log('Concatenating', file)
+
         return fs.readFileSync(file, 'utf8')
     })
 
