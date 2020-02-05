@@ -19,6 +19,9 @@ const terserOptions = {
 const lessOptions = {
     compress: true
 }
+const replaceOptions = {
+    delimiters: ['{:', ':}']
+}
 
 async function init () {
     const options = parseOptions()
@@ -100,13 +103,13 @@ async function replaceInFile (data) {
     for (let search in data) {
         let replace = data[search]
 
-        log('Replacing', search)
-
-        search = '__' + search
+        search = `${replaceOptions.delimiters[0]} ${search} ${replaceOptions.delimiters[1]}`
 
         if (replace.slice(0, 11) === '~read-file:') {
             replace = fs.readFileSync(replace.slice(11), 'utf8')
         }
+
+        log('Replacing', search)
 
         target = target.replace(search, replace)
     }

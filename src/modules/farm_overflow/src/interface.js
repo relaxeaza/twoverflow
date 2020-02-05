@@ -221,8 +221,8 @@ define('two/farmOverflow/ui', [
             $opener.classList.add('btn-green')
         })
 
-        interfaceOverflow.addTemplate('twoverflow_farm_overflow_window', `__farm_overflow_html_main`)
-        interfaceOverflow.addStyle('__farm_overflow_css_style')
+        interfaceOverflow.addTemplate('twoverflow_farm_overflow_window', `{: farm_overflow_html_main :}`)
+        interfaceOverflow.addStyle('{: farm_overflow_css_style :}')
     }
 
     var buildWindow = function () {

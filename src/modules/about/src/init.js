@@ -14,7 +14,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('__about_id', __about_lang)
+        twoLanguage.add('{: about_id :}', {: about_lang :})
         about.init()
         aboutInterface()
     }, ['map'])

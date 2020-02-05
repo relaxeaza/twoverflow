@@ -101,9 +101,9 @@ define('two/attackView/ui', [
         $opener = interfaceOverflow.addMenuButton('AttackView', 40)
         $opener.addEventListener('click', buildWindow)
 
-        interfaceOverflow.addTemplate('twoverflow_attack_view_main', `__attack_view_html_main`)
-        interfaceOverflow.addTemplate('twoverflow_attack_view_show_text_modal', `__attack_view_html_modal-show-text`)
-        interfaceOverflow.addStyle('__attack_view_css_style')
+        interfaceOverflow.addTemplate('twoverflow_attack_view_main', `{: attack_view_html_main :}`)
+        interfaceOverflow.addTemplate('twoverflow_attack_view_show_text_modal', `{: attack_view_html_modal-show-text :}`)
+        interfaceOverflow.addStyle('{: attack_view_css_style :}')
     }
 
     var buildWindow = function () {

@@ -18,15 +18,15 @@ define('two/about/ui', [
             buildWindow()
         })
 
-        interfaceOverflow.addTemplate('twoverflow_about_window', `__about_html_main`)
-        interfaceOverflow.addStyle('__about_css_style')
+        interfaceOverflow.addTemplate('twoverflow_about_window', `{: about_html_main :}`)
+        interfaceOverflow.addStyle('{: about_css_style :}')
     }
 
     var buildWindow = function () {
         $scope = $rootScope.$new()
         $scope.textObject = textObject
         $scope.textObjectCommon = textObjectCommon
-        $scope.version = '__overflow_version'
+        $scope.version = '{: overflow_version :}'
 
         $scope.selectTab = selectTab
 

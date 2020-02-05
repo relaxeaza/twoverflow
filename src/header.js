@@ -1,5 +1,5 @@
 /*!
- * __overflow_title v__overflow_version
+ * {: overflow_title :} v{: overflow_version :}
  *
  * Copyright (C) 2019 Relaxeaza
  * This work is free. You can redistribute it and/or modify it under the
