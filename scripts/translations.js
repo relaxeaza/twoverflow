@@ -5,8 +5,8 @@ const https = require('https')
 const request = require('request')
 const parseOptions = require('./parse-options.js')
 
-const approvedMinRequired = false // %
-const translatedMinRequired = 40 // %
+const approvedMinRequired = 0 // %
+const translatedMinRequired = 50 // %
 const options = parseOptions()
 
 const gameLanguageCodes = {
@@ -48,11 +48,12 @@ async function init () {
 
     const translationStatus = await getTranslationStatus(crowdinKey)
     const allowedTranslations = translationStatus.filter(function (item) {
-        const approved = approvedMinRequired ? item.approved_progress < approvedMinRequired : true
-        const translated = translatedMinRequired ? item.translated_progress < translatedMinRequired : true
-        return approved || translated
+        const approved = item.approved_progress >= approvedMinRequired
+        const translated = item.translated_progress >= translatedMinRequired
+
+        return approved && translated
     })
-    
+
     allowedTranslations.forEach(function (status) {
         const languageCode = gameLanguageCodes[status.code]
         const languageFiles = glob.sync(`${options.source}/${status.code}/twoverflow/*.json`)
@@ -69,8 +70,6 @@ async function init () {
             } else {
                 destPath = `./src/modules/${moduleName}/lang/${languageCode}.json`
             }
-
-
 
             fs.writeFileSync(destPath, languageStream, 'utf8')
         })
