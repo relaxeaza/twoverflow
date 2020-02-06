@@ -95,9 +95,9 @@ function deployTesting () {
     const copied = copyFiles({
         'dist/tw2overflow.js': `${testingPath}/tw2overflow.js`,
         'dist/tw2overflow.min.js': `${testingPath}/tw2overflow.min.js`
-    })
+    }, true)
 
-    if (copied) {   
+    if (copied) {
         gitDeploy('Update testing version')
     } else {
         console.log('Testing version is already the last build.')
