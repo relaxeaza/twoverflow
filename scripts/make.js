@@ -327,13 +327,13 @@ function generateOverflowModule (options) {
     })
 
     // Generate the common replaces
-    overflow.replaces['overflow_title'] = pkg.title
-    overflow.replaces['overflow_version'] = pkg.version
+    overflow.replaces['overflow_name'] = pkg.name
+    overflow.replaces['overflow_version'] = pkg.version + (options.dev ? '-dev' : 'stable')
     overflow.replaces['overflow_author'] = JSON.stringify(pkg.author)
     overflow.replaces['overflow_author_name'] = pkg.author.name
     overflow.replaces['overflow_author_url'] = pkg.author.url
     overflow.replaces['overflow_author_email'] = pkg.author.email
-    overflow.replaces['overflow_date'] = new Date().toLocaleString()
+    overflow.replaces['overflow_date'] = new Date().toUTCString()
     overflow.replaces['overflow_lang'] = fs.readFileSync(`${tempDir}/src/modules/core/lang/lang.json`, 'utf8')
 
     // Move all modules information to a single module (overflow)
