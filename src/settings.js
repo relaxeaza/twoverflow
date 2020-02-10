@@ -3,7 +3,6 @@ define('two/Settings', [
 ], function (
     Lockr
 ) {
-    var textObjectCommon = 'common'
     var hasOwn = Object.prototype.hasOwnProperty
 
     var generateDiff = function (before, after) {
@@ -36,7 +35,7 @@ define('two/Settings', [
 
     var disabledOption = function () {
         return {
-            name: $filter('i18n')('disabled', $rootScope.loc.ale, textObjectCommon),
+            name: $filter('i18n')('disabled', $rootScope.loc.ale, 'common'),
             value: false
         }
     }

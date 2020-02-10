@@ -10,20 +10,19 @@ define('two/autoCollector/ui', [
     eventQueue
 ) {
     var $opener
-    var textObject = 'auto_collector'
 
     var init = function () {
-        $opener = interfaceOverflow.addMenuButton('Collector', 50, $filter('i18n')('description', $rootScope.loc.ale, textObject))
+        $opener = interfaceOverflow.addMenuButton('Collector', 50, $filter('i18n')('description', $rootScope.loc.ale, 'auto_collector'))
         
         $opener.addEventListener('click', function () {
             if (autoCollector.isRunning()) {
                 autoCollector.stop()
                 autoCollector.secondVillage.stop()
-                utils.emitNotif('success', $filter('i18n')('deactivated', $rootScope.loc.ale, textObject))
+                utils.emitNotif('success', $filter('i18n')('deactivated', $rootScope.loc.ale, 'auto_collector'))
             } else {
                 autoCollector.start()
                 autoCollector.secondVillage.start()
-                utils.emitNotif('success', $filter('i18n')('activated', $rootScope.loc.ale, textObject))
+                utils.emitNotif('success', $filter('i18n')('activated', $rootScope.loc.ale, 'auto_collector'))
             }
         })
 

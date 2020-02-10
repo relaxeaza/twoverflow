@@ -27,8 +27,6 @@ define('two/commandQueue/ui', [
     util,
     Lockr
 ) {
-    var textObject = 'command_queue'
-    var textObjectCommon = 'common'
     var eventScope
     var $scope
     var $opener
@@ -196,7 +194,7 @@ define('two/commandQueue/ui', [
 
         // reset displayed value
         $scope.selectedInsertPreset = {
-            name: $filter('i18n')('add_insert_preset', $rootScope.loc.ale, textObject),
+            name: $filter('i18n')('add_insert_preset', $rootScope.loc.ale, 'command_queue'),
             value: null
         }
 
@@ -271,7 +269,7 @@ define('two/commandQueue/ui', [
 
     var addMapSelected = function () {
         if (!mapSelectedVillage) {
-            return utils.emitNotif('error', $filter('i18n')('error_no_map_selected_village', $rootScope.loc.ale, textObject))
+            return utils.emitNotif('error', $filter('i18n')('error_no_map_selected_village', $rootScope.loc.ale, 'command_queue'))
         }
 
         commandQueue.getVillageByCoords(mapSelectedVillage.x, mapSelectedVillage.y, function (data) {
@@ -349,8 +347,8 @@ define('two/commandQueue/ui', [
             key = prefix + '.' + key
         }
 
-        var a = $filter('i18n')(key, $rootScope.loc.ale, textObject)
-        var b = $filter('i18n')(key2, $rootScope.loc.ale, textObject)
+        var a = $filter('i18n')(key, $rootScope.loc.ale, 'command_queue')
+        var b = $filter('i18n')(key2, $rootScope.loc.ale, 'command_queue')
 
         return a + ' ' + b
     }
@@ -389,22 +387,22 @@ define('two/commandQueue/ui', [
             $scope.searchQuery[type] = ''
         },
         addInvalidOrigin: function (event) {
-            utils.emitNotif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, 'command_queue'))
         },
         addInvalidTarget: function (event) {
-            utils.emitNotif('error', $filter('i18n')('error_target', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_target', $rootScope.loc.ale, 'command_queue'))
         },
         addInvalidDate: function (event) {
-            utils.emitNotif('error', $filter('i18n')('error_invalid_date', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_invalid_date', $rootScope.loc.ale, 'command_queue'))
         },
         addNoUnits: function (event) {
-            utils.emitNotif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, 'command_queue'))
         },
         addAlreadySent: function (event, command) {
-            var commandType = $filter('i18n')(command.type, $rootScope.loc.ale, textObjectCommon)
+            var commandType = $filter('i18n')(command.type, $rootScope.loc.ale, 'common')
             var date = utils.formatDate(command.sendTime)
 
-            utils.emitNotif('error', $filter('i18n')('error_already_sent', $rootScope.loc.ale, textObject, commandType, date))
+            utils.emitNotif('error', $filter('i18n')('error_already_sent', $rootScope.loc.ale, 'command_queue', commandType, date))
         },
         removeCommand: function (event, command) {
             updateWaitingCommands()
@@ -413,7 +411,7 @@ define('two/commandQueue/ui', [
             utils.emitNotif('success', genNotifText(command.type, 'removed'))
         },
         removeError: function (event, command) {
-            utils.emitNotif('error', $filter('i18n')('error_remove_error', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_remove_error', $rootScope.loc.ale, 'command_queue'))
         },
         sendTimeLimit: function (event, command) {
             updateSentCommands()
@@ -427,14 +425,14 @@ define('two/commandQueue/ui', [
             updateExpiredCommands()
             updateWaitingCommands()
             updateVisibleCommands()
-            utils.emitNotif('error', $filter('i18n')('error_not_own_village', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_not_own_village', $rootScope.loc.ale, 'command_queue'))
         },
         sendNoUnitsEnough: function (event, command) {
             updateSentCommands()
             updateExpiredCommands()
             updateWaitingCommands()
             updateVisibleCommands()
-            utils.emitNotif('error', $filter('i18n')('error_no_units_enough', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_no_units_enough', $rootScope.loc.ale, 'command_queue'))
         },
         addCommand: function (event, command) {
             updateWaitingCommands()
@@ -553,11 +551,6 @@ define('two/commandQueue/ui', [
         var lastDateType = Lockr.get(STORAGE_KEYS.LAST_DATE_TYPE, DATE_TYPES.OUT, true)
 
         $scope = $rootScope.$new()
-        $scope.textObject = textObject
-        $scope.textObjectCommon = textObjectCommon
-        $scope.textObjectVillageInfo = 'screen_village_info'
-        $scope.textObjectUnitNames = 'unit_names'
-        $scope.textObjectMilitaryOperations = 'military_operations'
         $scope.selectedTab = DEFAULT_TAB
         $scope.inventory = modelDataService.getInventory()
         $scope.presets = utils.obj2selectOptions(presetList.getPresets())
@@ -570,14 +563,14 @@ define('two/commandQueue/ui', [
         }
         $scope.isValidDate = false
         $scope.dateTypes = util.toActionList(DATE_TYPES, function (actionType) {
-            return $filter('i18n')(actionType, $rootScope.loc.ale, textObject)
+            return $filter('i18n')(actionType, $rootScope.loc.ale, 'command_queue')
         })
         $scope.selectedDateType = {
-            name: $filter('i18n')(lastDateType, $rootScope.loc.ale, textObject),
+            name: $filter('i18n')(lastDateType, $rootScope.loc.ale, 'command_queue'),
             value: lastDateType
         }
         $scope.selectedInsertPreset = {
-            name: $filter('i18n')('add_insert_preset', $rootScope.loc.ale, textObject),
+            name: $filter('i18n')('add_insert_preset', $rootScope.loc.ale, 'command_queue'),
             value: null
         }
         $scope.catapultTarget = {
@@ -586,16 +579,16 @@ define('two/commandQueue/ui', [
         }
         $scope.autoCompleteOrigin = {
             type: ['village'],
-            placeholder: $filter('i18n')('add_village_search', $rootScope.loc.ale, textObject),
+            placeholder: $filter('i18n')('add_village_search', $rootScope.loc.ale, 'command_queue'),
             onEnter: eventHandlers.onAutoCompleteOrigin,
-            tooltip: $filter('i18n')('add_origin', $rootScope.loc.ale, textObject),
+            tooltip: $filter('i18n')('add_origin', $rootScope.loc.ale, 'command_queue'),
             dropDown: true
         }
         $scope.autoCompleteTarget = {
             type: ['village'],
-            placeholder: $filter('i18n')('add_village_search', $rootScope.loc.ale, textObject),
+            placeholder: $filter('i18n')('add_village_search', $rootScope.loc.ale, 'command_queue'),
             onEnter: eventHandlers.onAutoCompleteTarget,
-            tooltip: $filter('i18n')('add_target', $rootScope.loc.ale, textObject),
+            tooltip: $filter('i18n')('add_target', $rootScope.loc.ale, 'command_queue'),
             dropDown: true
         }
         $scope.showCatapultSelect = !!commandData.units.catapult

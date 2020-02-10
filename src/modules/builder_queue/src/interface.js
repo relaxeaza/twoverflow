@@ -27,8 +27,6 @@ define('two/builderQueue/ui', [
 ) {
     var eventScope
     var $scope
-    var textObject = 'builder_queue'
-    var textObjectCommon = 'common'
     var $opener
     var groupList = modelDataService.getGroupList()
     var groups = []
@@ -98,12 +96,12 @@ define('two/builderQueue/ui', [
 
         switch (error) {
         case ERROR_CODES.SEQUENCE_EXISTS:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_exists', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_sequence_exists', $rootScope.loc.ale, 'builder_queue'))
             return false
 
             break
         case ERROR_CODES.SEQUENCE_INVALID:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
             return false
 
             break
@@ -437,11 +435,11 @@ define('two/builderQueue/ui', [
 
         switch (error) {
         case ERROR_CODES.SEQUENCE_NO_EXISTS:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, 'builder_queue'))
 
             break
         case ERROR_CODES.SEQUENCE_INVALID:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
 
             break
         }
@@ -449,12 +447,11 @@ define('two/builderQueue/ui', [
 
     editorView.modal.removeSequence = function () {
         var modalScope = $rootScope.$new()
-        var textObject = 'builder_queue_remove_sequence_modal'
 
-        modalScope.title = $filter('i18n')('title', $rootScope.loc.ale, textObject)
-        modalScope.text = $filter('i18n')('text', $rootScope.loc.ale, textObject)
-        modalScope.submitText = $filter('i18n')('remove', $rootScope.loc.ale, textObjectCommon)
-        modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, textObjectCommon)
+        modalScope.title = $filter('i18n')('title', $rootScope.loc.ale, 'builder_queue_remove_sequence_modal')
+        modalScope.text = $filter('i18n')('text', $rootScope.loc.ale, 'builder_queue_remove_sequence_modal')
+        modalScope.submitText = $filter('i18n')('remove', $rootScope.loc.ale, 'common')
+        modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, 'common')
 
         modalScope.submit = function () {
             modalScope.closeWindow()
@@ -495,9 +492,9 @@ define('two/builderQueue/ui', [
 
             if (editorView.addBuilding(building, position)) {
                 modalScope.closeWindow()
-                utils.emitNotif('success', $filter('i18n')('add_building_success', $rootScope.loc.ale, textObject, buildingName, position))
+                utils.emitNotif('success', $filter('i18n')('add_building_success', $rootScope.loc.ale, 'builder_queue', buildingName, position))
             } else {
-                utils.emitNotif('error', $filter('i18n')('add_building_limit_exceeded', $rootScope.loc.ale, textObject, buildingName, buildingLimit))
+                utils.emitNotif('error', $filter('i18n')('add_building_limit_exceeded', $rootScope.loc.ale, 'builder_queue', buildingName, buildingLimit))
             }
         }
 
@@ -513,7 +510,7 @@ define('two/builderQueue/ui', [
 
         modalScope.submit = function () {
             if (modalScope.name.length < 3) {
-                utils.emitNotif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, textObject))
+                utils.emitNotif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, 'builder_queue'))
                 return false
             }
 
@@ -545,7 +542,7 @@ define('two/builderQueue/ui', [
         
         modalScope.submit = function () {
             if (modalScope.name.length < 3) {
-                utils.emitNotif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, textObject))
+                utils.emitNotif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, 'builder_queue'))
                 return false
             }
 
@@ -611,7 +608,7 @@ define('two/builderQueue/ui', [
             logsView.updateVisibleLogs()
         },
         clearLogs: function () {
-            utils.emitNotif('success', $filter('i18n')('logs_cleared', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('logs_cleared', $rootScope.loc.ale, 'builder_queue'))
             eventHandlers.updateLogs()
         },
         buildingSequenceUpdate: function (event, sequenceId) {
@@ -622,13 +619,13 @@ define('two/builderQueue/ui', [
                 settingsView.generateSequences()
             }
 
-            utils.emitNotif('success', $filter('i18n')('sequence_updated', $rootScope.loc.ale, textObject, sequenceId))
+            utils.emitNotif('success', $filter('i18n')('sequence_updated', $rootScope.loc.ale, 'builder_queue', sequenceId))
         },
         buildingSequenceAdd: function (event, sequenceId) {
             var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
             $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId] = sequences[sequenceId]
             eventHandlers.updateSequences()
-            utils.emitNotif('success', $filter('i18n')('sequence_created', $rootScope.loc.ale, textObject, sequenceId))
+            utils.emitNotif('success', $filter('i18n')('sequence_created', $rootScope.loc.ale, 'builder_queue', sequenceId))
         },
         buildingSequenceRemoved: function (event, sequenceId) {
             var substituteSequence
@@ -647,10 +644,10 @@ define('two/builderQueue/ui', [
                 settingsView.generateSequences()
             }
 
-            utils.emitNotif('success', $filter('i18n')('sequence_removed', $rootScope.loc.ale, textObject, sequenceId))
+            utils.emitNotif('success', $filter('i18n')('sequence_removed', $rootScope.loc.ale, 'builder_queue', sequenceId))
         },
         saveSettings: function () {
-            utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, 'builder_queue'))
         },
         started: function () {
             $scope.running = true
@@ -672,14 +669,14 @@ define('two/builderQueue/ui', [
             running = true
             $opener.classList.remove('btn-green')
             $opener.classList.add('btn-red')
-            utils.emitNotif('success', $filter('i18n')('started', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('started', $rootScope.loc.ale, 'builder_queue'))
         })
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_STOP, function () {
             running = false
             $opener.classList.remove('btn-red')
             $opener.classList.add('btn-green')
-            utils.emitNotif('success', $filter('i18n')('stopped', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('stopped', $rootScope.loc.ale, 'builder_queue'))
         })
 
         interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `{: builder_queue_html_main :}`)
@@ -692,8 +689,6 @@ define('two/builderQueue/ui', [
         var activeSequence = settings.get(SETTINGS.ACTIVE_SEQUENCE)
 
         $scope = $rootScope.$new()
-        $scope.textObject = textObject
-        $scope.textObjectCommon = textObjectCommon
         $scope.selectedTab = TAB_TYPES.SETTINGS
         $scope.TAB_TYPES = TAB_TYPES
         $scope.SETTINGS = SETTINGS

@@ -12,21 +12,21 @@
                 <div class="tab" ng-click="selectTab(TAB_TYPES.SETTINGS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.SETTINGS}">
                     <div class="tab-inner">
                         <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.SETTINGS}">
-                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.SETTINGS}">{{ TAB_TYPES.SETTINGS | i18n:loc.ale:textObjectCommon }}</a>
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.SETTINGS}">{{ TAB_TYPES.SETTINGS | i18n:loc.ale:'common' }}</a>
                         </div>
                     </div>
                 </div>
                 <div class="tab" ng-click="selectTab(TAB_TYPES.SEQUENCES)" ng-class="{'tab-active': selectedTab == TAB_TYPES.SEQUENCES}">
                     <div class="tab-inner">
                         <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.SEQUENCES}">
-                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.SEQUENCES}">{{ TAB_TYPES.SEQUENCES | i18n:loc.ale:textObject }}</a>
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.SEQUENCES}">{{ TAB_TYPES.SEQUENCES | i18n:loc.ale:'builder_queue' }}</a>
                         </div>
                     </div>
                 </div>
                 <div class="tab" ng-click="selectTab(TAB_TYPES.LOGS)" ng-class="{'tab-active': selectedTab == TAB_TYPES.LOGS}">
                     <div class="tab-inner">
                         <div ng-class="{'box-border-light': selectedTab === TAB_TYPES.LOGS}">
-                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.LOGS}">{{ TAB_TYPES.LOGS | i18n:loc.ale:textObjectCommon }}</a>
+                            <a href="#" ng-class="{'btn-icon btn-orange': selectedTab !== TAB_TYPES.LOGS}">{{ TAB_TYPES.LOGS | i18n:loc.ale:'common' }}</a>
                         </div>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
         <div class="box-paper footer">
             <div class="scroll-wrap">
                 <div ng-show="selectedTab === TAB_TYPES.SETTINGS">
-                    <h5 class="twx-section">{{ 'settings' | i18n:loc.ale:textObject }}</h5>
+                    <h5 class="twx-section">{{ 'settings' | i18n:loc.ale:'builder_queue' }}</h5>
                     <table class="settings tbl-border-light tbl-striped">
                         <colgroup>
                             <col width="40%">
@@ -45,15 +45,15 @@
                         </colgroup>
                         <tbody>
                             <tr>
-                                <td><span class="ff-cell-fix">{{ 'settings_village_groups' | i18n:loc.ale:textObject }}</span></td>
+                                <td><span class="ff-cell-fix">{{ 'settings_village_groups' | i18n:loc.ale:'builder_queue' }}</span></td>
                                 <td colspan="2"><div select="" list="groups" selected="settings[SETTINGS.GROUP_VILLAGES]" drop-down="true"></div></td>
                             </tr>
                             <tr ng-show="settingsView.sequencesAvail">
-                                <td><span class="ff-cell-fix">{{ 'settings_building_sequence' | i18n:loc.ale:textObject }}</span></td>
+                                <td><span class="ff-cell-fix">{{ 'settings_building_sequence' | i18n:loc.ale:'builder_queue' }}</span></td>
                                 <td colspan="2"><div select="" list="sequences" selected="settings[SETTINGS.ACTIVE_SEQUENCE]" drop-down="true"></div></td>
                             </tr>
                             <tr>
-                                <td><span class="ff-cell-fix">{{ 'settings_preserve_resources' | i18n:loc.ale:textObject }}</span></td>
+                                <td><span class="ff-cell-fix">{{ 'settings_preserve_resources' | i18n:loc.ale:'builder_queue' }}</span></td>
                                 <td colspan="2">
                                     <span class="icon-26x26-resource-wood"></span>
                                     <input type="number" min="0" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_WOOD]">
@@ -66,15 +66,15 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2"><span class="ff-cell-fix">{{ 'settings_priorize_farm' | i18n:loc.ale:textObject }}</span></td>
+                                <td colspan="2"><span class="ff-cell-fix">{{ 'settings_priorize_farm' | i18n:loc.ale:'builder_queue' }}</span></td>
                                 <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.PRIORIZE_FARM]" vertical="false" size="'56x28'"></div></td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <h5 class="twx-section">{{ 'settings_building_sequence' | i18n:loc.ale:textObject }}</h5>
+                    <h5 class="twx-section">{{ 'settings_building_sequence' | i18n:loc.ale:'builder_queue' }}</h5>
                     <p ng-show="!settingsView.sequencesAvail" class="text-center">
-                        <a href="#" class="btn-orange btn-border create-sequence" ng-click="createFirstSequence()">{{ 'create_sequence' | i18n:loc.ale:textObject }}</a>
+                        <a href="#" class="btn-orange btn-border create-sequence" ng-click="createFirstSequence()">{{ 'create_sequence' | i18n:loc.ale:'builder_queue' }}</a>
                     </p>
                     
                     <div ng-if="settingsView.sequencesAvail">
@@ -92,11 +92,11 @@
                                 <col width="6%"> <!-- food -->
                             </colgroup>
                             <tr>
-                                <th tooltip="" tooltip-content="{{ 'position' | i18n:loc.ale:textObject }}">#</th>
-                                <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'duration' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'points' | i18n:loc.ale:textObjectCommon }}</th>
+                                <th tooltip="" tooltip-content="{{ 'position' | i18n:loc.ale:'builder_queue' }}">#</th>
+                                <th>{{ 'building' | i18n:loc.ale:'common' }}</th>
+                                <th>{{ 'level' | i18n:loc.ale:'common' }}</th>
+                                <th>{{ 'duration' | i18n:loc.ale:'common' }}</th>
+                                <th>{{ 'points' | i18n:loc.ale:'common' }}</th>
                                 <th><span class="icon-26x26-resource-wood"></span></th>
                                 <th><span class="icon-26x26-resource-clay"></span></th>
                                 <th><span class="icon-26x26-resource-iron"></span></th>
@@ -120,7 +120,7 @@
                         <div class="page-wrap" pagination="pagination.buildingSequence"></div>
                     </div>
 
-                    <h5 ng-if="settingsView.sequencesAvail" class="twx-section">{{ 'settings_building_sequence_final' | i18n:loc.ale:textObject }}</h5>
+                    <h5 ng-if="settingsView.sequencesAvail" class="twx-section">{{ 'settings_building_sequence_final' | i18n:loc.ale:'builder_queue' }}</h5>
                     <table ng-if="settingsView.sequencesAvail" class="tbl-border-light tbl-striped header-center building-sequence-final">
                         <colgroup>
                             <col> <!-- name -->
@@ -133,10 +133,10 @@
                             <col width="7%"> <!-- food -->
                         </colgroup>
                         <tr>
-                            <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                            <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                            <th>{{ 'duration' | i18n:loc.ale:textObjectCommon }}</th>
-                            <th>{{ 'points' | i18n:loc.ale:textObjectCommon }}</th>
+                            <th>{{ 'building' | i18n:loc.ale:'common' }}</th>
+                            <th>{{ 'level' | i18n:loc.ale:'common' }}</th>
+                            <th>{{ 'duration' | i18n:loc.ale:'common' }}</th>
+                            <th>{{ 'points' | i18n:loc.ale:'common' }}</th>
                             <th><span class="icon-26x26-resource-wood"></span></th>
                             <th><span class="icon-26x26-resource-clay"></span></th>
                             <th><span class="icon-26x26-resource-iron"></span></th>
@@ -156,9 +156,9 @@
                 </div>
 
                 <div ng-show="selectedTab === TAB_TYPES.SEQUENCES">
-                    <h5 class="twx-section">{{ 'sequences_edit_sequence' | i18n:loc.ale:textObject }}</h5>
+                    <h5 class="twx-section">{{ 'sequences_edit_sequence' | i18n:loc.ale:'builder_queue' }}</h5>
                     <p ng-show="!editorView.sequencesAvail" class="text-center">
-                        <a href="#" class="btn-orange btn-border create-sequence" ng-click="createFirstSequence()">{{ 'create_sequence' | i18n:loc.ale:textObject }}</a>
+                        <a href="#" class="btn-orange btn-border create-sequence" ng-click="createFirstSequence()">{{ 'create_sequence' | i18n:loc.ale:'builder_queue' }}</a>
                     </p>
 
                     <table ng-if="editorView.sequencesAvail" class="tbl-border-light tbl-striped editor-select-sequence">
@@ -168,11 +168,11 @@
                         </colgroup>
                         <tbody>
                             <tr>
-                                <td><span class="ff-cell-fix">{{ 'sequences_select_edit' | i18n:loc.ale:textObject }}</span></td>
+                                <td><span class="ff-cell-fix">{{ 'sequences_select_edit' | i18n:loc.ale:'builder_queue' }}</span></td>
                                 <td>
                                     <div class="select-sequence-editor" select="" list="sequences" selected="editorView.selectedSequence" drop-down="true"></div>
-                                    <a class="btn btn-orange clone-sequence" ng-click="editorView.modal.nameSequence()" tooltip="" tooltip-content="{{ 'tooltip_clone' | i18n:loc.ale:textObject }}">{{ 'clone' | i18n:loc.ale:textObject }}</a>
-                                    <a href="#" class="btn-red remove-sequence icon-20x20-close" ng-click="editorView.modal.removeSequence()" tooltip="" tooltip-content="{{ 'tooltip_remove_sequence' | i18n:loc.ale:textObject }}"></a>
+                                    <a class="btn btn-orange clone-sequence" ng-click="editorView.modal.nameSequence()" tooltip="" tooltip-content="{{ 'tooltip_clone' | i18n:loc.ale:'builder_queue' }}">{{ 'clone' | i18n:loc.ale:'builder_queue' }}</a>
+                                    <a href="#" class="btn-red remove-sequence icon-20x20-close" ng-click="editorView.modal.removeSequence()" tooltip="" tooltip-content="{{ 'tooltip_remove_sequence' | i18n:loc.ale:'builder_queue' }}"></a>
                                 </td>
                             </tr>
                         </tbody>
@@ -190,10 +190,10 @@
                             </colgroup>
                             <tr>
                                 <th></th>
-                                <th tooltip="" tooltip-content="{{ 'position' | i18n:loc.ale:textObject }}">#</th>
-                                <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'actions' | i18n:loc.ale:textObjectCommon }}</th>
+                                <th tooltip="" tooltip-content="{{ 'position' | i18n:loc.ale:'builder_queue' }}">#</th>
+                                <th>{{ 'building' | i18n:loc.ale:'common' }}</th>
+                                <th>{{ 'level' | i18n:loc.ale:'common' }}</th>
+                                <th>{{ 'actions' | i18n:loc.ale:'common' }}</th>
                             </tr>
                             <tr ng-repeat="item in editorView.visibleBuildingSequence track by $index" ng-class="{'selected': item.checked}">
                                 <td>
@@ -204,7 +204,7 @@
                                 <td>{{ pagination.buildingSequenceEditor.offset + $index + 1 }}</td>
                                 <td><span class="building-icon icon-20x20-building-{{ item.building }}"></span> {{ item.building | i18n:loc.ale:'building_names' }}</td>
                                 <td>{{ item.level }}</td>
-                                <td><a href="#" class="size-20x20 btn-red icon-20x20-close" ng-click="editorView.removeBuilding(pagination.buildingSequenceEditor.offset + $index)" tooltip="" tooltip-content="{{ 'remove_building' | i18n:loc.ale:textObject }}"></a></td>
+                                <td><a href="#" class="size-20x20 btn-red icon-20x20-close" ng-click="editorView.removeBuilding(pagination.buildingSequenceEditor.offset + $index)" tooltip="" tooltip-content="{{ 'remove_building' | i18n:loc.ale:'builder_queue' }}"></a></td>
                             </tr>
                         </table>
                         <div class="page-wrap" pagination="pagination.buildingSequenceEditor"></div>
@@ -213,7 +213,7 @@
 
                 <div ng-show="selectedTab === TAB_TYPES.LOGS" class="rich-text">
                     <div class="page-wrap" pagination="pagination.logs"></div>
-                    <p class="text-center" ng-show="!logsView.logs.length">{{ 'logs_no_builds' | i18n:loc.ale:textObject }}</p>
+                    <p class="text-center" ng-show="!logsView.logs.length">{{ 'logs_no_builds' | i18n:loc.ale:'builder_queue' }}</p>
                     <table class="tbl-border-light tbl-striped header-center logs" ng-show="logsView.logs.length">
                         <colgroup>
                             <col width="40%">
@@ -224,10 +224,10 @@
                         </colgroup>
                         <thead>
                             <tr>
-                                <th>{{ 'village' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'building' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'level' | i18n:loc.ale:textObjectCommon }}</th>
-                                <th>{{ 'started_at' | i18n:loc.ale:textObjectCommon }}</th>
+                                <th>{{ 'village' | i18n:loc.ale:'common' }}</th>
+                                <th>{{ 'building' | i18n:loc.ale:'common' }}</th>
+                                <th>{{ 'level' | i18n:loc.ale:'common' }}</th>
+                                <th>{{ 'started_at' | i18n:loc.ale:'common' }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -248,29 +248,29 @@
     <footer class="win-foot">
         <ul class="list-btn list-center">
             <li ng-show="selectedTab === TAB_TYPES.SETTINGS && settingsView.sequencesAvail">
-                <a href="#" class="btn-border btn-orange" ng-click="saveSettings()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
+                <a href="#" class="btn-border btn-orange" ng-click="saveSettings()">{{ 'save' | i18n:loc.ale:'common' }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.SETTINGS && settingsView.sequencesAvail">
                 <a href="#" ng-class="{false:'btn-orange', true:'btn-red'}[running]" class="btn-border" ng-click="switchBuilder()">
-                    <span ng-show="running">{{ 'pause' | i18n:loc.ale:textObjectCommon }}</span>
-                    <span ng-show="!running">{{ 'start' | i18n:loc.ale:textObjectCommon }}</span>
+                    <span ng-show="running">{{ 'pause' | i18n:loc.ale:'common' }}</span>
+                    <span ng-show="!running">{{ 'start' | i18n:loc.ale:'common' }}</span>
                 </a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.LOGS">
-                <a href="#" class="btn-border btn-orange" ng-click="logsView.clearLogs()">{{ 'logs_clear' | i18n:loc.ale:textObject }}</a>
+                <a href="#" class="btn-border btn-orange" ng-click="logsView.clearLogs()">{{ 'logs_clear' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
 
             <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">
-                <a href="#" class="btn-border btn-orange" ng-click="editorView.moveUp()">{{ 'sequences_move_up' | i18n:loc.ale:textObject }}</a>
+                <a href="#" class="btn-border btn-orange" ng-click="editorView.moveUp()">{{ 'sequences_move_up' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">
-                <a href="#" class="btn-border btn-orange" ng-click="editorView.moveDown()">{{ 'sequences_move_down' | i18n:loc.ale:textObject }}</a>
+                <a href="#" class="btn-border btn-orange" ng-click="editorView.moveDown()">{{ 'sequences_move_down' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">
-                <a href="#" class="btn-border btn-orange" ng-click="editorView.modal.addBuilding()">{{ 'sequences_add_building' | i18n:loc.ale:textObject }}</a>
+                <a href="#" class="btn-border btn-orange" ng-click="editorView.modal.addBuilding()">{{ 'sequences_add_building' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">
-                <a href="#" class="btn-border btn-red" ng-click="editorView.updateBuildingSequence()">{{ 'save' | i18n:loc.ale:textObjectCommon }}</a>
+                <a href="#" class="btn-border btn-red" ng-click="editorView.updateBuildingSequence()">{{ 'save' | i18n:loc.ale:'common' }}</a>
             </li>
         </ul>
     </footer>

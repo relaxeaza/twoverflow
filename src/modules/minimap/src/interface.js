@@ -26,8 +26,6 @@ define('two/minimap/ui', [
     colors
 ) {
     var $scope
-    var textObject = 'minimap'
-    var textObjectCommon = 'common'
     var TAB_TYPES = {
         MINIMAP: 'minimap',
         HIGHLIGHTS: 'highlights',
@@ -218,22 +216,22 @@ define('two/minimap/ui', [
 
     var saveSettings = function () {
         settings.setAll(settings.decode($scope.settings))
-        utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject))
+        utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, 'minimap'))
     }
 
     var resetSettings = function () {
         var modalScope = $rootScope.$new()
 
-        modalScope.title = $filter('i18n')('reset_confirm_title', $rootScope.loc.ale, textObject)
-        modalScope.text = $filter('i18n')('reset_confirm_text', $rootScope.loc.ale, textObject)
-        modalScope.submitText = $filter('i18n')('reset', $rootScope.loc.ale, textObjectCommon)
-        modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, textObjectCommon)
+        modalScope.title = $filter('i18n')('reset_confirm_title', $rootScope.loc.ale, 'minimap')
+        modalScope.text = $filter('i18n')('reset_confirm_text', $rootScope.loc.ale, 'minimap')
+        modalScope.submitText = $filter('i18n')('reset', $rootScope.loc.ale, 'common')
+        modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, 'common')
         modalScope.showQuestionMarkIcon = true
         modalScope.switchColors = true
 
         modalScope.submit = function submit() {
             settings.resetAll()
-            utils.emitNotif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, textObject))
+            utils.emitNotif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, 'minimap'))
             modalScope.closeWindow()
         }
 
@@ -271,13 +269,13 @@ define('two/minimap/ui', [
             updateHighlightNames()
         },
         highlightAddErrorExists: function (event) {
-            utils.emitNotif('error', $filter('i18n')('highlight_add_error_exists', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('highlight_add_error_exists', $rootScope.loc.ale, 'minimap'))
         },
         highlightAddErrorNoEntry: function (event) {
-            utils.emitNotif('error', $filter('i18n')('highlight_add_error_no_entry', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('highlight_add_error_no_entry', $rootScope.loc.ale, 'minimap'))
         },
         highlightAddErrorInvalidColor: function (event) {
-            utils.emitNotif('error', $filter('i18n')('highlight_add_error_invalid_color', $rootScope.loc.ale, textObject))
+            utils.emitNotif('error', $filter('i18n')('highlight_add_error_invalid_color', $rootScope.loc.ale, 'minimap'))
         },
         onMouseLeaveMinimap: function (event) {
             var event = new MouseEvent('mouseup', {
@@ -333,8 +331,6 @@ define('two/minimap/ui', [
 
     var buildWindow = function () {
         $scope = $rootScope.$new()
-        $scope.textObject = textObject
-        $scope.textObjectCommon = textObjectCommon
         $scope.SETTINGS = SETTINGS
         $scope.TAB_TYPES = TAB_TYPES
         $scope.selectedTab = DEFAULT_TAB
@@ -343,12 +339,12 @@ define('two/minimap/ui', [
         $scope.highlights = minimap.getHighlights()
         $scope.highlightNames = highlightNames
         $scope.actionTypes = Settings.encodeList(ACTION_TYPES, {
-            textObject: textObject,
+            textObject: 'minimap',
             disabled: false
         })
         $scope.autoComplete = {
             type: ['character', 'tribe', 'village'],
-            placeholder: $filter('i18n')('placeholder_search', $rootScope.loc.ale, textObject),
+            placeholder: $filter('i18n')('placeholder_search', $rootScope.loc.ale, 'minimap'),
             onEnter: eventHandlers.addHighlightAutoCompleteSelect
         }
 
@@ -363,7 +359,7 @@ define('two/minimap/ui', [
         $scope.openProfile = openProfile
 
         settings.injectScope($scope, {
-            textObject: textObject
+            textObject: 'minimap'
         })
 
         eventScope = new EventScope('twoverflow_minimap_window')

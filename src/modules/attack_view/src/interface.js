@@ -26,8 +26,6 @@ define('two/attackView/ui', [
     $
 ) {
     var $scope
-    var textObject = 'attack_view'
-    var textObjectCommon = 'common'
     var eventScope
     var $opener
 
@@ -38,7 +36,7 @@ define('two/attackView/ui', [
     var copyTimeModal = function (time) {
         var modalScope = $rootScope.$new()
         modalScope.text = $filter('readableDateFilter')(time * 1000, $rootScope.loc.ale, $rootScope.GAME_TIMEZONE, $rootScope.GAME_TIME_OFFSET, 'H:mm:ss:sss dd/MM/yyyy')
-        modalScope.title = $filter('i18n')('copy', $rootScope.loc.ale, textObject)
+        modalScope.title = $filter('i18n')('copy', $rootScope.loc.ale, 'attack_view')
         windowManagerService.getModal('!twoverflow_attack_view_show_text_modal', modalScope)
     }
 
@@ -108,8 +106,6 @@ define('two/attackView/ui', [
 
     var buildWindow = function () {
         $scope = $rootScope.$new()
-        $scope.textObject = textObject
-        $scope.textObjectCommon = textObjectCommon
         $scope.commandQueueEnabled = attackView.commandQueueEnabled()
         $scope.commands = attackView.getCommands()
         $scope.selectedVillageId = modelDataService.getSelectedVillage().getId()

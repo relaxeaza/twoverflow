@@ -23,8 +23,6 @@ define('two/farmOverflow/ui', [
     $mapData,
     timeHelper
 ) {
-    var textObject = 'farm_overflow'
-    var textObjectCommon = 'common'
     var $scope
     var settings
     var presetList = modelDataService.getPresetList()
@@ -104,7 +102,7 @@ define('two/farmOverflow/ui', [
         settings.setAll(settings.decode($scope.settings))
 
         $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-            message: $filter('i18n')('settings_saved', $rootScope.loc.ale, textObject)
+            message: $filter('i18n')('settings_saved', $rootScope.loc.ale, 'farm_overflow')
         })
     }
 
@@ -160,7 +158,7 @@ define('two/farmOverflow/ui', [
             $scope.running = true
 
             $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                message: $filter('i18n')('farm_started', $rootScope.loc.ale, textObject)
+                message: $filter('i18n')('farm_started', $rootScope.loc.ale, 'farm_overflow')
             })
         },
         stop: function (event, data) {
@@ -169,14 +167,14 @@ define('two/farmOverflow/ui', [
             switch (data.reason) {
             case ERROR_TYPES.NO_PRESETS:
                 $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                    message: $filter('i18n')('no_preset', $rootScope.loc.ale, textObject)
+                    message: $filter('i18n')('no_preset', $rootScope.loc.ale, 'farm_overflow')
                 })
                 break
 
             default:
             case ERROR_TYPES.USER_STOP:
                 $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                    message: $filter('i18n')('farm_stopped', $rootScope.loc.ale, textObject)
+                    message: $filter('i18n')('farm_stopped', $rootScope.loc.ale, 'farm_overflow')
                 })
                 break
             }
@@ -187,7 +185,7 @@ define('two/farmOverflow/ui', [
 
             if (!$scope.logs.length) {
                 $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                    message: $filter('i18n')('reseted_logs', $rootScope.loc.ale, textObject)
+                    message: $filter('i18n')('reseted_logs', $rootScope.loc.ale, 'farm_overflow')
                 })
             }
         },
@@ -227,8 +225,6 @@ define('two/farmOverflow/ui', [
 
     var buildWindow = function () {
         $scope = $rootScope.$new()
-        $scope.textObject = textObject
-        $scope.textObjectCommon = textObjectCommon
         $scope.SETTINGS = SETTINGS
         $scope.TAB_TYPES = TAB_TYPES
         $scope.LOG_TYPES = LOG_TYPES
