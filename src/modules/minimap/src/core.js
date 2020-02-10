@@ -361,7 +361,7 @@ define('two/minimap', [
         var x = (_x || selectedVillage.getX()) - (size / 2)
         var y = (_y || selectedVillage.getY()) - (size / 2)
 
-        mapData.loadTownDataAsync(x, y, size, size, function () {})
+        mapData.loadTownDataAsync(x, y, size, size, noop)
     }
 
     var cacheVillages = function (villages) {

@@ -190,7 +190,7 @@ define('two/utils', [
         }
 
         _dataType = _dataType || 'text'
-        _callback = _callback || function () {}
+        _callback = _callback || noop
 
         var xhr
 

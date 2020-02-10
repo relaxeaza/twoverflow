@@ -7,7 +7,7 @@ define('two/EventScope', [
         }
 
         this.windowId = windowId
-        this.onDestroy = onDestroy || function () {}
+        this.onDestroy = onDestroy || noop
         this.listeners = []
 
         var unregister = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, (event, templateName) => {

@@ -4,7 +4,6 @@ define('two/Settings', [
     Lockr
 ) {
     var textObjectCommon = 'common'
-    var noop = function () {}
     var hasOwn = Object.prototype.hasOwnProperty
 
     var generateDiff = function (before, after) {
