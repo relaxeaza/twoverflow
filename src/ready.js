@@ -3,10 +3,10 @@ define('two/ready', [
 ], function (
     GAME_STATES
 ) {
-    var ready = function (callback, which) {
+    const ready = function (callback, which) {
         which = which || ['map']
 
-        var readyStep = function (item) {
+        const readyStep = function (item) {
             which = which.filter(function (_item) {
                 return _item !== item
             })
@@ -16,9 +16,9 @@ define('two/ready', [
             }
         }
 
-        var handlers = {
+        const handlers = {
             'map': function () {
-                var mapScope = transferredSharedDataService.getSharedData('MapController')
+                const mapScope = transferredSharedDataService.getSharedData('MapController')
 
                 if (mapScope.isInitialized) {
                     return readyStep('map')
@@ -29,23 +29,23 @@ define('two/ready', [
                 })
             },
             'tribe_relations': function () {
-                var $player = modelDataService.getSelectedCharacter()
+                const $player = modelDataService.getSelectedCharacter()
 
                 if ($player) {
-                    var $tribeRelations = $player.getTribeRelations()
+                    const $tribeRelations = $player.getTribeRelations()
 
                     if (!$player.getTribeId() || $tribeRelations) {
                         return readyStep('tribe_relations')
                     }
                 }
 
-                var unbind = $rootScope.$on(eventTypeProvider.TRIBE_RELATION_LIST, function () {
+                const unbind = $rootScope.$on(eventTypeProvider.TRIBE_RELATION_LIST, function () {
                     unbind()
                     readyStep('tribe_relations')
                 })
             },
             'initial_village': function () {
-                var $gameState = modelDataService.getGameState()
+                const $gameState = modelDataService.getGameState()
 
                 if ($gameState.getGameState(GAME_STATES.INITIAL_VILLAGE_READY)) {
                     return readyStep('initial_village')
@@ -56,7 +56,7 @@ define('two/ready', [
                 })
             },
             'all_villages_ready': function () {
-                var $gameState = modelDataService.getGameState()
+                const $gameState = modelDataService.getGameState()
 
                 if ($gameState.getGameState(GAME_STATES.ALL_VILLAGES_READY)) {
                     return readyStep('all_villages_ready')
@@ -68,7 +68,7 @@ define('two/ready', [
             }
         }
 
-        var mapScope = transferredSharedDataService.getSharedData('MapController')
+        const mapScope = transferredSharedDataService.getSharedData('MapController')
 
         if (!mapScope) {
             return setTimeout(function () {

@@ -9,15 +9,14 @@ define('two/autoCollector/secondVillage', [
     $timeHelper,
     SecondVillageModel
 ) {
-    var initialized = false
-    var running = false
-    var secondVillageService = injector.get('secondVillageService')
+    let initialized = false
+    let running = false
+    let secondVillageService = injector.get('secondVillageService')
 
-    var getRunningJob = function (jobs) {
-        var now = Date.now()
-        var id
+    const getRunningJob = function (jobs) {
+        const now = Date.now()
 
-        for (id in jobs) {
+        for (let id in jobs) {
             if (jobs[id].time_started && jobs[id].time_completed) {
                 if (now < $timeHelper.server2ClientTime(jobs[id].time_completed)) {
                     return jobs[id]
@@ -28,11 +27,10 @@ define('two/autoCollector/secondVillage', [
         return false
     }
 
-    var getCollectibleJob = function (jobs) {
-        var now = Date.now()
-        var id
+    const getCollectibleJob = function (jobs) {
+        const now = Date.now()
 
-        for (id in jobs) {
+        for (let id in jobs) {
             if (jobs[id].time_started && jobs[id].time_completed) {
                 if ((now >= $timeHelper.server2ClientTime(jobs[id].time_completed)) && !jobs[id].collected) {
                     return id
@@ -43,93 +41,80 @@ define('two/autoCollector/secondVillage', [
         return false
     }
 
-    var finalizeJob = function (jobId) {
+    const finalizeJob = function (jobId) {
         socketService.emit(routeProvider.SECOND_VILLAGE_COLLECT_JOB_REWARD, {
             village_id: modelDataService.getSelectedVillage().getId(),
             job_id: jobId
         })
     }
 
-    var startJob = function (jobId, callback) {
+    const startJob = function (jobId, callback) {
         socketService.emit(routeProvider.SECOND_VILLAGE_START_JOB, {
             village_id: modelDataService.getSelectedVillage().getId(),
             job_id: jobId
         }, callback)
     }
 
-    var getFirstJob = function (jobs) {
-        var id
-
-        for (id in jobs) {
+    const getFirstJob = function (jobs) {
+        for (let id in jobs) {
             return id
         }
 
         return false
     }
 
-    var updateSecondVillageInfo = function (callback) {
-        var model
-
+    const updateSecondVillageInfo = function (callback) {
         socketService.emit(routeProvider.SECOND_VILLAGE_GET_INFO, {}, function (data) {
-            model = new SecondVillageModel(data)
+            let model = new SecondVillageModel(data)
             modelDataService.getSelectedCharacter().setSecondVillage(model)
             callback()
         })
     }
 
-    var updateAndAnalyse = function () {
+    const updateAndAnalyse = function () {
         updateSecondVillageInfo(analyse)
     }
 
-    var analyse = function () {
-        var secondVillage = modelDataService.getSelectedCharacter().getSecondVillage()
-        var current
-        var completed
-        var nextRun
-        var collectible
-        var currentDayJobs
-        var collectedJobs
-        var resources
-        var availableJobs
-        var firstJob
-        var job
-
+    const analyse = function () {
+        let secondVillage = modelDataService.getSelectedCharacter().getSecondVillage()
 
         if (!running || !secondVillage || !secondVillage.isAvailable()) {
             return false
         }
 
-        current = getRunningJob(secondVillage.data.jobs)
+        const current = getRunningJob(secondVillage.data.jobs)
 
         if (current) {
-            completed = $timeHelper.server2ClientTime(current.time_completed)
-            nextRun = completed - Date.now() + 1000
+            const completed = $timeHelper.server2ClientTime(current.time_completed)
+            const nextRun = completed - Date.now() + 1000
+
             setTimeout(updateAndAnalyse, nextRun)
+
             return false
         }
 
-        collectible = getCollectibleJob(secondVillage.data.jobs)
+        const collectible = getCollectibleJob(secondVillage.data.jobs)
         
         if (collectible) {
             return finalizeJob(collectible)
         }
 
-        currentDayJobs = secondVillageService.getCurrentDayJobs(secondVillage.data.jobs, secondVillage.data.day)
-        collectedJobs = secondVillageService.getCollectedJobs(secondVillage.data.jobs)
-        resources = modelDataService.getSelectedVillage().getResources().getResources()
-        availableJobs = secondVillageService.getAvailableJobs(currentDayJobs, collectedJobs, resources, [])
+        const currentDayJobs = secondVillageService.getCurrentDayJobs(secondVillage.data.jobs, secondVillage.data.day)
+        const collectedJobs = secondVillageService.getCollectedJobs(secondVillage.data.jobs)
+        const resources = modelDataService.getSelectedVillage().getResources().getResources()
+        const availableJobs = secondVillageService.getAvailableJobs(currentDayJobs, collectedJobs, resources, [])
 
         if (availableJobs) {
-            firstJob = getFirstJob(availableJobs)
+            const firstJob = getFirstJob(availableJobs)
 
             startJob(firstJob, function () {
-                job = availableJobs[firstJob]
+                const job = availableJobs[firstJob]
                 setTimeout(updateAndAnalyse, (job.duration * 1000) + 1000)
             })
         }
     }
 
-    var secondVillageCollector = {}
+    let secondVillageCollector = {}
 
     secondVillageCollector.start = function () {
         if (!initialized) {

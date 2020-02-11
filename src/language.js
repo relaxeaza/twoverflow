@@ -1,14 +1,14 @@
 define('two/language', ['helper/i18n'], function (i18n) {
-    var initialized = false
-    var moduleLanguages = {}
-    var selectedLanguage
-    var defaultLanguage = 'en_us'
-    var sharedLanguages = {
+    let initialized = false
+    let moduleLanguages = {}
+    let selectedLanguage
+    const defaultLanguage = 'en_us'
+    const sharedLanguages = {
         'en_dk': 'en_us',
         'pt_pt': 'pt_br'
     }
 
-    var injectLanguage = function (moduleId) {
+    const injectLanguage = function (moduleId) {
         if (!initialized) {
             throw new Error('Language module not initialized.')
             return false
@@ -19,14 +19,14 @@ define('two/language', ['helper/i18n'], function (i18n) {
             return false
         }
 
-        var moduleLanguage = moduleLanguages[moduleId][selectedLanguage] || moduleLanguages[moduleId][defaultLanguage]
+        const moduleLanguage = moduleLanguages[moduleId][selectedLanguage] || moduleLanguages[moduleId][defaultLanguage]
 
         i18n.setJSON(moduleLanguage)
     }
 
-    var selectLanguage = function (language) {
+    const selectLanguage = function (language) {
         selectedLanguage = language
-        
+
         if (selectedLanguage in sharedLanguages) {
             selectedLanguage = sharedLanguages[selectedLanguage]
         }
@@ -34,7 +34,7 @@ define('two/language', ['helper/i18n'], function (i18n) {
         return selectedLanguage
     }
 
-    var twoLanguage = {}
+    let twoLanguage = {}
 
     twoLanguage.add = function (moduleId, languages) {
         if (!initialized) {
@@ -66,9 +66,7 @@ define('two/language', ['helper/i18n'], function (i18n) {
 
             selectLanguage($rootScope.loc.ale)
 
-            var moduleId
-
-            for (moduleId in moduleLanguages) {
+            for (let moduleId in moduleLanguages) {
                 injectLanguage(moduleId)
             }
         })

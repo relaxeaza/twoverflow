@@ -1,7 +1,7 @@
 define('two/about', [], function () {
-    var initialized = false
-    
-    var about = {}
+    let initialized = false
+
+    let about = {}
 
     about.isInitialized = function () {
         return initialized

@@ -25,37 +25,36 @@ define('two/builderQueue/ui', [
     eventQueue,
     timeHelper
 ) {
-    var eventScope
-    var $scope
-    var $opener
-    var groupList = modelDataService.getGroupList()
-    var groups = []
-    var buildingsLevelPoints = {}
-    var running = false
-    var gameDataBuildings
-    var editorView = {
+    let $scope
+    let $button
+    let groupList = modelDataService.getGroupList()
+    let groups = []
+    let buildingsLevelPoints = {}
+    let running = false
+    let gameDataBuildings
+    let editorView = {
         sequencesAvail: true,
         modal: {}
     }
-    var settings
-    var settingsView = {
+    let settings
+    let settingsView = {
         sequencesAvail: true
     }
-    var logsView = {}
-    var TAB_TYPES = {
+    let logsView = {}
+    const TAB_TYPES = {
         SETTINGS: 'settings',
         SEQUENCES: 'sequences',
         LOGS: 'logs'
     }
 
-    var buildingLevelReached = function (building, level) {
-        var buildingData = modelDataService.getSelectedVillage().getBuildingData()
+    const buildingLevelReached = function (building, level) {
+        const buildingData = modelDataService.getSelectedVillage().getBuildingData()
         return buildingData.getBuildingLevel(building) >= level
     }
 
-    var buildingLevelProgress = function (building, level) {
-        var queue = modelDataService.getSelectedVillage().getBuildingQueue().getQueue()
-        var progress = false
+    const buildingLevelProgress = function (building, level) {
+        const queue = modelDataService.getSelectedVillage().getBuildingQueue().getQueue()
+        let progress = false
 
         queue.some(function (job) {
             if (job.building === building && job.level === level) {
@@ -69,13 +68,13 @@ define('two/builderQueue/ui', [
     /**
      * Calculate the total of points accumulated ultil the specified level.
      */
-    var getLevelScale = function (factor, base, level) {
+    const getLevelScale = function (factor, base, level) {
         return level ? parseInt(Math.round(factor * Math.pow(base, level - 1)), 10) : 0
     }
 
-    var moveArrayItem = function (obj, oldIndex, newIndex) {
+    const moveArrayItem = function (obj, oldIndex, newIndex) {
         if (newIndex >= obj.length) {
-            var i = newIndex - obj.length + 1
+            let i = newIndex - obj.length + 1
             
             while (i--) {
                 obj.push(undefined)
@@ -85,14 +84,14 @@ define('two/builderQueue/ui', [
         obj.splice(newIndex, 0, obj.splice(oldIndex, 1)[0])
     }
 
-    var parseBuildingSequence = function (sequence) {
+    const parseBuildingSequence = function (sequence) {
         return sequence.map(function (item) {
             return item.building
         })
     }
 
-    var createBuildingSequence = function (sequenceId, sequence) {
-        var error = builderQueue.addBuildingSequence(sequenceId, sequence)
+    const createBuildingSequence = function (sequenceId, sequence) {
+        const error = builderQueue.addBuildingSequence(sequenceId, sequence)
 
         switch (error) {
         case ERROR_CODES.SEQUENCE_EXISTS:
@@ -110,8 +109,8 @@ define('two/builderQueue/ui', [
         return true
     }
 
-    var selectSome = function (obj) {
-        for (var i in obj) {
+    const selectSome = function (obj) {
+        for (let i in obj) {
             if (obj.hasOwnProperty(i)) {
                 return i
             }
@@ -121,8 +120,8 @@ define('two/builderQueue/ui', [
     }
 
     settingsView.generateSequences = function () {
-        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
-        var sequencesAvail = Object.keys(sequences).length
+        const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        const sequencesAvail = Object.keys(sequences).length
 
         settingsView.sequencesAvail = sequencesAvail
 
@@ -136,14 +135,10 @@ define('two/builderQueue/ui', [
     }
 
     settingsView.generateBuildingSequence = function () {
-        var sequenceId = $scope.settings[SETTINGS.ACTIVE_SEQUENCE].value
-        var buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
-        var buildingData = modelDataService.getGameData().getBuildings()
-        var buildingLevels = {}
-        var building
-        var level
-        var state
-        var price
+        const sequenceId = $scope.settings[SETTINGS.ACTIVE_SEQUENCE].value
+        const buildingSequenceRaw = $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
+        const buildingData = modelDataService.getGameData().getBuildings()
+        let buildingLevels = {}
 
         settingsView.sequencesAvail = !!buildingSequenceRaw
 
@@ -151,14 +146,14 @@ define('two/builderQueue/ui', [
             return false
         }
 
-        for (building in BUILDING_TYPES) {
+        for (let building in BUILDING_TYPES) {
             buildingLevels[BUILDING_TYPES[building]] = 0
         }
 
         settingsView.buildingSequence = buildingSequenceRaw.map(function (building) {
-            level = ++buildingLevels[building]
-            price = buildingData[building].individual_level_costs[level]
-            state = 'not-reached'
+            let level = ++buildingLevels[building]
+            let price = buildingData[building].individual_level_costs[level]
+            let state = 'not-reached'
 
             if (buildingLevelReached(building, level)) {
                 state = 'reached'
@@ -178,14 +173,12 @@ define('two/builderQueue/ui', [
     }
 
     settingsView.generateBuildingSequenceFinal = function (_sequenceId) {
-        var selectedSequence = $scope.settings[SETTINGS.ACTIVE_SEQUENCE].value
-        var sequenceBuildings = $scope.settings[SETTINGS.BUILDING_SEQUENCES][_sequenceId || selectedSequence]
-        var sequenceObj = {}
-        var sequence = []
-        var building
-        var costs
+        const selectedSequence = $scope.settings[SETTINGS.ACTIVE_SEQUENCE].value
+        const sequenceBuildings = $scope.settings[SETTINGS.BUILDING_SEQUENCES][_sequenceId || selectedSequence]
+        let sequenceObj = {}
+        let sequence = []
         
-        for (building in gameDataBuildings) {
+        for (let building in gameDataBuildings) {
             sequenceObj[building] = {
                 level: 0,
                 order: gameDataBuildings[building].order,
@@ -201,8 +194,8 @@ define('two/builderQueue/ui', [
         }
 
         sequenceBuildings.forEach(function (building) {
-            level = ++sequenceObj[building].level
-            costs = gameDataBuildings[building].individual_level_costs[level]
+            let level = ++sequenceObj[building].level
+            let costs = gameDataBuildings[building].individual_level_costs[level]
 
             sequenceObj[building].resources.wood += parseInt(costs.wood, 10)
             sequenceObj[building].resources.clay += parseInt(costs.clay, 10)
@@ -212,7 +205,7 @@ define('two/builderQueue/ui', [
             sequenceObj[building].points += buildingsLevelPoints[building][level - 1]
         })
 
-        for (building in sequenceObj) {
+        for (let building in sequenceObj) {
             if (sequenceObj[building].level !== 0) {
                 sequence.push({
                     building: building,
@@ -229,62 +222,56 @@ define('two/builderQueue/ui', [
     }
 
     settingsView.updateVisibleBuildingSequence = function () {
-        var offset = $scope.pagination.buildingSequence.offset
-        var limit = $scope.pagination.buildingSequence.limit
+        const offset = $scope.pagination.buildingSequence.offset
+        const limit = $scope.pagination.buildingSequence.limit
 
         settingsView.visibleBuildingSequence = settingsView.buildingSequence.slice(offset, offset + limit)
         $scope.pagination.buildingSequence.count = settingsView.buildingSequence.length
     }
 
     settingsView.generateBuildingsLevelPoints = function () {
-        var $gameData = modelDataService.getGameData()
-        var buildingName
-        var buildingData
-        var buildingTotalPoints
-        var levelPoints
-        var currentLevelPoints
-        var level
+        const $gameData = modelDataService.getGameData()
+        let buildingTotalPoints
 
-        for(buildingName in $gameData.data.buildings) {
-            buildingData = $gameData.getBuildingDataForBuilding(buildingName)
+        for(let buildingName in $gameData.data.buildings) {
+            let buildingData = $gameData.getBuildingDataForBuilding(buildingName)
             buildingTotalPoints = 0
             buildingsLevelPoints[buildingName] = []
 
-            for (level = 1; level <= buildingData.max_level; level++) {
-                currentLevelPoints  = getLevelScale(buildingData.points, buildingData.points_factor, level)
-                levelPoints = currentLevelPoints - buildingTotalPoints
+            for (let level = 1; level <= buildingData.max_level; level++) {
+                let currentLevelPoints  = getLevelScale(buildingData.points, buildingData.points_factor, level)
+                let levelPoints = currentLevelPoints - buildingTotalPoints
                 buildingTotalPoints += levelPoints
+
                 buildingsLevelPoints[buildingName].push(levelPoints)
             }
         }
     }
 
     editorView.moveUp = function () {
-        var copy = angular.copy(editorView.buildingSequence)
-        var index
-        var item
+        let copy = angular.copy(editorView.buildingSequence)
 
-        for (index = 0; index < copy.length; index++) {
-            item = copy[index]
+        for (let i = 0; i < copy.length; i++) {
+            let item = copy[i]
 
             if (!item.checked) {
                 continue
             }
 
-            if (index === 0) {
+            if (i === 0) {
                 continue
             }
 
-            if (copy[index - 1].checked) {
+            if (copy[i - 1].checked) {
                 continue
             }
 
-            if (copy[index - 1].building === item.building) {
-                copy[index - 1].level++
+            if (copy[i - 1].building === item.building) {
+                copy[i - 1].level++
                 item.level--
             }
 
-            moveArrayItem(copy, index, index - 1)
+            moveArrayItem(copy, i, i - 1)
         }
 
         editorView.buildingSequence = copy
@@ -292,31 +279,29 @@ define('two/builderQueue/ui', [
     }
 
     editorView.moveDown = function () {
-        var copy = angular.copy(editorView.buildingSequence)
-        var index
-        var item
+        let copy = angular.copy(editorView.buildingSequence)
 
-        for (index = copy.length - 1; index >= 0; index--) {
-            item = copy[index]
+        for (let i = copy.length - 1; i >= 0; i--) {
+            let item = copy[i]
 
             if (!item.checked) {
                 continue
             }
 
-            if (index === copy.length - 1) {
+            if (i === copy.length - 1) {
                 continue
             }
 
-            if (copy[index + 1].checked) {
+            if (copy[i + 1].checked) {
                 continue
             }
 
-            if (copy[index + 1].building === item.building) {
-                copy[index + 1].level--
+            if (copy[i + 1].building === item.building) {
+                copy[i + 1].level--
                 item.level++
             }
 
-            moveArrayItem(copy, index, index + 1)
+            moveArrayItem(copy, i, i + 1)
         }
 
         editorView.buildingSequence = copy
@@ -324,9 +309,8 @@ define('two/builderQueue/ui', [
     }
 
     editorView.addBuilding = function (building, position) {
-        var index = position - 1
-        var newSequence = editorView.buildingSequence.slice()
-        var updated
+        const index = position - 1
+        let newSequence = editorView.buildingSequence.slice()
 
         newSequence.splice(index, 0, {
             level: null,
@@ -347,7 +331,7 @@ define('two/builderQueue/ui', [
     }
 
     editorView.removeBuilding = function (index) {
-        var building = editorView.buildingSequence[index].building
+        const building = editorView.buildingSequence[index].building
 
         editorView.buildingSequence.splice(index, 1)
         editorView.buildingSequence = editorView.updateLevels(editorView.buildingSequence, building)
@@ -356,14 +340,12 @@ define('two/builderQueue/ui', [
     }
 
     editorView.updateLevels = function (sequence, building) {
-        var buildingLevel = 0
-        var modifiedSequence = []
-        var i
-        var item
-        var limitExceeded = false
+        let buildingLevel = 0
+        let modifiedSequence = []
+        let limitExceeded = false
 
-        for (i = 0; i < sequence.length; i++) {
-            item = sequence[i]
+        for (let i = 0; i < sequence.length; i++) {
+            let item = sequence[i]
 
             if (item.building === building) {
                 buildingLevel++
@@ -391,8 +373,8 @@ define('two/builderQueue/ui', [
     }
 
     editorView.generateBuildingSequence = function () {
-        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
-        var sequencesAvail = Object.keys(sequences).length
+        const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        const sequencesAvail = Object.keys(sequences).length
 
         editorView.sequencesAvail = sequencesAvail
 
@@ -400,12 +382,11 @@ define('two/builderQueue/ui', [
             return false
         }
 
-        var sequenceId = editorView.selectedSequence.value
-        var buildingSequenceRaw = sequences[sequenceId]
-        var buildingLevels = {}
-        var building
+        const sequenceId = editorView.selectedSequence.value
+        const buildingSequenceRaw = sequences[sequenceId]
+        let buildingLevels = {}
 
-        for (building in BUILDING_TYPES) {
+        for (let building in BUILDING_TYPES) {
             buildingLevels[BUILDING_TYPES[building]] = 0
         }
 
@@ -421,17 +402,17 @@ define('two/builderQueue/ui', [
     }
 
     editorView.updateVisibleBuildingSequence = function () {
-        var offset = $scope.pagination.buildingSequenceEditor.offset
-        var limit = $scope.pagination.buildingSequenceEditor.limit
+        const offset = $scope.pagination.buildingSequenceEditor.offset
+        const limit = $scope.pagination.buildingSequenceEditor.limit
 
         editorView.visibleBuildingSequence = editorView.buildingSequence.slice(offset, offset + limit)
         $scope.pagination.buildingSequenceEditor.count = editorView.buildingSequence.length
     }
 
     editorView.updateBuildingSequence = function () {
-        var selectedSequence = editorView.selectedSequence.value
-        var parsedSequence = parseBuildingSequence(editorView.buildingSequence)
-        var error = builderQueue.updateBuildingSequence(selectedSequence, parsedSequence)
+        const selectedSequence = editorView.selectedSequence.value
+        const parsedSequence = parseBuildingSequence(editorView.buildingSequence)
+        const error = builderQueue.updateBuildingSequence(selectedSequence, parsedSequence)
 
         switch (error) {
         case ERROR_CODES.SEQUENCE_NO_EXISTS:
@@ -446,7 +427,7 @@ define('two/builderQueue/ui', [
     }
 
     editorView.modal.removeSequence = function () {
-        var modalScope = $rootScope.$new()
+        let modalScope = $rootScope.$new()
 
         modalScope.title = $filter('i18n')('title', $rootScope.loc.ale, 'builder_queue_remove_sequence_modal')
         modalScope.text = $filter('i18n')('text', $rootScope.loc.ale, 'builder_queue_remove_sequence_modal')
@@ -466,8 +447,7 @@ define('two/builderQueue/ui', [
     }
 
     editorView.modal.addBuilding = function () {
-        var modalScope = $rootScope.$new()
-        var building
+        let modalScope = $rootScope.$new()
 
         modalScope.buildings = []
         modalScope.position = 1
@@ -477,7 +457,7 @@ define('two/builderQueue/ui', [
             value: BUILDING_TYPES.HEADQUARTER
         }
 
-        for (building in gameDataBuildings) {
+        for (let building in gameDataBuildings) {
             modalScope.buildings.push({
                 name: $filter('i18n')(building, $rootScope.loc.ale, 'building_names'),
                 value: building
@@ -485,10 +465,10 @@ define('two/builderQueue/ui', [
         }
 
         modalScope.add = function () {
-            var building = modalScope.selectedBuilding.value
-            var position = modalScope.position
-            var buildingName = $filter('i18n')(building, $rootScope.loc.ale, 'building_names')
-            var buildingLimit = gameDataBuildings[building].max_level
+            const building = modalScope.selectedBuilding.value
+            const position = modalScope.position
+            const buildingName = $filter('i18n')(building, $rootScope.loc.ale, 'building_names')
+            const buildingLimit = gameDataBuildings[building].max_level
 
             if (editorView.addBuilding(building, position)) {
                 modalScope.closeWindow()
@@ -502,9 +482,9 @@ define('two/builderQueue/ui', [
     }
 
     editorView.modal.nameSequence = function () {
-        var modalScope = $rootScope.$new()
-        var selectedSequenceName = editorView.selectedSequence.name
-        var selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCES][selectedSequenceName]
+        let modalScope = $rootScope.$new()
+        const selectedSequenceName = editorView.selectedSequence.name
+        const selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCES][selectedSequenceName]
         
         modalScope.name = selectedSequenceName
 
@@ -523,8 +503,8 @@ define('two/builderQueue/ui', [
     }
 
     logsView.updateVisibleLogs = function () {
-        var offset = $scope.pagination.logs.offset
-        var limit = $scope.pagination.logs.limit
+        const offset = $scope.pagination.logs.offset
+        const limit = $scope.pagination.logs.limit
 
         logsView.visibleLogs = logsView.logs.slice(offset, offset + limit)
         $scope.pagination.logs.count = logsView.logs.length
@@ -534,9 +514,9 @@ define('two/builderQueue/ui', [
         builderQueue.clearLogs()
     }
 
-    var createFirstSequence = function () {
-        var modalScope = $rootScope.$new()
-        var initialSequence = [BUILDING_TYPES.HEADQUARTER]
+    const createFirstSequence = function () {
+        let modalScope = $rootScope.$new()
+        const initialSequence = [BUILDING_TYPES.HEADQUARTER]
 
         modalScope.name = ''
         
@@ -566,15 +546,15 @@ define('two/builderQueue/ui', [
         windowManagerService.getModal('!twoverflow_builder_queue_name_sequence_modal', modalScope)
     }
 
-    var selectTab = function (tabType) {
+    const selectTab = function (tabType) {
         $scope.selectedTab = tabType
     }
 
-    var saveSettings = function () {
+    const saveSettings = function () {
         settings.setAll(settings.decode($scope.settings))
     }
 
-    var switchBuilder = function () {
+    const switchBuilder = function () {
         if (builderQueue.isRunning()) {
             builderQueue.stop()
         } else {
@@ -582,7 +562,7 @@ define('two/builderQueue/ui', [
         }
     }
 
-    var eventHandlers = {
+    const eventHandlers = {
         updateGroups: function () {
             $scope.groups = Settings.encodeList(groupList.getGroups(), {
                 type: 'groups',
@@ -590,7 +570,7 @@ define('two/builderQueue/ui', [
             })
         },
         updateSequences: function () {
-            var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+            const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
             
             $scope.sequences = Settings.encodeList(sequences, {
                 type: 'keys',
@@ -612,7 +592,7 @@ define('two/builderQueue/ui', [
             eventHandlers.updateLogs()
         },
         buildingSequenceUpdate: function (event, sequenceId) {
-            var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+            const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
             $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId] = sequences[sequenceId]
 
             if ($scope.settings[SETTINGS.ACTIVE_SEQUENCE].value === sequenceId) {
@@ -622,17 +602,15 @@ define('two/builderQueue/ui', [
             utils.emitNotif('success', $filter('i18n')('sequence_updated', $rootScope.loc.ale, 'builder_queue', sequenceId))
         },
         buildingSequenceAdd: function (event, sequenceId) {
-            var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+            const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
             $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId] = sequences[sequenceId]
             eventHandlers.updateSequences()
             utils.emitNotif('success', $filter('i18n')('sequence_created', $rootScope.loc.ale, 'builder_queue', sequenceId))
         },
         buildingSequenceRemoved: function (event, sequenceId) {
-            var substituteSequence
-
             delete $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
 
-            substituteSequence = selectSome($scope.settings[SETTINGS.BUILDING_SEQUENCES])
+            const substituteSequence = selectSome($scope.settings[SETTINGS.BUILDING_SEQUENCES])
             editorView.selectedSequence = { name: substituteSequence, value: substituteSequence }
             eventHandlers.updateSequences()
             editorView.generateBuildingSequence()
@@ -657,25 +635,25 @@ define('two/builderQueue/ui', [
         }
     }
 
-    var init = function () {
+    const init = function () {
         gameDataBuildings = modelDataService.getGameData().getBuildings()
         settingsView.generateBuildingsLevelPoints()
         settings = builderQueue.getSettings()
 
-        $opener = interfaceOverflow.addMenuButton('Builder', 30)
-        $opener.addEventListener('click', buildWindow)
+        $button = interfaceOverflow.addMenuButton('Builder', 30)
+        $button.addEventListener('click', buildWindow)
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_START, function () {
             running = true
-            $opener.classList.remove('btn-green')
-            $opener.classList.add('btn-red')
+            $button.classList.remove('btn-green')
+            $button.classList.add('btn-red')
             utils.emitNotif('success', $filter('i18n')('started', $rootScope.loc.ale, 'builder_queue'))
         })
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_STOP, function () {
             running = false
-            $opener.classList.remove('btn-red')
-            $opener.classList.add('btn-green')
+            $button.classList.remove('btn-red')
+            $button.classList.add('btn-green')
             utils.emitNotif('success', $filter('i18n')('stopped', $rootScope.loc.ale, 'builder_queue'))
         })
 
@@ -685,8 +663,8 @@ define('two/builderQueue/ui', [
         interfaceOverflow.addStyle('{: builder_queue_css_style :}')
     }
 
-    var buildWindow = function () {
-        var activeSequence = settings.get(SETTINGS.ACTIVE_SEQUENCE)
+    const buildWindow = function () {
+        const activeSequence = settings.get(SETTINGS.ACTIVE_SEQUENCE)
 
         $scope = $rootScope.$new()
         $scope.selectedTab = TAB_TYPES.SETTINGS
@@ -742,7 +720,7 @@ define('two/builderQueue/ui', [
         settingsView.generateSequences()
         editorView.generateBuildingSequence()
 
-        eventScope = new EventScope('twoverflow_builder_queue_window')
+        let eventScope = new EventScope('twoverflow_builder_queue_window')
         eventScope.register(eventTypeProvider.GROUPS_UPDATED, eventHandlers.updateGroups, true)
         eventScope.register(eventTypeProvider.GROUPS_CREATED, eventHandlers.updateGroups, true)
         eventScope.register(eventTypeProvider.GROUPS_DESTROYED, eventHandlers.updateGroups, true)

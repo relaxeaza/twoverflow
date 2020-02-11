@@ -5,8 +5,7 @@ define('two/utils', [
     $timeHelper,
     $math
 ) {
-    var notifTimeout = null
-    var utils = {}
+    let utils = {}
 
     /**
      * Gera um número aleatório aproximado da base.
@@ -20,8 +19,8 @@ define('two/utils', [
 
         base = parseInt(base, 10)
 
-        var max = base + (base / 2)
-        var min = base - (base / 2)
+        const max = base + (base / 2)
+        const min = base - (base / 2)
 
         return Math.round(Math.random() * (max - min) + min)
     }
@@ -49,7 +48,7 @@ define('two/utils', [
      * @param {String} message - Texto a ser exibido
      */
     utils.emitNotif = function (type, message) {
-        var eventType = type === 'success'
+        const eventType = type === 'success'
             ? eventTypeProvider.MESSAGE_SUCCESS
             : eventTypeProvider.MESSAGE_ERROR
 
@@ -97,9 +96,9 @@ define('two/utils', [
      * Inverte a posição do dia com o mês.
      */
     utils.fixDate = function (dateTime) {
-        var dateAndTime = dateTime.split(' ')
-        var time = dateAndTime[0]
-        var date = dateAndTime[1].split('/')
+        const dateAndTime = dateTime.split(' ')
+        const time = dateAndTime[0]
+        const date = dateAndTime[1].split('/')
 
         return time + ' ' + date[1] + '/' + date[0] + '/' + date[2]
     }
@@ -138,22 +137,22 @@ define('two/utils', [
      * @return {Number} Timestamp (milisegundos)
      */
     utils.getTimeFromString = function (dateString, offset) {
-        var dateSplit = dateString.trim().split(' ')
-        var time = dateSplit[0].split(':')
-        var date = dateSplit[1].split('/')
+        const dateSplit = dateString.trim().split(' ')
+        const time = dateSplit[0].split(':')
+        const date = dateSplit[1].split('/')
 
-        var hour = time[0]
-        var min = time[1]
-        var sec = time[2]
-        var ms = time[3] || null
+        const hour = time[0]
+        const min = time[1]
+        const sec = time[2]
+        const ms = time[3] || null
 
-        var month = parseInt(date[0], 10) - 1
-        var day = date[1]
-        var year = date[2]
+        const month = parseInt(date[0], 10) - 1
+        const day = date[1]
+        const year = date[2]
 
-        var date = new Date(year, month, day, hour, min, sec, ms)
+        const _date = new Date(year, month, day, hour, min, sec, ms)
 
-        return date.getTime() + (offset || 0)
+        return _date.getTime() + (offset || 0)
     }
 
     /**
@@ -177,9 +176,9 @@ define('two/utils', [
      * @type {Number}
      */
     utils.getTimeOffset = function () {
-        var localDate = $timeHelper.gameDate()
-        var localOffset = localDate.getTimezoneOffset() * 1000 * 60
-        var serverOffset = $rootScope.GAME_TIME_OFFSET
+        const localDate = $timeHelper.gameDate()
+        const localOffset = localDate.getTimezoneOffset() * 1000 * 60
+        const serverOffset = $rootScope.GAME_TIME_OFFSET
 
         return localOffset + serverOffset
     }
@@ -192,9 +191,7 @@ define('two/utils', [
         _dataType = _dataType || 'text'
         _callback = _callback || noop
 
-        var xhr
-
-        xhr = new XMLHttpRequest()
+        let xhr = new XMLHttpRequest()
         xhr.open('GET', url, true)
         xhr.responseType = _dataType
         xhr.addEventListener('load', function () {
@@ -205,12 +202,10 @@ define('two/utils', [
     }
 
     utils.obj2selectOptions = function (obj, _includeIcon) {
-        var list = []
-        var item
-        var i
+        let list = []
 
-        for (i in obj) {
-            item = {
+        for (let i in obj) {
+            let item = {
                 name: obj[i].name,
                 value: obj[i].id
             }
@@ -236,9 +231,9 @@ define('two/utils', [
      * @return {Number} Tempo de viagem
      */
     utils.getTravelTime = function (origin, target, units, type, officers) {
-        var useEffects = false
-        var targetIsBarbarian = target.character_id === null
-        var targetIsSameTribe = target.character_id && target.tribe_id &&
+        let useEffects = false
+        const targetIsBarbarian = target.character_id === null
+        const targetIsSameTribe = target.character_id && target.tribe_id &&
                 target.tribe_id === modelDataService.getSelectedCharacter().getTribeId()
 
         if (type === 'attack') {
@@ -259,21 +254,21 @@ define('two/utils', [
             }
         }
 
-        var army = {
+        const army = {
             units: units,
             officers: angular.copy(officers)
         }
 
-        var travelTime = armyService.calculateTravelTime(army, {
+        const travelTime = armyService.calculateTravelTime(army, {
             barbarian: targetIsBarbarian,
             ownTribe: targetIsSameTribe,
             officers: officers,
             effects: useEffects
         }, type)
 
-        var distance = $math.actualDistance(origin, target)
+        const distance = $math.actualDistance(origin, target)
 
-        var totalTravelTime = armyService.getTravelTimeForDistance(
+        const totalTravelTime = armyService.getTravelTimeForDistance(
             army,
             travelTime,
             distance,

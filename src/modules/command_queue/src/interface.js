@@ -27,34 +27,33 @@ define('two/commandQueue/ui', [
     util,
     Lockr
 ) {
-    var eventScope
-    var $scope
-    var $opener
-    var $gameData = modelDataService.getGameData()
-    var orderedUnitNames = $gameData.getOrderedUnitNames()
-    var orderedOfficerNames = $gameData.getOrderedOfficerNames()
-    var presetList = modelDataService.getPresetList()
-    var mapSelectedVillage = false
-    var unitOrder
-    var commandData
-    var TAB_TYPES = {
+    let $scope
+    let $button
+    let $gameData = modelDataService.getGameData()
+    let orderedUnitNames = $gameData.getOrderedUnitNames()
+    let orderedOfficerNames = $gameData.getOrderedOfficerNames()
+    let presetList = modelDataService.getPresetList()
+    let mapSelectedVillage = false
+    let unitOrder
+    let commandData
+    const TAB_TYPES = {
         ADD: 'add',
         WAITING: 'waiting',
         LOGS: 'logs'
     }
-    var DEFAULT_TAB = TAB_TYPES.ADD
-    var DEFAULT_CATAPULT_TARGET = 'wall'
-    var attackableBuildingsList = []
-    var unitList = {}
-    var officerList = {}
-    var timeOffset
-    var activeFilters
-    var filtersData
+    const DEFAULT_TAB = TAB_TYPES.ADD
+    const DEFAULT_CATAPULT_TARGET = 'wall'
+    let attackableBuildingsList = []
+    let unitList = {}
+    let officerList = {}
+    let timeOffset
+    let activeFilters
+    let filtersData
     /**
      * Name of one unity for each speed category.
      * Used to generate travel times.
      */
-    var UNITS_BY_SPEED = [
+    const UNITS_BY_SPEED = [
         'light_cavalry',
         'heavy_cavalry',
         'archer',
@@ -63,18 +62,18 @@ define('two/commandQueue/ui', [
         'snob',
         'trebuchet'
     ]
-    var FILTER_ORDER = [
+    const FILTER_ORDER = [
         FILTER_TYPES.SELECTED_VILLAGE,
         FILTER_TYPES.BARBARIAN_TARGET,
         FILTER_TYPES.ALLOWED_TYPES,
         FILTER_TYPES.TEXT_MATCH
     ]
 
-    var setMapSelectedVillage = function (event, menu) {
+    const setMapSelectedVillage = function (event, menu) {
         mapSelectedVillage = menu.data
     }
 
-    var unsetMapSelectedVillage = function () {
+    const unsetMapSelectedVillage = function () {
         mapSelectedVillage = false
     }
 
@@ -82,22 +81,22 @@ define('two/commandQueue/ui', [
      * @param {Number=} _ms - Optional time to be formated instead of the game date.
      * @return {String}
      */
-    var formatedDate = function (_ms) {
-        var date = new Date(_ms || ($timeHelper.gameTime() + utils.getTimeOffset()))
+    const formatedDate = function (_ms) {
+        const date = new Date(_ms || ($timeHelper.gameTime() + utils.getTimeOffset()))
 
-        var rawMS = date.getMilliseconds()
-        var ms = $timeHelper.zerofill(rawMS - (rawMS % 100), 3)
-        var sec = $timeHelper.zerofill(date.getSeconds(), 2)
-        var min = $timeHelper.zerofill(date.getMinutes(), 2)
-        var hour = $timeHelper.zerofill(date.getHours(), 2)
-        var day = $timeHelper.zerofill(date.getDate(), 2)
-        var month = $timeHelper.zerofill(date.getMonth() + 1, 2)
-        var year = date.getFullYear()
+        const rawMS = date.getMilliseconds()
+        const ms = $timeHelper.zerofill(rawMS - (rawMS % 100), 3)
+        const sec = $timeHelper.zerofill(date.getSeconds(), 2)
+        const min = $timeHelper.zerofill(date.getMinutes(), 2)
+        const hour = $timeHelper.zerofill(date.getHours(), 2)
+        const day = $timeHelper.zerofill(date.getDate(), 2)
+        const month = $timeHelper.zerofill(date.getMonth() + 1, 2)
+        const year = date.getFullYear()
 
         return hour + ':' + min + ':' + sec + ':' + ms + ' ' + day + '/' + month + '/' + year
     }
 
-    var addDateDiff = function (date, diff) {
+    const addDateDiff = function (date, diff) {
         if (!utils.isValidDateTime(date)) {
             return ''
         }
@@ -109,27 +108,22 @@ define('two/commandQueue/ui', [
         return formatedDate(date)
     }
 
-    var updateTravelTimes = function () {
+    const updateTravelTimes = function () {
         $scope.isValidDate = utils.isValidDateTime(commandData.date)
 
         if (!commandData.origin || !commandData.target) {
             return false
         }
 
-        var date
-        var arriveTime
-        var travelTime
-        var sendTime
-        var valueType
-        var commandType
-        var i
+        for (let i in COMMAND_TYPES) {
+            let valueType
+            let date
+            let commandType = COMMAND_TYPES[i]
 
-        for (i in COMMAND_TYPES) {
-            commandType = COMMAND_TYPES[i]
             $scope.travelTimes[commandType] = {}
 
             UNITS_BY_SPEED.forEach(function (unit) {
-                travelTime = utils.getTravelTime(
+                let travelTime = utils.getTravelTime(
                     commandData.origin,
                     commandData.target,
                     {[unit]: 1},
@@ -139,17 +133,17 @@ define('two/commandQueue/ui', [
 
                 if ($scope.selectedDateType.value === DATE_TYPES.OUT) {
                     if ($scope.isValidDate) {
-                        date = utils.fixDate(commandData.date)
-                        outTime = utils.getTimeFromString(date)
+                        let date = utils.fixDate(commandData.date)
+                        let outTime = utils.getTimeFromString(date)
                         valueType = isValidSendTime(outTime) ? 'valid' : 'invalid'
                     } else {
                         valueType = 'neutral'
                     }
                 } else if ($scope.selectedDateType.value === DATE_TYPES.ARRIVE) {
                     if ($scope.isValidDate) {
-                        date = utils.fixDate(commandData.date)
-                        arriveTime = utils.getTimeFromString(date)
-                        sendTime = arriveTime - travelTime
+                        let date = utils.fixDate(commandData.date)
+                        let arriveTime = utils.getTimeFromString(date)
+                        let sendTime = arriveTime - travelTime
                         valueType = isValidSendTime(sendTime) ? 'valid' : 'invalid'
                     } else {
                         valueType = 'invalid'
@@ -168,7 +162,7 @@ define('two/commandQueue/ui', [
      * @param  {Number}  time - Command date input in milliseconds.
      * @return {Boolean}
      */
-    var isValidSendTime = function (time) {
+    const isValidSendTime = function (time) {
         if (!$scope.isValidDate) {
             return false
         }
@@ -176,21 +170,21 @@ define('two/commandQueue/ui', [
         return ($timeHelper.gameTime() + timeOffset) < time
     }
 
-    var updateDateType = function () {
+    const updateDateType = function () {
         commandData.dateType = $scope.selectedDateType.value
         Lockr.set(STORAGE_KEYS.LAST_DATE_TYPE, $scope.selectedDateType.value)
         updateTravelTimes()
     }
 
-    var insertPreset = function () {
-        var selectedPreset = $scope.selectedInsertPreset.value
+    const insertPreset = function () {
+        const selectedPreset = $scope.selectedInsertPreset.value
 
         if (!selectedPreset) {
             return false
         }
 
-        var presets = modelDataService.getPresetList().getPresets()
-        var preset = presets[selectedPreset]
+        const presets = modelDataService.getPresetList().getPresets()
+        const preset = presets[selectedPreset]
 
         // reset displayed value
         $scope.selectedInsertPreset = {
@@ -212,20 +206,20 @@ define('two/commandQueue/ui', [
         }
     }
 
-    var updateWaitingCommands = function () {
+    const updateWaitingCommands = function () {
         $scope.waitingCommands = commandQueue.getWaitingCommands()
     }
 
-    var updateSentCommands = function () {
+    const updateSentCommands = function () {
         $scope.sentCommands = commandQueue.getSentCommands()
     }
 
-    var updateExpiredCommands = function () {
+    const updateExpiredCommands = function () {
         $scope.expiredCommands = commandQueue.getExpiredCommands()
     }
 
-    var updateVisibleCommands = function () {
-        var commands = $scope.waitingCommands
+    const updateVisibleCommands = function () {
+        let commands = $scope.waitingCommands
 
         FILTER_ORDER.forEach(function (filter) {
             if ($scope.activeFilters[filter]) {
@@ -236,28 +230,28 @@ define('two/commandQueue/ui', [
         $scope.visibleWaitingCommands = commands
     }
 
-    var onUnitInputFocus = function (unit) {
+    const onUnitInputFocus = function (unit) {
         if (commandData.units[unit] === 0) {
             commandData.units[unit] = ''
         }
     }
 
-    var onUnitInputBlur = function (unit) {
+    const onUnitInputBlur = function (unit) {
         if (commandData.units[unit] === '') {
             commandData.units[unit] = 0
         }
     }
 
-    var catapultTargetVisibility = function () {
+    const catapultTargetVisibility = function () {
         $scope.showCatapultSelect = !!commandData.units.catapult
     }
 
-    var selectTab = function (tabType) {
+    const selectTab = function (tabType) {
         $scope.selectedTab = tabType
     }
 
-    var addSelected = function () {
-        var village = modelDataService.getSelectedVillage().data
+    const addSelected = function () {
+        const village = modelDataService.getSelectedVillage().data
         
         commandData.origin = {
             id: village.villageId,
@@ -267,7 +261,7 @@ define('two/commandQueue/ui', [
         }
     }
 
-    var addMapSelected = function () {
+    const addMapSelected = function () {
         if (!mapSelectedVillage) {
             return utils.emitNotif('error', $filter('i18n')('error_no_map_selected_village', $rootScope.loc.ale, 'command_queue'))
         }
@@ -282,11 +276,11 @@ define('two/commandQueue/ui', [
         })
     }
 
-    var addCurrentDate = function () {
+    const addCurrentDate = function () {
         commandData.date = formatedDate()
     }
 
-    var incrementDate = function () {
+    const incrementDate = function () {
         if (!commandData.date) {
             return false
         }
@@ -294,7 +288,7 @@ define('two/commandQueue/ui', [
         commandData.date = addDateDiff(commandData.date, 100)
     }
 
-    var reduceDate = function () {
+    const reduceDate = function () {
         if (!commandData.date) {
             return false
         }
@@ -302,7 +296,7 @@ define('two/commandQueue/ui', [
         commandData.date = addDateDiff(commandData.date, -100)
     }
 
-    var cleanUnitInputs = function () {
+    const cleanUnitInputs = function () {
         commandData.units = angular.copy(unitList)
         commandData.officers = angular.copy(officerList)
         commandData.catapultTarget = DEFAULT_CATAPULT_TARGET
@@ -313,20 +307,20 @@ define('two/commandQueue/ui', [
         $scope.showCatapultSelect = false
     }
 
-    var addCommand = function (type) {
-        var copy = angular.copy(commandData)
+    const addCommand = function (type) {
+        let copy = angular.copy(commandData)
         copy.type = type
 
         commandQueue.addCommand(copy)
     }
 
-    var clearRegisters = function () {
+    const clearRegisters = function () {
         commandQueue.clearRegisters()
         updateSentCommands()
         updateExpiredCommands()
     }
 
-    var switchCommandQueue = function () {
+    const switchCommandQueue = function () {
         if (commandQueue.isRunning()) {
             commandQueue.stop()
         } else {
@@ -342,18 +336,18 @@ define('two/commandQueue/ui', [
      * @param  {String=} prefix
      * @return {String}
      */
-    var genNotifText = function (key, key2, prefix) {
+    const genNotifText = function (key, key2, prefix) {
         if (prefix) {
             key = prefix + '.' + key
         }
 
-        var a = $filter('i18n')(key, $rootScope.loc.ale, 'command_queue')
-        var b = $filter('i18n')(key2, $rootScope.loc.ale, 'command_queue')
+        const a = $filter('i18n')(key, $rootScope.loc.ale, 'command_queue')
+        const b = $filter('i18n')(key2, $rootScope.loc.ale, 'command_queue')
 
         return a + ' ' + b
     }
 
-    var toggleFilter = function (filter, allowedTypes) {
+    const toggleFilter = function (filter, allowedTypes) {
         $scope.activeFilters[filter] = !$scope.activeFilters[filter]
 
         if (allowedTypes) {
@@ -363,12 +357,12 @@ define('two/commandQueue/ui', [
         updateVisibleCommands()
     }
 
-    var textMatchFilter = function () {
+    const textMatchFilter = function () {
         $scope.activeFilters[FILTER_TYPES.TEXT_MATCH] = $scope.filtersData[FILTER_TYPES.TEXT_MATCH].length > 0
         updateVisibleCommands()
     }
 
-    var eventHandlers = {
+    const eventHandlers = {
         updatePresets: function () {
             $scope.presets = utils.obj2selectOptions(presetList.getPresets())
         },
@@ -399,8 +393,8 @@ define('two/commandQueue/ui', [
             utils.emitNotif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, 'command_queue'))
         },
         addAlreadySent: function (event, command) {
-            var commandType = $filter('i18n')(command.type, $rootScope.loc.ale, 'common')
-            var date = utils.formatDate(command.sendTime)
+            const commandType = $filter('i18n')(command.type, $rootScope.loc.ale, 'common')
+            const date = utils.formatDate(command.sendTime)
 
             utils.emitNotif('error', $filter('i18n')('error_already_sent', $rootScope.loc.ale, 'command_queue', commandType, date))
         },
@@ -476,12 +470,11 @@ define('two/commandQueue/ui', [
         }
     }
 
-    var init = function () {
+    const init = function () {
         timeOffset = utils.getTimeOffset()
-        var attackableBuildingsMap = $gameData.getAttackableBuildings()
-        var building
+        const attackableBuildingsMap = $gameData.getAttackableBuildings()
 
-        for (building in attackableBuildingsMap) {
+        for (let building in attackableBuildingsMap) {
             attackableBuildingsList.push({
                 name: $filter('i18n')(building, $rootScope.loc.ale, 'building_names'),
                 value: building
@@ -527,17 +520,17 @@ define('two/commandQueue/ui', [
             [FILTER_TYPES.TEXT_MATCH]: ''
         }
 
-        $opener = interfaceOverflow.addMenuButton('Commander', 20)
-        $opener.addEventListener('click', buildWindow)
+        $button = interfaceOverflow.addMenuButton('Commander', 20)
+        $button.addEventListener('click', buildWindow)
 
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_START, function () {
-            $opener.classList.remove('btn-green')
-            $opener.classList.add('btn-red')
+            $button.classList.remove('btn-green')
+            $button.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_STOP, function () {
-            $opener.classList.remove('btn-red')
-            $opener.classList.add('btn-green')
+            $button.classList.remove('btn-red')
+            $button.classList.add('btn-green')
         })
 
         $rootScope.$on(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage)
@@ -547,8 +540,8 @@ define('two/commandQueue/ui', [
         interfaceOverflow.addStyle('{: command_queue_css_style :}')
     }
 
-    var buildWindow = function () {
-        var lastDateType = Lockr.get(STORAGE_KEYS.LAST_DATE_TYPE, DATE_TYPES.OUT, true)
+    const buildWindow = function () {
+        const lastDateType = Lockr.get(STORAGE_KEYS.LAST_DATE_TYPE, DATE_TYPES.OUT, true)
 
         $scope = $rootScope.$new()
         $scope.selectedTab = DEFAULT_TAB
@@ -631,7 +624,7 @@ define('two/commandQueue/ui', [
         $scope.$watch('selectedInsertPreset.value', insertPreset)
         $scope.$watch('filtersData[FILTER_TYPES.TEXT_MATCH]', textMatchFilter)
 
-        eventScope = new EventScope('twoverflow_queue_window')
+        let eventScope = new EventScope('twoverflow_queue_window')
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.SELECT_SELECTED, eventHandlers.autoCompleteSelected, true)

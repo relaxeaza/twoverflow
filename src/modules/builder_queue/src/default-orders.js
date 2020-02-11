@@ -3,20 +3,17 @@ define('two/builderQueue/defaultOrders', [
 ], function (
     BUILDING_TYPES
 ) {
-    var defaultSequences = {}
+    let defaultSequences = {}
     
-    var shuffle = function (array) {
+    const shuffle = function (array) {
         array.sort(() => Math.random() - 0.5)
     }
 
-    var parseSequence = function (rawSequence) {
-        var i
-        var j
-        var item
-        var parsed = []
+    const parseSequence = function (rawSequence) {
+        let parsed = []
 
-        for (i = 0; i < rawSequence.length; i++) {
-            item = rawSequence[i]
+        for (let i = 0; i < rawSequence.length; i++) {
+            let item = rawSequence[i]
 
             if (angular.isArray(item)) {
                 shuffle(item)
@@ -29,11 +26,10 @@ define('two/builderQueue/defaultOrders', [
         return parsed
     }
 
-    var parseSequences = function (rawSequences) {
-        var i
-        var parsed = {}
+    const parseSequences = function (rawSequences) {
+        let parsed = {}
 
-        for (i in rawSequences) {
+        for (let i in rawSequences) {
             if (rawSequences.hasOwnProperty(i)) {
                 parsed[i] = parseSequence(rawSequences[i])
             }

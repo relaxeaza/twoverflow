@@ -3,13 +3,12 @@ define('two/Settings', [
 ], function (
     Lockr
 ) {
-    var hasOwn = Object.prototype.hasOwnProperty
+    const hasOwn = Object.prototype.hasOwnProperty
 
-    var generateDiff = function (before, after) {
-        var changes = {}
-        var id
+    const generateDiff = function (before, after) {
+        let changes = {}
 
-        for (id in before) {
+        for (let id in before) {
             if (hasOwn.call(after, id)) {
                 if (!angular.equals(before[id], after[id])) {
                     changes[id] = after[id]
@@ -22,29 +21,27 @@ define('two/Settings', [
         return angular.equals({}, changes) ? false : changes
     }
 
-    var generateDefaults = function (map) {
-        var key
-        var defaults = {}
+    const generateDefaults = function (map) {
+        let defaults = {}
 
-        for (key in map) {
+        for (let key in map) {
             defaults[key] = map[key].default
         }
 
         return defaults
     }
 
-    var disabledOption = function () {
+    const disabledOption = function () {
         return {
             name: $filter('i18n')('disabled', $rootScope.loc.ale, 'common'),
             value: false
         }
     }
 
-    var getUpdates = function (map, changes) {
-        var id
-        var updates = {}
+    const getUpdates = function (map, changes) {
+        let updates = {}
 
-        for (id in changes) {
+        for (let id in changes) {
             (map[id].updates || []).forEach(function (updateItem) {
                 updates[updateItem] = true
             })
@@ -57,7 +54,7 @@ define('two/Settings', [
         return updates
     }
 
-    var Settings = function (configs) {
+    let Settings = function (configs) {
         this.settingsMap = configs.settingsMap
         this.storageKey = configs.storageKey
         this.defaults = generateDefaults(this.settingsMap)
@@ -85,25 +82,20 @@ define('two/Settings', [
     }
 
     Settings.prototype.set = function (id, value, opt) {
-        var changes
-        var before
-        var after
-        var updates
-
         if (!hasOwn.call(this.settingsMap, id)) {
             return false
         }
 
-        before = angular.copy(this.settings)
+        const before = angular.copy(this.settings)
         this.settings[id] = value
-        after = angular.copy(this.settings)
-        changes = generateDiff(before, after)
+        const after = angular.copy(this.settings)
+        const changes = generateDiff(before, after)
 
         if (!changes) {
             return false
         }
 
-        updates = getUpdates(this.settingsMap, changes)
+        const updates = getUpdates(this.settingsMap, changes)
 
         this.store()
         this.updateScope()
@@ -113,26 +105,22 @@ define('two/Settings', [
     }
 
     Settings.prototype.setAll = function (values, opt) {
-        var before = angular.copy(this.settings)
-        var after
-        var changes
-        var updates
-        var id
+        const before = angular.copy(this.settings)
 
-        for (id in values) {
+        for (let id in values) {
             if (hasOwn.call(this.settingsMap, id)) {
                 this.settings[id] = values[id]
             }
         }
 
-        after = angular.copy(this.settings)
-        changes = generateDiff(before, after)
+        const after = angular.copy(this.settings)
+        const changes = generateDiff(before, after)
 
         if (!changes) {
             return false
         }
 
-        updates = getUpdates(this.settingsMap, changes)
+        const updates = getUpdates(this.settingsMap, changes)
 
         this.store()
         this.updateScope()
@@ -154,12 +142,8 @@ define('two/Settings', [
     }
 
     Settings.prototype.each = function (callback) {
-        var id
-        var value
-        var map
-
-        for (id in this.settings) {
-            map = this.settingsMap[id]
+        for (let id in this.settings) {
+            let map = this.settingsMap[id]
 
             if (map.inputType === 'checkbox') {
                 callback.call(this, id, !!this.settings[id], map)
@@ -176,9 +160,6 @@ define('two/Settings', [
     }
 
     Settings.prototype.injectScope = function ($scope, opt) {
-        var id
-        var map
-
         this.injected = {
             $scope: $scope,
             opt: opt
@@ -207,15 +188,14 @@ define('two/Settings', [
         if (!this.injected) {
             return false
         }
-        
+
         this.injected.$scope.settings = this.encode(this.injected.opt)
     }
 
     Settings.prototype.encode = function (opt) {
-        var encoded = {}
-        var presets = modelDataService.getPresetList().getPresets()
-        var groups = modelDataService.getGroupList().getGroups()
-        var multiValues
+        let encoded = {}
+        const presets = modelDataService.getPresetList().getPresets()
+        const groups = modelDataService.getGroupList().getGroups()
 
         opt = opt || {}
 
@@ -229,7 +209,7 @@ define('two/Settings', [
                 switch (map.type) {
                 case 'presets':
                     if (map.multiSelect) {
-                        multiValues = []
+                        let multiValues = []
 
                         value.forEach(function (presetId) {
                             if (!presets[presetId]) {
@@ -258,7 +238,7 @@ define('two/Settings', [
                     break
                 case 'groups':
                     if (map.multiSelect) {
-                        multiValues = []
+                        let multiValues = []
 
                         value.forEach(function (groupId) {
                             if (!groups[groupId]) {
@@ -307,20 +287,17 @@ define('two/Settings', [
     }
 
     Settings.prototype.decode = function (encoded) {
-        var id
-        var decoded = {}
-        var multiValues
-        var map
+        let decoded = {}
 
-        for (id in encoded) {
-            map = this.settingsMap[id]
+        for (let id in encoded) {
+            let map = this.settingsMap[id]
 
             if (map.inputType === 'select') {
                 if (map.multiSelect) {
                     if (encoded[id].length === 1 && encoded[id][0].value === false) {
                         decoded[id] = []
                     } else {
-                        multiValues = []
+                        let multiValues = []
 
                         encoded[id].forEach(function (item) {
                             multiValues.push(item.value)
@@ -340,9 +317,7 @@ define('two/Settings', [
     }
 
     Settings.encodeList = function (list, opt) {
-        var encoded = []
-        var prop
-        var value
+        let encoded = []
 
         opt = opt || {}
 
@@ -352,8 +327,8 @@ define('two/Settings', [
 
         switch (opt.type) {
         case 'keys':
-            for (prop in list) {
-                value = list[prop]
+            for (let prop in list) {
+                let value = list[prop]
 
                 encoded.push({
                     name: prop,
@@ -363,8 +338,8 @@ define('two/Settings', [
 
             break
         case 'groups':
-            for (prop in list) {
-                value = list[prop]
+            for (let prop in list) {
+                let value = list[prop]
 
                 encoded.push({
                     name: value.name,
@@ -375,8 +350,8 @@ define('two/Settings', [
 
             break
         case 'presets':
-            for (prop in list) {
-                value = list[prop]
+            for (let prop in list) {
+                let value = list[prop]
 
                 encoded.push({
                     name: value.name,
@@ -387,8 +362,8 @@ define('two/Settings', [
             break
         case 'values':
         default:
-            for (prop in list) {
-                value = list[prop]
+            for (let prop in list) {
+                let value = list[prop]
 
                 encoded.push({
                     name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,

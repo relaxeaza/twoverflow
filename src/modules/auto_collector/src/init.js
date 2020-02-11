@@ -15,7 +15,7 @@ require([
     Lockr,
     eventQueue
 ) {
-    var STORAGE_KEYS = {
+    const STORAGE_KEYS = {
         ACTIVE: 'auto_collector_active'
     }
 

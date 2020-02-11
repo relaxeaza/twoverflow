@@ -5,22 +5,22 @@ define('two/ui', [
     conf,
     cdnConf
 ) {
-    var interfaceOverflow = {}
-    var templates = {}
-    var initialized = false
-    var containerCreated = false
+    let interfaceOverflow = {}
+    let templates = {}
+    let initialized = false
+    let containerCreated = false
 
-    var $head = document.querySelector('head')
-    var $wrapper = document.querySelector('#wrapper')
-    var httpService = injector.get('httpService')
-    var templateManagerService = injector.get('templateManagerService')
-    var $templateCache = injector.get('$templateCache')
+    let $head = document.querySelector('head')
+    let $wrapper = document.querySelector('#wrapper')
+    let httpService = injector.get('httpService')
+    let templateManagerService = injector.get('templateManagerService')
+    let $templateCache = injector.get('$templateCache')
 
-    var $container
-    var $menu
-    var $mainButton
+    let $container
+    let $menu
+    let $mainButton
 
-    var buildMenuContainer = function () {
+    const buildMenuContainer = function () {
         if (containerCreated) {
             return true
         }
@@ -41,9 +41,9 @@ define('two/ui', [
     }
 
     templateManagerService.load = function (templateName, onSuccess, opt_onError) {
-        var path
+        let path
 
-        var success = function (data, status, headers, config) {
+        const success = function (data, status, headers, config) {
             $templateCache.put(path.substr(1), data)
 
             if (angular.isFunction(onSuccess)) {
@@ -55,7 +55,7 @@ define('two/ui', [
             }
         }
 
-        var error = function (data, status, headers, config) {
+        const error = function (data, status, headers, config) {
             if (angular.isFunction(opt_onError)) {
                 opt_onError(data, status, headers, config)
             }
@@ -92,7 +92,7 @@ define('two/ui', [
     }
 
     interfaceOverflow.addStyle = function (styles) {
-        var $style = document.createElement('style')
+        let $style = document.createElement('style')
         $style.type = 'text/css'
         $style.appendChild(document.createTextNode(styles))
         $head.appendChild($style)
@@ -101,7 +101,7 @@ define('two/ui', [
     interfaceOverflow.addMenuButton = function (label, order, _tooltip) {
         buildMenuContainer()
 
-        var $button = document.createElement('div')
+        let $button = document.createElement('div')
         $button.className = 'btn-border btn-green button'
         $button.innerHTML = label
         $button.style.order = order

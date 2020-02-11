@@ -5,36 +5,30 @@ define('two/mapData', [
     conf,
     mapState
 ) {
-    var villages = []
-    var width = 306
-    var height = 306
-    var grid = []
-    var loadingQueue = {}
+    let villages = []
+    let width = 306
+    let height = 306
+    let grid = []
+    let loadingQueue = {}
 
-    var init = function () {
+    const init = function () {
         setupGrid()
     }
 
-    var setupGrid = function () {
-        var xChunks = Math.ceil(conf.MAP_SIZE / width)
-        var yChunks = Math.ceil(conf.MAP_SIZE / height)
-        var chunkWidth
-        var chunkHeight
-        var chunkX
-        var chunkY
-        var gridX
-        var gridY
+    const setupGrid = function () {
+        const xChunks = Math.ceil(conf.MAP_SIZE / width)
+        const yChunks = Math.ceil(conf.MAP_SIZE / height)
 
-        for (gridX = 0; gridX < xChunks; gridX++) {
+        for (let gridX = 0; gridX < xChunks; gridX++) {
             grid.push([])
 
-            chunkX = width * gridX
-            chunkWidth = width.bound(0, chunkX + width).bound(0, conf.MAP_SIZE - chunkX)
+            let chunkX = width * gridX
+            let chunkWidth = width.bound(0, chunkX + width).bound(0, conf.MAP_SIZE - chunkX)
             chunkX = chunkX.bound(0, conf.MAP_SIZE)
 
-            for (gridY = 0; gridY < yChunks; gridY++) {
-                chunkY = height * gridY
-                chunkHeight = height.bound(0, chunkY + height).bound(0, conf.MAP_SIZE - chunkY)
+            for (let gridY = 0; gridY < yChunks; gridY++) {
+                let chunkY = height * gridY
+                let chunkHeight = height.bound(0, chunkY + height).bound(0, conf.MAP_SIZE - chunkY)
                 chunkY = chunkY.bound(0, conf.MAP_SIZE)
 
                 grid[gridX].push({
@@ -49,15 +43,12 @@ define('two/mapData', [
         }
     }
 
-    var getVisibleGridCells = function (origin) {
-        var cells = []
-        var cell
-        var gridX
-        var gridY
+    const getVisibleGridCells = function (origin) {
+        let cells = []
 
-        for (gridX = 0; gridX < grid.length; gridX++) {
-            for (gridY = 0; gridY < grid[gridX].length; gridY++) {
-                cell = grid[gridX][gridY]
+        for (let gridX = 0; gridX < grid.length; gridX++) {
+            for (let gridY = 0; gridY < grid[gridX].length; gridY++) {
+                let cell = grid[gridX][gridY]
 
                 if (
                     Math.abs(origin.x) + width <= cell.x ||
@@ -75,8 +66,8 @@ define('two/mapData', [
         return cells
     }
 
-    var genLoadingId = function (cells) {
-        var id = []
+    const genLoadingId = function (cells) {
+        let id = []
 
         cells.forEach(function (cell) {
             id.push(cell.x.toString() + cell.y.toString())
@@ -85,14 +76,13 @@ define('two/mapData', [
         return id.join('')
     }
 
-    var mapData = {}
+    let mapData = {}
 
     mapData.load = function (origin, callback, _error) {
-        var cells = getVisibleGridCells(origin)
-        var loadId = genLoadingId(cells)
-        var requests = []
-        var promise
-        var alreadyLoading = cells.every(function (cell) {
+        const cells = getVisibleGridCells(origin)
+        let loadId = genLoadingId(cells)
+        let requests = []
+        const alreadyLoading = cells.every(function (cell) {
             return cell.loading
         })
 
@@ -110,7 +100,7 @@ define('two/mapData', [
 
             cell.loading = true
 
-            promise = new Promise(function (resolve, reject) {
+            let promise = new Promise(function (resolve, reject) {
                 socketService.emit(routeProvider.MAP_GET_MINIMAP_VILLAGES, cell, function (data) {
                     cell.loaded = true
                     cell.loading = false
@@ -136,7 +126,7 @@ define('two/mapData', [
 
         Promise.all(requests)
         .then(function (cells) {
-            var loadId = genLoadingId(cells)
+            loadId = genLoadingId(cells)
 
             loadingQueue[loadId].forEach(function (handler) {
                 handler(villages)

@@ -3,13 +3,13 @@ define('two/about/ui', [
 ], function (
     interfaceOverflow
 ) {
-    var $scope
+    let $scope
     
-    var selectTab = function (tabType) {
+    const selectTab = function (tabType) {
         $scope.selectedTab = tabType
     }
 
-    var init = function () {
+    const init = function () {
         $opener = interfaceOverflow.addMenuButton('About', 100)
 
         $opener.addEventListener('click', function () {
@@ -20,7 +20,7 @@ define('two/about/ui', [
         interfaceOverflow.addStyle('{: about_css_style :}')
     }
 
-    var buildWindow = function () {
+    const buildWindow = function () {
         $scope = $rootScope.$new()
         $scope.selectTab = selectTab
 

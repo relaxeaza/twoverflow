@@ -25,32 +25,29 @@ define('two/minimap/ui', [
     cdn,
     colors
 ) {
-    var $scope
-    var TAB_TYPES = {
+    let $scope
+    let $button
+    let $minimapCanvas
+    let $crossCanvas
+    let $minimapContainer
+    let MapController
+    let windowWrapper
+    let mapWrapper
+    let tooltipWrapper
+    let tooltipTimeout
+    let highlightNames = {
+        character: {},
+        tribe: {}
+    }
+    let settings
+    const TAB_TYPES = {
         MINIMAP: 'minimap',
         HIGHLIGHTS: 'highlights',
         SETTINGS: 'settings'
     }
-    var DEFAULT_TAB = TAB_TYPES.MINIMAP
-    var $opener
-    var $minimapCanvas
-    var $crossCanvas
-    var $minimapContainer
-    var actionTypes = []
-    var selectedActionType = {}
-    var MapController
-    var tooltipWrapper
-    var windowWrapper
-    var mapWrapper
-    var tooltipWrapperSpacer = {}
-    var tooltipTimeout
-    var highlightNames = {
-        character: {},
-        tribe: {}
-    }
-    var settings
+    const DEFAULT_TAB = TAB_TYPES.MINIMAP
 
-    var selectTab = function (tab) {
+    const selectTab = function (tab) {
         $scope.selectedTab = tab
 
         if (tab === TAB_TYPES.MINIMAP) {
@@ -60,29 +57,29 @@ define('two/minimap/ui', [
         }
     }
 
-    var appendCanvas = function () {
+    const appendCanvas = function () {
         $minimapContainer = document.querySelector('#two-minimap .minimap-container')
         $minimapContainer.appendChild($minimapCanvas)
         $minimapContainer.appendChild($crossCanvas)
     }
 
-    var getTribeData = function (data, callback) {
+    const getTribeData = function (data, callback) {
         socketService.emit(routeProvider.TRIBE_GET_PROFILE, {
             tribe_id: data.id
         }, callback)
     }
     
-    var getCharacterData = function (data, callback) {
+    const getCharacterData = function (data, callback) {
         socketService.emit(routeProvider.CHAR_GET_PROFILE, {
             character_id: data.id
         }, callback)
     }
 
-    var getVillageData = function (data, callback) {
+    const getVillageData = function (data, callback) {
         mapData.loadTownDataAsync(data.x, data.y, 1, 1, callback)
     }
 
-    var updateHighlightNames = function () {
+    const updateHighlightNames = function () {
         Object.keys($scope.highlights.character).forEach(function (id) {
             if (id in highlightNames.character) {
                 return
@@ -108,13 +105,8 @@ define('two/minimap/ui', [
         })
     }
 
-    var showTooltip = function (_, data) {
+    const showTooltip = function (_, data) {
         tooltipTimeout = setTimeout(function () {
-            var windowOffset
-            var tooltipOffset
-            var onTop
-            var onLeft
-
             windowWrapper.appendChild(tooltipWrapper)
             tooltipWrapper.classList.remove('ng-hide')
 
@@ -134,13 +126,13 @@ define('two/minimap/ui', [
             MapController.tt.position.y = data.event.pageY + 50
             MapController.tt.visible = true
 
-            tooltipOffset = tooltipWrapper.getBoundingClientRect()
-            windowOffset = windowWrapper.getBoundingClientRect()
-            tooltipWrapperSpacer.x = tooltipOffset.width + 50
-            tooltipWrapperSpacer.y = tooltipOffset.height + 50
+            const tooltipOffset = tooltipWrapper.getBoundingClientRect()
+            const windowOffset = windowWrapper.getBoundingClientRect()
+            const tooltipWrapperSpacerX = tooltipOffset.width + 50
+            const tooltipWrapperSpacerY = tooltipOffset.height + 50
 
-            onTop = MapController.tt.position.y + tooltipWrapperSpacer.y > windowOffset.top + windowOffset.height
-            onLeft = MapController.tt.position.x + tooltipWrapperSpacer.x > windowOffset.width
+            onTop = MapController.tt.position.y + tooltipWrapperSpacerY > windowOffset.top + windowOffset.height
+            onLeft = MapController.tt.position.x + tooltipWrapperSpacerX > windowOffset.width
 
             if (onTop) {
                 MapController.tt.position.y -= 50
@@ -151,18 +143,18 @@ define('two/minimap/ui', [
         }, 50)
     }
 
-    var hideTooltip = function () {
+    const hideTooltip = function () {
         clearTimeout(tooltipTimeout)
         MapController.tt.visible = false
         tooltipWrapper.classList.add('ng-hide')
         mapWrapper.appendChild(tooltipWrapper)
     }
 
-    var openColorPalette = function (inputType, colorGroup, itemId, itemColor) {
-        var modalScope = $rootScope.$new()
-        var selectedColor
-        var hideReset = true
-        var settingId
+    const openColorPalette = function (inputType, colorGroup, itemId, itemColor) {
+        let modalScope = $rootScope.$new()
+        let selectedColor
+        let hideReset = true
+        let settingId
 
         modalScope.colorPalettes = colors.palette
 
@@ -210,17 +202,17 @@ define('two/minimap/ui', [
         windowManagerService.getModal('modal_color_palette', modalScope)
     }
 
-    var addCustomHighlight = function () {
+    const addCustomHighlight = function () {
         minimap.addHighlight($scope.selectedHighlight, $scope.addHighlightColor)
     }
 
-    var saveSettings = function () {
+    const saveSettings = function () {
         settings.setAll(settings.decode($scope.settings))
         utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, 'minimap'))
     }
 
-    var resetSettings = function () {
-        var modalScope = $rootScope.$new()
+    const resetSettings = function () {
+        let modalScope = $rootScope.$new()
 
         modalScope.title = $filter('i18n')('reset_confirm_title', $rootScope.loc.ale, 'minimap')
         modalScope.text = $filter('i18n')('reset_confirm_text', $rootScope.loc.ale, 'minimap')
@@ -242,22 +234,22 @@ define('two/minimap/ui', [
         windowManagerService.getModal('modal_attention', modalScope)
     }
 
-    var highlightsCount = function () {
-        var character = Object.keys($scope.highlights.character).length
-        var tribe = Object.keys($scope.highlights.tribe).length
+    const highlightsCount = function () {
+        const character = Object.keys($scope.highlights.character).length
+        const tribe = Object.keys($scope.highlights.tribe).length
         
         return character + tribe
     }
 
-    var openProfile = function (type, itemId) {
-        var handler = type === 'character'
+    const openProfile = function (type, itemId) {
+        const handler = type === 'character'
             ? windowDisplayService.openCharacterProfile
             : windowDisplayService.openTribeProfile
 
         handler(itemId)
     }
 
-    var eventHandlers = {
+    const eventHandlers = {
         addHighlightAutoCompleteSelect: function (item) {
             $scope.selectedHighlight = {
                 id: item.id,
@@ -278,14 +270,14 @@ define('two/minimap/ui', [
             utils.emitNotif('error', $filter('i18n')('highlight_add_error_invalid_color', $rootScope.loc.ale, 'minimap'))
         },
         onMouseLeaveMinimap: function (event) {
-            var event = new MouseEvent('mouseup', {
+            const mouseUpEvent = new MouseEvent('mouseup', {
                 view: window,
                 bubbles: true,
                 cancelable: true
             })
 
             hideTooltip()
-            $crossCanvas.dispatchEvent(event)
+            $crossCanvas.dispatchEvent(mouseUpEvent)
         },
         onMouseMoveMinimap: function (event) {
             hideTooltip()
@@ -296,9 +288,7 @@ define('two/minimap/ui', [
         }
     }
 
-    var init = function () {
-        var opener
-
+    const init = function () {
         settings = minimap.getSettings()
         MapController = transferredSharedDataService.getSharedData('MapController')
         $minimapCanvas = document.createElement('canvas')
@@ -313,9 +303,9 @@ define('two/minimap/ui', [
         windowWrapper = document.querySelector('#wrapper')
         mapWrapper = document.querySelector('#map')
 
-        $opener = interfaceOverflow.addMenuButton('Minimap', 50)
-        $opener.addEventListener('click', function () {
-            var current = minimap.getMapPosition()
+        $button = interfaceOverflow.addMenuButton('Minimap', 50)
+        $button.addEventListener('click', function () {
+            const current = minimap.getMapPosition()
 
             if (!current) {
                 return false
@@ -329,7 +319,7 @@ define('two/minimap/ui', [
         interfaceOverflow.addStyle('{: minimap_css_style :}')
     }
 
-    var buildWindow = function () {
+    const buildWindow = function () {
         $scope = $rootScope.$new()
         $scope.SETTINGS = SETTINGS
         $scope.TAB_TYPES = TAB_TYPES

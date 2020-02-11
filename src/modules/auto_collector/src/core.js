@@ -7,41 +7,26 @@ define('two/autoCollector', [
     $timeHelper,
     Lockr
 ) {
-    /**
-     * Indica se o modulo já foi iniciado.
-     *
-     * @type {Boolean}
-     */
-    var initialized = false
-
-    /**
-     * Indica se o modulo está em funcionamento.
-     *
-     * @type {Boolean}
-     */
-    var running = false
+    let initialized = false
+    let running = false
 
     /**
      * Permite que o evento RESOURCE_DEPOSIT_JOB_COLLECTIBLE seja executado
      * apenas uma vez.
-     *
-     * @type {Boolean}
      */
-    var recall = true
+    let recall = true
 
     /**
      * Next automatic reroll setTimeout ID.
-     * 
-     * @type {Number}
      */
-    var nextUpdateId = 0
+    let nextUpdateId = 0
 
     /**
      * Inicia um trabalho.
      *
      * @param {Object} job - Dados do trabalho
      */
-    var startJob = function (job) {
+    const startJob = function (job) {
         socketService.emit(routeProvider.RESOURCE_DEPOSIT_START_JOB, {
             job_id: job.id
         })
@@ -52,7 +37,7 @@ define('two/autoCollector', [
      *
      * @param {Object} job - Dados do trabalho
      */
-    var finalizeJob = function (job) {
+    const finalizeJob = function (job) {
         socketService.emit(routeProvider.RESOURCE_DEPOSIT_COLLECT, {
             job_id: job.id,
             village_id: modelDataService.getSelectedVillage().getId()
@@ -62,7 +47,7 @@ define('two/autoCollector', [
     /**
      * Força a atualização das informações do depósito.
      */
-    var updateDepositInfo = function () {
+    const updateDepositInfo = function () {
         socketService.emit(routeProvider.RESOURCE_DEPOSIT_GET_INFO, {})
     }
 
@@ -70,35 +55,28 @@ define('two/autoCollector', [
      * Faz a analise dos trabalhos sempre que um evento relacionado ao depósito
      * é disparado.
      */
-    var analyse = function () {
-        var data
-        var current
-        var collectible
-        var ready
-        
+    const analyse = function () {
         if (!running) {
             return false
         }
 
-        data = modelDataService.getSelectedCharacter().getResourceDeposit()
+        let data = modelDataService.getSelectedCharacter().getResourceDeposit()
 
         if (!data) {
             return false
         }
 
-        current = data.getCurrentJob()
-
-        if (current) {
+        if (data.getCurrentJob()) {
             return false
         }
 
-        collectible = data.getCollectibleJobs()
+        let collectible = data.getCollectibleJobs()
 
         if (collectible) {
             return finalizeJob(collectible.shift())
         }
 
-        ready = data.getReadyJobs()
+        let ready = data.getReadyJobs()
 
         if (ready) {
             return startJob(getFastestJob(ready))
@@ -110,8 +88,8 @@ define('two/autoCollector', [
      *
      * @param {Array} jobs - Lista de trabalhos prontos para serem iniciados.
      */
-    var getFastestJob = function (jobs) {
-        var sorted = jobs.sort(function (a, b) {
+    const getFastestJob = function (jobs) {
+        const sorted = jobs.sort(function (a, b) {
             return a.duration - b.duration
         })
 
@@ -126,8 +104,8 @@ define('two/autoCollector', [
      * 
      * @param {Object} data - Os dados recebidos de RESOURCE_DEPOSIT_INFO
      */
-    var rerollUpdater = function (data) {
-        var timeLeft = data.time_next_reset * 1000 - Date.now() + 1000
+    const rerollUpdater = function (data) {
+        const timeLeft = data.time_next_reset * 1000 - Date.now() + 1000
 
         clearTimeout(nextUpdateId)
         nextUpdateId = setTimeout(updateDepositInfo, timeLeft)
@@ -138,7 +116,7 @@ define('two/autoCollector', [
      *
      * @type {Object}
      */
-    var autoCollector = {}
+    let autoCollector = {}
 
     /**
      * Inicializa o AutoDepois, configura os eventos.

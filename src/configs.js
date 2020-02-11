@@ -6,7 +6,7 @@ require([
     Lockr
 ) {
     ready(function () {
-        var $player = modelDataService.getSelectedCharacter()
+        let $player = modelDataService.getSelectedCharacter()
 
         // Lockr settings
         Lockr.prefix = $player.getId() + '_twOverflow_' + $player.getWorldId() + '-'

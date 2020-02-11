@@ -25,23 +25,23 @@ define('two/builderQueue', [
     eventQueue,
     Lockr
 ) {
-    var buildingService = injector.get('buildingService')
-    var premiumActionService = injector.get('premiumActionService')
-    var buildingQueueService = injector.get('buildingQueueService')
-    var initialized = false
-    var running = false
-    var localSettings
-    var intervalCheckId
-    var buildingSequenceLimit
-    var ANALYSES_PER_MINUTE = 1
-    var ANALYSES_PER_MINUTE_INSTANT_FINISH = 10
-    var VILLAGE_BUILDINGS = {}
-    var groupList
-    var $player
-    var logs
-    var sequencesAvail = true
-    var settings
-    var STORAGE_KEYS = {
+    let buildingService = injector.get('buildingService')
+    let premiumActionService = injector.get('premiumActionService')
+    let buildingQueueService = injector.get('buildingQueueService')
+    let initialized = false
+    let running = false
+    let localSettings
+    let intervalCheckId
+    let buildingSequenceLimit
+    const ANALYSES_PER_MINUTE = 1
+    const ANALYSES_PER_MINUTE_INSTANT_FINISH = 10
+    const VILLAGE_BUILDINGS = {}
+    let groupList
+    let $player
+    let logs
+    let sequencesAvail = true
+    let settings
+    const STORAGE_KEYS = {
         LOGS: 'builder_queue_log',
         SETTINGS: 'builder_queue_settings'
     }
@@ -50,11 +50,8 @@ define('two/builderQueue', [
      * Loop all player villages, check if ready and init the building analyse
      * for each village.
      */
-    var analyseVillages = function () {
-        var villageIds = getVillageIds()
-        var village
-        var readyState
-        var queue
+    const analyseVillages = function () {
+        const villageIds = getVillageIds()
 
         if (!sequencesAvail) {
             builderQueue.stop()
@@ -62,10 +59,10 @@ define('two/builderQueue', [
         }
 
         villageIds.forEach(function (villageId) {
-            village = $player.getVillage(villageId)
-            readyState = village.checkReadyState()
-            queue = village.buildingQueue
-            jobs = queue.getAmountJobs()
+            const village = $player.getVillage(villageId)
+            const readyState = village.checkReadyState()
+            const queue = village.buildingQueue
+            const jobs = queue.getAmountJobs()
 
             if (jobs === queue.getUnlockedSlots()) {
                 return false
@@ -79,18 +76,15 @@ define('two/builderQueue', [
         })
     }
 
-    var analyseVillagesInstantFinish = function () {
-        var villageIds = getVillageIds()
-        var village
-        var queue
-        var jobs
+    const analyseVillagesInstantFinish = function () {
+        const villageIds = getVillageIds()
 
         villageIds.forEach(function (villageId) {
-            village = $player.getVillage(villageId)
-            queue = village.buildingQueue
+            const village = $player.getVillage(villageId)
+            const queue = village.buildingQueue
 
             if (queue.getAmountJobs()) {
-                jobs = queue.getQueue()
+                const jobs = queue.getQueue()
 
                 jobs.forEach(function (job) {
                     if (buildingQueueService.canBeFinishedForFree(job, village)) {
@@ -101,12 +95,11 @@ define('two/builderQueue', [
         })
     }
 
-    var initializeAllVillages = function () {
-        var villageIds = getVillageIds()
-        var village
+    const initializeAllVillages = function () {
+        const villageIds = getVillageIds()
 
         villageIds.forEach(function (villageId) {
-            village = $player.getVillage(villageId)
+            const village = $player.getVillage(villageId)
 
             if (!village.isInitialized()) {
                 villageService.initializeVillage(village)
@@ -119,10 +112,9 @@ define('two/builderQueue', [
      *
      * @return {Array}
      */
-    var getVillageIds = function () {
-        var ids = []
-        var groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
-        var villages = []
+    const getVillageIds = function () {
+        const groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
+        let villages = []
 
         if (groupVillages) {
             villages = groupList.getGroupVillageIds(groupVillages)
@@ -143,15 +135,13 @@ define('two/builderQueue', [
      *
      * @param {VillageModel} village
      */
-    var analyseVillageBuildings = function (village) {
-        var buildingLevels = angular.copy(village.buildingData.getBuildingLevels())
-        var currentQueue = village.buildingQueue.getQueue()
-        var sequence = angular.copy(VILLAGE_BUILDINGS)
-        var now
-        var logData
-        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
-        var activeSequenceId = settings.get(SETTINGS.ACTIVE_SEQUENCE)
-        var activeSequence = sequences[activeSequenceId]
+    const analyseVillageBuildings = function (village) {
+        let buildingLevels = angular.copy(village.buildingData.getBuildingLevels())
+        const currentQueue = village.buildingQueue.getQueue()
+        let sequence = angular.copy(VILLAGE_BUILDINGS)
+        const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        const activeSequenceId = settings.get(SETTINGS.ACTIVE_SEQUENCE)
+        const activeSequence = sequences[activeSequenceId]
 
         currentQueue.forEach(function (job) {
             buildingLevels[job.building]++
@@ -171,8 +161,8 @@ define('two/builderQueue', [
                             return false
                         }
 
-                        now = Date.now()
-                        logData = [
+                        let now = Date.now()
+                        let logData = [
                             {
                                 x: village.getX(),
                                 y: village.getY(),
@@ -202,10 +192,8 @@ define('two/builderQueue', [
      * @param {String} buildingName - Building to be build.
      * @param {Function} callback
      */
-    var checkAndUpgradeBuilding = function (village, buildingName, callback) {
-        var upgradeability = checkBuildingUpgradeability(village, buildingName)
-        var limitFarm
-        var currentFarm
+    const checkAndUpgradeBuilding = function (village, buildingName, callback) {
+        const upgradeability = checkBuildingUpgradeability(village, buildingName)
 
         if (upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
             upgradeBuilding(village, buildingName, function (event, data) {
@@ -213,8 +201,8 @@ define('two/builderQueue', [
             })
         } else if (upgradeability === UPGRADEABILITY_STATES.NOT_ENOUGH_FOOD) {
             if (settings.get(SETTINGS.PRIORIZE_FARM)) {
-                limitFarm = buildingSequenceLimit[BUILDING_TYPES.FARM]
-                villageFarm = village.getBuildingData().getDataForBuilding(BUILDING_TYPES.FARM)
+                const limitFarm = buildingSequenceLimit[BUILDING_TYPES.FARM]
+                const villageFarm = village.getBuildingData().getDataForBuilding(BUILDING_TYPES.FARM)
 
                 if (villageFarm.level < limitFarm) {
                     upgradeBuilding(village, BUILDING_TYPES.FARM, function (event, data) {
@@ -227,7 +215,7 @@ define('two/builderQueue', [
         callback(false)
     }
 
-    var upgradeBuilding = function (village, buildingName, callback) {
+    const upgradeBuilding = function (village, buildingName, callback) {
         socketService.emit(routeProvider.VILLAGE_UPGRADE_BUILDING, {
             building: buildingName,
             village_id: village.getId(),
@@ -239,14 +227,12 @@ define('two/builderQueue', [
     /**
      * Can't just use the .upgradeability value because of the preserve resources setting.
      */
-    var checkBuildingUpgradeability = function (village, buildingName) {
-        var buildingData = village.getBuildingData().getDataForBuilding(buildingName)
-        var nextLevelCosts
-        var resources
+    const checkBuildingUpgradeability = function (village, buildingName) {
+        const buildingData = village.getBuildingData().getDataForBuilding(buildingName)
 
         if (buildingData.upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
-            nextLevelCosts = buildingData.nextLevelCosts
-            resources = village.getResources().getComputed()
+            const nextLevelCosts = buildingData.nextLevelCosts
+            const resources = village.getResources().getComputed()
 
             if (
                 resources.clay.currentStock - settings.get(SETTINGS.PRESERVE_CLAY) < nextLevelCosts.clay ||
@@ -267,8 +253,8 @@ define('two/builderQueue', [
      * @param {Object} buildingLevels - Current buildings level from the village.
      * @return {Boolean} True if the levels already reached the limit.
      */
-    var checkVillageBuildingLimit = function (buildingLevels) {
-        for (var buildingName in buildingLevels) {
+    const checkVillageBuildingLimit = function (buildingLevels) {
+        for (let buildingName in buildingLevels) {
             if (buildingLevels[buildingName] < buildingSequenceLimit[buildingName]) {
                 return false
             }
@@ -284,14 +270,11 @@ define('two/builderQueue', [
      * @param {Array} sequence
      * @return {Boolean}
      */
-    var validSequence = function (sequence) {
-        var sequence = angular.copy(VILLAGE_BUILDINGS)
-        var buildingData = modelDataService.getGameData().getBuildings()
-        var building
-        var i
+    const validSequence = function (sequence) {
+        const buildingData = modelDataService.getGameData().getBuildings()
 
-        for (i = 0; i < sequence.length; i++) {
-            building = sequence[i]
+        for (let i = 0; i < sequence.length; i++) {
+            let building = sequence[i]
 
             if (++sequence[building] > buildingData[building].max_level) {
                 return false
@@ -307,10 +290,10 @@ define('two/builderQueue', [
      * @param {String} sequenceId
      * @return {Object} Maximum level for each building.
      */
-    var getSequenceLimit = function (sequenceId) {
-        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
-        var sequence = sequences[sequenceId]
-        var sequenceLimit = angular.copy(VILLAGE_BUILDINGS)
+    const getSequenceLimit = function (sequenceId) {
+        const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        const sequence = sequences[sequenceId]
+        let sequenceLimit = angular.copy(VILLAGE_BUILDINGS)
 
         sequence.forEach(function (buildingName) {
             sequenceLimit[buildingName]++
@@ -319,7 +302,7 @@ define('two/builderQueue', [
         return sequenceLimit
     }
 
-    var builderQueue = {}
+    let builderQueue = {}
 
     builderQueue.start = function () {
         if (!sequencesAvail) {
@@ -370,7 +353,7 @@ define('two/builderQueue', [
     }
 
     builderQueue.addBuildingSequence = function (id, sequence) {
-        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        let sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
 
         if (id in sequences) {
             return ERROR_CODES.SEQUENCE_EXISTS
@@ -390,7 +373,7 @@ define('two/builderQueue', [
     }
 
     builderQueue.updateBuildingSequence = function (id, sequence) {
-        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        let sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
 
         if (!(id in sequences)) {
             return ERROR_CODES.SEQUENCE_NO_EXISTS
@@ -410,7 +393,7 @@ define('two/builderQueue', [
     }
 
     builderQueue.removeSequence = function (id) {
-        var sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        let sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
 
         if (!(id in sequences)) {
             return ERROR_CODES.SEQUENCE_NO_EXISTS
@@ -424,9 +407,6 @@ define('two/builderQueue', [
     }
 
     builderQueue.init = function () {
-        var buildingName
-        var village
-
         initialized = true
         logs = Lockr.get(STORAGE_KEYS.LOGS, [], true)
         $player = modelDataService.getSelectedCharacter()
@@ -447,7 +427,7 @@ define('two/builderQueue', [
             }
         })
 
-        for (buildingName in BUILDING_TYPES) {
+        for (let buildingName in BUILDING_TYPES) {
             VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
         }
 
@@ -460,7 +440,7 @@ define('two/builderQueue', [
             }
 
             setTimeout(function () {
-                village = $player.getVillage(data.village_id)
+                let village = $player.getVillage(data.village_id)
                 analyseVillageBuildings(village)
             }, 1000)
         })

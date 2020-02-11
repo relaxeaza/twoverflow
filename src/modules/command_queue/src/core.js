@@ -23,20 +23,20 @@ define('two/commandQueue', [
     mapData,
     Lockr
 ) {
-    var CHECKS_PER_SECOND = 10
-    var ERROR_CODES = {
+    const CHECKS_PER_SECOND = 10
+    const ERROR_CODES = {
         INVALID_ORIGIN: 'invalid_rigin',
         INVALID_TARGET: 'invalid_target'
     }
-    var waitingCommands = []
-    var waitingCommandsObject = {}
-    var sentCommands = []
-    var expiredCommands = []
-    var running = false
-    var $player
-    var timeOffset
+    let waitingCommands = []
+    let waitingCommandsObject = {}
+    let sentCommands = []
+    let expiredCommands = []
+    let running = false
+    let $player
+    let timeOffset
 
-    var commandFilters = {
+    const commandFilters = {
         [FILTER_TYPES.SELECTED_VILLAGE]: function (command) {
             return command.origin.id === modelDataService.getSelectedVillage().getId()
         },
@@ -56,10 +56,10 @@ define('two/commandQueue', [
             return command.type !== COMMAND_TYPES.RELOCATE
         },
         [FILTER_TYPES.TEXT_MATCH]: function (command, options) {
-            var show = true
-            var keywords = options[FILTER_TYPES.TEXT_MATCH].toLowerCase().split(/\W/)
+            let show = true
+            const keywords = options[FILTER_TYPES.TEXT_MATCH].toLowerCase().split(/\W/)
 
-            var searchString = [
+            const searchString = [
                 command.origin.name,
                 command.origin.x + '|' + command.origin.y,
                 command.origin.character_name || '',
@@ -68,9 +68,7 @@ define('two/commandQueue', [
                 command.target.character_name || '',
                 command.target.tribe_name || '',
                 command.target.tribe_tag || ''
-            ]
-
-            searchString = searchString.join('').toLowerCase()
+            ].join('').toLowerCase()
 
             keywords.some(function (keyword) {
                 if (keyword.length && !searchString.includes(keyword)) {
@@ -83,7 +81,7 @@ define('two/commandQueue', [
         }
     }
 
-    var isTimeToSend = function (sendTime) {
+    const isTimeToSend = function (sendTime) {
         return sendTime < (timeHelper.gameTime() + timeOffset)
     }
 
@@ -97,13 +95,11 @@ define('two/commandQueue', [
      * @param  {Object} units - Unidades a serem analisadas
      * @return {Object} Objeto sem nenhum valor zero
      */
-    var cleanZeroUnits = function (units) {
-        var cleanUnits = {}
-        var unit
-        var amount
+    const cleanZeroUnits = function (units) {
+        let cleanUnits = {}
 
-        for (unit in units) {
-            amount = units[unit]
+        for (let unit in units) {
+            let amount = units[unit]
 
             if (amount === '*' || amount !== 0) {
                 cleanUnits[unit] = amount
@@ -113,46 +109,46 @@ define('two/commandQueue', [
         return cleanUnits
     }
 
-    var sortWaitingQueue = function () {
+    const sortWaitingQueue = function () {
         waitingCommands = waitingCommands.sort(function (a, b) {
             return a.sendTime - b.sendTime
         })
     }
 
-    var pushWaitingCommand = function (command) {
+    const pushWaitingCommand = function (command) {
         waitingCommands.push(command)
     }
 
-    var pushCommandObject = function (command) {
+    const pushCommandObject = function (command) {
         waitingCommandsObject[command.id] = command
     }
 
-    var pushSentCommand = function (command) {
+    const pushSentCommand = function (command) {
         sentCommands.push(command)
     }
 
-    var pushExpiredCommand = function (command) {
+    const pushExpiredCommand = function (command) {
         expiredCommands.push(command)
     }
 
-    var storeWaitingQueue = function () {
+    const storeWaitingQueue = function () {
         Lockr.set(STORAGE_KEYS.QUEUE_COMMANDS, waitingCommands)
     }
 
-    var storeSentQueue = function () {
+    const storeSentQueue = function () {
         Lockr.set(STORAGE_KEYS.QUEUE_SENT, sentCommands)
     }
 
-    var storeExpiredQueue = function () {
+    const storeExpiredQueue = function () {
         Lockr.set(STORAGE_KEYS.QUEUE_EXPIRED, expiredCommands)
     }
 
-    var loadStoredCommands = function () {
-        var storedQueue = Lockr.get(STORAGE_KEYS.QUEUE_COMMANDS, [], true)
+    const loadStoredCommands = function () {
+        const storedQueue = Lockr.get(STORAGE_KEYS.QUEUE_COMMANDS, [], true)
 
         if (storedQueue.length) {
-            for (var i = 0; i < storedQueue.length; i++) {
-                var command = storedQueue[i]
+            for (let i = 0; i < storedQueue.length; i++) {
+                let command = storedQueue[i]
 
                 if (timeHelper.gameTime() > command.sendTime) {
                     commandQueue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
@@ -165,7 +161,7 @@ define('two/commandQueue', [
         }
     }
 
-    var waitingCommandHelpers = function (command) {
+    const waitingCommandHelpers = function (command) {
         if (command.hasOwnProperty('countdown')) {
             return false
         }
@@ -175,23 +171,19 @@ define('two/commandQueue', [
         }
     }
 
-    var parseDynamicUnits = function (command) {
-        var playerVillages = modelDataService.getVillages()
-        var village = playerVillages[command.origin.id]
-        var villageUnits
-        var parsedUnits
-        var unit
-        var amount
+    const parseDynamicUnits = function (command) {
+        const playerVillages = modelDataService.getVillages()
+        const village = playerVillages[command.origin.id]
 
         if (!village) {
             return EVENT_CODES.NOT_OWN_VILLAGE
         }
 
-        villageUnits = village.unitInfo.units
-        parsedUnits = {}
+        const villageUnits = village.unitInfo.units
+        let parsedUnits = {}
 
-        for (unit in command.units) {
-            amount = command.units[unit]
+        for (let unit in command.units) {
+            let amount = command.units[unit]
 
             if (amount === '*') {
                 amount = villageUnits[unit].available
@@ -221,7 +213,7 @@ define('two/commandQueue', [
         return parsedUnits
     }
 
-    var listenCommands = function () {
+    const listenCommands = function () {
         setInterval(function () {
             if (!waitingCommands.length) {
                 return
@@ -241,7 +233,7 @@ define('two/commandQueue', [
         }, 1000 / CHECKS_PER_SECOND)
     }
 
-    var commandQueue = {
+    let commandQueue = {
         initialized: false
     }
 
@@ -265,7 +257,7 @@ define('two/commandQueue', [
     }
 
     commandQueue.sendCommand = function (command) {
-        var units = parseDynamicUnits(command)
+        const units = parseDynamicUnits(command)
 
         // units === EVENT_CODES.*
         if (typeof units === 'string') {
@@ -329,24 +321,24 @@ define('two/commandQueue', [
             return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, command)
         }
 
-        var getOriginVillage = new Promise(function (resolve, reject) {
+        let getOriginVillage = new Promise(function (resolve, reject) {
             commandQueue.getVillageByCoords(command.origin.x, command.origin.y, function (data) {
                 data ? resolve(data) : reject(ERROR_CODES.INVALID_ORIGIN)
             })
         })
 
-        var getTargetVillage = new Promise(function (resolve, reject) {
+        let getTargetVillage = new Promise(function (resolve, reject) {
             commandQueue.getVillageByCoords(command.target.x, command.target.y, function (data) {
                 data ? resolve(data) : reject(ERROR_CODES.INVALID_TARGET)
             })
         })
 
-        var loadVillagesData = Promise.all([
+        let loadVillagesData = Promise.all([
             getOriginVillage,
             getTargetVillage
         ])
 
-        for (var officer in command.officers) {
+        for (let officer in command.officers) {
             if (command.officers[officer]) {
                 command.officers[officer] = 1
             } else {
@@ -367,7 +359,7 @@ define('two/commandQueue', [
                 command.officers
             )
 
-            var inputTime = utils.getTimeFromString(command.date)
+            const inputTime = utils.getTimeFromString(command.date)
 
             if (command.dateType === DATE_TYPES.ARRIVE) {
                 command.sendTime = inputTime - command.travelTime
@@ -423,10 +415,10 @@ define('two/commandQueue', [
      * @return {Boolean} If the command was successfully removed.
      */
     commandQueue.removeCommand = function (command, eventCode) {
-        var removed = false
+        let removed = false
         delete waitingCommandsObject[command.id]
 
-        for (var i = 0; i < waitingCommands.length; i++) {
+        for (let i = 0; i < waitingCommands.length; i++) {
             if (waitingCommands[i].id == command.id) {
                 waitingCommands.splice(i, 1)
                 storeWaitingQueue()
@@ -510,8 +502,8 @@ define('two/commandQueue', [
      * @return {Array} Comandos filtrados.
      */
     commandQueue.filterCommands = function (filterId, _options, _commandsDeepFilter) {
-        var filterHandler = commandFilters[filterId]
-        var commands = _commandsDeepFilter || waitingCommands
+        const filterHandler = commandFilters[filterId]
+        const commands = _commandsDeepFilter || waitingCommands
 
         return commands.filter(function (command) {
             return filterHandler(command, _options)

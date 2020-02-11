@@ -27,47 +27,44 @@ define('two/attackView', [
     eventQueue,
     CommandModel
 ) {
-    var initialized = false
-    var listeners = {}
-    var overviewService = injector.get('overviewService')
-    var globalInfoModel
-    var commands = []
-    var commandQueue
-    var commandQueueEnabled = false
-    var filters = {}
-    var filterParams = {}
-    var sorting = {
+    let initialized = false
+    let listeners = {}
+    let overviewService = injector.get('overviewService')
+    let globalInfoModel
+    let commands = []
+    let commandQueue = false
+    let filters = {}
+    let filterParams = {}
+    let sorting = {
         reverse: false,
         column: COLUMN_TYPES.TIME_COMPLETED
     }
-    var COMMAND_ORDER = [
+    const COMMAND_ORDER = [
         'ATTACK',
         'SUPPORT',
         'RELOCATE'
     ]
-    var STORAGE_KEYS = {
+    const STORAGE_KEYS = {
         FILTERS: 'attack_view_filters'
     }
-    var INCOMING_UNITS_FILTER = {}
-    var COMMAND_TYPES_FILTER = {}
+    const INCOMING_UNITS_FILTER = {}
+    const COMMAND_TYPES_FILTER = {}
 
-    var resetFilters = function () {
+    const resetFilters = function () {
         filters = {}
         filters[FILTER_TYPES.COMMAND_TYPES] = {}
         filters[FILTER_TYPES.VILLAGE] = angular.copy(COMMAND_TYPES_FILTER)
         filters[FILTER_TYPES.INCOMING_UNITS] = angular.copy(INCOMING_UNITS_FILTER)
     }
 
-    var formatFilters = function () {
-        var toArray = [FILTER_TYPES.COMMAND_TYPES]
-        var currentVillageId = modelDataService.getSelectedVillage().getId()
-        var arrays = {}
-        var i
-        var j
+    const formatFilters = function () {
+        const toArray = [FILTER_TYPES.COMMAND_TYPES]
+        const currentVillageId = modelDataService.getSelectedVillage().getId()
+        let arrays = {}
 
         // format filters for backend
-        for (i = 0; i < toArray.length; i++) {
-            for (j in filters[toArray[i]]) {
+        for (let i = 0; i < toArray.length; i++) {
+            for (let j in filters[toArray[i]]) {
                 if (!arrays[toArray[i]]) {
                     arrays[toArray[i]] = []
                 }
@@ -95,7 +92,7 @@ define('two/attackView', [
     /**
      * Command was sent.
      */
-    var onCommandIncomming = function () {
+    const onCommandIncomming = function () {
         // we can never know if the command is currently visible (because of filters, sorting and stuff) -> reload
         attackView.loadCommands()
     }
@@ -106,7 +103,7 @@ define('two/attackView', [
      * @param {Object} event unused
      * @param {Object} data The backend-data
      */
-    var onCommandCancelled = function (event, data) {
+    const onCommandCancelled = function (event, data) {
         eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMAND_CANCELLED, [data.id || data.command_id])
     }
 
@@ -116,10 +113,8 @@ define('two/attackView', [
      * @param {Object} event unused
      * @param {Object} data The backend-data
      */
-    var onCommandIgnored = function (event, data) {
-        var i
-
-        for (i = 0; i < commands.length; i++) {
+    const onCommandIgnored = function (event, data) {
+        for (let i = 0; i < commands.length; i++) {
             if (commands[i].command_id === data.command_id) {
                 commands.splice(i, 1)
             }
@@ -134,10 +129,8 @@ define('two/attackView', [
      * @param {Object} event unused
      * @param {Object} data The backend-data
      */
-    var onVillageNameChanged = function (event, data) {
-        var i
-
-        for (i = 0; i < commands.length; i++) {
+    const onVillageNameChanged = function (event, data) {
+        for (let i = 0; i < commands.length; i++) {
             if (commands[i].target_village_id === data.village_id) {
                 commands[i].target_village_name = data.name
                 commands[i].targetVillage.name = data.name
@@ -150,7 +143,7 @@ define('two/attackView', [
         eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_VILLAGE_RENAMED, [data])
     }
 
-    var onVillageSwitched = function (e, newVillageId) {
+    const onVillageSwitched = function (e, newVillageId) {
         if (filterParams[FILTER_TYPES.VILLAGE].length) {
             filterParams[FILTER_TYPES.VILLAGE] = [newVillageId]
 
@@ -162,12 +155,12 @@ define('two/attackView', [
      * @param {CommandModel} command
      * @return {String} Slowest unit
      */
-    var getSlowestUnit = function (command) {
-        var commandDuration = command.model.duration
-        var units = {}
-        var origin = { x: command.origin_x, y: command.origin_y }
-        var target = { x: command.target_x, y: command.target_y }
-        var travelTimes = []
+    const getSlowestUnit = function (command) {
+        const commandDuration = command.model.duration
+        let units = {}
+        const origin = { x: command.origin_x, y: command.origin_y }
+        const target = { x: command.target_x, y: command.target_y }
+        let travelTimes = []
 
         UNIT_SPEED_ORDER.forEach(function (unit) {
             units[unit] = 1
@@ -195,13 +188,10 @@ define('two/attackView', [
      * @param {VillageModel} origin
      * @return {Array} Sorted villages
      */
-    var sortByDistance = function (villages, origin) {
-        var distA
-        var distB
-
+    const sortByDistance = function (villages, origin) {
         return villages.sort(function (villageA, villageB) {
-            distA = math.actualDistance(origin, villageA)
-            distB = math.actualDistance(origin, villageB)
+            let distA = math.actualDistance(origin, villageA)
+            let distB = math.actualDistance(origin, villageB)
 
             return distA - distB
         })
@@ -216,52 +206,36 @@ define('two/attackView', [
      * @param {VillageModel} origin
      * @param {Function} callback
      */
-    var closestNonHostileVillage = function (origin, callback) {
-        var size = 25
-        var sectors
-        var targets
-        var possibleTargets
-        var closestTargets
-        var barbs
-        var own
-        var tribe
-        var x
-        var y
-        var tribeId
-        var playerId
-        var loads
-        var index = 0
+    const closestNonHostileVillage = function (origin, callback) {
+        const size = 25
+        let loadBlockIndex = 0
 
         if (mapData.hasTownDataInChunk(origin.x, origin.y)) {
-            sectors = mapData.loadTownData(origin.x, origin.y, size, size, size)
-            targets = []
-            possibleTargets = []
-            closestTargets
-            barbs = []
-            own = []
-            tribe = []
-            tribeId = modelDataService.getSelectedCharacter().getTribeId()
-            playerId = modelDataService.getSelectedCharacter().getId()
+            const sectors = mapData.loadTownData(origin.x, origin.y, size, size, size)
+            let targets = []
+            let closestTargets
+            const tribeId = modelDataService.getSelectedCharacter().getTribeId()
+            const playerId = modelDataService.getSelectedCharacter().getId()
 
             sectors.forEach(function (sector) {
-                for (x in sector.data) {
-                    for (y in sector.data[x]) {
+                for (let x in sector.data) {
+                    for (let y in sector.data[x]) {
                         targets.push(sector.data[x][y])
                     }
                 }
             })
 
 
-            barbs = targets.filter(function (target) {
+            const barbs = targets.filter(function (target) {
                 return target.character_id === null && target.id > 0
             })
 
-            own = targets.filter(function (target) {
+            const own = targets.filter(function (target) {
                 return target.character_id === playerId && origin.id !== target.id
             })
 
             if (tribeId) {
-                tribe = targets.filter(function (target) {
+                const tribe = targets.filter(function (target) {
                     return tribeId && target.tribe_id === tribeId
                 })
             }
@@ -279,10 +253,10 @@ define('two/attackView', [
             return callback(closestTargets[0])
         }
         
-        loads = convert.scaledGridCoordinates(origin.x, origin.y, size, size, size)
+        const loads = convert.scaledGridCoordinates(origin.x, origin.y, size, size, size)
 
         mapData.loadTownDataAsync(origin.x, origin.y, size, size, function () {
-            if (++index === loads.length) {
+            if (++loadBlockIndex === loads.length) {
                 closestNonHostileVillage(origin, callback)
             }
         })
@@ -291,12 +265,10 @@ define('two/attackView', [
     /**
      * @param {Object} data The data-object from the backend
      */
-    var onOverviewIncomming = function (data) {
-        var i
-
+    const onOverviewIncomming = function (data) {
         commands = data.commands
 
-        for (i = 0; i < commands.length; i++) {
+        for (let i = 0; i < commands.length; i++) {
             overviewService.formatCommand(commands[i])
             commands[i].slowestUnit = getSlowestUnit(commands[i])
         }
@@ -308,11 +280,11 @@ define('two/attackView', [
         eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMANDS_LOADED, [commands])
     }
 
-    var attackView = {}
+    let attackView = {}
 
     attackView.loadCommands = function () { 
-        var incomingCommands = globalInfoModel.getCommandListModel().getIncomingCommands().length
-        var count = incomingCommands > 25 ? incomingCommands : 25
+        const incomingCommands = globalInfoModel.getCommandListModel().getIncomingCommands().length
+        const count = incomingCommands > 25 ? incomingCommands : 25
 
         socketService.emit(routeProvider.OVERVIEW_GET_INCOMING, {
             'count': count,
@@ -375,14 +347,10 @@ define('two/attackView', [
      * @param {String} date Date that the command has to leave.
      */
     attackView.setCommander = function (command, date) {
-        var origin
-        var target
-        var type
-
         closestNonHostileVillage(command.targetVillage, function (closestVillage) {
-            origin = command.targetVillage
-            target = closestVillage
-            type = target.character_id === null ? 'attack' : 'support'
+            const origin = command.targetVillage
+            const target = closestVillage
+            const type = target.character_id === null ? 'attack' : 'support'
             
             commandQueue.addCommand({
                 origin: origin,
@@ -416,7 +384,7 @@ define('two/attackView', [
     }
 
     attackView.commandQueueEnabled = function () {
-        return commandQueueEnabled
+        return !!commandQueue
     }
 
     attackView.isInitialized = function () {
@@ -424,26 +392,23 @@ define('two/attackView', [
     }
 
     attackView.init = function () {
-        var defaultFilters
-        var i
-
-        for (i = 0; i < UNIT_SPEED_ORDER.length; i++) {
+        for (let i = 0; i < UNIT_SPEED_ORDER.length; i++) {
             INCOMING_UNITS_FILTER[UNIT_SPEED_ORDER[i]] = true
         }
 
-        for (i in COMMAND_TYPES) {
+        for (let i in COMMAND_TYPES) {
             COMMAND_TYPES_FILTER[COMMAND_TYPES[i]] = true
         }
 
         try {
             commandQueue = require('two/commandQueue')
-            commandQueueEnabled = !!commandQueue
         } catch (e) {}
 
-        defaultFilters = {}
-        defaultFilters[FILTER_TYPES.COMMAND_TYPES] = angular.copy(COMMAND_TYPES_FILTER)
-        defaultFilters[FILTER_TYPES.INCOMING_UNITS] = angular.copy(INCOMING_UNITS_FILTER)
-        defaultFilters[FILTER_TYPES.VILLAGE] = false
+        const defaultFilters = {
+            [FILTER_TYPES.COMMAND_TYPES]: angular.copy(COMMAND_TYPES_FILTER),
+            [FILTER_TYPES.INCOMING_UNITS]: angular.copy(INCOMING_UNITS_FILTER),
+            [FILTER_TYPES.VILLAGE]: false
+        }
 
         initialized = true
         globalInfoModel = modelDataService.getSelectedCharacter().getGlobalInfo()

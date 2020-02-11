@@ -33,38 +33,37 @@ define('two/farmOverflow', [
     $mapData,
     Lockr
 ) {
-    var initialized = false
-    var running = false
-    var settings
-    var farmers = []
-    var logs = []
-    var includedVillages = []
-    var ignoredVillages = []
-    var onlyVillages = []
-    var selectedPresets = []
-    var activeFarmer = false
-    var sendingCommand = false
-    var currentTarget = false
-    var farmerIndex = 0
-    var farmerCycle = []
-    var farmerTimeoutId = null
-    var targetTimeoutId = null
-    var exceptionLogs
-    var tempVillageReports = {}
+    let initialized = false
+    let running = false
+    let settings
+    let farmers = []
+    let logs = []
+    let includedVillages = []
+    let ignoredVillages = []
+    let onlyVillages = []
+    let selectedPresets = []
+    let activeFarmer = false
+    let sendingCommand = false
+    let currentTarget = false
+    let farmerIndex = 0
+    let farmerCycle = []
+    let farmerTimeoutId = null
+    let targetTimeoutId = null
+    let exceptionLogs
+    let tempVillageReports = {}
+    let $player
+    let unitsData
+    const VILLAGE_COMMAND_LIMIT = 50
+    const MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
+    const MINIMUM_ATTACK_INTERVAL = 1 * 1000
 
-    var $player
-    var unitsData
-    var VILLAGE_COMMAND_LIMIT = 50
-    var MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
-    var MINIMUM_ATTACK_INTERVAL = 1 * 1000
-
-    var STORAGE_KEYS = {
+    const STORAGE_KEYS = {
         LOGS: 'farm_overflow_logs',
         SETTINGS: 'farm_overflow_settings',
         EXCEPTION_LOGS: 'farm_overflow_exception_logs'
     }
 
-    var villageFilters = {
+    const villageFilters = {
         distance: function (target) {
             return !target.distance.between(
                 settings.get(SETTINGS.MIN_DISTANCE),
@@ -88,21 +87,21 @@ define('two/farmOverflow', [
         }
     }
 
-    var targetFilters = [
+    const targetFilters = [
         villageFilters.distance,
         villageFilters.ownPlayer,
         villageFilters.included,
         villageFilters.ignored
     ]
 
-    var calcDistances = function (targets, origin) {
+    const calcDistances = function (targets, origin) {
         return targets.map(function (target) {
             target.distance = math.actualDistance(origin, target)
             return target
         })
     }
 
-    var filterTargets = function (targets) {
+    const filterTargets = function (targets) {
         return targets.filter(function (target) {
             return targetFilters.every(function (fn) {
                 return !fn(target)
@@ -110,25 +109,25 @@ define('two/farmOverflow', [
         })
     }
 
-    var sortTargets = function (targets) {
+    const sortTargets = function (targets) {
         return targets.sort(function (a, b) {
             return a.distance - b.distance
         })
     }
 
-    var reloadTargets = function () {
+    const reloadTargets = function () {
         farmers.forEach(function (farmer) {
             farmer.loadTargets()
         })
     }
 
-    var arrayUnique = function (array) {
+    const arrayUnique = function (array) {
         return array.sort().filter(function (item, pos, ary) {
             return !pos || item != ary[pos - 1]
         })
     }
 
-    var skipStepInterval = function () {
+    const skipStepInterval = function () {
         if (!running) {
             return
         }
@@ -149,33 +148,31 @@ define('two/farmOverflow', [
         }
     }
 
-    var updateIncludedVillage = function () {
-        var groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
-        var groupVillages
+    const updateIncludedVillage = function () {
+        const groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
 
         includedVillages = []
 
         groupsInclude.forEach(function (groupId) {
-            groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupId)
+            let groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupId)
             includedVillages = includedVillages.concat(groupVillages)
         })
 
         includedVillages = arrayUnique(includedVillages)
     }
 
-    var updateIgnoredVillage = function () {
-        var groupIgnored = settings.get(SETTINGS.GROUP_IGNORE)
+    const updateIgnoredVillage = function () {
+        const groupIgnored = settings.get(SETTINGS.GROUP_IGNORE)
         ignoredVillages = modelDataService.getGroupList().getGroupVillageIds(groupIgnored)
     }
 
-    var updateOnlyVillage = function () {
-        var groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
-        var groupVillages
+    const updateOnlyVillage = function () {
+        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
 
         onlyVillages = []
 
         groupsOnly.forEach(function (groupId) {
-            groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupId)
+            let groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupId)
             groupVillages = groupVillages.filter(function (villageId) {
                 return !!$player.getVillage(villageId)
             })
@@ -186,9 +183,9 @@ define('two/farmOverflow', [
         onlyVillages = arrayUnique(onlyVillages)
     }
 
-    var updateExceptionLogs = function () {
-        var exceptionVillages = ignoredVillages.concat(includedVillages)
-        var modified = false
+    const updateExceptionLogs = function () {
+        const exceptionVillages = ignoredVillages.concat(includedVillages)
+        let modified = false
 
         exceptionVillages.forEach(function (villageId) {
             if (!exceptionLogs.hasOwnProperty(villageId)) { 
@@ -215,7 +212,7 @@ define('two/farmOverflow', [
         }
     }
 
-    var updateGroupVillages = function () {
+    const updateGroupVillages = function () {
         updateIncludedVillage()
         updateIgnoredVillage()
         updateOnlyVillage()
@@ -224,13 +221,12 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_VILLAGES_UPDATED)
     }
 
-    var villageGroupLink = function (event, data) {
-        var groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
-        var groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
-        var groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
-        var isOwnVillage = $player.getVillage(data.village_id)
-        var farmer
-        var farmerListUpdated = false
+    const villageGroupLink = function (event, data) {
+        const groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
+        const groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
+        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
+        const isOwnVillage = $player.getVillage(data.village_id)
+        let farmerListUpdated = false
 
         updateGroupVillages()
 
@@ -258,7 +254,7 @@ define('two/farmOverflow', [
         }
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
-            farmer = farmOverflow.create(data.village_id)
+            let farmer = farmOverflow.create(data.village_id)
             farmer.init().then(function () {
                 if (running) {
                     farmer.start()
@@ -273,19 +269,18 @@ define('two/farmOverflow', [
         }
     }
 
-    var villageGroupUnlink = function (event, data) {
-        var groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
-        var groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
-        var groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
-        var isOwnVillage = $player.getVillage(data.village_id)
-        var farmer
-        var farmerListUpdated = false
+    const villageGroupUnlink = function (event, data) {
+        const groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
+        const groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
+        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
+        const isOwnVillage = $player.getVillage(data.village_id)
+        let farmerListUpdated = false
 
         updateGroupVillages()
 
         if (groupIgnore === data.group_id) {
             if (isOwnVillage) {
-                farmer = farmOverflow.create(data.village_id)
+                let farmer = farmOverflow.create(data.village_id)
                 farmer.init().then(function () {
                     if (running) {
                         farmer.start()
@@ -320,7 +315,7 @@ define('two/farmOverflow', [
         }
     }
 
-    var removedGroupListener = function () {
+    const removedGroupListener = function () {
         updateGroupVillages()
 
         farmOverflow.flush()
@@ -328,14 +323,11 @@ define('two/farmOverflow', [
         farmOverflow.createAll()
     }
 
-    var updatePresets = function () {
-        var playerPresets
-        var activePresets
-
-        function processPresets () {
+    const updatePresets = function () {
+        const processPresets = function () {
             selectedPresets = []
-            playerPresets = modelDataService.getPresetList().getPresets()
-            activePresets = settings.get(SETTINGS.PRESETS)
+            const playerPresets = modelDataService.getPresetList().getPresets()
+            const activePresets = settings.get(SETTINGS.PRESETS)
 
             activePresets.forEach(function (presetId) {
                 if (!playerPresets.hasOwnProperty(presetId)) {
@@ -360,8 +352,8 @@ define('two/farmOverflow', [
         }
     }
 
-    var ignoreVillage = function (villageId) {
-        var groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
+    const ignoreVillage = function (villageId) {
+        const groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
 
         if (!groupIgnore) {
             return false
@@ -375,7 +367,7 @@ define('two/farmOverflow', [
         return true
     }
 
-    var presetListener = function () {
+    const presetListener = function () {
         updatePresets()
 
         if (!selectedPresets.length) {
@@ -389,7 +381,7 @@ define('two/farmOverflow', [
         }
     }
 
-    var reportListener = function (event, data) {
+    const reportListener = function (event, data) {
         if (!settings.get(SETTINGS.IGNORE_ON_LOSS) || !settings.get(SETTINGS.GROUP_IGNORE)) {
             return
         }
@@ -413,7 +405,7 @@ define('two/farmOverflow', [
         }
     }
 
-    var commandSentListener = function (event, data) {
+    const commandSentListener = function (event, data) {
         if (!activeFarmer || !currentTarget) {
             return
         }
@@ -431,7 +423,7 @@ define('two/farmOverflow', [
         }
     }
 
-    var commandErrorListener = function (event, data) {
+    const commandErrorListener = function (event, data) {
         if (!activeFarmer || !sendingCommand || !currentTarget) {
             return
         }
@@ -441,15 +433,15 @@ define('two/farmOverflow', [
         }
     }
 
-    var assignPresets = function (villageId, presetIds, callback) {
+    const assignPresets = function (villageId, presetIds, callback) {
         socketService.emit(routeProvider.ASSIGN_PRESETS, {
             village_id: villageId,
             preset_ids: presetIds
         }, callback)
     }
 
-    var getPresetHaul = function (preset) {
-        var haul = 0
+    const getPresetHaul = function (preset) {
+        let haul = 0
 
         angular.forEach(preset.units, function (unitAmount, unitName) {
             if (unitAmount) {
@@ -460,38 +452,38 @@ define('two/farmOverflow', [
         return haul
     }
 
-    var getPresetTimeTravel = function (preset, barbarian) {
+    const getPresetTimeTravel = function (preset, barbarian) {
         return armyService.calculateTravelTime(preset, {
             barbarian: barbarian,
             officers: false
         })
     }
 
-    var checkPresetTime = function (preset, village, target) {
-        var limitTime = settings.get(SETTINGS.MAX_TRAVEL_TIME) * 60
-        var position = village.getPosition()
-        var distance = math.actualDistance(position, target)
-        var travelTime = getPresetTimeTravel(preset, !target.character_id)
-        var totalTravelTime = armyService.getTravelTimeForDistance(preset, travelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
+    const checkPresetTime = function (preset, village, target) {
+        const limitTime = settings.get(SETTINGS.MAX_TRAVEL_TIME) * 60
+        const position = village.getPosition()
+        const distance = math.actualDistance(position, target)
+        const travelTime = getPresetTimeTravel(preset, !target.character_id)
+        const totalTravelTime = armyService.getTravelTimeForDistance(preset, travelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
 
         return limitTime > totalTravelTime
     }
 
-    var checkFullStorage = function(village) {
+    const checkFullStorage = function(village) {
         if (!village.isReady()) {
             return false
         }
 
-        var resources = village.getResources()
-        var computed = resources.getComputed()
-        var maxStorage = resources.getMaxStorage()
+        const resources = village.getResources()
+        const computed = resources.getComputed()
+        const maxStorage = resources.getMaxStorage()
 
         return ['wood', 'clay', 'iron'].every(function (type) {
             return computed[type].currentStock === maxStorage
         })
     }
 
-    var addExceptionLog = function (villageId) {
+    const addExceptionLog = function (villageId) {
         exceptionLogs[villageId] = {
             time: timeHelper.gameTime(),
             report: tempVillageReports[villageId] || false
@@ -503,12 +495,12 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED)
     }
 
-    var addLog = function(type, _data) {
+    const addLog = function(type, _data) {
         if (typeof type !== 'string') {
             return false
         }
 
-        var data = angular.isObject(_data) ? _data : {}
+        let data = angular.isObject(_data) ? _data : {}
 
         data.time = timeHelper.gameTime()
         data.type = type
@@ -519,8 +511,8 @@ define('two/farmOverflow', [
         return true
     }
 
-    var trimAndSaveLogs = function () {
-        var limit = settings.get(SETTINGS.LOGS_LIMIT)
+    const trimAndSaveLogs = function () {
+        const limit = settings.get(SETTINGS.LOGS_LIMIT)
 
         if (logs.length > limit) {
             logs.splice(logs.length - limit, logs.length)
@@ -530,17 +522,17 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_LOGS_UPDATED)
     }
 
-    var Farmer = function (villageId) {
-        var self = this
-        var village = $player.getVillage(villageId)
-        var index = 0
-        var running = false
-        var initialized = false
-        var ready = false
-        var targets = false
-        var cycleEndHandler = noop
-        var loadPromises
-        var status = STATUS.WAITING_CYCLE
+    const Farmer = function (villageId) {
+        let self = this
+        let village = $player.getVillage(villageId)
+        let index = 0
+        let running = false
+        let initialized = false
+        let ready = false
+        let targets = false
+        let cycleEndHandler = noop
+        let loadPromises
+        let status = STATUS.WAITING_CYCLE
 
         if (!village) {
             throw new Error(`new Farmer -> Village ${villageId} doesn't exist.`)
@@ -579,9 +571,6 @@ define('two/farmOverflow', [
         }
 
         self.start = function () {
-            var interval
-            var target
-
             if (running) {
                 return false
             }
@@ -629,17 +618,17 @@ define('two/farmOverflow', [
         }
 
         self.targetStep = function (_options) {
-            var options = _options || {}
-            var preset
-            var delayTime = 0
-            var target
-            var commandList = village.getCommandListModel()
-            var villageCommands = commandList.getOutgoingCommands(true, true)
-            var checkedLocalCommands = false
+            const options = _options || {}
+            let preset
+            let delayTime = 0
+            let target
+            const commandList = village.getCommandListModel()
+            const villageCommands = commandList.getOutgoingCommands(true, true)
+            let checkedLocalCommands = false
 
-            function checkCommandLimit () {
+            const checkCommandLimit = function () {
                 return new Promise(function (resolve, reject) {
-                    var limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
+                    const limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
 
                     if (villageCommands.length >= limit) {
                         return reject(STATUS.COMMAND_LIMIT)
@@ -649,7 +638,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkStorage () {
+            const checkStorage = function () {
                 return new Promise(function (resolve, reject) {
                     if (settings.get(SETTINGS.IGNORE_FULL_STORAGE) && checkFullStorage(village)) {
                         return reject(STATUS.FULL_STORAGE)
@@ -659,7 +648,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkTargets () {
+            const checkTargets = function () {
                 return new Promise(function (resolve, reject) {
                     if (!targets.length) {
                         reject(STATUS.NO_TARGETS)
@@ -671,9 +660,9 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkVillagePresets () {
+            const checkVillagePresets = function () {
                 return new Promise(function (resolve) {
-                    var neededPresets = genPresetList()
+                    const neededPresets = genPresetList()
 
                     if (neededPresets) {
                         assignPresets(village.getId(), neededPresets, resolve)
@@ -683,7 +672,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkPreset () {
+            const checkPreset = function () {
                 return new Promise(function (resolve, reject) {
                     target = getTarget()
 
@@ -701,7 +690,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkTarget () {
+            const checkTarget = function () {
                 return new Promise(function (resolve, reject) {
                     socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
                         target_id: target.id
@@ -718,15 +707,14 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkLocalCommands () {
+            const checkLocalCommands = function () {
                 return new Promise(function (resolve, reject) {
-                    var multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-                    var singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
-                    var playerVillages = $player.getVillageList()
-                    var anotherVillageCommands
-                    var otherAttacking = false
-                    var attacking
-                    var allVillagesLoaded = playerVillages.every(function (anotherVillage) {
+                    let otherAttacking = false
+
+                    const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
+                    const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
+                    const playerVillages = $player.getVillageList()
+                    const allVillagesLoaded = playerVillages.every(function (anotherVillage) {
                         return anotherVillage.isReady(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS)
                     })
 
@@ -736,7 +724,7 @@ define('two/farmOverflow', [
                                 return false
                             }
 
-                            anotherVillageCommands = anotherVillage.getCommandListModel().getOutgoingCommands(true, true)
+                            const anotherVillageCommands = anotherVillage.getCommandListModel().getOutgoingCommands(true, true)
 
                             return anotherVillageCommands.some(function (command) {
                                 return command.targetVillageId === target.id && command.data.direction === 'forward'
@@ -744,7 +732,7 @@ define('two/farmOverflow', [
                         })
                     }
 
-                    attacking = villageCommands.some(function (command) {
+                    const attacking = villageCommands.some(function (command) {
                         return command.data.target.id === target.id && command.data.direction === 'forward'
                     })
 
@@ -760,7 +748,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkTargetPoints () {
+            const checkTargetPoints = function () {
                 return new Promise(function (resolve, reject) {
                     $mapData.getTownAtAsync(target.x, target.y, function (data) {
                         if (villageFilters.points(data.points)) {
@@ -772,7 +760,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            function checkLoadedCommands () {
+            const checkLoadedCommands = function () {
                 if (checkedLocalCommands) {
                     return true
                 }
@@ -783,15 +771,15 @@ define('two/farmOverflow', [
                         village_id: target.id,
                         num_reports: 0
                     }, function (data) {
-                        var targetCommands = data.commands.own.filter(function (command) {
+                        const targetCommands = data.commands.own.filter(function (command) {
                             return command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward'
                         })
-                        var multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-                        var singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
-                        var otherAttacking = targetCommands.some(function (command) {
+                        const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
+                        const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
+                        const otherAttacking = targetCommands.some(function (command) {
                             return command.start_village_id !== villageId
                         })
-                        var attacking = targetCommands.some(function (command) {
+                        const attacking = targetCommands.some(function (command) {
                             return command.start_village_id === villageId
                         })
 
@@ -804,7 +792,7 @@ define('two/farmOverflow', [
                 })
             }
 
-            function prepareAttack () {
+            const prepareAttack = function () {
                 if (options.delay) {
                     delayTime = utils.randomSeconds(settings.get(SETTINGS.ATTACK_INTERVAL))
                     delayTime = MINIMUM_ATTACK_INTERVAL + (delayTime * 1000)
@@ -817,7 +805,7 @@ define('two/farmOverflow', [
                 }, delayTime)
             }
 
-            function onError (error) {
+            const onError = function (error) {
                 console.log(error)
 
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
@@ -905,7 +893,7 @@ define('two/farmOverflow', [
         }
 
         self.loadTargets = function (_callback) {
-            var pos = village.getPosition()
+            const pos = village.getPosition()
 
             mapData.load(pos, function (loadedTargets) {
                 targets = calcDistances(loadedTargets, pos)
@@ -952,11 +940,10 @@ define('two/farmOverflow', [
 
         // private functions
 
-        var genPresetList = function () {
-            var villagePresets = modelDataService.getPresetList().getPresetsByVillageId(village.getId())
-            var needAssign = false
-            var which = []
-            var id
+        const genPresetList = function () {
+            const villagePresets = modelDataService.getPresetList().getPresetsByVillageId(village.getId())
+            let needAssign = false
+            let which = []
 
             selectedPresets.forEach(function (preset) {
                 if (!villagePresets.hasOwnProperty(preset.id)) {
@@ -966,7 +953,7 @@ define('two/farmOverflow', [
             })
 
             if (needAssign) {
-                for (id in villagePresets) {
+                for (let id in villagePresets) {
                     which.push(id)
                 }
 
@@ -976,9 +963,9 @@ define('two/farmOverflow', [
             return false
         }
 
-        var isTargetBusy = function (attacking, otherAttacking, allVillagesLoaded) {
-            var multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-            var singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
+        const isTargetBusy = function (attacking, otherAttacking, allVillagesLoaded) {
+            const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
+            const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
 
             if (multipleFarmers && allVillagesLoaded) {
                 if (singleAttack && attacking) {
@@ -995,7 +982,7 @@ define('two/farmOverflow', [
             return false
         }
 
-        var attackTarget = function (target, preset) {
+        const attackTarget = function (target, preset) {
             if (!running) {
                 return false
             }
@@ -1012,24 +999,18 @@ define('two/farmOverflow', [
             })
         }
 
-        var getTarget = function () {
+        const getTarget = function () {
             return targets[index]
         }
 
-        var getPreset = function (target) {
-            var timeLimit = false
-            var units = village.getUnitInfo().getUnits()
-            var selectedPreset = false
-            var avail
-            var unit
-            var i
-            var preset
+        const getPreset = function (target) {
+            const units = village.getUnitInfo().getUnits()
 
-            for (i = 0; i < selectedPresets.length; i++) {
-                preset = selectedPresets[i]
-                avail = true
+            for (let i = 0; i < selectedPresets.length; i++) {
+                let preset = selectedPresets[i]
+                let avail = true
 
-                for (unit in preset.units) {
+                for (let unit in preset.units) {
                     if (!preset.units[unit]) {
                         continue
                     }
@@ -1052,7 +1033,7 @@ define('two/farmOverflow', [
         }
     }
 
-    var farmOverflow = {}
+    let farmOverflow = {}
 
     farmOverflow.init = function () {
         initialized = true
@@ -1108,7 +1089,7 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.start = function () {
-        var readyFarmers
+        let readyFarmers
 
         if (running) {
             return false
@@ -1175,7 +1156,7 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.create = function (villageId) {
-        var groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
+        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
 
         villageId = parseInt(villageId, 10)
 
@@ -1195,12 +1176,11 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.flush = function () {
-        var groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
-        var villageId
-        var removeIds = []
+        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
+        let removeIds = []
 
         farmers.forEach(function (farmer) {
-            villageId = farmer.getVillage().getId()
+            let villageId = farmer.getVillage().getId()
 
             if (groupsOnly.length && !onlyVillages.includes(villageId)) {
                 removeIds.push(villageId)
@@ -1219,9 +1199,7 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.getById = function (farmerId) {
-        var i
-
-        for (i = 0; i < farmers.length; i++) {
+        for (let i = 0; i < farmers.length; i++) {
             if (farmers[i].getVillage().getId() === farmerId) {
                 return farmers[i]
             }
@@ -1235,9 +1213,7 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.removeById = function (farmerId) {
-        var i
-
-        for (i = 0; i < farmers.length; i++) {
+        for (let i = 0; i < farmers.length; i++) {
             if (farmers[i].getVillage().getId() === farmerId) {
                 farmers[i].stop()
                 farmers.splice(i, i + 1)
@@ -1263,12 +1239,10 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.farmerStep = function () {
-        var interval
-
         activeFarmer = farmOverflow.getOne()
 
         if (!activeFarmer) {
-            interval = settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
+            let interval = settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
             interval += MINIMUM_FARMER_CYCLE_INTERVAL
 
             farmerTimeoutId = setTimeout(function() {
@@ -1289,18 +1263,12 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.isTarget = function (targetId) {
-        var i
-        var j
-        var farmer
-        var targets
-        var target
+        for (let i = 0; i < farmers.length; i++) {
+            let farmer = farmers[i]
+            let targets = farmer.getTargets()
 
-        for (i = 0; i < farmers.length; i++) {
-            farmer = farmers[i]
-            targets = farmer.getTargets()
-
-            for (j = 0; j < targets.length; j++) {
-                target = targets[j]
+            for (let j = 0; j < targets.length; j++) {
+                let target = targets[j]
 
                 if (target.id === targetId) {
                     return true

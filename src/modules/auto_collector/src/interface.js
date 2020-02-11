@@ -9,12 +9,12 @@ define('two/autoCollector/ui', [
     utils,
     eventQueue
 ) {
-    var $opener
+    let $button
 
-    var init = function () {
-        $opener = interfaceOverflow.addMenuButton('Collector', 50, $filter('i18n')('description', $rootScope.loc.ale, 'auto_collector'))
+    const init = function () {
+        $button = interfaceOverflow.addMenuButton('Collector', 50, $filter('i18n')('description', $rootScope.loc.ale, 'auto_collector'))
         
-        $opener.addEventListener('click', function () {
+        $button.addEventListener('click', function () {
             if (autoCollector.isRunning()) {
                 autoCollector.stop()
                 autoCollector.secondVillage.stop()
@@ -27,13 +27,13 @@ define('two/autoCollector/ui', [
         })
 
         eventQueue.register(eventTypeProvider.AUTO_COLLECTOR_STARTED, function () {
-            $opener.classList.remove('btn-green')
-            $opener.classList.add('btn-red')
+            $button.classList.remove('btn-green')
+            $button.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.AUTO_COLLECTOR_STOPPED, function () {
-            $opener.classList.remove('btn-red')
-            $opener.classList.add('btn-green')
+            $button.classList.remove('btn-red')
+            $button.classList.add('btn-green')
         })
 
         if (autoCollector.isRunning()) {

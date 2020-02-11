@@ -1,7 +1,7 @@
 define('two/EventScope', [
     'queues/EventQueue'
 ], function (eventQueue) {
-    var EventScope = function (windowId, onDestroy) {
+    const EventScope = function (windowId, onDestroy) {
         if (typeof windowId === 'undefined') {
             throw new Error('EventScope: no windowId')
         }
@@ -10,7 +10,7 @@ define('two/EventScope', [
         this.onDestroy = onDestroy || noop
         this.listeners = []
 
-        var unregister = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, (event, templateName) => {
+        const unregister = $rootScope.$on(eventTypeProvider.WINDOW_CLOSED, (event, templateName) => {
             if (templateName === '!' + this.windowId) {
                 this.destroy()
                 unregister()

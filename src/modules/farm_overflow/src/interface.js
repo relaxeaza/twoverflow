@@ -23,23 +23,23 @@ define('two/farmOverflow/ui', [
     $mapData,
     timeHelper
 ) {
-    var $scope
-    var settings
-    var presetList = modelDataService.getPresetList()
-    var groupList = modelDataService.getGroupList()
-    var $opener
-    var villagesInfo = {}
-    var villagesLabel = {}
+    let $scope
+    let settings
+    let presetList = modelDataService.getPresetList()
+    let groupList = modelDataService.getGroupList()
+    let $button
+    let villagesInfo = {}
+    let villagesLabel = {}
 
-    var TAB_TYPES = {
+    const TAB_TYPES = {
         SETTINGS: 'settings',
         VILLAGES: 'villages',
         LOGS: 'logs'
     }
 
-    var updateVisibleLogs = function () {
-        var offset = $scope.pagination.offset
-        var limit = $scope.pagination.limit
+    const updateVisibleLogs = function () {
+        const offset = $scope.pagination.offset
+        const limit = $scope.pagination.limit
 
         $scope.visibleLogs = $scope.logs.slice(offset, offset + limit)
         $scope.pagination.count = $scope.logs.length
@@ -51,9 +51,7 @@ define('two/farmOverflow/ui', [
         })
     }
 
-    var loadVillageInfo = function (villageId) {
-        var info
-
+    const loadVillageInfo = function (villageId) {
         if (villagesInfo[villageId]) {
             return villagesInfo[villageId]
         }
@@ -77,7 +75,7 @@ define('two/farmOverflow/ui', [
         })
     }
 
-    var loadExceptionsInfo = function () {
+    const loadExceptionsInfo = function () {
         $scope.exceptionVillages.included.forEach(function (villageId) {
             loadVillageInfo(villageId)
         })
@@ -86,7 +84,7 @@ define('two/farmOverflow/ui', [
         })
     }
 
-    var switchFarm = function () {
+    const switchFarm = function () {
         if (farmOverflow.isRunning()) {
             farmOverflow.stop()
         } else {
@@ -94,11 +92,11 @@ define('two/farmOverflow/ui', [
         }
     }
 
-    var selectTab = function (tabType) {
+    const selectTab = function (tabType) {
         $scope.selectedTab = tabType
     }
 
-    var saveSettings = function () {
+    const saveSettings = function () {
         settings.setAll(settings.decode($scope.settings))
 
         $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
@@ -106,9 +104,9 @@ define('two/farmOverflow/ui', [
         })
     }
 
-    var removeIgnored = function (villageId) {
-        var groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
-        var groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupIgnore)
+    const removeIgnored = function (villageId) {
+        const groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
+        const groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupIgnore)
 
         if (!groupVillages.includes(villageId)) {
             return false
@@ -120,12 +118,11 @@ define('two/farmOverflow/ui', [
         })
     }
 
-    var removeIncluded = function (villageId) {
-        var groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
-        var groupVillages
+    const removeIncluded = function (villageId) {
+        const groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
 
         groupsInclude.forEach(function (groupId) {
-            groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupId)
+            let groupVillages = modelDataService.getGroupList().getGroupVillageIds(groupId)
 
             if (groupVillages.includes(villageId)) {
                 socketService.emit(routeProvider.GROUPS_UNLINK_VILLAGE, {
@@ -136,7 +133,7 @@ define('two/farmOverflow/ui', [
         })
     }
 
-    var eventHandlers = {
+    const eventHandlers = {
         updatePresets: function () {
             $scope.presets = Settings.encodeList(presetList.getPresets(), {
                 disabled: false,
@@ -201,29 +198,29 @@ define('two/farmOverflow/ui', [
         }
     }
 
-    var init = function () {
+    const init = function () {
         settings = farmOverflow.getSettings()
-        $opener = interfaceOverflow.addMenuButton('Farmer', 10)
+        $button = interfaceOverflow.addMenuButton('Farmer', 10)
 
-        $opener.addEventListener('click', function () {
+        $button.addEventListener('click', function () {
             buildWindow()
         })
 
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_START, function () {
-            $opener.classList.remove('btn-green')
-            $opener.classList.add('btn-red')
+            $button.classList.remove('btn-green')
+            $button.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_STOP, function () {
-            $opener.classList.remove('btn-red')
-            $opener.classList.add('btn-green')
+            $button.classList.remove('btn-red')
+            $button.classList.add('btn-green')
         })
 
         interfaceOverflow.addTemplate('twoverflow_farm_overflow_window', `{: farm_overflow_html_main :}`)
         interfaceOverflow.addStyle('{: farm_overflow_css_style :}')
     }
 
-    var buildWindow = function () {
+    const buildWindow = function () {
         $scope = $rootScope.$new()
         $scope.SETTINGS = SETTINGS
         $scope.TAB_TYPES = TAB_TYPES
@@ -262,7 +259,7 @@ define('two/farmOverflow/ui', [
         $scope.removeIgnored = removeIgnored
         $scope.removeIncluded = removeIncluded
 
-        eventScope = new EventScope('twoverflow_farm_overflow_window')
+        let eventScope = new EventScope('twoverflow_farm_overflow_window')
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.GROUPS_UPDATED, eventHandlers.updateGroups, true)

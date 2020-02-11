@@ -20,7 +20,7 @@
     }
 
     Lockr.set = function(key, value, options) {
-        var query_key = this._getPrefixedKey(key, options)
+        const query_key = this._getPrefixedKey(key, options)
 
         try {
             localStorage.setItem(query_key, JSON.stringify({
@@ -30,8 +30,8 @@
     }
 
     Lockr.get = function(key, missing, options) {
-        var query_key = this._getPrefixedKey(key, options),
-            value
+        const query_key = this._getPrefixedKey(key, options)
+        let value
 
         try {
             value = JSON.parse(localStorage.getItem(query_key))

@@ -25,47 +25,45 @@ define('two/attackView/ui', [
     timeHelper,
     $
 ) {
-    var $scope
-    var eventScope
-    var $opener
+    let $scope
+    let $button
 
-    var nowSeconds = function () {
+    const nowSeconds = function () {
         return Date.now() / 1000
     }
 
-    var copyTimeModal = function (time) {
-        var modalScope = $rootScope.$new()
+    const copyTimeModal = function (time) {
+        let modalScope = $rootScope.$new()
         modalScope.text = $filter('readableDateFilter')(time * 1000, $rootScope.loc.ale, $rootScope.GAME_TIMEZONE, $rootScope.GAME_TIME_OFFSET, 'H:mm:ss:sss dd/MM/yyyy')
         modalScope.title = $filter('i18n')('copy', $rootScope.loc.ale, 'attack_view')
         windowManagerService.getModal('!twoverflow_attack_view_show_text_modal', modalScope)
     }
 
-    var removeTroops = function (command) {
-        var formatedDate = $filter('readableDateFilter')((command.time_completed - 10) * 1000, $rootScope.loc.ale, $rootScope.GAME_TIMEZONE, $rootScope.GAME_TIME_OFFSET, 'H:mm:ss:sss dd/MM/yyyy')
+    const removeTroops = function (command) {
+        const formatedDate = $filter('readableDateFilter')((command.time_completed - 10) * 1000, $rootScope.loc.ale, $rootScope.GAME_TIMEZONE, $rootScope.GAME_TIME_OFFSET, 'H:mm:ss:sss dd/MM/yyyy')
         attackView.setCommander(command, formatedDate)
     }
 
-    var switchWindowSize = function () {
-        var $window = $('#two-attack-view').parent()
-        var $wrapper = $('#wrapper')
+    const switchWindowSize = function () {
+        let $window = $('#two-attack-view').parent()
+        let $wrapper = $('#wrapper')
 
         $window.toggleClass('fullsize')
         $wrapper.toggleClass('window-fullsize')
     }
 
-    var updateVisibileCommands = function () {
-        var offset = $scope.pagination.offset
-        var limit = $scope.pagination.limit
+    const updateVisibileCommands = function () {
+        const offset = $scope.pagination.offset
+        const limit = $scope.pagination.limit
 
         $scope.visibleCommands = $scope.commands.slice(offset, offset + limit)
         $scope.pagination.count = $scope.commands.length
     }
 
-    var checkCommands = function () {
-        var now = Date.now()
-        var i
-        
-        for (i = 0; i < $scope.commands.length; i++) {
+    const checkCommands = function () {
+        const now = Date.now()
+
+        for (let i = 0; i < $scope.commands.length; i++) {
             if ($scope.commands[i].model.percent(now) === 100) {
                 $scope.commands.splice(i, 1)
             }
@@ -76,17 +74,17 @@ define('two/attackView/ui', [
 
     // scope functions
 
-    var toggleFilter = function (type, _filter) {
+    const toggleFilter = function (type, _filter) {
         attackView.toggleFilter(type, _filter)
         $scope.filters = attackView.getFilters()
     }
 
-    var toggleSorting = function (column) {
+    const toggleSorting = function (column) {
         attackView.toggleSorting(column)
         $scope.sorting = attackView.getSortings()
     }
 
-    var eventHandlers = {
+    const eventHandlers = {
         updateCommands: function () {
             $scope.commands = attackView.getCommands()
         },
@@ -95,16 +93,16 @@ define('two/attackView/ui', [
         }
     }
 
-    var init = function () {
-        $opener = interfaceOverflow.addMenuButton('AttackView', 40)
-        $opener.addEventListener('click', buildWindow)
+    const init = function () {
+        $button = interfaceOverflow.addMenuButton('AttackView', 40)
+        $button.addEventListener('click', buildWindow)
 
         interfaceOverflow.addTemplate('twoverflow_attack_view_main', `{: attack_view_html_main :}`)
         interfaceOverflow.addTemplate('twoverflow_attack_view_show_text_modal', `{: attack_view_html_modal-show-text :}`)
         interfaceOverflow.addStyle('{: attack_view_css_style :}')
     }
 
-    var buildWindow = function () {
+    const buildWindow = function () {
         $scope = $rootScope.$new()
         $scope.commandQueueEnabled = attackView.commandQueueEnabled()
         $scope.commands = attackView.getCommands()
@@ -136,7 +134,7 @@ define('two/attackView/ui', [
 
         updateVisibileCommands()
 
-        eventScope = new EventScope('twoverflow_queue_window', function onWindowClose() {
+        let eventScope = new EventScope('twoverflow_queue_window', function onWindowClose() {
             timeHelper.timer.remove(checkCommands)
         })
         eventScope.register(eventTypeProvider.MAP_SELECTED_VILLAGE, eventHandlers.onVillageSwitched, true)
