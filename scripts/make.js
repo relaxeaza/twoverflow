@@ -328,7 +328,7 @@ function generateOverflowModule (options) {
 
     // Generate the common replaces
     overflow.replaces['overflow_name'] = pkg.name
-    overflow.replaces['overflow_version'] = pkg.version + (options.dev ? '-dev' : 'stable')
+    overflow.replaces['overflow_version'] = pkg.version + (options.dev ? '-dev' : '-stable')
     overflow.replaces['overflow_author'] = JSON.stringify(pkg.author)
     overflow.replaces['overflow_author_name'] = pkg.author.name
     overflow.replaces['overflow_author_url'] = pkg.author.url
