@@ -143,6 +143,17 @@ async function minifyCode (data) {
     const minified = terser.minify({
         'tw2overflow.js': fs.readFileSync(`${distDir}/tw2overflow.js`, 'utf8')
     }, terserOptions)
+    
+    if (minified.error) {
+        const error = minified.error
+
+        console.log('')
+        logError(`${error.name}: ${error.message}`)
+        console.log(`${error.filename} line ${error.line} col ${error.col}`)
+        console.log('')
+
+        process.exit()
+    }
 
     fs.writeFileSync(`${distDir}/tw2overflow.min.js`, minified.code, 'utf8')
 }
@@ -405,9 +416,24 @@ function replaceText (source, token, replace) {
 }
 
 function log () {
-    let args = arguments
-    args[0] = `\x1b[32m${args[0]}\x1b[0m`
+    let args = Array.from(arguments)
+
+    if (args[0] === 'error') {
+        args.splice(0, 1)
+        color = '\x1b[31m'
+    } else {
+        color = '\x1b[32m'
+    }
+
+    args[0] = `${color}${args[0]}\x1b[0m`
+
     console.log.apply(this, args)
+}
+
+function logError () {
+    let args = Array.from(arguments)
+    args.unshift('error')
+    log.apply(this, args)
 }
 
 init()

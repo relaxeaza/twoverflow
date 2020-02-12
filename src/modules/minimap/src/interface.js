@@ -270,7 +270,7 @@ define('two/minimap/ui', [
             utils.emitNotif('error', $filter('i18n')('highlight_add_error_invalid_color', $rootScope.loc.ale, 'minimap'))
         },
         onMouseLeaveMinimap: function (event) {
-            const mouseUpEvent = new MouseEvent('mouseup', {
+            const event = new MouseEvent('mouseup', {
                 view: window,
                 bubbles: true,
                 cancelable: true
