@@ -270,14 +270,13 @@ define('two/minimap/ui', [
             utils.emitNotif('error', $filter('i18n')('highlight_add_error_invalid_color', $rootScope.loc.ale, 'minimap'))
         },
         onMouseLeaveMinimap: function (event) {
-            const event = new MouseEvent('mouseup', {
+            hideTooltip()
+
+            $crossCanvas.dispatchEvent(new MouseEvent('mouseup', {
                 view: window,
                 bubbles: true,
                 cancelable: true
-            })
-
-            hideTooltip()
-            $crossCanvas.dispatchEvent(mouseUpEvent)
+            }))
         },
         onMouseMoveMinimap: function (event) {
             hideTooltip()
