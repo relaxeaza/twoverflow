@@ -7,8 +7,9 @@ const terser = require('terser')
 const less = require('less')
 const htmlMinifier = require('html-minifier').minify
 
-const distDir = './dist'
-const tempDir = '/tmp'
+const root = path.dirname(__dirname)
+const distDir = `${root}/dist`
+const tempDir = '/tmp/twoverflow'
 
 const terserOptions = {
     output: {
@@ -43,7 +44,7 @@ async function init () {
 
 async function concatCode (data) {
     const code = data.map(function (file) {
-        log('Concatenating', file)
+        log('Concatenating', file.replace(root, ''))
 
         return fs.readFileSync(file, 'utf8')
     })
@@ -60,7 +61,7 @@ async function compileLess (data) {
             recursive: true
         })
 
-        log('Compiling .less', sourceLocation)
+        log('Compiling .less', sourceLocation.replace(root, ''))
 
         await less.render(source, lessOptions)
         .then(function (output) {
@@ -78,7 +79,7 @@ async function minifyHTML (data) {
         const sourceLocation = data[destination]
         const source = fs.readFileSync(sourceLocation, 'utf8')
 
-        log('Minifying .html', sourceLocation)
+        log('Minifying .html', sourceLocation.replace(root, ''))
 
         let output = htmlMinifier(source, {
             removeRedundantAttributes: true,
@@ -138,7 +139,7 @@ async function replaceInFile (data) {
 }
 
 async function minifyCode (data) {
-    log('Minifying .js', `${distDir}/tw2overflow.min.js`)
+    log('Minifying .js', `${distDir}/tw2overflow.min.js`.replace(root, ''))
 
     const minified = terser.minify({
         'tw2overflow.js': fs.readFileSync(`${distDir}/tw2overflow.js`, 'utf8')
@@ -174,7 +175,7 @@ async function minifyCode (data) {
  * - /lang/*.json
  */
 function generateModule (moduleId, moduleDir) {
-    const modulePath = `src/modules/${moduleDir}`
+    const modulePath = `${root}/src/modules/${moduleDir}`
     let data = {
         id: moduleId,
         dir: moduleDir,
@@ -278,12 +279,12 @@ function generateLocaleFile (module) {
 function generateModules (options) {
     let modules = []
 
-    fs.readdirSync('src/modules/').forEach(function (moduleDir) {
-        if (!fs.existsSync(`src/modules/${moduleDir}/module.json`)) {
+    fs.readdirSync(`${root}/src/modules/`).forEach(function (moduleDir) {
+        if (!fs.existsSync(`${root}/src/modules/${moduleDir}/module.json`)) {
             return false
         }
 
-        const info = JSON.parse(fs.readFileSync(`src/modules/${moduleDir}/module.json`, 'utf8'))
+        const info = JSON.parse(fs.readFileSync(`${root}/src/modules/${moduleDir}/module.json`, 'utf8'))
 
         if (options.only && options.only !== info.id && info.id !== 'interface') {
             console.log(`Ignoring module ${info.id}`)
@@ -319,16 +320,16 @@ function generateOverflowModule (options) {
     }
 
     overflow.js = overflow.js.concat([
-        'src/header.js',
-        'src/event-scope.js',
-        'src/utils.js',
-        'src/ready.js',
-        'src/configs.js',
-        'src/language.js',
-        'src/settings.js',
-        'src/map-data.js',
-        'src/init.js',
-        'src/libs/lockr.js'
+        `${root}/src/header.js`,
+        `${root}/src/event-scope.js`,
+        `${root}/src/utils.js`,
+        `${root}/src/ready.js`,
+        `${root}/src/configs.js`,
+        `${root}/src/language.js`,
+        `${root}/src/settings.js`,
+        `${root}/src/map-data.js`,
+        `${root}/src/init.js`,
+        `${root}/src/libs/lockr.js`
     ])
 
     // Generate the common translations
@@ -394,7 +395,7 @@ function generateOverflowModule (options) {
         }
     })
 
-    overflow.js.push('src/footer.js')
+    overflow.js.push(`${root}/src/footer.js`)
 
     return overflow
 }
