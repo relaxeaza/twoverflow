@@ -59,10 +59,10 @@ function gitAdd () {
         })
 }
 
-function gitCommit (msg) {
+function gitCommit () {
     console.log('Running git commit')
 
-    return git(`commit --message "${msg}"`, gitOptions)
+    return git(`commit --message "Update testing version"`, gitOptions)
         .fail(function (error) {
             console.log('git commit failed.')
             console.log(error.stdout)
@@ -79,7 +79,7 @@ function gitPush () {
         })
 }
 
-function gitDeploy (commitMsg) {
+function gitDeploy () {
     console.log('')
 
     gitAdd()
@@ -98,7 +98,7 @@ function deployTesting () {
     }, true)
 
     if (copied) {
-        gitDeploy('Update testing version')
+        gitDeploy()
     } else {
         console.log('Testing version is already the last build.')
     }

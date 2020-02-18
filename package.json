@@ -5,10 +5,11 @@
   "author": {
     "name": "Relaxeaza",
     "url": "https://gitlab.com/relaxeaza",
-    "email": "twoverflow at outlook.com"
+    "email": "twoverflow@outlook.com"
   },
   "private": true,
   "version": "1.0.7",
+  "dev-version": "2.0.0",
   "license": "WTFPL",
   "repository": {
     "type": "git",
@@ -24,9 +25,9 @@
   },
   "scripts": {
     "make": "node scripts/make.js --minify",
-    "make-dev": "node scripts/make.js --minify --dev",
+    "make-dev": "node scripts/make.js --dev",
     "release": "node scripts/make.js --minify && node scripts/release.js",
-    "release-testing": "node scripts/make.js --minify && node scripts/release.js --testing",
+    "release-testing": "node scripts/make.js --minify --dev && node scripts/release.js --testing",
     "server": "http-server ./dist/ --ssl --cert=scripts/server/cert.pem --key=scripts/server/key.pem -p 2838"
   }
 }
