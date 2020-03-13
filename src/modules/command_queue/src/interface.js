@@ -176,6 +176,10 @@ define('two/commandQueue/ui', [
         updateTravelTimes()
     }
 
+    const updateCatapultTarget = function () {
+        commandData.catapultTarget = $scope.catapultTarget.value
+    }
+
     const insertPreset = function () {
         const selectedPreset = $scope.selectedInsertPreset.value
 
@@ -622,6 +626,7 @@ define('two/commandQueue/ui', [
         $scope.$watch('commandData.date', updateTravelTimes)
         $scope.$watch('selectedDateType.value', updateDateType)
         $scope.$watch('selectedInsertPreset.value', insertPreset)
+        $scope.$watch('catapultTarget.value', updateCatapultTarget)
         $scope.$watch('filtersData[FILTER_TYPES.TEXT_MATCH]', textMatchFilter)
 
         let eventScope = new EventScope('twoverflow_queue_window')
