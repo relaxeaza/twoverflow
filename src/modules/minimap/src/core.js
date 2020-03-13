@@ -38,6 +38,7 @@ define('two/minimap', [
     let villageSize = 5
     let villageMargin = 1
     let villageBlock = villageSize + villageMargin
+    let lineSize = 1000 * (villageSize + villageMargin)
     const rhex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
     let cache = {
         village: {},
@@ -309,7 +310,7 @@ define('two/minimap', [
     }
 
     const renderStep = function () {
-        if(enableRendering) {
+        if (enableRendering) {
             const pos =  {
                 x: currentPosition.x - (frameSize.x / 2),
                 y: currentPosition.y - (frameSize.y / 2)
@@ -716,8 +717,8 @@ define('two/minimap', [
     }
 
     minimap.setCurrentPosition = function (x, y) {
-        currentPosition.x = x * block + 50
-        currentPosition.y = y * block + (1000 - ((document.body.clientHeight - 238) / 2)) + 50
+        currentPosition.x = x * villageBlock + 50
+        currentPosition.y = y * villageBlock + (1000 - ((document.body.clientHeight - 238) / 2)) + 50
     }
 
     /**
@@ -728,10 +729,12 @@ define('two/minimap', [
             return false
         }
 
+        let view
+
         if (gameVersion.product.major === 1 && gameVersion.product.minor < 94) {
-            const view = window.twx.game.map.engine.getView()
+            view = window.twx.game.map.engine.getView()
         } else {
-            const view = mapData.getMap().engine.getView()
+            view = mapData.getMap().engine.getView()
         }
 
         return convert([
