@@ -794,8 +794,13 @@ define('two/farmOverflow', [
 
             const prepareAttack = function () {
                 if (options.delay) {
-                    delayTime = utils.randomSeconds(settings.get(SETTINGS.ATTACK_INTERVAL))
-                    delayTime = MINIMUM_ATTACK_INTERVAL + (delayTime * 1000)
+                    delayTime = settings.get(SETTINGS.ATTACK_INTERVAL) * 1000
+
+                    if (delayTime < MINIMUM_ATTACK_INTERVAL) {
+                        delayTime = MINIMUM_ATTACK_INTERVAL
+                    }
+
+                    delayTime = utils.randomSeconds(delayTime)
                 }
 
                 self.setStatus(STATUS.ATTACKING)
@@ -1243,7 +1248,10 @@ define('two/farmOverflow', [
 
         if (!activeFarmer) {
             let interval = settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
-            interval += MINIMUM_FARMER_CYCLE_INTERVAL
+
+            if (interval < MINIMUM_ATTACK_INTERVAL) {
+                interval = MINIMUM_FARMER_CYCLE_INTERVAL
+            }
 
             farmerTimeoutId = setTimeout(function() {
                 farmerTimeoutId = null
