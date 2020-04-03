@@ -1,10 +1,10 @@
 {
     "about": {
-        "contact": "Contact",
+        "contact": "Kontakt",
         "email": "E-mail",
-        "links": "Project links",
-        "source_code": "Source Code",
-        "issues_suggestions": "Issues/suggestions",
-        "translations": "Translations"
+        "links": "Linki projektów",
+        "source_code": "Kod źródłowy",
+        "issues_suggestions": "Błędy/sugestie",
+        "translations": "Tłumaczenia"
     }
 }

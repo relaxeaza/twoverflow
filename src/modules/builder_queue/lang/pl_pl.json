@@ -6,7 +6,7 @@
         "settings_village_groups": "Buduj w wioskach z grupy",
         "settings_building_sequence": "Szablon kolejki budowy",
         "settings_building_sequence_final": "Finalne poziomy budynków",
-        "settings_priorize_farm": "Priorize farm if it's full",
+        "settings_priorize_farm": "Priorytet farmy, jeżeli brakuje prowiantu",
         "settings_saved": "Ustawienia zapisane!",
         "logs_no_builds": "Nie rozpoczęto żadnej rozbudowy",
         "logs_clear": "Wyczyść logi",
@@ -29,11 +29,11 @@
         "sequence_updated": "Szablon %d zaktualizowany.",
         "sequence_removed": "Szablon %d usunięty.",
         "error_sequence_exists": "Ten szablon już istnieje.",
-        "error_sequence_no_exists": "This sequence doesn't exist.",
+        "error_sequence_no_exists": "Ta sekwencja nie istnieje.",
         "error_sequence_invalid": "Niektóre z wartości szablonu są niepoprawne.",
         "logs_cleared": "Logi wyczyszczone.",
         "create_sequence": "Utwórz szablon",
-        "settings_preserve_resources": "Preserve village's resources"
+        "settings_preserve_resources": "Zarezerwowane surowce wioski"
     },
     "builder_queue_add_building_modal": {
         "title": "Dodaj nowy budynek"
