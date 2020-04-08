@@ -11,7 +11,7 @@ const eslint = require('eslint')
 const root = path.dirname(__dirname)
 const distDir = `${root}/dist`
 const srcDir = `${root}/src`
-const tempDir = '/tmp/twoverflow'
+const tempDir = `${root}/tmp`
 
 const terserOptions = {
     output: {
@@ -43,6 +43,8 @@ async function init () {
     if (options.minify) {
         await minifyCode(overflow.js)
     }
+
+    fs.rmdirSync(tempDir, { recursive: true })
 }
 
 async function lintCode (data) {
