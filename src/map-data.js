@@ -125,18 +125,18 @@ define('two/mapData', [
         }
 
         Promise.all(requests)
-        .then(function (cells) {
-            loadId = genLoadingId(cells)
+            .then(function (cells) {
+                loadId = genLoadingId(cells)
 
-            loadingQueue[loadId].forEach(function (handler) {
-                handler(villages)
+                loadingQueue[loadId].forEach(function (handler) {
+                    handler(villages)
+                })
+
+                delete loadingQueue[loadId]
             })
-
-            delete loadingQueue[loadId]
-        })
-        .catch(function (error) {
-            console.error(error.message)
-        })
+            .catch(function (error) {
+                console.error(error.message)
+            })
     }
 
     mapData.getVillages = function () {
