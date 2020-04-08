@@ -187,7 +187,7 @@ define('two/farmOverflow/ui', [
             }
         },
         updateFarmerVillages: function () {
-            $scope.farmers = farmOverflow.getAll()
+            $scope.farmers = farmOverflow.getFarmers()
         },
         updateExceptionVillages: function () {
             $scope.exceptionVillages = farmOverflow.getExceptionVillages()
@@ -227,7 +227,7 @@ define('two/farmOverflow/ui', [
         $scope.LOG_TYPES = LOG_TYPES
         $scope.running = farmOverflow.isRunning()
         $scope.selectedTab = TAB_TYPES.SETTINGS
-        $scope.farmers = farmOverflow.getAll()
+        $scope.farmers = farmOverflow.getFarmers()
         $scope.villagesLabel = villagesLabel
         $scope.villagesInfo = villagesInfo
         $scope.exceptionVillages = farmOverflow.getExceptionVillages()

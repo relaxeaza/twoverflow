@@ -115,12 +115,6 @@ define('two/farmOverflow', [
         })
     }
 
-    const reloadTargets = function () {
-        farmers.forEach(function (farmer) {
-            farmer.loadTargets()
-        })
-    }
-
     const arrayUnique = function (array) {
         return array.sort().filter(function (item, pos, ary) {
             return !pos || item != ary[pos - 1]
@@ -232,7 +226,7 @@ define('two/farmOverflow', [
 
         if (groupIgnore === data.group_id) {
             if (isOwnVillage) {
-                farmOverflow.removeById(data.village_id)
+                farmOverflow.removeFarmer(data.village_id)
                 farmerListUpdated = true
             } else {
                 farmOverflow.removeTarget(data.village_id)
@@ -245,7 +239,7 @@ define('two/farmOverflow', [
         }
 
         if (groupsInclude.includes(data.group_id) && !isOwnVillage) {
-            reloadTargets()
+            farmOverflow.reloadTargets()
 
             addLog(LOG_TYPES.INCLUDED_VILLAGE, {
                 villageId: data.village_id
@@ -254,7 +248,7 @@ define('two/farmOverflow', [
         }
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
-            let farmer = farmOverflow.create(data.village_id)
+            let farmer = farmOverflow.createFarmer(data.village_id)
             farmer.init().then(function () {
                 if (running) {
                     farmer.start()
@@ -280,7 +274,7 @@ define('two/farmOverflow', [
 
         if (groupIgnore === data.group_id) {
             if (isOwnVillage) {
-                let farmer = farmOverflow.create(data.village_id)
+                let farmer = farmOverflow.createFarmer(data.village_id)
                 farmer.init().then(function () {
                     if (running) {
                         farmer.start()
@@ -289,7 +283,7 @@ define('two/farmOverflow', [
 
                 farmerListUpdated = true
             } else {
-                reloadTargets()
+                farmOverflow.reloadTargets()
 
                 addLog(LOG_TYPES.IGNORED_VILLAGE_REMOVED, {
                     villageId: data.village_id
@@ -298,7 +292,7 @@ define('two/farmOverflow', [
         }
 
         if (groupsInclude.includes(data.group_id) && !isOwnVillage) {
-            reloadTargets()
+            farmOverflow.reloadTargets()
 
             addLog(LOG_TYPES.INCLUDED_VILLAGE_REMOVED, {
                 villageId: data.village_id
@@ -306,7 +300,7 @@ define('two/farmOverflow', [
         }
 
         if (groupsOnly.includes(data.group_id) && isOwnVillage) {
-            farmOverflow.removeById(data.village_id)
+            farmOverflow.removeFarmer(data.village_id)
             farmerListUpdated = true
         }
 
@@ -318,9 +312,9 @@ define('two/farmOverflow', [
     const removedGroupListener = function () {
         updateGroupVillages()
 
-        farmOverflow.flush()
-        reloadTargets()
-        farmOverflow.createAll()
+        farmOverflow.flushFarmers()
+        farmOverflow.reloadTargets()
+        farmOverflow.createFarmers()
     }
 
     const updatePresets = function () {
@@ -1037,12 +1031,12 @@ define('two/farmOverflow', [
             }
 
             if (updates[UPDATES.TARGETS]) {
-                reloadTargets()
+                farmOverflow.reloadTargets()
             }
 
             if (updates[UPDATES.VILLAGES]) {
-                farmOverflow.flush()
-                farmOverflow.createAll()
+                farmOverflow.flushFarmers()
+                farmOverflow.createFarmers()
             }
 
             if (updates[UPDATES.LOGS]) {
@@ -1056,7 +1050,7 @@ define('two/farmOverflow', [
         
         updateGroupVillages()
         updatePresets()
-        farmOverflow.createAll()
+        farmOverflow.createFarmers()
 
         $rootScope.$on(eventTypeProvider.ARMY_PRESET_UPDATE, presetListener)
         $rootScope.$on(eventTypeProvider.ARMY_PRESET_DELETED, presetListener)
@@ -1127,15 +1121,15 @@ define('two/farmOverflow', [
         }
     }
 
-    farmOverflow.createAll = function () {
+    farmOverflow.createFarmers = function () {
         angular.forEach($player.getVillages(), function (village, villageId) {
-            farmOverflow.create(villageId)
+            farmOverflow.createFarmer(villageId)
         })
 
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED)
     }
 
-    farmOverflow.create = function (villageId) {
+    farmOverflow.createFarmer = function (villageId) {
         const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
 
         villageId = parseInt(villageId, 10)
@@ -1148,14 +1142,18 @@ define('two/farmOverflow', [
             return false
         }
 
-        if (!farmOverflow.getById(villageId)) {
+        if (!farmOverflow.getFarmer(villageId)) {
             farmers.push(new Farmer(villageId))
         }
 
-        return farmOverflow.getById(villageId)
+        return farmOverflow.getFarmer(villageId)
     }
 
-    farmOverflow.flush = function () {
+    /**
+     * Clean farmer instances by removing villages based on
+     * groups-only, only-villages and ignore-villages group filters.
+     */
+    farmOverflow.flushFarmers = function () {
         const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
         let removeIds = []
 
@@ -1171,14 +1169,14 @@ define('two/farmOverflow', [
 
         if (removeIds.length) {
             removeIds.forEach(function (removeId) {
-                farmOverflow.removeById(removeId)
+                farmOverflow.removeFarmer(removeId)
             })
 
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED)
         }
     }
 
-    farmOverflow.getById = function (farmerId) {
+    farmOverflow.getFarmer = function (farmerId) {
         for (let i = 0; i < farmers.length; i++) {
             if (farmers[i].getVillage().getId() === farmerId) {
                 return farmers[i]
@@ -1188,11 +1186,11 @@ define('two/farmOverflow', [
         return false
     }
 
-    farmOverflow.getAll = function () {
+    farmOverflow.getFarmers = function () {
         return farmers
     }
 
-    farmOverflow.removeById = function (farmerId) {
+    farmOverflow.removeFarmer = function (farmerId) {
         for (let i = 0; i < farmers.length; i++) {
             if (farmers[i].getVillage().getId() === farmerId) {
                 farmers[i].stop()
@@ -1205,21 +1203,15 @@ define('two/farmOverflow', [
         return false
     }
 
-    farmOverflow.getOne = function () {
-        if (!farmers.length) {
-            return false
-        }
-
-        if (farmerIndex >= farmers.length) {
-            farmerIndex = 0
-            return false
-        }
-
-        return farmers[farmerIndex]
-    }
-
     farmOverflow.farmerStep = function () {
-        activeFarmer = farmOverflow.getOne()
+        if (!farmers.length) {
+            activeFarmer = false
+        } else if (farmerIndex >= farmers.length) {
+            farmerIndex = 0
+            activeFarmer = false
+        } else {
+            activeFarmer = farmers[farmerIndex]
+        }
 
         if (!activeFarmer) {
             let interval = settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
@@ -1265,6 +1257,12 @@ define('two/farmOverflow', [
     farmOverflow.removeTarget = function (targetId) {
         farmers.forEach(function (farmer) {
             farmer.removeTarget(targetId)
+        })
+    }
+
+    farmOverflow.reloadTargets = function () {
+        farmers.forEach(function (farmer) {
+            farmer.loadTargets()
         })
     }
 
