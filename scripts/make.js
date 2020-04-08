@@ -6,9 +6,11 @@ const parseOptions = require('./parse-options.js')
 const terser = require('terser')
 const less = require('less')
 const htmlMinifier = require('html-minifier').minify
+const eslint = require('eslint')
 
 const root = path.dirname(__dirname)
 const distDir = `${root}/dist`
+const srcDir = `${root}/src`
 const tempDir = '/tmp/twoverflow'
 
 const terserOptions = {
@@ -21,7 +23,7 @@ const lessOptions = {
     compress: true
 }
 const replaceOptions = {
-    delimiters: ['{:', ':}']
+    delimiters: ['___', '']
 }
 
 async function init () {
@@ -32,6 +34,7 @@ async function init () {
         recursive: true
     })
 
+    await lintCode()
     await concatCode(overflow.js)
     await compileLess(overflow.css)
     await minifyHTML(overflow.html)
@@ -42,17 +45,64 @@ async function init () {
     }
 }
 
-async function concatCode (data) {
-    const code = data.map(function (file) {
-        log('Concatenating', file.replace(root, ''))
+async function lintCode (data) {
+    let severityCodes = {
+        '1': 'WARN',
+        '2': 'ERROR'
+    }
 
+    console.log('Running lint')
+
+    let cli = new eslint.CLIEngine()
+    let lint = cli.executeOnFiles(srcDir)
+    let clean = !(lint.warningCount + lint.errorCount)
+
+    if (!clean) {
+        console.log(`Warnings: ${lint.warningCount}  Errors: ${lint.errorCount}`)
+        console.log('')
+    }
+
+    lint.results.forEach(function (fileLint) {
+        if (fileLint.messages.length) {
+            console.log(fileLint.filePath)
+
+            fileLint.messages.forEach(function (error) {
+                let severityLabel = severityCodes[error.severity]
+
+                console.log(`${error.line}:${error.column}  ${severityLabel}  ${error.message}`)
+            })
+        }
+    })
+
+    if (clean) {
+        console.log('OK')
+        console.log('')
+    } else {
+        process.exit()
+    }
+}
+
+async function concatCode (data) {
+    console.log('Concatenating sources')
+
+    let fileCount = 0
+
+    const code = data.map(function (file) {
+        fileCount++
         return fs.readFileSync(file, 'utf8')
     })
 
     fs.writeFileSync(`${distDir}/tw2overflow.js`, code.join('\n'), 'utf8')
+
+    console.log(`OK [${fileCount} js files]`)
+    console.log('')
 }
 
 async function compileLess (data) {
+    console.log('Compiling styles')
+
+    let fileCount = 0
+
     for (let destination in data) {
         const sourceLocation = data[destination]
         const source = fs.readFileSync(sourceLocation, 'utf8')
@@ -60,8 +110,6 @@ async function compileLess (data) {
         fs.mkdirSync(path.dirname(destination), {
             recursive: true
         })
-
-        log('Compiling .less', sourceLocation.replace(root, ''))
 
         await less.render(source, lessOptions)
         .then(function (output) {
@@ -71,15 +119,22 @@ async function compileLess (data) {
             console.log(error)
             process.exit()
         })
+
+        fileCount++
     }
+
+    console.log(`OK [${fileCount} styles]`)
+    console.log('')
 }
 
 async function minifyHTML (data) {
+    console.log('Minifying HTML')
+
+    let fileCount = 0
+
     for (let destination in data) {
         const sourceLocation = data[destination]
         const source = fs.readFileSync(sourceLocation, 'utf8')
-
-        log('Minifying .html', sourceLocation.replace(root, ''))
 
         let output = htmlMinifier(source, {
             removeRedundantAttributes: true,
@@ -95,13 +150,21 @@ async function minifyHTML (data) {
         output = output.replace(/"/g, '\\"')
 
         fs.writeFileSync(destination, output, 'utf8')
+
+        fileCount++
     }
+
+    console.log(`OK [${fileCount} html files]`)
+    console.log('')
 }
 
 async function replaceInFile (data) {
+    console.log('Replacing in file')
+
     let target = fs.readFileSync(`${distDir}/tw2overflow.js`, 'utf8')
     let search
     let replace
+    let replaceCount = 0
     let ordered = {
         file: {},
         text: {}
@@ -119,27 +182,30 @@ async function replaceInFile (data) {
 
     for (search in ordered.file) {
         replace = ordered.file[search]
-        search = `${replaceOptions.delimiters[0]} ${search} ${replaceOptions.delimiters[1]}`
-
-        log('Replacing', search)
+        search = `${replaceOptions.delimiters[0]}${search}${replaceOptions.delimiters[1]}`
 
         target = replaceText(target, search, replace)
+
+        replaceCount++
     }
 
     for (search in ordered.text) {
         replace = ordered.text[search]
-        search = `${replaceOptions.delimiters[0]} ${search} ${replaceOptions.delimiters[1]}`
-
-        log('Replacing', search)
+        search = `${replaceOptions.delimiters[0]}${search}${replaceOptions.delimiters[1]}`
 
         target = replaceText(target, search, replace)
+
+        replaceCount++
     }
 
     fs.writeFileSync(`${distDir}/tw2overflow.js`, target, 'utf8')
+
+    console.log(`OK [${replaceCount} replaces]`)
+    console.log('')
 }
 
 async function minifyCode (data) {
-    log('Minifying .js', `${distDir}/tw2overflow.min.js`.replace(root, ''))
+    console.log('Minifying code')
 
     const minified = terser.minify({
         'tw2overflow.js': fs.readFileSync(`${distDir}/tw2overflow.js`, 'utf8')
@@ -149,14 +215,17 @@ async function minifyCode (data) {
         const error = minified.error
 
         console.log('')
-        logError(`${error.name}: ${error.message}`)
-        console.log(`${error.filename} line ${error.line} col ${error.col}`)
+        console.log(error.filename)
+        console.log(`${error.line}:${error.col}  ${error.name}  ${error.message}`)
         console.log('')
 
         process.exit()
     }
 
     fs.writeFileSync(`${distDir}/tw2overflow.min.js`, minified.code, 'utf8')
+
+    console.log('OK', `[${distDir}/tw2overflow.min.js]`.replace(root, ''))
+    console.log('')
 }
 
 /**
@@ -347,10 +416,10 @@ function generateOverflowModule (options) {
         overflow.replaces['overflow_version'] = pkg.version + '-stable'
     }
 
-    overflow.replaces['overflow_author'] = JSON.stringify(pkg.author)
     overflow.replaces['overflow_author_name'] = pkg.author.name
     overflow.replaces['overflow_author_url'] = pkg.author.url
     overflow.replaces['overflow_author_email'] = pkg.author.email
+    overflow.replaces['overflow_author'] = JSON.stringify(pkg.author)
     overflow.replaces['overflow_date'] = new Date().toUTCString()
     overflow.replaces['overflow_lang'] = fs.readFileSync(`${tempDir}/src/modules/core/lang/lang.json`, 'utf8')
 
@@ -420,27 +489,6 @@ function replaceText (source, token, replace) {
     } while((index = source.indexOf(token, index + 1)) > -1)
 
     return source
-}
-
-function log () {
-    let args = Array.from(arguments)
-
-    if (args[0] === 'error') {
-        args.splice(0, 1)
-        color = '\x1b[31m'
-    } else {
-        color = '\x1b[32m'
-    }
-
-    args[0] = `${color}${args[0]}\x1b[0m`
-
-    console.log.apply(this, args)
-}
-
-function logError () {
-    let args = Array.from(arguments)
-    args.unshift('error')
-    log.apply(this, args)
 }
 
 init()

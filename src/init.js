@@ -6,6 +6,6 @@ require([
     ready
 ) {
     ready(function () {
-        twoLanguage.add('core', {: overflow_lang :})
+        twoLanguage.add('core', ___overflow_lang)
     })
 })

@@ -540,8 +540,8 @@ define('two/commandQueue/ui', [
         $rootScope.$on(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage)
         $rootScope.$on(eventTypeProvider.DESTROY_CONTEXT_MENU, unsetMapSelectedVillage)
 
-        interfaceOverflow.addTemplate('twoverflow_queue_window', `{: command_queue_html_main :}`)
-        interfaceOverflow.addStyle('{: command_queue_css_style :}')
+        interfaceOverflow.addTemplate('twoverflow_queue_window', `___command_queue_html_main`)
+        interfaceOverflow.addStyle('___command_queue_css_style')
     }
 
     const buildWindow = function () {

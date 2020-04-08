@@ -16,8 +16,8 @@ define('two/about/ui', [
             buildWindow()
         })
 
-        interfaceOverflow.addTemplate('twoverflow_about_window', `{: about_html_main :}`)
-        interfaceOverflow.addStyle('{: about_css_style :}')
+        interfaceOverflow.addTemplate('twoverflow_about_window', `___about_html_main`)
+        interfaceOverflow.addStyle('___about_css_style')
     }
 
     const buildWindow = function () {

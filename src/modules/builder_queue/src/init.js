@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('{: builder_queue_id :}', {: builder_queue_lang :})
+        twoLanguage.add('___builder_queue_id', ___builder_queue_lang)
         builderQueue.init()
         builderQueueInterface()
     })

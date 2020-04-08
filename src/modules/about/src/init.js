@@ -14,7 +14,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('{: about_id :}', {: about_lang :})
+        twoLanguage.add('___about_id', ___about_lang) // eslint-disable-line
         about.init()
         aboutInterface()
     }, ['map'])

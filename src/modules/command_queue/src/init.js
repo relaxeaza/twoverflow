@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('{: command_queue_id :}', {: command_queue_lang :})
+        twoLanguage.add('___command_queue_id', ___command_queue_lang)
         commandQueue.init()
         commandQueueInterface()
 

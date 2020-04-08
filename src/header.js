@@ -1,7 +1,7 @@
 /*!
- * {: overflow_name :} v{: overflow_version :}
- * {: overflow_date :}
- * Developed by {: overflow_author_name :} <{: overflow_author_email :}>
+ * ___overflow_name v___overflow_version
+ * ___overflow_date
+ * Developed by ___overflow_author_name <___overflow_author_email>
  *
  * This work is free. You can redistribute it and/or modify it under the
  * terms of the Do What The Fuck You Want To Public License, Version 2,

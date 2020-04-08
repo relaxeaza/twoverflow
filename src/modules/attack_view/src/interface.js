@@ -97,9 +97,9 @@ define('two/attackView/ui', [
         $button = interfaceOverflow.addMenuButton('AttackView', 40)
         $button.addEventListener('click', buildWindow)
 
-        interfaceOverflow.addTemplate('twoverflow_attack_view_main', `{: attack_view_html_main :}`)
+        interfaceOverflow.addTemplate('twoverflow_attack_view_main', `___attack_view_html_main`)
         interfaceOverflow.addTemplate('twoverflow_attack_view_show_text_modal', `{: attack_view_html_modal-show-text :}`)
-        interfaceOverflow.addStyle('{: attack_view_css_style :}')
+        interfaceOverflow.addStyle('___attack_view_css_style')
     }
 
     const buildWindow = function () {

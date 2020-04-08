@@ -657,10 +657,10 @@ define('two/builderQueue/ui', [
             utils.emitNotif('success', $filter('i18n')('stopped', $rootScope.loc.ale, 'builder_queue'))
         })
 
-        interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `{: builder_queue_html_main :}`)
+        interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `___builder_queue_html_main`)
         interfaceOverflow.addTemplate('twoverflow_builder_queue_add_building_modal', `{: builder_queue_html_modal-add-building :}`)
         interfaceOverflow.addTemplate('twoverflow_builder_queue_name_sequence_modal', `{: builder_queue_html_modal-name-sequence :}`)
-        interfaceOverflow.addStyle('{: builder_queue_css_style :}')
+        interfaceOverflow.addStyle('___builder_queue_css_style')
     }
 
     const buildWindow = function () {

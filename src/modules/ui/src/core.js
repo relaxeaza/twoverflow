@@ -84,7 +84,7 @@ define('two/ui', [
         }
 
         initialized = true
-        interfaceOverflow.addStyle('{: interface_css_style :}')
+        interfaceOverflow.addStyle('___interface_css_style')
     }
 
     interfaceOverflow.addTemplate = function (path, data) {
