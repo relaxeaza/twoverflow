@@ -475,12 +475,14 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED)
     }
 
-    const addLog = function (type, _data) {
+    const addLog = function (type, data = {}) {
         if (typeof type !== 'string') {
             return false
         }
 
-        let data = angular.isObject(_data) ? _data : {}
+        if (!angular.isObject(data)) {
+            data = {}
+        }
 
         data.time = timeHelper.gameTime()
         data.type = type
@@ -667,8 +669,7 @@ define('two/farmOverflow', [
         this.onCycleEndFn = noop
     }
 
-    Farmer.prototype.targetStep = async function (_options) {
-        const options = _options || {}
+    Farmer.prototype.targetStep = async function (options = {}) {
         const commandList = this.village.getCommandListModel()
         const villageCommands = commandList.getOutgoingCommands(true, true)
         let preset
