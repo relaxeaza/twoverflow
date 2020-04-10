@@ -317,28 +317,28 @@ define('two/farmOverflow', [
         farmOverflow.createFarmers()
     }
 
+    const processPresets = function () {
+        selectedPresets = []
+        const playerPresets = modelDataService.getPresetList().getPresets()
+        const activePresets = settings.get(SETTINGS.PRESETS)
+
+        activePresets.forEach(function (presetId) {
+            if (!playerPresets.hasOwnProperty(presetId)) {
+                return
+            }
+
+            preset = playerPresets[presetId]
+            preset.load = getPresetHaul(preset)
+            preset.travelTime = getPresetTimeTravel(preset, false)
+            selectedPresets.push(preset)
+        })
+
+        selectedPresets = selectedPresets.sort(function (a, b) {
+            return a.travelTime - b.travelTime || b.load - a.load
+        })
+    }
+
     const updatePresets = function () {
-        const processPresets = function () {
-            selectedPresets = []
-            const playerPresets = modelDataService.getPresetList().getPresets()
-            const activePresets = settings.get(SETTINGS.PRESETS)
-
-            activePresets.forEach(function (presetId) {
-                if (!playerPresets.hasOwnProperty(presetId)) {
-                    return
-                }
-
-                preset = playerPresets[presetId]
-                preset.load = getPresetHaul(preset)
-                preset.travelTime = getPresetTimeTravel(preset, false)
-                selectedPresets.push(preset)
-            })
-
-            selectedPresets = selectedPresets.sort(function (a, b) {
-                return a.travelTime - b.travelTime || b.load - a.load
-            })
-        }
-
         if (modelDataService.getPresetList().isLoaded()) {
             processPresets()
         } else {
