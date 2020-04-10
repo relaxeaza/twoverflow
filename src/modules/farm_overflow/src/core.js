@@ -404,7 +404,7 @@ define('two/farmOverflow', [
             return
         }
 
-        if (data.origin.id !== activeFarmer.getVillage().getId()) {
+        if (data.origin.id !== activeFarmer.getId()) {
             return
         }
 
@@ -463,20 +463,6 @@ define('two/farmOverflow', [
         return limitTime > totalTravelTime
     }
 
-    const checkFullStorage = function(village) {
-        if (!village.isReady()) {
-            return false
-        }
-
-        const resources = village.getResources()
-        const computed = resources.getComputed()
-        const maxStorage = resources.getMaxStorage()
-
-        return ['wood', 'clay', 'iron'].every(function (type) {
-            return computed[type].currentStock === maxStorage
-        })
-    }
-
     const addExceptionLog = function (villageId) {
         exceptionLogs[villageId] = {
             time: timeHelper.gameTime(),
@@ -489,7 +475,7 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED)
     }
 
-    const addLog = function(type, _data) {
+    const addLog = function (type, _data) {
         if (typeof type !== 'string') {
             return false
         }
@@ -517,40 +503,36 @@ define('two/farmOverflow', [
     }
 
     const Farmer = function (villageId) {
-        let self = this
         let village = $player.getVillage(villageId)
         let index = 0
         let running = false
         let initialized = false
-        let ready = false
         let targets = false
-        let cycleEndHandler = noop
-        let loadPromises
+        let onCycleEndFn = noop
         let status = STATUS.WAITING_CYCLE
 
         if (!village) {
             throw new Error(`new Farmer -> Village ${villageId} doesn't exist.`)
         }
 
-        self.init = function () {
-            loadPromises = []
-            initialized = true
+        this.init = function () {
+            let loadPromises = []
 
-            if (!self.isReady()) {
-                loadPromises.push(new Promise(function(resolve) {
-                    if (self.isReady()) {
+            if (!this.isInitialized()) {
+                loadPromises.push(new Promise((resolve) => {
+                    if (this.isInitialized()) {
                         return resolve()
                     }
 
-                    villageService.ensureVillageDataLoaded(village.getId(), resolve)
+                    villageService.ensureVillageDataLoaded(villageId, resolve)
                 }))
 
-                loadPromises.push(new Promise(function (resolve) {
-                    if (self.isReady()) {
+                loadPromises.push(new Promise((resolve) => {
+                    if (this.isInitialized()) {
                         return resolve()
                     }
 
-                    self.loadTargets(function () {
+                    this.loadTargets(() => {
                         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, {
                             villageId: villageId
                         })
@@ -559,17 +541,17 @@ define('two/farmOverflow', [
                 }))
             }
 
-            return Promise.all(loadPromises).then(function() {
-                ready = true
+            return Promise.all(loadPromises).then(() => {
+                initialized = true
             })
         }
 
-        self.start = function () {
+        this.start = function () {
             if (running) {
                 return false
             }
 
-            if (!ready) {
+            if (!initialized) {
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, {
                     villageId: villageId
                 })
@@ -589,14 +571,14 @@ define('two/farmOverflow', [
                 villageId: villageId
             })
 
-            self.targetStep({
+            this.targetStep({
                 delay: false
             })
 
             return true
         }
 
-        self.stop = function (reason) {
+        this.stop = function (reason) {
             running = false
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
                 villageId: villageId,
@@ -604,23 +586,23 @@ define('two/farmOverflow', [
             })
 
             if (reason !== ERROR_TYPES.USER_STOP) {
-                cycleEndHandler(reason)
+                onCycleEndFn(reason)
             }
 
             clearTimeout(targetTimeoutId)
-            cycleEndHandler = noop
+            onCycleEndFn = noop
         }
 
-        self.targetStep = async function (_options) {
+        this.targetStep = async function (_options) {
             const options = _options || {}
+            const commandList = village.getCommandListModel()
+            const villageCommands = commandList.getOutgoingCommands(true, true)
             let preset
             let delayTime = 0
             let target
-            const commandList = village.getCommandListModel()
-            const villageCommands = commandList.getOutgoingCommands(true, true)
             let checkedLocalCommands = false
 
-            const checkCommandLimit = function () {
+            const checkCommandLimit = () => {
                 const limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
 
                 if (villageCommands.length >= limit) {
@@ -628,13 +610,20 @@ define('two/farmOverflow', [
                 }
             }
 
-            const checkStorage = function () {
-                if (settings.get(SETTINGS.IGNORE_FULL_STORAGE) && checkFullStorage(village)) {
-                    throw STATUS.FULL_STORAGE
+            const checkStorage = () => {
+                if (settings.get(SETTINGS.IGNORE_FULL_STORAGE)) {
+                    const resources = village.getResources()
+                    const computed = resources.getComputed()
+                    const maxStorage = resources.getMaxStorage()
+                    const isFull = ['wood', 'clay', 'iron'].every((type) => computed[type].currentStock === maxStorage)
+
+                    if (isFull) {
+                        throw STATUS.FULL_STORAGE
+                    }
                 }
             }
 
-            const checkTargets = function () {
+            const checkTargets = () => {
                 if (!targets.length) {
                     throw STATUS.NO_TARGETS
                 }
@@ -644,17 +633,19 @@ define('two/farmOverflow', [
                 }
             }
 
-            const checkVillagePresets = () => new Promise(function (resolve) {
-                const neededPresets = genPresetList()
+            const checkVillagePresets = () => {
+                return new Promise((resolve) => {
+                    const neededPresets = genPresetList()
 
-                if (neededPresets) {
-                    assignPresets(village.getId(), neededPresets, resolve)
-                } else {
-                    resolve()
-                }
-            })
+                    if (neededPresets) {
+                        assignPresets(villageId, neededPresets, resolve)
+                    } else {
+                        resolve()
+                    }
+                })
+            }
 
-            const checkPreset = function () {
+            const checkPreset = () => {
                 target = getTarget()
 
                 if (!target) {
@@ -668,50 +659,50 @@ define('two/farmOverflow', [
                 }
             }
 
-            const checkTarget = () => new Promise(function (resolve) {
-                socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
-                    target_id: target.id
-                }, function(data) {
-                    // abandoned village conquered by some noob.
-                    if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
-                        throw STATUS.ABANDONED_CONQUERED
-                    } else if (target.attack_protection) {
-                        throw STATUS.PROTECTED_VILLAGE
-                    } else {
-                        resolve()
-                    }
+            const checkTarget = () => {
+                return new Promise((resolve) => {
+                    socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
+                        target_id: target.id
+                    }, (data) => {
+                        // abandoned village conquered by some noob.
+                        if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
+                            throw STATUS.ABANDONED_CONQUERED
+                        } else if (target.attack_protection) {
+                            throw STATUS.PROTECTED_VILLAGE
+                        } else {
+                            resolve()
+                        }
+                    })
                 })
-            })
+            }
 
-            const checkLocalCommands = function () {
-                let otherAttacking = false
+            const checkLocalCommands = () => {
+                let otherVillageAttacking = false
 
                 const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
                 const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
                 const playerVillages = $player.getVillageList()
-                const allVillagesLoaded = playerVillages.every(function (anotherVillage) {
-                    return anotherVillage.isReady(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS)
-                })
+                const allVillagesLoaded = playerVillages.every((anotherVillage) => anotherVillage.isInitialized(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS))
 
                 if (allVillagesLoaded) {
-                    otherAttacking = playerVillages.some(function (anotherVillage) {
-                        if (anotherVillage.getId() === village.getId()) {
+                    otherVillageAttacking = playerVillages.some((anotherVillage) => {
+                        if (anotherVillage.getId() === villageId) {
                             return false
                         }
 
-                        const anotherVillageCommands = anotherVillage.getCommandListModel().getOutgoingCommands(true, true)
+                        const otherVillageCommands = anotherVillage.getCommandListModel().getOutgoingCommands(true, true)
 
-                        return anotherVillageCommands.some(function (command) {
+                        return otherVillageCommands.some((command) => {
                             return command.targetVillageId === target.id && command.data.direction === 'forward'
                         })
                     })
                 }
 
-                const attacking = villageCommands.some(function (command) {
+                const attacking = villageCommands.some((command) => {
                     return command.data.target.id === target.id && command.data.direction === 'forward'
                 })
 
-                if (isTargetBusy(attacking, otherAttacking, allVillagesLoaded)) {
+                if (isTargetBusy(attacking, otherVillageAttacking, allVillagesLoaded)) {
                     throw STATUS.BUSY_TARGET
                 }
 
@@ -720,47 +711,45 @@ define('two/farmOverflow', [
                 }
             }
 
-            const checkTargetPoints = () => new Promise(function (resolve) {
-                $mapData.getTownAtAsync(target.x, target.y, function (data) {
-                    if (villageFilters.points(data.points)) {
-                        throw STATUS.NOT_ALLOWED_POINTS
+            const checkTargetPoints = () => {
+                return new Promise((resolve) => {
+                    $mapData.getTownAtAsync(target.x, target.y, (data) => {
+                        if (villageFilters.points(data.points)) {
+                            throw STATUS.NOT_ALLOWED_POINTS
+                        }
+
+                        resolve()
+                    })
+                })
+            }
+
+            const checkLoadedCommands = () => {
+                return new Promise((resolve) => {
+                    if (checkedLocalCommands) {
+                        return resolve()
                     }
 
-                    resolve()
+                    socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
+                        my_village_id: villageId,
+                        village_id: target.id,
+                        num_reports: 0
+                    }, (data) => {
+                        const targetCommands = data.commands.own.filter((command) => command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward')
+                        const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
+                        const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
+                        const otherAttacking = targetCommands.some((command) => command.start_village_id !== villageId)
+                        const attacking = targetCommands.some((command) => command.start_village_id === villageId)
+
+                        if (isTargetBusy(attacking, otherAttacking, true)) {
+                            throw STATUS.BUSY_TARGET
+                        }
+
+                        resolve()
+                    })
                 })
-            })
+            }
 
-            const checkLoadedCommands = () => new Promise(function (resolve) {
-                if (checkedLocalCommands) {
-                    return resolve()
-                }
-
-                socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
-                    my_village_id: villageId,
-                    village_id: target.id,
-                    num_reports: 0
-                }, function (data) {
-                    const targetCommands = data.commands.own.filter(function (command) {
-                        return command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward'
-                    })
-                    const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-                    const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
-                    const otherAttacking = targetCommands.some(function (command) {
-                        return command.start_village_id !== villageId
-                    })
-                    const attacking = targetCommands.some(function (command) {
-                        return command.start_village_id === villageId
-                    })
-
-                    if (isTargetBusy(attacking, otherAttacking, true)) {
-                        throw STATUS.BUSY_TARGET
-                    }
-
-                    resolve()
-                })
-            })
-
-            const prepareAttack = function () {
+            const prepareAttack = () => {
                 if (options.delay) {
                     delayTime = settings.get(SETTINGS.ATTACK_INTERVAL) * 1000
 
@@ -771,14 +760,14 @@ define('two/farmOverflow', [
                     delayTime = utils.randomSeconds(delayTime)
                 }
 
-                self.setStatus(STATUS.ATTACKING)
+                this.setStatus(STATUS.ATTACKING)
 
-                targetTimeoutId = setTimeout(function() {
+                targetTimeoutId = setTimeout(() => {
                     attackTarget(target, preset)
                 }, delayTime)
             }
 
-            const onError = function (error) {
+            const onError = (error) => {
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
                     villageId: villageId,
                     error: error
@@ -791,33 +780,33 @@ define('two/farmOverflow', [
                 case STATUS.BUSY_TARGET:
                 case STATUS.ABANDONED_CONQUERED:
                 case STATUS.PROTECTED_VILLAGE:
-                    self.setStatus(error)
-                    self.targetStep(options)
+                    this.setStatus(error)
+                    this.targetStep(options)
                     break
 
                 case STATUS.NOT_ALLOWED_POINTS:
-                    self.setStatus(error)
+                    this.setStatus(error)
                     farmOverflow.removeTarget(target.id)
-                    self.targetStep(options)
+                    this.targetStep(options)
                     break
 
                 case STATUS.NO_UNITS:
                 case STATUS.NO_TARGETS:
                 case STATUS.FULL_STORAGE:
                 case STATUS.COMMAND_LIMIT:
-                    self.setStatus(error)
-                    self.stop(error)
+                    this.setStatus(error)
+                    this.stop(error)
                     break
 
                 case STATUS.TARGET_CYCLE_END:
-                    self.setStatus(error)
-                    self.stop(error)
+                    this.setStatus(error)
+                    this.stop(error)
                     index = 0
                     break
 
                 default:
-                    self.setStatus(STATUS.UNKNOWN)
-                    self.stop(STATUS.UNKNOWN)
+                    this.setStatus(STATUS.UNKNOWN)
+                    this.stop(STATUS.UNKNOWN)
                     break
                 }
             }
@@ -838,35 +827,35 @@ define('two/farmOverflow', [
             }
         }
 
-        self.setStatus = function (newStatus) {
+        this.setStatus = function (newStatus) {
             status = newStatus
         }
 
-        self.getStatus = function () {
+        this.getStatus = function () {
             return status || ''
         }
 
-        self.commandSent = function (data) {
+        this.commandSent = function (data) {
             sendingCommand = false
             currentTarget = false
 
-            self.targetStep({
+            this.targetStep({
                 delay: true
             })
         }
 
-        self.commandError = function (data) {
+        this.commandError = function (data) {
             sendingCommand = false
             currentTarget = false
 
-            self.stop(STATUS.COMMAND_ERROR)
+            this.stop(STATUS.COMMAND_ERROR)
         }
 
-        self.onCycleEnd = function (handler) {
-            cycleEndHandler = handler
+        this.onCycleEnd = function (handler) {
+            onCycleEndFn = handler
         }
 
-        self.loadTargets = function (_callback) {
+        this.loadTargets = function (_callback) {
             const pos = village.getPosition()
 
             mapData.load(pos, function (loadedTargets) {
@@ -880,27 +869,27 @@ define('two/farmOverflow', [
             })
         }
 
-        self.getTargets = function () {
+        this.getTargets = function () {
             return targets
         }
 
-        self.getIndex = function () {
+        this.getIndex = function () {
             return index
         }
 
-        self.getVillage = function () {
+        this.getVillage = function () {
             return village
         }
 
-        self.isRunning = function () {
+        this.isRunning = function () {
             return running
         }
 
-        self.isReady = function () {
-            return initialized && ready
+        this.isInitialized = function () {
+            return initialized
         }
 
-        self.removeTarget = function (targetId) {
+        this.removeTarget = function (targetId) {
             if (typeof targetId !== 'number' || !targets) {
                 return false
             }
@@ -912,10 +901,14 @@ define('two/farmOverflow', [
             return true
         }
 
+        this.getId = function () {
+            return villageId
+        }
+
         // private functions
 
         const genPresetList = function () {
-            const villagePresets = modelDataService.getPresetList().getPresetsByVillageId(village.getId())
+            const villagePresets = modelDataService.getPresetList().getPresetsByVillageId(villageId)
             let needAssign = false
             let which = []
 
@@ -966,7 +959,7 @@ define('two/farmOverflow', [
             index++
 
             socketService.emit(routeProvider.SEND_PRESET, {
-                start_village: village.getId(),
+                start_village: villageId,
                 target_village: target.id,
                 army_preset_id: preset.id,
                 type: COMMAND_TYPES.TYPES.ATTACK
@@ -1158,7 +1151,7 @@ define('two/farmOverflow', [
         let removeIds = []
 
         farmers.forEach(function (farmer) {
-            let villageId = farmer.getVillage().getId()
+            let villageId = farmer.getId()
 
             if (groupsOnly.length && !onlyVillages.includes(villageId)) {
                 removeIds.push(villageId)
@@ -1177,13 +1170,9 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.getFarmer = function (farmerId) {
-        for (let i = 0; i < farmers.length; i++) {
-            if (farmers[i].getVillage().getId() === farmerId) {
-                return farmers[i]
-            }
-        }
-
-        return false
+        return farmers.find(function (farmer) {
+            return farmer.getId() === farmerId
+        })
     }
 
     farmOverflow.getFarmers = function () {
@@ -1192,8 +1181,8 @@ define('two/farmOverflow', [
 
     farmOverflow.removeFarmer = function (farmerId) {
         for (let i = 0; i < farmers.length; i++) {
-            if (farmers[i].getVillage().getId() === farmerId) {
-                farmers[i].stop()
+            if (farmers[i].getId() === farmerId) {
+                farmers[i].stop(ERROR_TYPES.KILL_FARMER)
                 farmers.splice(i, i + 1)
 
                 return true
@@ -1213,28 +1202,26 @@ define('two/farmOverflow', [
             activeFarmer = farmers[farmerIndex]
         }
 
-        if (!activeFarmer) {
+        if (activeFarmer) {
+            activeFarmer.onCycleEnd(function () {
+                farmerIndex++
+                farmOverflow.farmerStep()
+            })
+            
+            activeFarmer.start()
+        } else {
             let interval = settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
 
             if (interval < MINIMUM_ATTACK_INTERVAL) {
                 interval = MINIMUM_FARMER_CYCLE_INTERVAL
             }
 
-            farmerTimeoutId = setTimeout(function() {
+            farmerTimeoutId = setTimeout(function () {
                 farmerTimeoutId = null
                 farmerIndex = 0
                 farmOverflow.farmerStep()
             }, interval)
-
-            return
         }
-
-        activeFarmer.onCycleEnd(function () {
-            farmerIndex++
-            farmOverflow.farmerStep()
-        })
-        
-        activeFarmer.start()
     }
 
     farmOverflow.isTarget = function (targetId) {

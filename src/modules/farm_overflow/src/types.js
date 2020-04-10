@@ -1,7 +1,8 @@
 define('two/farmOverflow/types/errors', [], function () {
     return {
         NO_PRESETS: 'no_presets',
-        USER_STOP: 'user_stop'
+        USER_STOP: 'user_stop',
+        KILL_FARMER: 'kill_farmer'
     }
 })
 
