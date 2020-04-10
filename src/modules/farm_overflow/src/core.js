@@ -502,502 +502,490 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_LOGS_UPDATED)
     }
 
-    const Farmer = function (villageId) {
-        let village = $player.getVillage(villageId)
-        let index = 0
-        let running = false
-        let initialized = false
-        let targets = false
-        let onCycleEndFn = noop
-        let status = STATUS.WAITING_CYCLE
+    const getPreset = function (village, target) {
+        const units = village.getUnitInfo().getUnits()
 
-        if (!village) {
+        for (let i = 0; i < selectedPresets.length; i++) {
+            let preset = selectedPresets[i]
+            let avail = true
+
+            for (let unit in preset.units) {
+                if (!preset.units[unit]) {
+                    continue
+                }
+
+                if (units[unit].in_town < preset.units[unit]) {
+                    avail = false
+                }
+            }
+
+            if (avail) {
+                if (checkPresetTime(preset, village, target)) {
+                    return preset
+                } else {
+                    return STATUS.TIME_LIMIT
+                }
+            }
+        }
+
+        return STATUS.NO_UNITS
+    }
+
+    const isTargetBusy = function (attacking, otherAttacking, allVillagesLoaded) {
+        const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
+        const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
+
+        if (multipleFarmers && allVillagesLoaded) {
+            if (singleAttack && attacking) {
+                return true
+            }
+        } else if (singleAttack) {
+            if (attacking || otherAttacking) {
+                return true
+            }
+        } else if (otherAttacking) {
+            return true
+        }
+
+        return false
+    }
+
+    const genPresetList = function (villageId) {
+        const villagePresets = modelDataService.getPresetList().getPresetsByVillageId(villageId)
+        let needAssign = false
+        let which = []
+
+        selectedPresets.forEach(function (preset) {
+            if (!villagePresets.hasOwnProperty(preset.id)) {
+                needAssign = true
+                which.push(preset.id)
+            }
+        })
+
+        if (needAssign) {
+            for (let id in villagePresets) {
+                which.push(id)
+            }
+
+            return which
+        }
+
+        return false
+    }
+
+    const Farmer = function (villageId) {
+        this.villageId = villageId
+        this.village = $player.getVillage(villageId)
+
+        if (!this.village) {
             throw new Error(`new Farmer -> Village ${villageId} doesn't exist.`)
         }
 
-        this.init = function () {
-            let loadPromises = []
+        this.index = 0
+        this.running = false
+        this.initialized = false
+        this.targets = false
+        this.onCycleEndFn = noop
+        this.status = STATUS.WAITING_CYCLE
+    }
 
-            if (!this.isInitialized()) {
-                loadPromises.push(new Promise((resolve) => {
-                    if (this.isInitialized()) {
-                        return resolve()
-                    }
+    Farmer.prototype.init = function () {
+        let loadPromises = []
 
-                    villageService.ensureVillageDataLoaded(villageId, resolve)
-                }))
+        if (!this.isInitialized()) {
+            loadPromises.push(new Promise((resolve) => {
+                if (this.isInitialized()) {
+                    return resolve()
+                }
 
-                loadPromises.push(new Promise((resolve) => {
-                    if (this.isInitialized()) {
-                        return resolve()
-                    }
+                villageService.ensureVillageDataLoaded(this.villageId, resolve)
+            }))
 
-                    this.loadTargets(() => {
-                        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, {
-                            villageId: villageId
-                        })
-                        resolve()
+            loadPromises.push(new Promise((resolve) => {
+                if (this.isInitialized()) {
+                    return resolve()
+                }
+
+                this.loadTargets(() => {
+                    eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_READY, {
+                        villageId: this.villageId
                     })
-                }))
-            }
-
-            return Promise.all(loadPromises).then(() => {
-                initialized = true
-            })
-        }
-
-        this.start = function () {
-            if (running) {
-                return false
-            }
-
-            if (!initialized) {
-                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, {
-                    villageId: villageId
+                    resolve()
                 })
-                return false
-            }
-
-            if (!targets.length) {
-                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS, {
-                    villageId: villageId
-                })
-                return false
-            }
-
-            activeFarmer = this
-            running = true
-            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, {
-                villageId: villageId
-            })
-
-            this.targetStep({
-                delay: false
-            })
-
-            return true
+            }))
         }
 
-        this.stop = function (reason) {
-            running = false
-            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
-                villageId: villageId,
-                reason: reason
-            })
+        return Promise.all(loadPromises).then(() => {
+            this.initialized = true
+        })
+    }
 
-            if (reason !== ERROR_TYPES.USER_STOP) {
-                onCycleEndFn(reason)
-            }
-
-            clearTimeout(targetTimeoutId)
-            onCycleEndFn = noop
+    Farmer.prototype.start = function () {
+        if (this.running) {
+            return false
         }
 
-        this.targetStep = async function (_options) {
-            const options = _options || {}
-            const commandList = village.getCommandListModel()
-            const villageCommands = commandList.getOutgoingCommands(true, true)
-            let preset
-            let delayTime = 0
-            let target
-            let checkedLocalCommands = false
+        if (!this.initialized) {
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY, {
+                villageId: this.villageId
+            })
+            return false
+        }
 
-            const checkCommandLimit = () => {
-                const limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
+        if (!this.targets.length) {
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS, {
+                villageId: this.villageId
+            })
+            return false
+        }
 
-                if (villageCommands.length >= limit) {
-                    throw STATUS.COMMAND_LIMIT
+        activeFarmer = this
+        this.running = true
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_START, {
+            villageId: this.villageId
+        })
+
+        this.targetStep({
+            delay: false
+        })
+
+        return true
+    }
+
+    Farmer.prototype.stop = function (reason) {
+        this.running = false
+        eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
+            villageId: this.villageId,
+            reason: reason
+        })
+
+        if (reason !== ERROR_TYPES.USER_STOP) {
+            this.onCycleEndFn(reason)
+        }
+
+        clearTimeout(targetTimeoutId)
+        this.onCycleEndFn = noop
+    }
+
+    Farmer.prototype.targetStep = async function (_options) {
+        const options = _options || {}
+        const commandList = this.village.getCommandListModel()
+        const villageCommands = commandList.getOutgoingCommands(true, true)
+        let preset
+        let delayTime = 0
+        let target
+        let checkedLocalCommands = false
+
+        const checkCommandLimit = () => {
+            const limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
+
+            if (villageCommands.length >= limit) {
+                throw STATUS.COMMAND_LIMIT
+            }
+        }
+
+        const checkStorage = () => {
+            if (settings.get(SETTINGS.IGNORE_FULL_STORAGE)) {
+                const resources = this.village.getResources()
+                const computed = resources.getComputed()
+                const maxStorage = resources.getMaxStorage()
+                const isFull = ['wood', 'clay', 'iron'].every((type) => computed[type].currentStock === maxStorage)
+
+                if (isFull) {
+                    throw STATUS.FULL_STORAGE
                 }
             }
+        }
 
-            const checkStorage = () => {
-                if (settings.get(SETTINGS.IGNORE_FULL_STORAGE)) {
-                    const resources = village.getResources()
-                    const computed = resources.getComputed()
-                    const maxStorage = resources.getMaxStorage()
-                    const isFull = ['wood', 'clay', 'iron'].every((type) => computed[type].currentStock === maxStorage)
-
-                    if (isFull) {
-                        throw STATUS.FULL_STORAGE
-                    }
-                }
+        const checkTargets = () => {
+            if (!this.targets.length) {
+                throw STATUS.NO_TARGETS
             }
 
-            const checkTargets = () => {
-                if (!targets.length) {
-                    throw STATUS.NO_TARGETS
-                }
+            if (this.index > this.targets.length || !this.targets[this.index]) {
+                throw STATUS.TARGET_CYCLE_END
+            }
+        }
 
-                if (index > targets.length || !targets[index]) {
-                    throw STATUS.TARGET_CYCLE_END
+        const checkVillagePresets = () => {
+            return new Promise((resolve) => {
+                const neededPresets = genPresetList(this.villageId)
+
+                if (neededPresets) {
+                    assignPresets(this.villageId, neededPresets, resolve)
+                } else {
+                    resolve()
                 }
+            })
+        }
+
+        const checkPreset = () => {
+            target = this.targets[this.index]
+
+            if (!target) {
+                throw STATUS.UNKNOWN
             }
 
-            const checkVillagePresets = () => {
-                return new Promise((resolve) => {
-                    const neededPresets = genPresetList()
+            preset = getPreset(this.village, target)
 
-                    if (neededPresets) {
-                        assignPresets(villageId, neededPresets, resolve)
+            if (typeof preset === 'string') {
+                throw preset
+            }
+        }
+
+        const checkTarget = () => {
+            return new Promise((resolve) => {
+                socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
+                    target_id: target.id
+                }, (data) => {
+                    // abandoned village conquered by some noob.
+                    if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
+                        throw STATUS.ABANDONED_CONQUERED
+                    } else if (target.attack_protection) {
+                        throw STATUS.PROTECTED_VILLAGE
                     } else {
                         resolve()
                     }
                 })
-            }
-
-            const checkPreset = () => {
-                target = getTarget()
-
-                if (!target) {
-                    throw STATUS.UNKNOWN
-                }
-
-                preset = getPreset(target)
-
-                if (typeof preset === 'string') {
-                    throw preset
-                }
-            }
-
-            const checkTarget = () => {
-                return new Promise((resolve) => {
-                    socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
-                        target_id: target.id
-                    }, (data) => {
-                        // abandoned village conquered by some noob.
-                        if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
-                            throw STATUS.ABANDONED_CONQUERED
-                        } else if (target.attack_protection) {
-                            throw STATUS.PROTECTED_VILLAGE
-                        } else {
-                            resolve()
-                        }
-                    })
-                })
-            }
-
-            const checkLocalCommands = () => {
-                let otherVillageAttacking = false
-
-                const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-                const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
-                const playerVillages = $player.getVillageList()
-                const allVillagesLoaded = playerVillages.every((anotherVillage) => anotherVillage.isInitialized(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS))
-
-                if (allVillagesLoaded) {
-                    otherVillageAttacking = playerVillages.some((anotherVillage) => {
-                        if (anotherVillage.getId() === villageId) {
-                            return false
-                        }
-
-                        const otherVillageCommands = anotherVillage.getCommandListModel().getOutgoingCommands(true, true)
-
-                        return otherVillageCommands.some((command) => {
-                            return command.targetVillageId === target.id && command.data.direction === 'forward'
-                        })
-                    })
-                }
-
-                const attacking = villageCommands.some((command) => {
-                    return command.data.target.id === target.id && command.data.direction === 'forward'
-                })
-
-                if (isTargetBusy(attacking, otherVillageAttacking, allVillagesLoaded)) {
-                    throw STATUS.BUSY_TARGET
-                }
-
-                if (allVillagesLoaded) {
-                    checkedLocalCommands = true
-                }
-            }
-
-            const checkTargetPoints = () => {
-                return new Promise((resolve) => {
-                    $mapData.getTownAtAsync(target.x, target.y, (data) => {
-                        if (villageFilters.points(data.points)) {
-                            throw STATUS.NOT_ALLOWED_POINTS
-                        }
-
-                        resolve()
-                    })
-                })
-            }
-
-            const checkLoadedCommands = () => {
-                return new Promise((resolve) => {
-                    if (checkedLocalCommands) {
-                        return resolve()
-                    }
-
-                    socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
-                        my_village_id: villageId,
-                        village_id: target.id,
-                        num_reports: 0
-                    }, (data) => {
-                        const targetCommands = data.commands.own.filter((command) => command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward')
-                        const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-                        const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
-                        const otherAttacking = targetCommands.some((command) => command.start_village_id !== villageId)
-                        const attacking = targetCommands.some((command) => command.start_village_id === villageId)
-
-                        if (isTargetBusy(attacking, otherAttacking, true)) {
-                            throw STATUS.BUSY_TARGET
-                        }
-
-                        resolve()
-                    })
-                })
-            }
-
-            const prepareAttack = () => {
-                if (options.delay) {
-                    delayTime = settings.get(SETTINGS.ATTACK_INTERVAL) * 1000
-
-                    if (delayTime < MINIMUM_ATTACK_INTERVAL) {
-                        delayTime = MINIMUM_ATTACK_INTERVAL
-                    }
-
-                    delayTime = utils.randomSeconds(delayTime)
-                }
-
-                this.setStatus(STATUS.ATTACKING)
-
-                targetTimeoutId = setTimeout(() => {
-                    attackTarget(target, preset)
-                }, delayTime)
-            }
-
-            const onError = (error) => {
-                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
-                    villageId: villageId,
-                    error: error
-                })
-
-                index++
-
-                switch (error) {
-                case STATUS.TIME_LIMIT:
-                case STATUS.BUSY_TARGET:
-                case STATUS.ABANDONED_CONQUERED:
-                case STATUS.PROTECTED_VILLAGE:
-                    this.setStatus(error)
-                    this.targetStep(options)
-                    break
-
-                case STATUS.NOT_ALLOWED_POINTS:
-                    this.setStatus(error)
-                    farmOverflow.removeTarget(target.id)
-                    this.targetStep(options)
-                    break
-
-                case STATUS.NO_UNITS:
-                case STATUS.NO_TARGETS:
-                case STATUS.FULL_STORAGE:
-                case STATUS.COMMAND_LIMIT:
-                    this.setStatus(error)
-                    this.stop(error)
-                    break
-
-                case STATUS.TARGET_CYCLE_END:
-                    this.setStatus(error)
-                    this.stop(error)
-                    index = 0
-                    break
-
-                default:
-                    this.setStatus(STATUS.UNKNOWN)
-                    this.stop(STATUS.UNKNOWN)
-                    break
-                }
-            }
-
-            try {
-                checkCommandLimit()
-                checkStorage()
-                checkTargets()
-                await checkVillagePresets()
-                checkPreset()
-                await checkTarget()
-                checkLocalCommands()
-                await checkTargetPoints()
-                await checkLoadedCommands()
-                prepareAttack()
-            } catch (error) {
-                onError(error)
-            }
-        }
-
-        this.setStatus = function (newStatus) {
-            status = newStatus
-        }
-
-        this.getStatus = function () {
-            return status || ''
-        }
-
-        this.commandSent = function (data) {
-            sendingCommand = false
-            currentTarget = false
-
-            this.targetStep({
-                delay: true
             })
         }
 
-        this.commandError = function (data) {
-            sendingCommand = false
-            currentTarget = false
+        const checkLocalCommands = () => {
+            let otherVillageAttacking = false
 
-            this.stop(STATUS.COMMAND_ERROR)
-        }
-
-        this.onCycleEnd = function (handler) {
-            onCycleEndFn = handler
-        }
-
-        this.loadTargets = function (_callback) {
-            const pos = village.getPosition()
-
-            mapData.load(pos, function (loadedTargets) {
-                targets = calcDistances(loadedTargets, pos)
-                targets = filterTargets(targets, pos)
-                targets = sortTargets(targets)
-
-                if (typeof _callback === 'function') {
-                    _callback(targets)
-                }
-            })
-        }
-
-        this.getTargets = function () {
-            return targets
-        }
-
-        this.getIndex = function () {
-            return index
-        }
-
-        this.getVillage = function () {
-            return village
-        }
-
-        this.isRunning = function () {
-            return running
-        }
-
-        this.isInitialized = function () {
-            return initialized
-        }
-
-        this.removeTarget = function (targetId) {
-            if (typeof targetId !== 'number' || !targets) {
-                return false
-            }
-
-            targets = targets.filter(function (target) {
-                return target.id !== targetId
-            })
-
-            return true
-        }
-
-        this.getId = function () {
-            return villageId
-        }
-
-        // private functions
-
-        const genPresetList = function () {
-            const villagePresets = modelDataService.getPresetList().getPresetsByVillageId(villageId)
-            let needAssign = false
-            let which = []
-
-            selectedPresets.forEach(function (preset) {
-                if (!villagePresets.hasOwnProperty(preset.id)) {
-                    needAssign = true
-                    which.push(preset.id)
-                }
-            })
-
-            if (needAssign) {
-                for (let id in villagePresets) {
-                    which.push(id)
-                }
-
-                return which
-            }
-
-            return false
-        }
-
-        const isTargetBusy = function (attacking, otherAttacking, allVillagesLoaded) {
             const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
             const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
+            const playerVillages = $player.getVillageList()
+            const allVillagesLoaded = playerVillages.every((anotherVillage) => anotherVillage.isInitialized(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS))
 
-            if (multipleFarmers && allVillagesLoaded) {
-                if (singleAttack && attacking) {
-                    return true
-                }
-            } else if (singleAttack) {
-                if (attacking || otherAttacking) {
-                    return true
-                }
-            } else if (otherAttacking) {
-                return true
+            if (allVillagesLoaded) {
+                otherVillageAttacking = playerVillages.some((anotherVillage) => {
+                    if (anotherVillage.getId() === this.villageId) {
+                        return false
+                    }
+
+                    const otherVillageCommands = anotherVillage.getCommandListModel().getOutgoingCommands(true, true)
+
+                    return otherVillageCommands.some((command) => {
+                        return command.targetVillageId === target.id && command.data.direction === 'forward'
+                    })
+                })
             }
 
-            return false
+            const attacking = villageCommands.some((command) => {
+                return command.data.target.id === target.id && command.data.direction === 'forward'
+            })
+
+            if (isTargetBusy(attacking, otherVillageAttacking, allVillagesLoaded)) {
+                throw STATUS.BUSY_TARGET
+            }
+
+            if (allVillagesLoaded) {
+                checkedLocalCommands = true
+            }
         }
 
-        const attackTarget = function (target, preset) {
-            if (!running) {
-                return false
-            }
+        const checkTargetPoints = () => {
+            return new Promise((resolve) => {
+                $mapData.getTownAtAsync(target.x, target.y, (data) => {
+                    if (villageFilters.points(data.points)) {
+                        throw STATUS.NOT_ALLOWED_POINTS
+                    }
 
-            sendingCommand = true
-            currentTarget = target
-            index++
-
-            socketService.emit(routeProvider.SEND_PRESET, {
-                start_village: villageId,
-                target_village: target.id,
-                army_preset_id: preset.id,
-                type: COMMAND_TYPES.TYPES.ATTACK
+                    resolve()
+                })
             })
         }
 
-        const getTarget = function () {
-            return targets[index]
+        const checkLoadedCommands = () => {
+            return new Promise((resolve) => {
+                if (checkedLocalCommands) {
+                    return resolve()
+                }
+
+                socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
+                    my_village_id: this.villageId,
+                    village_id: target.id,
+                    num_reports: 0
+                }, (data) => {
+                    const targetCommands = data.commands.own.filter((command) => command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward')
+                    const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
+                    const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
+                    const otherAttacking = targetCommands.some((command) => command.start_village_id !== this.villageId)
+                    const attacking = targetCommands.some((command) => command.start_village_id === this.villageId)
+
+                    if (isTargetBusy(attacking, otherAttacking, true)) {
+                        throw STATUS.BUSY_TARGET
+                    }
+
+                    resolve()
+                })
+            })
         }
 
-        const getPreset = function (target) {
-            const units = village.getUnitInfo().getUnits()
+        const prepareAttack = () => {
+            if (options.delay) {
+                delayTime = settings.get(SETTINGS.ATTACK_INTERVAL) * 1000
 
-            for (let i = 0; i < selectedPresets.length; i++) {
-                let preset = selectedPresets[i]
-                let avail = true
-
-                for (let unit in preset.units) {
-                    if (!preset.units[unit]) {
-                        continue
-                    }
-
-                    if (units[unit].in_town < preset.units[unit]) {
-                        avail = false
-                    }
+                if (delayTime < MINIMUM_ATTACK_INTERVAL) {
+                    delayTime = MINIMUM_ATTACK_INTERVAL
                 }
 
-                if (avail) {
-                    if (checkPresetTime(preset, village, target)) {
-                        return preset
-                    } else {
-                        return STATUS.TIME_LIMIT
-                    }
-                }
+                delayTime = utils.randomSeconds(delayTime)
             }
 
-            return STATUS.NO_UNITS
+            this.setStatus(STATUS.ATTACKING)
+
+            targetTimeoutId = setTimeout(() => {
+                if (!this.running) {
+                    return
+                }
+
+                sendingCommand = true
+                currentTarget = target
+                this.index++
+
+                socketService.emit(routeProvider.SEND_PRESET, {
+                    start_village: this.villageId,
+                    target_village: target.id,
+                    army_preset_id: preset.id,
+                    type: COMMAND_TYPES.TYPES.ATTACK
+                })
+            }, delayTime)
         }
+
+        try {
+            await checkCommandLimit()
+            await checkStorage()
+            await checkTargets()
+            await checkVillagePresets()
+            await checkPreset()
+            await checkTarget()
+            await checkLocalCommands()
+            await checkTargetPoints()
+            await checkLoadedCommands()
+            await prepareAttack()
+        } catch (error) {
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
+                villageId: this.villageId,
+                error: error
+            })
+
+            this.index++
+
+            switch (error) {
+            case STATUS.TIME_LIMIT:
+            case STATUS.BUSY_TARGET:
+            case STATUS.ABANDONED_CONQUERED:
+            case STATUS.PROTECTED_VILLAGE:
+                this.setStatus(error)
+                this.targetStep(options)
+                break
+
+            case STATUS.NOT_ALLOWED_POINTS:
+                this.setStatus(error)
+                farmOverflow.removeTarget(target.id)
+                this.targetStep(options)
+                break
+
+            case STATUS.NO_UNITS:
+            case STATUS.NO_TARGETS:
+            case STATUS.FULL_STORAGE:
+            case STATUS.COMMAND_LIMIT:
+                this.setStatus(error)
+                this.stop(error)
+                break
+
+            case STATUS.TARGET_CYCLE_END:
+                this.setStatus(error)
+                this.stop(error)
+                this.index = 0
+                break
+
+            default:
+                this.setStatus(STATUS.UNKNOWN)
+                this.stop(STATUS.UNKNOWN)
+                break
+            }
+        }
+    }
+
+    Farmer.prototype.setStatus = function (newStatus) {
+        this.status = newStatus
+    }
+
+    Farmer.prototype.getStatus = function () {
+        return this.status || STATUS.UNKNOWN
+    }
+
+    Farmer.prototype.commandSent = function (data) {
+        sendingCommand = false
+        currentTarget = false
+
+        this.targetStep({
+            delay: true
+        })
+    }
+
+    Farmer.prototype.commandError = function (data) {
+        sendingCommand = false
+        currentTarget = false
+
+        this.stop(STATUS.COMMAND_ERROR)
+    }
+
+    Farmer.prototype.onCycleEnd = function (handler) {
+        this.onCycleEndFn = handler
+    }
+
+    Farmer.prototype.loadTargets = function (callback) {
+        const pos = this.village.getPosition()
+
+        mapData.load(pos, (loadedTargets) => {
+            this.targets = calcDistances(loadedTargets, pos)
+            this.targets = filterTargets(this.targets, pos)
+            this.targets = sortTargets(this.targets)
+
+            if (typeof callback === 'function') {
+                callback(this.targets)
+            }
+        })
+    }
+
+    Farmer.prototype.getTargets = function () {
+        return this.targets
+    }
+
+    Farmer.prototype.getIndex = function () {
+        return this.index
+    }
+
+    Farmer.prototype.getVillage = function () {
+        return this.village
+    }
+
+    Farmer.prototype.isRunning = function () {
+        return this.running
+    }
+
+    Farmer.prototype.isInitialized = function () {
+        return this.initialized
+    }
+
+    Farmer.prototype.removeTarget = function (targetId) {
+        if (typeof targetId !== 'number' || !this.targets) {
+            return false
+        }
+
+        this.targets = this.targets.filter(function (target) {
+            return target.id !== targetId
+        })
+
+        return true
+    }
+
+    Farmer.prototype.getId = function () {
+        return this.villageId
     }
 
     let farmOverflow = {}
