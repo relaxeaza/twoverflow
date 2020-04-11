@@ -654,8 +654,8 @@ define('two/builderQueue/ui', [
         })
 
         interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `___builder_queue_html_main`)
-        interfaceOverflow.addTemplate('twoverflow_builder_queue_add_building_modal', `{: builder_queue_html_modal-add-building :}`)
-        interfaceOverflow.addTemplate('twoverflow_builder_queue_name_sequence_modal', `{: builder_queue_html_modal-name-sequence :}`)
+        interfaceOverflow.addTemplate('twoverflow_builder_queue_add_building_modal', `___builder_queue_html_modal-add-building`)
+        interfaceOverflow.addTemplate('twoverflow_builder_queue_name_sequence_modal', `___builder_queue_html_modal-name-sequence`)
         interfaceOverflow.addStyle('___builder_queue_css_style')
     }
 
