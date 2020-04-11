@@ -332,7 +332,7 @@ define('two/Settings', [
 
                 encoded.push({
                     name: prop,
-                    value: prop
+                    value: value
                 })
             }
 
