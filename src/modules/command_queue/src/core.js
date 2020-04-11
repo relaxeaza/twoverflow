@@ -161,7 +161,7 @@ define('two/commandQueue', [
     }
 
     const waitingCommandHelpers = function (command) {
-        if (command.hasOwnProperty('countdown')) {
+        if (Object.prototype.hasOwnProperty.call(command, 'countdown')) {
             return false
         }
 

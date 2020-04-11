@@ -1,9 +1,7 @@
 /**
  * https://github.com/tsironis/lockr
  */
-;(function(root, factory) {
-    define('Lockr', factory(root, {}))
-}(this, function(root, Lockr) {
+define('Lockr', function(root, Lockr) {
     'use strict'
 
     Lockr.prefix = ''
@@ -55,4 +53,4 @@
     }
 
     return Lockr
-}))
+})

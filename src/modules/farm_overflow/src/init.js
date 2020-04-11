@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('___farm_overflow_id', ___farm_overflow_lang)
+        twoLanguage.add('___farm_overflow_id', ___farm_overflow_lang) // eslint-disable-line
         farmOverflow.init()
         farmOverflowInterface()
     }, ['map'])

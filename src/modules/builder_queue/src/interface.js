@@ -97,12 +97,9 @@ define('two/builderQueue/ui', [
             utils.emitNotif('error', $filter('i18n')('error_sequence_exists', $rootScope.loc.ale, 'builder_queue'))
             return false
 
-            break
         case ERROR_CODES.SEQUENCE_INVALID:
             utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
             return false
-
-            break
         }
 
         return true
@@ -110,7 +107,7 @@ define('two/builderQueue/ui', [
 
     const selectSome = function (obj) {
         for (let i in obj) {
-            if (obj.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.call(obj, i)) {
                 return i
             }
         }

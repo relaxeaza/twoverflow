@@ -11,12 +11,10 @@ define('two/language', ['helper/i18n'], function (i18n) {
     const injectLanguage = function (moduleId) {
         if (!initialized) {
             throw new Error('Language module not initialized.')
-            return false
         }
 
         if (!(moduleId in moduleLanguages)) {
             throw new Error('Language data for ' + moduleId + ' does not exists.')
-            return false
         }
 
         const moduleLanguage = moduleLanguages[moduleId][selectedLanguage] || moduleLanguages[moduleId][defaultLanguage]

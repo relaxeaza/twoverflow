@@ -181,7 +181,7 @@ define('two/farmOverflow', [
         let modified = false
 
         exceptionVillages.forEach(function (villageId) {
-            if (!exceptionLogs.hasOwnProperty(villageId)) { 
+            if (!Object.prototype.hasOwnProperty.call(exceptionLogs, villageId)) { 
                 exceptionLogs[villageId] = {
                     time: timeHelper.gameTime(),
                     report: false
@@ -322,11 +322,11 @@ define('two/farmOverflow', [
         const activePresets = settings.get(SETTINGS.PRESETS)
 
         activePresets.forEach(function (presetId) {
-            if (!playerPresets.hasOwnProperty(presetId)) {
+            if (!Object.prototype.hasOwnProperty.call(playerPresets, presetId)) {
                 return
             }
 
-            preset = playerPresets[presetId]
+            let preset = playerPresets[presetId]
             preset.load = getPresetHaul(preset)
             preset.travelTime = getPresetTimeTravel(preset, false)
             selectedPresets.push(preset)
@@ -557,7 +557,7 @@ define('two/farmOverflow', [
         let which = []
 
         selectedPresets.forEach(function (preset) {
-            if (!villagePresets.hasOwnProperty(preset.id)) {
+            if (!Object.prototype.hasOwnProperty.call(villagePresets, preset.id)) {
                 needAssign = true
                 which.push(preset.id)
             }

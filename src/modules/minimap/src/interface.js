@@ -127,8 +127,8 @@ define('two/minimap/ui', [
             const tooltipWrapperSpacerX = tooltipOffset.width + 50
             const tooltipWrapperSpacerY = tooltipOffset.height + 50
 
-            onTop = MapController.tt.position.y + tooltipWrapperSpacerY > windowOffset.top + windowOffset.height
-            onLeft = MapController.tt.position.x + tooltipWrapperSpacerX > windowOffset.width
+            const onTop = MapController.tt.position.y + tooltipWrapperSpacerY > windowOffset.top + windowOffset.height
+            const onLeft = MapController.tt.position.x + tooltipWrapperSpacerX > windowOffset.width
 
             if (onTop) {
                 MapController.tt.position.y -= 50
@@ -347,7 +347,7 @@ define('two/minimap/ui', [
             textObject: 'minimap'
         })
 
-        eventScope = new EventScope('twoverflow_minimap_window')
+        let eventScope = new EventScope('twoverflow_minimap_window')
         eventScope.register(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.highlightUpdate, true)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_EXISTS, eventHandlers.highlightAddErrorExists)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY, eventHandlers.highlightAddErrorNoEntry)

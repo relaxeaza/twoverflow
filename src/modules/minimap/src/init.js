@@ -19,7 +19,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('___minimap_id', ___minimap_lang)
+        twoLanguage.add('___minimap_id', ___minimap_lang) // eslint-disable-line
         minimap.init()
         minimapInterface()
         minimap.run()

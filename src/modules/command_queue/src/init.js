@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('___command_queue_id', ___command_queue_lang)
+        twoLanguage.add('___command_queue_id', ___command_queue_lang) // eslint-disable-line
         commandQueue.init()
         commandQueueInterface()
 

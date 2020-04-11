@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('___builder_queue_id', ___builder_queue_lang)
+        twoLanguage.add('___builder_queue_id', ___builder_queue_lang) // eslint-disable-line
         builderQueue.init()
         builderQueueInterface()
     })

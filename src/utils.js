@@ -113,22 +113,6 @@ define('two/utils', [
     }
 
     /**
-     * Verifica se um elemento é pertencente a outro elemento.
-     *
-     * @param  {Element} elem - Elemento referencia
-     * @param  {String} selector - Selector CSS do elemento no qual será
-     *   será verificado se tem relação com o elemento indicado.
-     * @return {Boolean}
-     */
-    utils.matchesElem = function (elem, selector) {
-        if ($(elem).parents(selector).length) {
-            return true
-        }
-
-        return false
-    }
-
-    /**
      * Obtem o timestamp de uma data em string.
      * Formato da data: mês/dia/ano
      * Exmplo de entrada: 23:59:59:999 12/30/2017

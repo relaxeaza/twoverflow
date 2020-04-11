@@ -30,7 +30,7 @@ define('two/builderQueue/defaultOrders', [
         let parsed = {}
 
         for (let i in rawSequences) {
-            if (rawSequences.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.call(rawSequences, i)) {
                 parsed[i] = parseSequence(rawSequences[i])
             }
         }

@@ -15,7 +15,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('___attack_view_id', ___attack_view_lang)
+        twoLanguage.add('___attack_view_id', ___attack_view_lang) // eslint-disable-line
         attackView.init()
         attackViewInterface()
     })

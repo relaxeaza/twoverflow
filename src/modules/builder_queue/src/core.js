@@ -31,6 +31,7 @@ define('two/builderQueue', [
     let initialized = false
     let running = false
     let intervalCheckId
+    let intervalInstantCheckId
     let buildingSequenceLimit
     const ANALYSES_PER_MINUTE = 1
     const ANALYSES_PER_MINUTE_INSTANT_FINISH = 10
