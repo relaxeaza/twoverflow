@@ -28,7 +28,6 @@ define('two/builderQueue/ui', [
     let $scope
     let $button
     let groupList = modelDataService.getGroupList()
-    let groups = []
     let buildingsLevelPoints = {}
     let running = false
     let gameDataBuildings

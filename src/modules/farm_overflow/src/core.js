@@ -46,7 +46,6 @@ define('two/farmOverflow', [
     let sendingCommand = false
     let currentTarget = false
     let farmerIndex = 0
-    let farmerCycle = []
     let farmerTimeoutId = null
     let targetTimeoutId = null
     let exceptionLogs
@@ -754,8 +753,6 @@ define('two/farmOverflow', [
         const checkLocalCommands = () => {
             let otherVillageAttacking = false
 
-            const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-            const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
             const playerVillages = $player.getVillageList()
             const allVillagesLoaded = playerVillages.every((anotherVillage) => anotherVillage.isInitialized(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS))
 
@@ -810,8 +807,6 @@ define('two/farmOverflow', [
                     num_reports: 0
                 }, (data) => {
                     const targetCommands = data.commands.own.filter((command) => command.type === COMMAND_TYPES.TYPES.ATTACK && command.direction === 'forward')
-                    const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-                    const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
                     const otherAttacking = targetCommands.some((command) => command.start_village_id !== this.villageId)
                     const attacking = targetCommands.some((command) => command.start_village_id === this.villageId)
 
@@ -919,7 +914,7 @@ define('two/farmOverflow', [
         return this.status || STATUS.UNKNOWN
     }
 
-    Farmer.prototype.commandSent = function (data) {
+    Farmer.prototype.commandSent = function () {
         sendingCommand = false
         currentTarget = false
 
@@ -928,7 +923,7 @@ define('two/farmOverflow', [
         })
     }
 
-    Farmer.prototype.commandError = function (data) {
+    Farmer.prototype.commandError = function () {
         sendingCommand = false
         currentTarget = false
 

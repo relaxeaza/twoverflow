@@ -1,9 +1,7 @@
 define('two/mapData', [
-    'conf/conf',
-    'states/MapState'
+    'conf/conf'
 ], function (
-    conf,
-    mapState
+    conf
 ) {
     let villages = []
     let width = 306
@@ -78,7 +76,7 @@ define('two/mapData', [
 
     let mapData = {}
 
-    mapData.load = function (origin, callback, _error) {
+    mapData.load = function (origin, callback) {
         const cells = getVisibleGridCells(origin)
         let loadId = genLoadingId(cells)
         let requests = []

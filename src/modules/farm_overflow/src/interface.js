@@ -7,9 +7,7 @@ define('two/farmOverflow/ui', [
     'two/Settings',
     'two/EventScope',
     'two/utils',
-    'queues/EventQueue',
-    'struct/MapData',
-    'helper/time',
+    'queues/EventQueue'
 ], function (
     interfaceOverflow,
     farmOverflow,
@@ -19,9 +17,7 @@ define('two/farmOverflow/ui', [
     Settings,
     EventScope,
     utils,
-    eventQueue,
-    $mapData,
-    timeHelper
+    eventQueue
 ) {
     let $scope
     let settings

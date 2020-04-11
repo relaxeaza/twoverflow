@@ -23,7 +23,7 @@ define('two/EventScope', [
             this.listeners.push($rootScope.$on(id, handler))
         } else {
             eventQueue.register(id, handler)
-            
+
             this.listeners.push(function () {
                 eventQueue.unregister(id, handler)
             })

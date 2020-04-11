@@ -75,10 +75,6 @@ define('two/minimap/ui', [
         }, callback)
     }
 
-    const getVillageData = function (data, callback) {
-        mapData.loadTownDataAsync(data.x, data.y, 1, 1, callback)
-    }
-
     const updateHighlightNames = function () {
         Object.keys($scope.highlights.character).forEach(function (id) {
             if (id in highlightNames.character) {
@@ -150,7 +146,7 @@ define('two/minimap/ui', [
         mapWrapper.appendChild(tooltipWrapper)
     }
 
-    const openColorPalette = function (inputType, colorGroup, itemId, itemColor) {
+    const openColorPalette = function (inputType, colorGroup, itemId) {
         let modalScope = $rootScope.$new()
         let selectedColor
         let hideReset = true
@@ -257,19 +253,19 @@ define('two/minimap/ui', [
                 name: item.name
             }
         },
-        highlightUpdate: function (event) {
+        highlightUpdate: function () {
             updateHighlightNames()
         },
-        highlightAddErrorExists: function (event) {
+        highlightAddErrorExists: function () {
             utils.emitNotif('error', $filter('i18n')('highlight_add_error_exists', $rootScope.loc.ale, 'minimap'))
         },
-        highlightAddErrorNoEntry: function (event) {
+        highlightAddErrorNoEntry: function () {
             utils.emitNotif('error', $filter('i18n')('highlight_add_error_no_entry', $rootScope.loc.ale, 'minimap'))
         },
-        highlightAddErrorInvalidColor: function (event) {
+        highlightAddErrorInvalidColor: function () {
             utils.emitNotif('error', $filter('i18n')('highlight_add_error_invalid_color', $rootScope.loc.ale, 'minimap'))
         },
-        onMouseLeaveMinimap: function (event) {
+        onMouseLeaveMinimap: function () {
             hideTooltip()
 
             $crossCanvas.dispatchEvent(new MouseEvent('mouseup', {
@@ -278,11 +274,11 @@ define('two/minimap/ui', [
                 cancelable: true
             }))
         },
-        onMouseMoveMinimap: function (event) {
+        onMouseMoveMinimap: function () {
             hideTooltip()
             $crossCanvas.style.cursor = 'url(' + cdn.getPath('/img/cursor/grab_pushed.png') + '), move'
         },
-        onMouseStopMoveMinimap: function (event) {
+        onMouseStopMoveMinimap: function () {
             $crossCanvas.style.cursor = ''
         }
     }

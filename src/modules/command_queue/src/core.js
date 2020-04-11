@@ -33,7 +33,6 @@ define('two/commandQueue', [
     let sentCommands = []
     let expiredCommands = []
     let running = false
-    let $player
     let timeOffset
 
     const commandFilters = {
@@ -239,10 +238,7 @@ define('two/commandQueue', [
 
     commandQueue.init = function () {
         timeOffset = utils.getTimeOffset()
-        $player = modelDataService.getSelectedCharacter()
-
         commandQueue.initialized = true
-
         sentCommands = Lockr.get(STORAGE_KEYS.QUEUE_SENT, [], true)
         expiredCommands = Lockr.get(STORAGE_KEYS.QUEUE_EXPIRED, [], true)
 

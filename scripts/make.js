@@ -73,6 +73,8 @@ async function lintCode (data) {
 
                 console.log(`${error.line}:${error.column}  ${severityLabel}  ${error.message}`)
             })
+
+            console.log('')
         }
     })
 

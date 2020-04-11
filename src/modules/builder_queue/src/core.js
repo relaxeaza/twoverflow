@@ -30,7 +30,6 @@ define('two/builderQueue', [
     let buildingQueueService = injector.get('buildingQueueService')
     let initialized = false
     let running = false
-    let localSettings
     let intervalCheckId
     let buildingSequenceLimit
     const ANALYSES_PER_MINUTE = 1

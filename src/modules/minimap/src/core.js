@@ -329,20 +329,6 @@ define('two/minimap', [
         window.requestAnimationFrame(renderStep)
     }
 
-    /**
-     * @param {Number} sectors - Amount of sectors to be loaded,
-     *   each sector has a size of 25x25 fields.
-     * @param {Number=} x Optional load center X
-     * @param {Number=} y Optional load center Y
-     */
-    const preloadSectors = function (sectors, _x, _y) {
-        const size = sectors * 25
-        const x = (_x || selectedVillage.getX()) - (size / 2)
-        const y = (_y || selectedVillage.getY()) - (size / 2)
-
-        mapData.loadTownDataAsync(x, y, size, size, noop)
-    }
-
     const cacheVillages = function (villages) {
         for (let i = 0; i < villages.length; i++) {
             let v = villages[i]

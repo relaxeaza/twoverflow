@@ -10,8 +10,7 @@ define('two/attackView', [
     'helper/math',
     'helper/mapconvert',
     'struct/MapData',
-    'queues/EventQueue',
-    'models/CommandModel'
+    'queues/EventQueue'
 ], function (
     ready,
     utils,
@@ -24,11 +23,9 @@ define('two/attackView', [
     math,
     convert,
     mapData,
-    eventQueue,
-    CommandModel
+    eventQueue
 ) {
     let initialized = false
-    let listeners = {}
     let overviewService = injector.get('overviewService')
     let globalInfoModel
     let commands = []
@@ -39,23 +36,11 @@ define('two/attackView', [
         reverse: false,
         column: COLUMN_TYPES.TIME_COMPLETED
     }
-    const COMMAND_ORDER = [
-        'ATTACK',
-        'SUPPORT',
-        'RELOCATE'
-    ]
     const STORAGE_KEYS = {
         FILTERS: 'attack_view_filters'
     }
     const INCOMING_UNITS_FILTER = {}
     const COMMAND_TYPES_FILTER = {}
-
-    const resetFilters = function () {
-        filters = {}
-        filters[FILTER_TYPES.COMMAND_TYPES] = {}
-        filters[FILTER_TYPES.VILLAGE] = angular.copy(COMMAND_TYPES_FILTER)
-        filters[FILTER_TYPES.INCOMING_UNITS] = angular.copy(INCOMING_UNITS_FILTER)
-    }
 
     const formatFilters = function () {
         const toArray = [FILTER_TYPES.COMMAND_TYPES]
@@ -212,10 +197,10 @@ define('two/attackView', [
 
         if (mapData.hasTownDataInChunk(origin.x, origin.y)) {
             const sectors = mapData.loadTownData(origin.x, origin.y, size, size, size)
-            let targets = []
-            let closestTargets
             const tribeId = modelDataService.getSelectedCharacter().getTribeId()
             const playerId = modelDataService.getSelectedCharacter().getId()
+            let targets = []
+            let closestTargets
 
             sectors.forEach(function (sector) {
                 for (let x in sector.data) {
@@ -234,18 +219,20 @@ define('two/attackView', [
                 return target.character_id === playerId && origin.id !== target.id
             })
 
-            if (tribeId) {
-                const tribe = targets.filter(function (target) {
-                    return tribeId && target.tribe_id === tribeId
-                })
-            }
-
             if (barbs.length) {
                 closestTargets = sortByDistance(barbs, origin)
             } else if (own.length) {
                 closestTargets = sortByDistance(own, origin)
-            } else if (tribe.length) {
-                closestTargets = sortByDistance(tribe, origin)
+            } else if (tribeId) {
+                const tribe = targets.filter(function (target) {
+                    return target.tribe_id === tribeId
+                })
+
+                if (tribe.length) {
+                    closestTargets = sortByDistance(tribe, origin)
+                } else {
+                    return callback(false)
+                }
             } else {
                 return callback(false)
             }

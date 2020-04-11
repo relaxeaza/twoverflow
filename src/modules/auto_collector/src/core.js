@@ -1,11 +1,7 @@
 define('two/autoCollector', [
-    'queues/EventQueue',
-    'helper/time',
-    'Lockr'
+    'queues/EventQueue'
 ], function (
-    eventQueue,
-    $timeHelper,
-    Lockr
+    eventQueue
 ) {
     let initialized = false
     let running = false
