@@ -23,7 +23,8 @@ define('two/farmOverflow/types/status', [], function () {
         NOT_ALLOWED_POINTS: 'not_allowed_points',
         UNKNOWN: 'unknown',
         ATTACKING: 'attacking',
-        WAITING_CYCLE: 'waiting_cycle'
+        WAITING_CYCLE: 'waiting_cycle',
+        USER_STOP: 'user_stop'
     }
 })
 

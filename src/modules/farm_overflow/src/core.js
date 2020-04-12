@@ -660,12 +660,14 @@ define('two/farmOverflow', [
             reason: reason
         })
 
-        if (reason !== ERROR_TYPES.USER_STOP) {
-            this.onCycleEndFn(reason)
+        if (reason === ERROR_TYPES.USER_STOP) {
+            this.setStatus(STATUS.USER_STOP)
         }
 
-        clearTimeout(targetTimeoutId)
+        this.onCycleEndFn(reason)
         this.onCycleEndFn = noop
+        
+        clearTimeout(targetTimeoutId)
     }
 
     Farmer.prototype.targetStep = async function (options = {}) {
@@ -1187,9 +1189,11 @@ define('two/farmOverflow', [
         }
 
         if (activeFarmer) {
-            activeFarmer.onCycleEnd(function () {
-                farmerIndex++
-                farmOverflow.farmerStep()
+            activeFarmer.onCycleEnd(function (reason) {
+                if (reason !== ERROR_TYPES.USER_STOP) {
+                    farmerIndex++
+                    farmOverflow.farmerStep()
+                }
             })
             
             activeFarmer.start()

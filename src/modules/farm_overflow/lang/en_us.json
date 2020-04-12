@@ -17,6 +17,7 @@
         "status_unknown": "Unknown status",
         "status_attacking": "Attacking",
         "status_waiting_cycle": "Waiting cycle",
+        "status_user_stop": "Stopped by player",
         "not_loaded": "Not loaded.",
         "ignored_targets": "Ignored Targets",
         "no_ignored_targets": "Nothing ignored",
