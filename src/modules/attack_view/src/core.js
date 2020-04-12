@@ -36,6 +36,7 @@ define('two/attackView', [
         reverse: false,
         column: COLUMN_TYPES.TIME_COMPLETED
     }
+    let COMMAND_QUEUE_DATE_TYPES
     const STORAGE_KEYS = {
         FILTERS: 'attack_view_filters'
     }
@@ -338,12 +339,12 @@ define('two/attackView', [
             const origin = command.targetVillage
             const target = closestVillage
             const type = target.character_id === null ? 'attack' : 'support'
-            
+
             commandQueue.addCommand({
                 origin: origin,
                 target: target,
                 date: date,
-                dateType: 'out',
+                dateType: COMMAND_QUEUE_DATE_TYPES.OUT,
                 units: {
                     spear: '*',
                     sword: '*',
@@ -389,6 +390,7 @@ define('two/attackView', [
 
         try {
             commandQueue = require('two/commandQueue')
+            COMMAND_QUEUE_DATE_TYPES = require('two/commandQueue/types/dates')
         } catch (e) {}
 
         const defaultFilters = {
