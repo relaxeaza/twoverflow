@@ -1,10 +1,12 @@
 define('two/autoCollector/secondVillage', [
     'two/autoCollector',
+    'two/utils',
     'queues/EventQueue',
     'helper/time',
     'models/SecondVillageModel'
 ], function (
     autoCollector,
+    utils,
     eventQueue,
     $timeHelper,
     SecondVillageModel
@@ -56,11 +58,14 @@ define('two/autoCollector/secondVillage', [
     }
 
     const getFirstJob = function (jobs) {
-        for (let id in jobs) {
-            return id
-        }
+        let jobId = false
 
-        return false
+        utils.each(jobs, function (id) {
+            jobId = id
+            return false
+        })
+
+        return jobId
     }
 
     const updateSecondVillageInfo = function (callback) {
@@ -109,7 +114,13 @@ define('two/autoCollector/secondVillage', [
 
             startJob(firstJob, function () {
                 const job = availableJobs[firstJob]
-                setTimeout(updateAndAnalyse, (job.duration * 1000) + 1000)
+
+                if (job) {
+                    setTimeout(updateAndAnalyse, (job.duration * 1000) + 1000)
+                } else {
+                    setTimeout(updateAndAnalyse, 60 * 1000)
+                }
+
             })
         }
     }
