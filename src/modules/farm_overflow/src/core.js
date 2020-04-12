@@ -511,6 +511,10 @@ define('two/farmOverflow', [
             let avail = true
 
             for (let unit in preset.units) {
+                if (!Object.prototype.hasOwnProperty.call(preset.units, unit)) {
+                    continue
+                }
+
                 if (!preset.units[unit]) {
                     continue
                 }
@@ -678,6 +682,32 @@ define('two/farmOverflow', [
         let target
         let checkedLocalCommands = false
 
+        const delayStep = () => {
+            return new Promise((resolve) => {
+                if (options.delay) {
+                    delayTime = settings.get(SETTINGS.ATTACK_INTERVAL) * 1000
+
+                    if (delayTime < MINIMUM_ATTACK_INTERVAL) {
+                        delayTime = MINIMUM_ATTACK_INTERVAL
+                    }
+
+                    delayTime = utils.randomSeconds(delayTime)
+                }
+
+                if (delayTime) {
+                    targetTimeoutId = setTimeout(() => {
+                        if (!this.running) {
+                            return
+                        }
+
+                        resolve()
+                    }, delayTime)
+                } else {
+                    resolve()
+                }
+            })
+        }
+
         const checkCommandLimit = () => {
             const limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
 
@@ -733,18 +763,20 @@ define('two/farmOverflow', [
             if (typeof preset === 'string') {
                 throw preset
             }
+
+            return preset
         }
 
         const checkTarget = () => {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
                     target_id: target.id
                 }, (data) => {
                     // abandoned village conquered by some noob.
                     if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
-                        throw STATUS.ABANDONED_CONQUERED
+                        reject(STATUS.ABANDONED_CONQUERED)
                     } else if (target.attack_protection) {
-                        throw STATUS.PROTECTED_VILLAGE
+                        reject(STATUS.PROTECTED_VILLAGE)
                     } else {
                         resolve()
                     }
@@ -786,10 +818,10 @@ define('two/farmOverflow', [
         }
 
         const checkTargetPoints = () => {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 $mapData.getTownAtAsync(target.x, target.y, (data) => {
                     if (villageFilters.points(data.points)) {
-                        throw STATUS.NOT_ALLOWED_POINTS
+                        return reject(STATUS.NOT_ALLOWED_POINTS)
                     }
 
                     resolve()
@@ -798,7 +830,7 @@ define('two/farmOverflow', [
         }
 
         const checkLoadedCommands = () => {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 if (checkedLocalCommands) {
                     return resolve()
                 }
@@ -813,7 +845,7 @@ define('two/farmOverflow', [
                     const attacking = targetCommands.some((command) => command.start_village_id === this.villageId)
 
                     if (isTargetBusy(attacking, otherAttacking, true)) {
-                        throw STATUS.BUSY_TARGET
+                        return reject(STATUS.BUSY_TARGET)
                     }
 
                     resolve()
@@ -822,37 +854,22 @@ define('two/farmOverflow', [
         }
 
         const prepareAttack = () => {
-            if (options.delay) {
-                delayTime = settings.get(SETTINGS.ATTACK_INTERVAL) * 1000
-
-                if (delayTime < MINIMUM_ATTACK_INTERVAL) {
-                    delayTime = MINIMUM_ATTACK_INTERVAL
-                }
-
-                delayTime = utils.randomSeconds(delayTime)
-            }
-
             this.setStatus(STATUS.ATTACKING)
 
-            targetTimeoutId = setTimeout(() => {
-                if (!this.running) {
-                    return
-                }
+            sendingCommand = true
+            currentTarget = target
+            this.index++
 
-                sendingCommand = true
-                currentTarget = target
-                this.index++
-
-                socketService.emit(routeProvider.SEND_PRESET, {
-                    start_village: this.villageId,
-                    target_village: target.id,
-                    army_preset_id: preset.id,
-                    type: COMMAND_TYPES.TYPES.ATTACK
-                })
-            }, delayTime)
+            socketService.emit(routeProvider.SEND_PRESET, {
+                start_village: this.villageId,
+                target_village: target.id,
+                army_preset_id: preset.id,
+                type: COMMAND_TYPES.TYPES.ATTACK
+            })
         }
 
         try {
+            await delayStep()
             await checkCommandLimit()
             await checkStorage()
             await checkTargets()
