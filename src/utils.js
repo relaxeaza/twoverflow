@@ -262,5 +262,29 @@ define('two/utils', [
         return totalTravelTime * 1000
     }
 
+    utils.each = function (obj, callback) {
+        if (typeof callback !== 'function') {
+            throw new Error('utils.each: fucked up callback')
+        }
+
+        if (Array.isArray(obj)) {
+            for (let i = 0; i < obj.length; i++) {
+                if (callback(obj[i], i) === false) {
+                    break
+                }
+            }
+        } else if (typeof obj === 'object' && obj !== null) {
+            for (let i in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, i)) {
+                    if (callback(obj[i], i) === false) {
+                        break
+                    }
+                }
+            }
+        } else {
+            throw new Error('utils.each: fucked up obj')
+        }
+    }
+
     return utils
 })
