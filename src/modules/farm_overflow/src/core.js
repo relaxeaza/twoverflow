@@ -55,6 +55,7 @@ define('two/farmOverflow', [
     const VILLAGE_COMMAND_LIMIT = 50
     const MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
     const MINIMUM_ATTACK_INTERVAL = 1 * 1000
+    const STEP_EXPIRE_TIME = 30 * 1000
 
     const STORAGE_KEYS = {
         LOGS: 'farm_overflow_logs',
@@ -592,6 +593,7 @@ define('two/farmOverflow', [
         this.targets = false
         this.onCycleEndFn = noop
         this.status = STATUS.WAITING_CYCLE
+        this.expireTimer = null
     }
 
     Farmer.prototype.init = function () {
@@ -682,8 +684,10 @@ define('two/farmOverflow', [
         let target
         let checkedLocalCommands = false
 
+        this.expireTimer = null
+
         const delayStep = () => {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 if (options.delay) {
                     delayTime = settings.get(SETTINGS.ATTACK_INTERVAL) * 1000
 
@@ -697,7 +701,7 @@ define('two/farmOverflow', [
                 if (delayTime) {
                     targetTimeoutId = setTimeout(() => {
                         if (!this.running) {
-                            return
+                            return reject(STATUS.USER_STOP)
                         }
 
                         resolve()
@@ -709,34 +713,46 @@ define('two/farmOverflow', [
         }
 
         const checkCommandLimit = () => {
-            const limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
+            return new Promise((resolve, reject) => {
+                const limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
 
-            if (villageCommands.length >= limit) {
-                throw STATUS.COMMAND_LIMIT
-            }
+                if (villageCommands.length >= limit) {
+                    reject(STATUS.COMMAND_LIMIT)
+                } else {
+                    resolve()
+                }
+            })
         }
 
         const checkStorage = () => {
-            if (settings.get(SETTINGS.IGNORE_FULL_STORAGE)) {
-                const resources = this.village.getResources()
-                const computed = resources.getComputed()
-                const maxStorage = resources.getMaxStorage()
-                const isFull = ['wood', 'clay', 'iron'].every((type) => computed[type].currentStock === maxStorage)
+            return new Promise((resolve, reject) => {
+                if (settings.get(SETTINGS.IGNORE_FULL_STORAGE)) {
+                    const resources = this.village.getResources()
+                    const computed = resources.getComputed()
+                    const maxStorage = resources.getMaxStorage()
+                    const isFull = ['wood', 'clay', 'iron'].every((type) => computed[type].currentStock === maxStorage)
 
-                if (isFull) {
-                    throw STATUS.FULL_STORAGE
+                    if (isFull) {
+                        return reject(STATUS.FULL_STORAGE)
+                    }
                 }
-            }
+
+                resolve()
+            })
         }
 
         const checkTargets = () => {
-            if (!this.targets.length) {
-                throw STATUS.NO_TARGETS
-            }
+            return new Promise((resolve, reject) => {
+                if (!this.targets.length) {
+                    return reject(STATUS.NO_TARGETS)
+                }
 
-            if (this.index > this.targets.length || !this.targets[this.index]) {
-                throw STATUS.TARGET_CYCLE_END
-            }
+                if (this.index > this.targets.length || !this.targets[this.index]) {
+                    return reject(STATUS.TARGET_CYCLE_END)
+                }
+
+                resolve()
+            })
         }
 
         const checkVillagePresets = () => {
@@ -752,19 +768,21 @@ define('two/farmOverflow', [
         }
 
         const checkPreset = () => {
-            target = this.targets[this.index]
+            return new Promise((resolve, reject) => {
+                target = this.targets[this.index]
 
-            if (!target) {
-                throw STATUS.UNKNOWN
-            }
+                if (!target) {
+                    return reject(STATUS.UNKNOWN)
+                }
 
-            preset = getPreset(this.village, target)
+                preset = getPreset(this.village, target)
 
-            if (typeof preset === 'string') {
-                throw preset
-            }
+                if (typeof preset === 'string') {
+                    return reject(preset)
+                }
 
-            return preset
+                resolve()
+            })
         }
 
         const checkTarget = () => {
@@ -785,36 +803,40 @@ define('two/farmOverflow', [
         }
 
         const checkLocalCommands = () => {
-            let otherVillageAttacking = false
+            return new Promise((resolve, reject) => {
+                let otherVillageAttacking = false
 
-            const playerVillages = $player.getVillageList()
-            const allVillagesLoaded = playerVillages.every((anotherVillage) => anotherVillage.isInitialized(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS))
+                const playerVillages = $player.getVillageList()
+                const allVillagesLoaded = playerVillages.every((anotherVillage) => anotherVillage.isInitialized(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS))
 
-            if (allVillagesLoaded) {
-                otherVillageAttacking = playerVillages.some((anotherVillage) => {
-                    if (anotherVillage.getId() === this.villageId) {
-                        return false
-                    }
+                if (allVillagesLoaded) {
+                    otherVillageAttacking = playerVillages.some((anotherVillage) => {
+                        if (anotherVillage.getId() === this.villageId) {
+                            return false
+                        }
 
-                    const otherVillageCommands = anotherVillage.getCommandListModel().getOutgoingCommands(true, true)
+                        const otherVillageCommands = anotherVillage.getCommandListModel().getOutgoingCommands(true, true)
 
-                    return otherVillageCommands.some((command) => {
-                        return command.targetVillageId === target.id && command.data.direction === 'forward'
+                        return otherVillageCommands.some((command) => {
+                            return command.targetVillageId === target.id && command.data.direction === 'forward'
+                        })
                     })
+                }
+
+                const attacking = villageCommands.some((command) => {
+                    return command.data.target.id === target.id && command.data.direction === 'forward'
                 })
-            }
 
-            const attacking = villageCommands.some((command) => {
-                return command.data.target.id === target.id && command.data.direction === 'forward'
+                if (isTargetBusy(attacking, otherVillageAttacking, allVillagesLoaded)) {
+                    return reject(STATUS.BUSY_TARGET)
+                }
+
+                if (allVillagesLoaded) {
+                    checkedLocalCommands = true
+                }
+
+                resolve()
             })
-
-            if (isTargetBusy(attacking, otherVillageAttacking, allVillagesLoaded)) {
-                throw STATUS.BUSY_TARGET
-            }
-
-            if (allVillagesLoaded) {
-                checkedLocalCommands = true
-            }
         }
 
         const checkTargetPoints = () => {
@@ -868,36 +890,26 @@ define('two/farmOverflow', [
             })
         }
 
-        try {
-            await delayStep()
-            await checkCommandLimit()
-            await checkStorage()
-            await checkTargets()
-            await checkVillagePresets()
-            await checkPreset()
-            await checkTarget()
-            await checkLocalCommands()
-            await checkTargetPoints()
-            await checkLoadedCommands()
-            await prepareAttack()
-        } catch (error) {
+        const errorHandler = (error) => {
+            clearTimeout(this.expireTimer)
+
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
                 villageId: this.villageId,
                 error: error
             })
-
-            this.index++
 
             switch (error) {
             case STATUS.TIME_LIMIT:
             case STATUS.BUSY_TARGET:
             case STATUS.ABANDONED_CONQUERED:
             case STATUS.PROTECTED_VILLAGE:
+                this.index++
                 this.setStatus(error)
                 this.targetStep(options)
                 break
 
             case STATUS.NOT_ALLOWED_POINTS:
+                this.index++
                 this.setStatus(error)
                 farmOverflow.removeTarget(target.id)
                 this.targetStep(options)
@@ -907,22 +919,56 @@ define('two/farmOverflow', [
             case STATUS.NO_TARGETS:
             case STATUS.FULL_STORAGE:
             case STATUS.COMMAND_LIMIT:
+                this.index++
                 this.setStatus(error)
                 this.stop(error)
                 break
 
             case STATUS.TARGET_CYCLE_END:
+                this.index = 0
                 this.setStatus(error)
                 this.stop(error)
-                this.index = 0
+                break
+
+            case STATUS.EXPIRED_STEP:
+                this.setStatus(error)
+                this.targetStep()
                 break
 
             default:
+                this.index++
                 this.setStatus(STATUS.UNKNOWN)
                 this.stop(STATUS.UNKNOWN)
                 break
             }
         }
+
+        let attackPromise = new Promise((resolve, reject) => {
+            delayStep()
+                .then(checkCommandLimit)
+                .then(checkStorage)
+                .then(checkTargets)
+                .then(checkVillagePresets)
+                .then(checkPreset)
+                .then(checkTarget)
+                .then(checkLocalCommands)
+                .then(checkTargetPoints)
+                .then(checkLoadedCommands)
+                .then(prepareAttack)
+                .then(resolve)
+                .catch(reject)
+        })
+
+        let expirePromise = new Promise((resolve, reject) => {
+            this.expireTimer = setTimeout(() => {
+                reject(STATUS.EXPIRED_STEP)
+            }, STEP_EXPIRE_TIME)
+        })
+
+        Promise.race([
+            attackPromise,
+            expirePromise
+        ]).catch(errorHandler)
     }
 
     Farmer.prototype.setStatus = function (newStatus) {
@@ -936,6 +982,8 @@ define('two/farmOverflow', [
     Farmer.prototype.commandSent = function () {
         sendingCommand = false
         currentTarget = false
+
+        clearTimeout(this.expireTimer)
 
         this.targetStep({
             delay: true

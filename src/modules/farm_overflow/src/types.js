@@ -24,7 +24,8 @@ define('two/farmOverflow/types/status', [], function () {
         UNKNOWN: 'unknown',
         ATTACKING: 'attacking',
         WAITING_CYCLE: 'waiting_cycle',
-        USER_STOP: 'user_stop'
+        USER_STOP: 'user_stop',
+        EXPIRED_STEP: 'expired_step'
     }
 })
 
