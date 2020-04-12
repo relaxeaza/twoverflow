@@ -979,11 +979,15 @@ define('two/farmOverflow', [
         return this.status || STATUS.UNKNOWN
     }
 
-    Farmer.prototype.commandSent = function () {
+    Farmer.prototype.commandSent = function (data) {
         sendingCommand = false
         currentTarget = false
 
         clearTimeout(this.expireTimer)
+
+        addLog(LOG_TYPES.ATTACKED_VILLAGE, {
+            targetId: data.target.id
+        })
 
         this.targetStep({
             delay: true

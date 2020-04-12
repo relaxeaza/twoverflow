@@ -258,7 +258,17 @@
                         </colgroup>
                         <tr ng-repeat="log in visibleLogs track by $index">
                             <td>{{ log.time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
-                            <td><span class="icon-bg-black" ng-class="{'icon-26x26-dot-green': log.type === LOG_TYPES.FARM_START, 'icon-26x26-dot-red': log.type === LOG_TYPES.FARM_STOP, 'icon-26x26-check-negative': log.type === LOG_TYPES.IGNORED_VILLAGE || log.type === LOG_TYPES.INCLUDED_VILLAGE_REMOVED, 'icon-26x26-check-positive': log.type === LOG_TYPES.INCLUDED_VILLAGE || log.type === LOG_TYPES.IGNORED_VILLAGE_REMOVED}"></span></td>
+                            <td><span class="icon-bg-black" ng-class="{
+                                'icon-26x26-dot-green': log.type === LOG_TYPES.FARM_START,
+                                'icon-26x26-dot-red': log.type === LOG_TYPES.FARM_STOP,
+                                'icon-26x26-check-negative': log.type === LOG_TYPES.IGNORED_VILLAGE || log.type === LOG_TYPES.INCLUDED_VILLAGE_REMOVED,
+                                'icon-26x26-check-positive': log.type === LOG_TYPES.INCLUDED_VILLAGE || log.type === LOG_TYPES.IGNORED_VILLAGE_REMOVED,
+                                'icon-26x26-attack-small': log.type === LOG_TYPES.ATTACKED_VILLAGE}"></span></td>
+
+                            <td ng-if="log.type === LOG_TYPES.ATTACKED_VILLAGE">
+                                <span class="icon-26x26-attack-small"></span>
+                                <a class="link" ng-click="openVillageInfo(log.targetId)"><span class="icon-20x20-village"></span> {{ villagesLabel[log.targetId] }}</a>
+                            </td>
 
                             <td ng-if="log.type === LOG_TYPES.IGNORED_VILLAGE">
                                 <a class="link" ng-click="openVillageInfo(log.villageId)"><span class="icon-20x20-village"></span> {{ villagesLabel[log.villageId] }}</a>

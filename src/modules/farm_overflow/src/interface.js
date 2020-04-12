@@ -44,6 +44,10 @@ define('two/farmOverflow/ui', [
             if (log.villageId) {
                 loadVillageInfo(log.villageId)
             }
+
+            if (log.targetId) {
+                loadVillageInfo(log.targetId)
+            }
         })
     }
 
