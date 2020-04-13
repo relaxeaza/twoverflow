@@ -51,6 +51,7 @@ define('two/farmOverflow/ui', [
         })
     }
 
+    // TODO: make it shared with other modules
     const loadVillageInfo = function (villageId) {
         if (villagesInfo[villageId]) {
             return villagesInfo[villageId]

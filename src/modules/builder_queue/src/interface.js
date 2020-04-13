@@ -45,6 +45,33 @@ define('two/builderQueue/ui', [
         SEQUENCES: 'sequences',
         LOGS: 'logs'
     }
+    let villagesInfo = {}
+    let villagesLabel = {}
+
+    // TODO: make it shared with other modules
+    const loadVillageInfo = function (villageId) {
+        if (villagesInfo[villageId]) {
+            return villagesInfo[villageId]
+        }
+
+        villagesInfo[villageId] = true
+        villagesLabel[villageId] = 'LOADING...'
+
+        socketService.emit(routeProvider.MAP_GET_VILLAGE_DETAILS, {
+            my_village_id: modelDataService.getSelectedVillage().getId(),
+            village_id: villageId,
+            num_reports: 1
+        }, function (data) {
+            villagesInfo[villageId] = {
+                x: data.village_x,
+                y: data.village_y,
+                name: data.village_name,
+                last_report: data.last_reports[0]
+            }
+
+            villagesLabel[villageId] = `${data.village_name} (${data.village_x}|${data.village_y})`
+        })
+    }
 
     const buildingLevelReached = function (building, level) {
         const buildingData = modelDataService.getSelectedVillage().getBuildingData()
@@ -504,6 +531,12 @@ define('two/builderQueue/ui', [
 
         logsView.visibleLogs = logsView.logs.slice(offset, offset + limit)
         $scope.pagination.logs.count = logsView.logs.length
+
+        logsView.visibleLogs.forEach(function (log) {
+            if (log.villageId) {
+                loadVillageInfo(log.villageId)
+            }
+        })
     }
 
     logsView.clearLogs = function () {
@@ -669,6 +702,9 @@ define('two/builderQueue/ui', [
         $scope.running = running
         $scope.pagination = {}
 
+        $scope.villagesLabel = villagesLabel
+        $scope.villagesInfo = villagesInfo
+
         $scope.editorView = editorView
         $scope.editorView.buildingSequence = {}
         $scope.editorView.visibleBuildingSequence = {}
@@ -712,6 +748,8 @@ define('two/builderQueue/ui', [
             loader: logsView.updateVisibleLogs,
             limit: storageService.getPaginationLimit()
         }
+
+        logsView.updateVisibleLogs()
 
         settingsView.generateSequences()
         editorView.generateBuildingSequence()

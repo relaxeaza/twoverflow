@@ -10,7 +10,8 @@ define('two/builderQueue', [
     'conf/buildingTypes',
     'conf/locationTypes',
     'queues/EventQueue',
-    'Lockr'
+    'Lockr',
+    'helper/time'
 ], function (
     ready,
     utils,
@@ -23,7 +24,8 @@ define('two/builderQueue', [
     BUILDING_TYPES,
     LOCATION_TYPES,
     eventQueue,
-    Lockr
+    Lockr,
+    timeHelper
 ) {
     let buildingService = injector.get('buildingService')
     let premiumActionService = injector.get('premiumActionService')
@@ -36,6 +38,7 @@ define('two/builderQueue', [
     const ANALYSES_PER_MINUTE = 1
     const ANALYSES_PER_MINUTE_INSTANT_FINISH = 10
     const VILLAGE_BUILDINGS = {}
+    const LOGS_LIMIT = 500
     let groupList
     let $player
     let logs
@@ -156,27 +159,9 @@ define('two/builderQueue', [
                 buildingService.compute(village)
 
                 checkAndUpgradeBuilding(village, buildingName, function (jobAdded, data) {
-                    if (jobAdded) {
-                        if (!data.job) {
-                            return false
-                        }
-
-                        let now = Date.now()
-                        let logData = [
-                            {
-                                x: village.getX(),
-                                y: village.getY(),
-                                name: village.getName(),
-                                id: village.getId()
-                            },
-                            data.job.building,
-                            data.job.level,
-                            now
-                        ]
-
-                        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_JOB_STARTED, logData)
-                        logs.unshift(logData)
-                        Lockr.set(STORAGE_KEYS.LOGS, logs)
+                    if (jobAdded && data.job) {
+                        eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_JOB_STARTED, data.job)
+                        addLog(village.getId(), data.job)
                     }
                 })
 
@@ -196,7 +181,7 @@ define('two/builderQueue', [
         const upgradeability = checkBuildingUpgradeability(village, buildingName)
 
         if (upgradeability === UPGRADEABILITY_STATES.POSSIBLE) {
-            upgradeBuilding(village, buildingName, function (event, data) {
+            upgradeBuilding(village, buildingName, function (data) {
                 callback(true, data)
             })
         } else if (upgradeability === UPGRADEABILITY_STATES.NOT_ENOUGH_FOOD) {
@@ -205,7 +190,7 @@ define('two/builderQueue', [
                 const villageFarm = village.getBuildingData().getDataForBuilding(BUILDING_TYPES.FARM)
 
                 if (villageFarm.level < limitFarm) {
-                    upgradeBuilding(village, BUILDING_TYPES.FARM, function (event, data) {
+                    upgradeBuilding(village, BUILDING_TYPES.FARM, function (data) {
                         callback(true, data)
                     })
                 }
@@ -300,6 +285,25 @@ define('two/builderQueue', [
         })
 
         return sequenceLimit
+    }
+
+    const addLog = function (villageId, jobData) {
+        let data = {
+            time: timeHelper.gameTime(),
+            villageId: villageId,
+            building: jobData.building,
+            level: jobData.level
+        }
+
+        logs.unshift(data)
+
+        if (logs.length > LOGS_LIMIT) {
+            logs.splice(logs.length - LOGS_LIMIT, logs.length)
+        }
+
+        Lockr.set(STORAGE_KEYS.LOGS, logs)
+
+        return true
     }
 
     let builderQueue = {}

@@ -232,10 +232,10 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="log in logsView.logs">
-                                <td><span class="village-link img-link icon-20x20-village btn btn-orange padded" ng-click="openVillageInfo(log[0].id)">{{ log[0].name }} ({{ log[0].x }}|{{ log[0].y }})</span></td>
-                                <td><span class="building-icon icon-20x20-building-{{ log[1] }}"></span> {{ log[1] | i18n:loc.ale:'building_names' }}</td>
-                                <td>{{ log[2] }}</td>
-                                <td>{{ log[3] | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
+                                <td><a class="link" ng-click="openVillageInfo(log.villageId)"><span class="icon-20x20-village"></span> {{ villagesLabel[log.villageId] }}</a></td>
+                                <td><span class="building-icon icon-20x20-building-{{ log.building }}"></span> {{ log.building | i18n:loc.ale:'building_names' }}</td>
+                                <td>{{ log.level }}</td>
+                                <td>{{ log.time | readableDateFilter:loc.ale:GAME_TIMEZONE:GAME_TIME_OFFSET }}</td>
                             </tr>
                         </tbody>
                     </table>
