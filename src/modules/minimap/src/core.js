@@ -14,7 +14,8 @@ define('two/minimap', [
     'conf/colors',
     'conf/colorGroups',
     'conf/conf',
-    'version'
+    'version',
+    'states/MapState'
 ], function (
     ACTION_TYPES,
     SETTINGS,
@@ -31,7 +32,8 @@ define('two/minimap', [
     colors,
     colorGroups,
     conf,
-    gameVersion
+    gameVersion,
+    mapState
 ) {
     let enableRendering = false
     let highlights = {}
@@ -74,6 +76,9 @@ define('two/minimap', [
     let allowJump = true
     let allowMove = false
     let dragStart = {}
+    const spriteFactory = injector.get('spriteFactory')
+    let highlightSprite = spriteFactory.make('hover')
+    let currentCoords = {x: null, y: null}
 
     /**
      * Calcule the coords from clicked position in the canvas.
@@ -424,6 +429,16 @@ define('two/minimap', [
         drawVillages(_villages)
     }
 
+    const showHighlightSprite = function (x, y) {
+        let pos = mapService.tileCoordinate2Pixel(x, y)
+        highlightSprite.setTranslation(pos[0] - 25, pos[1] + 2)
+        highlightSprite.alpha = 1
+    }
+
+    const hideHighlightSprite = function () {
+        highlightSprite.alpha = 0
+    }
+
     const quickHighlight = function (coords) {
         const village = mapData.getTownAt(coords.x, coords.y)
         const action = settings.get(SETTINGS.RIGHT_CLICK_ACTION)
@@ -495,6 +510,13 @@ define('two/minimap', [
             }
 
             const coords = getCoords(event)
+
+            if (coords.x !== currentCoords.x || coords.y !== currentCoords.y) {
+                hideHighlightSprite()
+                showHighlightSprite(coords.x, coords.y)
+            }
+
+            currentCoords = coords
 
             if (coords.x in cache.village) {
                 if (coords.y in cache.village[coords.x]) {
@@ -784,6 +806,9 @@ define('two/minimap', [
             $player = modelDataService.getSelectedCharacter()
             $tribeRelations = $player.getTribeRelations()
             cachedVillages = Lockr.get(STORAGE_KEYS.CACHE_VILLAGES, {}, true)
+
+            highlightSprite.alpha = 0
+            mapState.graph.layers.effects.push(highlightSprite)
 
             currentPosition.x = 500 * villageBlock
             currentPosition.y = 500 * villageBlock
