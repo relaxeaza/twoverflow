@@ -56,7 +56,7 @@ define('two/builderQueue/settings/map', [
             updates: [UPDATES.ANALYSE]
         },
         [SETTINGS.PRIORIZE_FARM]: {
-            default: false,
+            default: true,
             inputType: 'checkbox',
             updates: [UPDATES.ANALYSE]
         }
