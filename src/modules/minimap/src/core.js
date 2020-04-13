@@ -561,7 +561,7 @@ define('two/minimap', [
             }
 
             const coords = getCoords(event)
-            $rootScope.$broadcast(eventTypeProvider.MAP_CENTER_ON_POSITION, coords.x, coords.y, true)
+            mapService.jumpToVillage(coords.x, coords.y, true)
         },
         onCrossMouseContext: function (event) {
             event.preventDefault()
