@@ -328,11 +328,9 @@ define('two/Settings', [
         switch (opt.type) {
         case 'keys':
             for (let prop in list) {
-                let value = list[prop]
-
                 encoded.push({
                     name: prop,
-                    value: value
+                    value: prop
                 })
             }
 
