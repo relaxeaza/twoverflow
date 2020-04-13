@@ -5,7 +5,7 @@ define('two/builderQueue', [
     'two/builderQueue/settings',
     'two/builderQueue/settings/map',
     'two/builderQueue/settings/updates',
-    'two/builderQueue/types/errors',
+    'two/builderQueue/sequenceStatus',
     'conf/upgradeabilityStates',
     'conf/buildingTypes',
     'conf/locationTypes',
@@ -19,7 +19,7 @@ define('two/builderQueue', [
     SETTINGS,
     SETTINGS_MAP,
     UPDATES,
-    ERROR_CODES,
+    SEQUENCE_STATUS,
     UPGRADEABILITY_STATES,
     BUILDING_TYPES,
     LOCATION_TYPES,
@@ -360,11 +360,11 @@ define('two/builderQueue', [
         let sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
 
         if (id in sequences) {
-            return ERROR_CODES.SEQUENCE_EXISTS
+            return SEQUENCE_STATUS.SEQUENCE_EXISTS
         }
 
         if (!angular.isArray(sequence)) {
-            return ERROR_CODES.SEQUENCE_INVALID
+            return SEQUENCE_STATUS.SEQUENCE_INVALID
         }
 
         sequences[id] = sequence
@@ -373,18 +373,18 @@ define('two/builderQueue', [
         })
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_ADDED, id)
 
-        return true
+        return SEQUENCE_STATUS.SEQUENCE_SAVED
     }
 
     builderQueue.updateBuildingSequence = function (id, sequence) {
         let sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
 
         if (!(id in sequences)) {
-            return ERROR_CODES.SEQUENCE_NO_EXISTS
+            return SEQUENCE_STATUS.SEQUENCE_NO_EXISTS
         }
 
         if (!angular.isArray(sequence) || !validSequence(sequence)) {
-            return ERROR_CODES.SEQUENCE_INVALID
+            return SEQUENCE_STATUS.SEQUENCE_INVALID
         }
 
         sequences[id] = sequence
@@ -393,14 +393,14 @@ define('two/builderQueue', [
         })
         eventQueue.trigger(eventTypeProvider.BUILDER_QUEUE_BUILDING_SEQUENCES_UPDATED, id)
 
-        return true
+        return SEQUENCE_STATUS.SEQUENCE_SAVED
     }
 
     builderQueue.removeSequence = function (id) {
         let sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
 
         if (!(id in sequences)) {
-            return ERROR_CODES.SEQUENCE_NO_EXISTS
+            return SEQUENCE_STATUS.SEQUENCE_NO_EXISTS
         }
 
         delete sequences[id]

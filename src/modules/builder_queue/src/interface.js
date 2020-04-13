@@ -6,7 +6,7 @@ define('two/builderQueue/ui', [
     'two/Settings',
     'two/builderQueue/settings',
     'two/builderQueue/settings/map',
-    'two/builderQueue/types/errors',
+    'two/builderQueue/sequenceStatus',
     'conf/buildingTypes',
     'two/EventScope',
     'queues/EventQueue',
@@ -19,7 +19,7 @@ define('two/builderQueue/ui', [
     Settings,
     SETTINGS,
     SETTINGS_MAP,
-    ERROR_CODES,
+    SEQUENCE_STATUS,
     BUILDING_TYPES,
     EventScope,
     eventQueue,
@@ -47,6 +47,9 @@ define('two/builderQueue/ui', [
     }
     let villagesInfo = {}
     let villagesLabel = {}
+    let unsavedChanges = false
+    let oldCloseWindow
+    let ignoreInputChange = false
 
     // TODO: make it shared with other modules
     const loadVillageInfo = function (villageId) {
@@ -117,19 +120,20 @@ define('two/builderQueue/ui', [
     }
 
     const createBuildingSequence = function (sequenceId, sequence) {
-        const error = builderQueue.addBuildingSequence(sequenceId, sequence)
+        const status = builderQueue.addBuildingSequence(sequenceId, sequence)
 
-        switch (error) {
-        case ERROR_CODES.SEQUENCE_EXISTS:
+        switch (status) {
+        case SEQUENCE_STATUS.SEQUENCE_SAVED:
+            return true
+
+        case SEQUENCE_STATUS.SEQUENCE_EXISTS:
             utils.emitNotif('error', $filter('i18n')('error_sequence_exists', $rootScope.loc.ale, 'builder_queue'))
             return false
 
-        case ERROR_CODES.SEQUENCE_INVALID:
+        case SEQUENCE_STATUS.SEQUENCE_INVALID:
             utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
             return false
         }
-
-        return true
     }
 
     const selectSome = function (obj) {
@@ -299,6 +303,7 @@ define('two/builderQueue/ui', [
 
         editorView.buildingSequence = copy
         editorView.updateVisibleBuildingSequence()
+        unsavedChanges = true
     }
 
     editorView.moveDown = function () {
@@ -329,6 +334,7 @@ define('two/builderQueue/ui', [
 
         editorView.buildingSequence = copy
         editorView.updateVisibleBuildingSequence()
+        unsavedChanges = true
     }
 
     editorView.addBuilding = function (building, position) {
@@ -349,6 +355,7 @@ define('two/builderQueue/ui', [
 
         editorView.buildingSequence = newSequence
         editorView.updateVisibleBuildingSequence()
+        unsavedChanges = true
 
         return true
     }
@@ -360,6 +367,7 @@ define('two/builderQueue/ui', [
         editorView.buildingSequence = editorView.updateLevels(editorView.buildingSequence, building)
 
         editorView.updateVisibleBuildingSequence()
+        unsavedChanges = true
     }
 
     editorView.updateLevels = function (sequence, building) {
@@ -435,14 +443,18 @@ define('two/builderQueue/ui', [
     editorView.updateBuildingSequence = function () {
         const selectedSequence = editorView.selectedSequence.value
         const parsedSequence = parseBuildingSequence(editorView.buildingSequence)
-        const error = builderQueue.updateBuildingSequence(selectedSequence, parsedSequence)
+        const status = builderQueue.updateBuildingSequence(selectedSequence, parsedSequence)
 
-        switch (error) {
-        case ERROR_CODES.SEQUENCE_NO_EXISTS:
+        switch (status) {
+        case SEQUENCE_STATUS.SEQUENCE_SAVED:
+            unsavedChanges = false
+
+            break
+        case SEQUENCE_STATUS.SEQUENCE_NO_EXISTS:
             utils.emitNotif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, 'builder_queue'))
 
             break
-        case ERROR_CODES.SEQUENCE_INVALID:
+        case SEQUENCE_STATUS.SEQUENCE_INVALID:
             utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
 
             break
@@ -460,6 +472,7 @@ define('two/builderQueue/ui', [
         modalScope.submit = function () {
             modalScope.closeWindow()
             builderQueue.removeSequence(editorView.selectedSequence.value)
+            unsavedChanges = false
         }
 
         modalScope.cancel = function () {
@@ -505,24 +518,47 @@ define('two/builderQueue/ui', [
     }
 
     editorView.modal.nameSequence = function () {
-        let modalScope = $rootScope.$new()
-        const selectedSequenceName = editorView.selectedSequence.name
-        const selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCES][selectedSequenceName]
-        
-        modalScope.name = selectedSequenceName
+        const nameSequence = function () {
+            let modalScope = $rootScope.$new()
+            const selectedSequenceName = editorView.selectedSequence.name
+            const selectedSequence = $scope.settings[SETTINGS.BUILDING_SEQUENCES][selectedSequenceName]
+            
+            modalScope.name = selectedSequenceName
 
-        modalScope.submit = function () {
-            if (modalScope.name.length < 3) {
-                utils.emitNotif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, 'builder_queue'))
-                return false
+            modalScope.submit = function () {
+                if (modalScope.name.length < 3) {
+                    utils.emitNotif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, 'builder_queue'))
+                    return false
+                }
+
+                if (createBuildingSequence(modalScope.name, selectedSequence)) {
+                    modalScope.closeWindow()
+                }
             }
 
-            if (createBuildingSequence(modalScope.name, selectedSequence)) {
-                modalScope.closeWindow()
-            }
+            windowManagerService.getModal('!twoverflow_builder_queue_name_sequence_modal', modalScope)
         }
 
-        windowManagerService.getModal('!twoverflow_builder_queue_name_sequence_modal', modalScope)
+        if (unsavedChanges) {
+            let modalScope = $rootScope.$new()
+            modalScope.title = $filter('i18n')('clone_warn_changed_sequence_title', $rootScope.loc.ale, 'builder_queue')
+            modalScope.text = $filter('i18n')('clone_warn_changed_sequence_text', $rootScope.loc.ale, 'builder_queue')
+            modalScope.submitText = $filter('i18n')('clone', $rootScope.loc.ale, 'builder_queue')
+            modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, 'common')
+
+            modalScope.submit = function () {
+                modalScope.closeWindow()
+                nameSequence()
+            }
+
+            modalScope.cancel = function () {
+                modalScope.closeWindow()
+            }
+
+            windowManagerService.getModal('modal_attention', modalScope)
+        } else {
+            nameSequence()
+        }
     }
 
     logsView.updateVisibleLogs = function () {
@@ -581,6 +617,7 @@ define('two/builderQueue/ui', [
 
     const saveSettings = function () {
         settings.setAll(settings.decode($scope.settings))
+        unsavedChanges = false
     }
 
     const switchBuilder = function () {
@@ -588,6 +625,36 @@ define('two/builderQueue/ui', [
             builderQueue.stop()
         } else {
             builderQueue.start()
+        }
+    }
+
+    const confirmDiscardModal = function (onDiscard, onCancel) {
+        let modalScope = $rootScope.$new()
+        modalScope.title = $filter('i18n')('discard_changes_title', $rootScope.loc.ale, 'builder_queue')
+        modalScope.text = $filter('i18n')('discard_changes_text', $rootScope.loc.ale, 'builder_queue')
+        modalScope.submitText = $filter('i18n')('discard', $rootScope.loc.ale, 'common')
+        modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, 'common')
+
+        modalScope.submit = function () {
+            modalScope.closeWindow()
+            onDiscard && onDiscard()
+        }
+
+        modalScope.cancel = function () {
+            modalScope.closeWindow()
+            onCancel && onCancel()
+        }
+
+        windowManagerService.getModal('modal_attention', modalScope)
+    }
+
+    const confirmCloseWindow = function () {
+        if (unsavedChanges) {
+            confirmDiscardModal(function onDiscard () {
+                oldCloseWindow()
+            })
+        } else {
+            oldCloseWindow()
         }
     }
 
@@ -774,6 +841,9 @@ define('two/builderQueue/ui', [
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_builder_queue_window', $scope)
 
+        oldCloseWindow = $scope.closeWindow
+        $scope.closeWindow = confirmCloseWindow
+
         $scope.$watch('settings[SETTINGS.ACTIVE_SEQUENCE].value', function (newValue, oldValue) {
             if (newValue !== oldValue) {
                 eventHandlers.generateBuildingSequences()
@@ -781,8 +851,23 @@ define('two/builderQueue/ui', [
         })
 
         $scope.$watch('editorView.selectedSequence.value', function (newValue, oldValue) {
+            if (ignoreInputChange) {
+                ignoreInputChange = false
+                return
+            }
+
             if (newValue !== oldValue) {
-                eventHandlers.generateBuildingSequencesEditor()
+                if (unsavedChanges) {
+                    confirmDiscardModal(function onDiscard () {
+                        eventHandlers.generateBuildingSequencesEditor()
+                        unsavedChanges = false
+                    }, function onCancel () {
+                        $scope.editorView.selectedSequence = { name: oldValue, value: oldValue }
+                        ignoreInputChange = true
+                    })
+                } else {
+                    eventHandlers.generateBuildingSequencesEditor()
+                }
             }
         })
     }

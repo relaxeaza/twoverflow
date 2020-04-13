@@ -33,7 +33,11 @@
         "error_sequence_invalid": "Some sequence's value is invalid.",
         "logs_cleared": "Logs cleared.",
         "create_sequence": "Create a sequence",
-        "settings_preserve_resources": "Preserve village's resources"
+        "settings_preserve_resources": "Preserve village's resources",
+        "discard_changes_title": "Unsaved sequence",
+        "discard_changes_text": "The selected sequence have unsaved changes. Are you sure you want to discard the changes?",
+        "clone_warn_changed_sequence_title": "Changed sequence",
+        "clone_warn_changed_sequence_text": "The sequence you are trying to clone was changed. If you accept, the old version will be cloned."
     },
     "builder_queue_add_building_modal": {
         "title": "Add new building"
