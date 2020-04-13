@@ -422,8 +422,10 @@ define('two/builderQueue', [
         })
 
         settings.onChange(function (changes, updates, opt) {
-            if (updates[UPDATES.ANALYSE]) {
-                analyseVillages()
+            if (running) {
+                if (updates[UPDATES.ANALYSE]) {
+                    analyseVillages()
+                }
             }
 
             if (!opt.quiet) {
