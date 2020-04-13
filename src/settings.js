@@ -66,11 +66,11 @@ define('two/Settings', [
     }
 
     Settings.prototype.get = function (id) {
-        return this.settings[id]
+        return angular.copy(this.settings[id])
     }
 
     Settings.prototype.getAll = function () {
-        return this.settings
+        return angular.copy(this.settings)
     }
 
     Settings.prototype.getDefault = function (id) {
