@@ -50,10 +50,10 @@ define('two/autoCollector/secondVillage', [
         })
     }
 
-    const startJob = function (jobId, callback) {
+    const startJob = function (job, callback) {
         socketService.emit(routeProvider.SECOND_VILLAGE_START_JOB, {
             village_id: modelDataService.getSelectedVillage().getId(),
-            job_id: jobId
+            job_id: job.id
         }, callback)
     }
 
