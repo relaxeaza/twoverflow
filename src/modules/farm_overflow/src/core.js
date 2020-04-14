@@ -52,6 +52,10 @@ define('two/farmOverflow', [
     let tempVillageReports = {}
     let $player
     let unitsData
+    let persistentRunningLastCheck = timeHelper.gameTime()
+    let persistentRunningTimer = null
+    let persistentRunningBrokenTimes = 0 // REMOVE IT
+    const PERSISTENT_RUNNING_CHECK_INTERVAL = 30 * 1000
     const VILLAGE_COMMAND_LIMIT = 50
     const MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
     const MINIMUM_ATTACK_INTERVAL = 1 * 1000
@@ -579,6 +583,46 @@ define('two/farmOverflow', [
         return false
     }
 
+    const persistentRunningStart = function () {
+        let cycleInterval = Math.max(MINIMUM_FARMER_CYCLE_INTERVAL, settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000)
+        let attackInterval = Math.max(MINIMUM_ATTACK_INTERVAL, settings.get(SETTINGS.ATTACK_INTERVAL) * 1000)
+        let timeLimit = cycleInterval + (cycleInterval / 2) + attackInterval
+
+        persistentRunningTimer = setInterval(function () {
+            let now = timeHelper.gameTime()
+
+            if (now - persistentRunningLastCheck > timeLimit) {
+                console.log('------------- FARMER IS BROKE')
+                persistentRunningBrokenTimes++ // REMOVE IT
+
+                farmOverflow.stop()
+
+                setTimeout(function () {
+                    farmOverflow.start()
+                }, 5000)
+            } else { // REMOVE IT
+                console.log('------------- farmer is fine')
+            }
+        }, PERSISTENT_RUNNING_CHECK_INTERVAL)
+    }
+
+    // REMOVE IT
+    window.checkPersistentRunning = function () {
+        let cycleInterval = Math.max(MINIMUM_FARMER_CYCLE_INTERVAL, settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000)
+        let attackInterval = Math.max(MINIMUM_ATTACK_INTERVAL, settings.get(SETTINGS.ATTACK_INTERVAL) * 1000)
+        let timeLimit = cycleInterval + (cycleInterval / 2) + attackInterval
+        let now = timeHelper.gameTime()
+        console.log('(now - persistentRunningLastCheck =', now - persistentRunningLastCheck, ') >', '( timeLimit =', timeLimit, ')', now - persistentRunningLastCheck > timeLimit, ' | Times broken:', persistentRunningBrokenTimes)
+    }
+
+    const persistentRunningStop = function () {
+        clearInterval(persistentRunningTimer)
+    }
+
+    const persistentRunningUpdate = function () {
+        persistentRunningLastCheck = timeHelper.gameTime()
+    }
+
     const Farmer = function (villageId) {
         this.villageId = villageId
         this.village = $player.getVillage(villageId)
@@ -628,6 +672,8 @@ define('two/farmOverflow', [
     }
 
     Farmer.prototype.start = function () {
+        persistentRunningUpdate()
+
         if (this.running) {
             return false
         }
@@ -677,6 +723,8 @@ define('two/farmOverflow', [
     }
 
     Farmer.prototype.targetStep = async function (options = {}) {
+        persistentRunningUpdate()
+
         const commandList = this.village.getCommandListModel()
         const villageCommands = commandList.getOutgoingCommands(true, true)
         let preset
@@ -1143,6 +1191,9 @@ define('two/farmOverflow', [
             farmOverflow.farmerStep()
         })
 
+        persistentRunningUpdate()
+        persistentRunningStart()
+
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_START)
 
         addLog(LOG_TYPES.FARM_START)
@@ -1163,6 +1214,8 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
             reason: reason
         })
+
+        persistentRunningStop()
 
         if (reason === ERROR_TYPES.USER_STOP) {
             addLog(LOG_TYPES.FARM_STOP)
@@ -1248,6 +1301,8 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.farmerStep = function () {
+        persistentRunningUpdate()
+
         if (!farmers.length) {
             activeFarmer = false
         } else if (farmerIndex >= farmers.length) {

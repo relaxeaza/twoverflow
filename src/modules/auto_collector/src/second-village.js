@@ -13,6 +13,7 @@ define('two/autoCollector/secondVillage', [
 ) {
     let initialized = false
     let running = false
+    let allFinished = false
     let secondVillageService = injector.get('secondVillageService')
 
     const getRunningJob = function (jobs) {
@@ -70,9 +71,15 @@ define('two/autoCollector/secondVillage', [
 
     const updateSecondVillageInfo = function (callback) {
         socketService.emit(routeProvider.SECOND_VILLAGE_GET_INFO, {}, function (data) {
-            let model = new SecondVillageModel(data)
-            modelDataService.getSelectedCharacter().setSecondVillage(model)
-            callback()
+            if (secondVillageService.hasFinishedLastJob(data.jobs)) {
+                allFinished = true
+                socketService.emit(routeProvider.SECOND_VILLAGE_FINISH_VILLAGE)
+                secondVillageCollector.stop()
+            } else{
+                let model = new SecondVillageModel(data)
+                modelDataService.getSelectedCharacter().setSecondVillage(model)
+                callback()
+            }
         })
     }
 
@@ -128,7 +135,7 @@ define('two/autoCollector/secondVillage', [
     let secondVillageCollector = {}
 
     secondVillageCollector.start = function () {
-        if (!initialized) {
+        if (!initialized || allFinished) {
             return false
         }
 
@@ -161,9 +168,15 @@ define('two/autoCollector/secondVillage', [
 
         initialized = true
 
-        $rootScope.$on(eventTypeProvider.SECOND_VILLAGE_VILLAGE_CREATED, updateAndAnalyse)
-        $rootScope.$on(eventTypeProvider.SECOND_VILLAGE_JOB_COLLECTED, updateAndAnalyse)
-        $rootScope.$on(eventTypeProvider.SECOND_VILLAGE_VILLAGE_CREATED, updateAndAnalyse)
+        socketService.emit(routeProvider.SECOND_VILLAGE_GET_INFO, {}, function (data) {
+            if (secondVillageService.hasFinishedLastJob(data.jobs)) {
+                allFinished = true
+                socketService.emit(routeProvider.SECOND_VILLAGE_FINISH_VILLAGE)
+            } else {
+                $rootScope.$on(eventTypeProvider.SECOND_VILLAGE_VILLAGE_CREATED, updateAndAnalyse)
+                $rootScope.$on(eventTypeProvider.SECOND_VILLAGE_JOB_COLLECTED, updateAndAnalyse)
+            }
+        })
     }
 
     autoCollector.secondVillage = secondVillageCollector
