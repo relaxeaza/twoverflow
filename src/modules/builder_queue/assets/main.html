@@ -73,11 +73,12 @@
                     </table>
 
                     <h5 class="twx-section">{{ 'settings_building_sequence' | i18n:loc.ale:'builder_queue' }}</h5>
+
                     <p ng-show="!settingsView.sequencesAvail" class="text-center">
                         <a href="#" class="btn-orange btn-border create-sequence" ng-click="createSequence()">{{ 'create_sequence' | i18n:loc.ale:'builder_queue' }}</a>
                     </p>
-                    
-                    <div ng-if="settingsView.sequencesAvail">
+
+                    <div ng-if="settingsView.sequencesAvail && settingsView.visibleBuildingSequence.length">
                         <div class="page-wrap" pagination="pagination.buildingSequence"></div>
                         <table class="tbl-border-light header-center building-sequence">
                             <colgroup>
@@ -120,8 +121,9 @@
                         <div class="page-wrap" pagination="pagination.buildingSequence"></div>
                     </div>
 
-                    <h5 ng-if="settingsView.sequencesAvail" class="twx-section">{{ 'settings_building_sequence_final' | i18n:loc.ale:'builder_queue' }}</h5>
-                    <table ng-if="settingsView.sequencesAvail" class="tbl-border-light tbl-striped header-center building-sequence-final">
+                    <h5 ng-if="settingsView.sequencesAvail && settingsView.visibleBuildingSequence.length" class="twx-section">{{ 'settings_building_sequence_final' | i18n:loc.ale:'builder_queue' }}</h5>
+                    
+                    <table ng-if="settingsView.sequencesAvail && settingsView.visibleBuildingSequence.length" class="tbl-border-light tbl-striped header-center building-sequence-final">
                         <colgroup>
                             <col> <!-- name -->
                             <col width="5%"> <!-- level -->
@@ -153,6 +155,10 @@
                             <td>{{ item.resources.food | number }}</td>
                         </tr>
                     </table>
+
+                    <p ng-show="settingsView.sequencesAvail && !settingsView.visibleBuildingSequence.length" class="text-center">
+                        {{ 'empty_sequence' | i18n:loc.ale:'builder_queue' }}
+                    </p>
                 </div>
 
                 <div ng-show="selectedTab === TAB_TYPES.SEQUENCES">
@@ -178,7 +184,7 @@
 
                     <div ng-if="editorView.sequencesAvail">
                         <div class="page-wrap" pagination="pagination.buildingSequenceEditor"></div>
-                        <table class="tbl-border-light tbl-striped header-center building-sequence-editor">
+                        <table ng-show="editorView.visibleBuildingSequence.length" class="tbl-border-light tbl-striped header-center building-sequence-editor">
                             <colgroup>
                                 <col width="5%">
                                 <col width="5%">
@@ -206,6 +212,10 @@
                             </tr>
                         </table>
                         <div class="page-wrap" pagination="pagination.buildingSequenceEditor"></div>
+
+                        <p ng-show="!editorView.visibleBuildingSequence.length" class="text-center">
+                            <a class="btn btn-border btn-orange" ng-click="editorView.modal.addBuilding()">{{ 'sequences_add_building' | i18n:loc.ale:'builder_queue' }}</a>
+                        </p>
                     </div>
                 </div>
 

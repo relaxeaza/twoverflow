@@ -39,6 +39,7 @@
         "clone_warn_changed_sequence_text": "A sequência que está tentando clonar foi alterada. Se aceitar, a versão antiga será clonada.",
         "clone_sequence": "Clonar sequência selecionada",
         "amount": "Quantidade",
+        "empty_sequence": "Sequência vazia"
     },
     "builder_queue_add_building_modal": {
         "title": "Adicionar novo edifício"

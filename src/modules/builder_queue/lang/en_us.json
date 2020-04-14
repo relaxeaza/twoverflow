@@ -38,7 +38,8 @@
         "clone_warn_changed_sequence_title": "Changed sequence",
         "clone_warn_changed_sequence_text": "The sequence you are trying to clone was changed. If you accept, the old version will be cloned.",
         "clone_sequence": "Clone selected sequence",
-        "amount": "Amount"
+        "amount": "Amount",
+        "empty_sequence": "Empty sequence"
     },
     "builder_queue_add_building_modal": {
         "title": "Add new building"

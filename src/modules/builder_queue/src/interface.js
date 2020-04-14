@@ -763,7 +763,7 @@ define('two/builderQueue/ui', [
 
         $scope.editorView = editorView
         $scope.editorView.buildingSequence = {}
-        $scope.editorView.visibleBuildingSequence = {}
+        $scope.editorView.visibleBuildingSequence = []
         $scope.editorView.selectedSequence = { name: activeSequence, value: activeSequence }
 
         $scope.settingsView = settingsView
