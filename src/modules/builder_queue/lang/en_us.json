@@ -22,8 +22,7 @@
         "position": "Position",
         "remove_building": "Remove building from list",
         "clone": "Clone",
-        "tooltip_clone": "Crate a new sequence from the selected sequence",
-        "tooltip_remove_sequence": "Remove selected sequence",
+        "remove_sequence": "Remove selected sequence",
         "name_sequence_min_lenght": "The sequence name must have at least 3 character.",
         "sequence_created": "New sequence %d created.",
         "sequence_updated": "Sequence %d updated.",
@@ -38,6 +37,7 @@
         "discard_changes_text": "The selected sequence have unsaved changes. Are you sure you want to discard the changes?",
         "clone_warn_changed_sequence_title": "Changed sequence",
         "clone_warn_changed_sequence_text": "The sequence you are trying to clone was changed. If you accept, the old version will be cloned.",
+        "clone_sequence": "Clone selected sequence",
         "amount": "Amount"
     },
     "builder_queue_add_building_modal": {

@@ -74,7 +74,7 @@
 
                     <h5 class="twx-section">{{ 'settings_building_sequence' | i18n:loc.ale:'builder_queue' }}</h5>
                     <p ng-show="!settingsView.sequencesAvail" class="text-center">
-                        <a href="#" class="btn-orange btn-border create-sequence" ng-click="createFirstSequence()">{{ 'create_sequence' | i18n:loc.ale:'builder_queue' }}</a>
+                        <a href="#" class="btn-orange btn-border create-sequence" ng-click="createSequence()">{{ 'create_sequence' | i18n:loc.ale:'builder_queue' }}</a>
                     </p>
                     
                     <div ng-if="settingsView.sequencesAvail">
@@ -157,23 +157,21 @@
 
                 <div ng-show="selectedTab === TAB_TYPES.SEQUENCES">
                     <h5 class="twx-section">{{ 'sequences_edit_sequence' | i18n:loc.ale:'builder_queue' }}</h5>
+
                     <p ng-show="!editorView.sequencesAvail" class="text-center">
-                        <a href="#" class="btn-orange btn-border create-sequence" ng-click="createFirstSequence()">{{ 'create_sequence' | i18n:loc.ale:'builder_queue' }}</a>
+                        <a class="btn btn-orange create-sequence" ng-click="createSequence()">{{ 'create_sequence' | i18n:loc.ale:'builder_queue' }}</a>
                     </p>
 
                     <table ng-if="editorView.sequencesAvail" class="tbl-border-light tbl-striped editor-select-sequence">
-                        <colgroup>
-                            <col width="50%">
-                            <col>
-                        </colgroup>
                         <tbody>
                             <tr>
-                                <td><span class="ff-cell-fix">{{ 'sequences_select_edit' | i18n:loc.ale:'builder_queue' }}</span></td>
-                                <td>
-                                    <div class="select-sequence-editor" select="" list="sequences" selected="editorView.selectedSequence" drop-down="true"></div>
-                                    <a class="btn btn-orange clone-sequence" ng-click="editorView.modal.nameSequence()" tooltip="" tooltip-content="{{ 'tooltip_clone' | i18n:loc.ale:'builder_queue' }}">{{ 'clone' | i18n:loc.ale:'builder_queue' }}</a>
-                                    <a href="#" class="btn-red remove-sequence icon-20x20-close" ng-click="editorView.modal.removeSequence()" tooltip="" tooltip-content="{{ 'tooltip_remove_sequence' | i18n:loc.ale:'builder_queue' }}"></a>
-                                </td>
+                                <td colspan="2"><span class="ff-cell-fix">{{ 'sequences_select_edit' | i18n:loc.ale:'builder_queue' }}</span></td>
+                                <td><div class="select-sequence-editor" select="" list="sequences" selected="editorView.selectedSequence" drop-down="true"></div></td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"><a class="btn btn-orange create-sequence" ng-click="createSequence()">{{ 'create_sequence' | i18n:loc.ale:'builder_queue' }}</a></td>
+                                <td class="text-center"><a class="btn btn-orange clone-sequence" ng-click="editorView.modal.nameSequence()">{{ 'clone_sequence' | i18n:loc.ale:'builder_queue' }}</a></td>
+                                <td class="text-center"><a class="btn btn-red remove-sequence" ng-click="editorView.modal.removeSequence()">{{ 'remove_sequence' | i18n:loc.ale:'builder_queue' }}</a></td>
                             </tr>
                         </tbody>
                     </table>
@@ -260,10 +258,10 @@
                 <a href="#" class="btn-border btn-orange" ng-click="logsView.clearLogs()">{{ 'logs_clear' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
 
-            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">
+            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail && editorView.itemSelected">
                 <a href="#" class="btn-border btn-orange" ng-click="editorView.moveUp()">{{ 'sequences_move_up' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
-            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">
+            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail && editorView.itemSelected">
                 <a href="#" class="btn-border btn-orange" ng-click="editorView.moveDown()">{{ 'sequences_move_down' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">

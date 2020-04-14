@@ -568,7 +568,7 @@ define('two/builderQueue/ui', [
         builderQueue.clearLogs()
     }
 
-    const createFirstSequence = function () {
+    const createSequence = function () {
         let modalScope = $rootScope.$new()
         const initialSequence = [BUILDING_TYPES.HEADQUARTER]
 
@@ -777,7 +777,7 @@ define('two/builderQueue/ui', [
         $scope.selectTab = selectTab
         $scope.switchBuilder = switchBuilder
         $scope.saveSettings = saveSettings
-        $scope.createFirstSequence = createFirstSequence
+        $scope.createSequence = createSequence
         $scope.openVillageInfo = windowDisplayService.openVillageInfo
 
         settings.injectScope($scope)

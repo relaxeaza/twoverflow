@@ -22,8 +22,7 @@
         "position": "Posição",
         "remove_building": "Remover edifício da lista",
         "clone": "Clonar",
-        "tooltip_clone": "Criar uma nova sequência a partir da sequência selecionada",
-        "tooltip_remove_sequence": "Remover sequência selecionada",
+        "remove_sequence": "Remover sequência selecionada",
         "name_sequence_min_lenght": "O nome da sequência deve ter pelo menos 3 caracteres.",
         "sequence_created": "Nova sequência %d criada.",
         "sequence_updated": "Sequência %d atualizada.",
@@ -38,7 +37,8 @@
         "discard_changes_text": "A sequência selecionada tem alterações não salvas. Tem certeza que deseja descartar  as alterações?",
         "clone_warn_changed_sequence_title": "Sequência alterada",
         "clone_warn_changed_sequence_text": "A sequência que está tentando clonar foi alterada. Se aceitar, a versão antiga será clonada.",
-        "amount": "Quantidade"
+        "clone_sequence": "Clonar sequência selecionada",
+        "amount": "Quantidade",
     },
     "builder_queue_add_building_modal": {
         "title": "Adicionar novo edifício"
