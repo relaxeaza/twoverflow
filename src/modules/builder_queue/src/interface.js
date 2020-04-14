@@ -337,23 +337,20 @@ define('two/builderQueue/ui', [
         unsavedChanges = true
     }
 
-    editorView.addBuilding = function (building, position) {
+    editorView.addBuilding = function (building, position, amount = 1) {
         const index = position - 1
         let newSequence = editorView.buildingSequence.slice()
-
-        newSequence.splice(index, 0, {
+        let buildingData = {
             level: null,
             building: building,
             checked: false
-        })
-
-        newSequence = editorView.updateLevels(newSequence, building)
-
-        if (!newSequence) {
-            return false
         }
 
-        editorView.buildingSequence = newSequence
+        for (let i = 0; i < amount; i++) {
+            newSequence.splice(index, 0, buildingData)
+        }
+
+        editorView.buildingSequence = editorView.updateLevels(newSequence, building)
         editorView.updateVisibleBuildingSequence()
         unsavedChanges = true
 
@@ -373,31 +370,21 @@ define('two/builderQueue/ui', [
     editorView.updateLevels = function (sequence, building) {
         let buildingLevel = 0
         let modifiedSequence = []
-        let limitExceeded = false
 
         for (let i = 0; i < sequence.length; i++) {
             let item = sequence[i]
 
             if (item.building === building) {
-                buildingLevel++
-
-                if (buildingLevel > gameDataBuildings[building].max_level) {
-                    limitExceeded = true
-                    break
+                if (buildingLevel < gameDataBuildings[building].max_level) {
+                    modifiedSequence.push({
+                        level: ++buildingLevel,
+                        building: building,
+                        checked: false
+                    })
                 }
-
-                modifiedSequence.push({
-                    level: buildingLevel,
-                    building: building,
-                    checked: false
-                })
             } else {
                 modifiedSequence.push(item)
             }
-        }
-
-        if (limitExceeded) {
-            return false
         }
 
         return modifiedSequence
@@ -484,10 +471,11 @@ define('two/builderQueue/ui', [
 
     editorView.modal.addBuilding = function () {
         let modalScope = $rootScope.$new()
-
         modalScope.buildings = []
         modalScope.position = 1
         modalScope.indexLimit = editorView.buildingSequence.length + 1
+        modalScope.buildingsData = modelDataService.getGameData().getBuildings()
+        modalScope.amount = 1
         modalScope.selectedBuilding = {
             name: $filter('i18n')(BUILDING_TYPES.HEADQUARTER, $rootScope.loc.ale, 'building_names'),
             value: BUILDING_TYPES.HEADQUARTER
@@ -503,10 +491,11 @@ define('two/builderQueue/ui', [
         modalScope.add = function () {
             const building = modalScope.selectedBuilding.value
             const position = modalScope.position
+            const amount = modalScope.amount
             const buildingName = $filter('i18n')(building, $rootScope.loc.ale, 'building_names')
             const buildingLimit = gameDataBuildings[building].max_level
 
-            if (editorView.addBuilding(building, position)) {
+            if (editorView.addBuilding(building, position, amount)) {
                 modalScope.closeWindow()
                 utils.emitNotif('success', $filter('i18n')('add_building_success', $rootScope.loc.ale, 'builder_queue', buildingName, position))
             } else {

@@ -37,7 +37,8 @@
         "discard_changes_title": "Unsaved sequence",
         "discard_changes_text": "The selected sequence have unsaved changes. Are you sure you want to discard the changes?",
         "clone_warn_changed_sequence_title": "Changed sequence",
-        "clone_warn_changed_sequence_text": "The sequence you are trying to clone was changed. If you accept, the old version will be cloned."
+        "clone_warn_changed_sequence_text": "The sequence you are trying to clone was changed. If you accept, the old version will be cloned.",
+        "amount": "Amount"
     },
     "builder_queue_add_building_modal": {
         "title": "Add new building"

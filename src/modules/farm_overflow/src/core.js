@@ -1111,7 +1111,7 @@ define('two/farmOverflow', [
         exceptionLogs = Lockr.get(STORAGE_KEYS.EXCEPTION_LOGS, {})
         $player = modelDataService.getSelectedCharacter()
         unitsData = modelDataService.getGameData().getUnitsObject()
-        
+
         settings = new Settings({
             settingsMap: SETTINGS_MAP,
             storageKey: STORAGE_KEYS.SETTINGS
@@ -1143,7 +1143,7 @@ define('two/farmOverflow', [
                 skipStepInterval()
             }
         })
-        
+
         updateGroupVillages()
         updatePresets()
         farmOverflow.createFarmers()
