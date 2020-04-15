@@ -216,7 +216,7 @@ define('two/utils', [
      */
     utils.getTravelTime = function (origin, target, units, type, officers) {
         let useEffects = false
-        const targetIsBarbarian = target.character_id === null
+        const targetIsBarbarian = !target.character_id
         const targetIsSameTribe = target.character_id && target.tribe_id &&
                 target.tribe_id === modelDataService.getSelectedCharacter().getTribeId()
 

@@ -30,6 +30,7 @@ define('two/commandQueue/ui', [
     let $scope
     let $button
     let $gameData = modelDataService.getGameData()
+    let $player
     let orderedUnitNames = $gameData.getOrderedUnitNames()
     let orderedOfficerNames = $gameData.getOrderedOfficerNames()
     let presetList = modelDataService.getPresetList()
@@ -260,7 +261,8 @@ define('two/commandQueue/ui', [
             id: village.villageId,
             x: village.x,
             y: village.y,
-            name: village.name
+            name: village.name,
+            character_id: $player.getId()
         }
     }
 
@@ -270,12 +272,7 @@ define('two/commandQueue/ui', [
         }
 
         commandQueue.getVillageByCoords(mapSelectedVillage.x, mapSelectedVillage.y, function (data) {
-            commandData.target = {
-                id: data.id,
-                x: data.x,
-                y: data.y,
-                name: data.name
-            }
+            commandData.target = data
         })
     }
 
@@ -474,6 +471,7 @@ define('two/commandQueue/ui', [
     }
 
     const init = function () {
+        $player = modelDataService.getSelectedCharacter()
         timeOffset = utils.getTimeOffset()
         const attackableBuildingsMap = $gameData.getAttackableBuildings()
 
