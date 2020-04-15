@@ -24,10 +24,6 @@ const gameLanguageCodes = {
 }
 
 async function init () {
-    if (!options.source || !path.isAbsolute(options.source)) {
-        return console.log('Missing/wrong translations directory --source')
-    }
-
     if (!validSource()) {
         return console.log('Invalid translation source')
     }
@@ -35,7 +31,7 @@ async function init () {
     const crowdinKey = getCrowdinKey()
 
     if (!crowdinKey) {
-        return console.log('Missing crowdin project api key (/keys/crowdin.key)')
+        return console.log('Missing crowdin project api key (share/keys/crowdin.key)')
     }
 
     const translationStatus = await getTranslationStatus(crowdinKey)
@@ -97,16 +93,16 @@ async function getTranslationStatus (key) {
 }
 
 function getCrowdinKey () {
-    if (!fs.existsSync('./keys/crowdin.key')) {
+    if (!fs.existsSync('./share/keys/crowdin.key')) {
         return false
     }
 
-    return fs.readFileSync('./keys/crowdin.key', 'utf8').trim()
+    return fs.readFileSync('./share/keys/crowdin.key', 'utf8').trim()
 }
 
 function validSource () {
     return Object.keys(gameLanguageCodes).every(function (languageDir) {
-        return fs.existsSync(`${options.source}/${languageDir}/twoverflow/twoverflow.json`)
+        return fs.existsSync(`./share/translations/${languageDir}/twoverflow/twoverflow.json`)
     })
 }
 

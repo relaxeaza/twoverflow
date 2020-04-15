@@ -19,12 +19,7 @@ You can run the testing version to experiment new features and bug fixes before 
 
 See [https://gitlab.com/relaxeaza/twoverflow/wikis/Testing-version](https://gitlab.com/relaxeaza/twoverflow/wikis/Testing-version)
 
-## Languages
-
-- English
-- Português
-- Polish
-- Deutsch
+## Translations
 
 Please help to translate TWOverflow on [Crowdin](https://crowdin.com/project/twoverflow).
 
@@ -53,15 +48,16 @@ You can use some flags to customize the resulting file.
 - `--minify` to generate a minified file.
 - `--ignore` to ignore specific modules by ID (check _module.json_ for ID).
 - `--only` compile only a specific module by ID (check _module.json_ for ID).
+- `--nolint` compile without checking the source for errors.
 
 Example: `node scripts/make.js --ignore=farm_overflow,minimap --minify` ignores both modules farm_overflow and minimap and will generate an minified file.
 
 ### Sync translations from Crowdin
 
-Run `node scripts/translations.js` with the fallowing parameters:
+Extract the build translations from Crowdin to the directory `share/translations/`
 
-- `--source` extracted directory of translations build from Crowdin.
+Create the file `share/keys/crowdin.key` with the crowdin api key.
 
-The project key is read from `keys/crowdin.key` file.
+Run `node scripts/translations.js`
 
-A language needs at least 40% of the words translated to be included in the script build.
+A language needs at least 50% of the words translated to be merged into the project's source code.
