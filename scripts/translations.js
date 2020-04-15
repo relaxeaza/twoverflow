@@ -11,24 +11,16 @@ const options = parseOptions()
 
 const gameLanguageCodes = {
     'cs': 'cs_cz',
-    'da': 'da_dk',
+    'nl': 'nl_nl',
+    'en': 'en_us',
+    'fr': 'fr_fr',
     'de': 'de_de',
     'el': 'el_gr',
-    'en': 'en_us',
-    'es-ES': 'es_es',
-    'fi': 'fi_fi',
-    'fr': 'fr_fr',
-    'hu': 'hu_hu',
-    'it': 'it_it',
-    'no': 'nb_no',
-    'nl': 'nl_nl',
     'pl': 'pl_pl',
     'pt-BR': 'pt_br',
     'ro': 'ro_ro',
     'ru': 'ru_ru',
-    'sk': 'sk_sk',
-    'sv-SE': 'sv_se',
-    'tr': 'tr_tr',
+    'es-ES': 'es_es'
 }
 
 async function init () {

@@ -88,6 +88,7 @@
         "no_logs": "No logs registered",
         "clear_logs": "Clear logs",
         "reseted_logs": "Registered logs reseted.",
-        "date_added": "Date added"
+        "date_added": "Date added",
+        "multiple_attacks_interval": "Interval between attacks in the same target (minutes)"
     }
 }

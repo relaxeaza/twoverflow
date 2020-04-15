@@ -83,6 +83,7 @@
         "remove": "Entfernen",
         "started_at": "Gestartet um",
         "arrive": "Ankommen",
-        "settings_saved": "Einstellungen gespeichert"
+        "settings_saved": "Einstellungen gespeichert",
+        "discard": "Discard"
     }
 }

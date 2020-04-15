@@ -17,6 +17,8 @@
         "status_unknown": "Nieznany status",
         "status_attacking": "Attakuje",
         "status_waiting_cycle": "Cykl czekania",
+        "status_user_stop": "Stopped by player",
+        "status_expired_step": "Expired command",
         "not_loaded": "Nie załadowany.",
         "ignored_targets": "Ignorowane cele",
         "no_ignored_targets": "Brak ignorowanych",
@@ -86,6 +88,7 @@
         "no_logs": "Brak zarejestrowanych logów",
         "clear_logs": "Wyczyść logi",
         "reseted_logs": "Zarejestrowane logi zostały wyczyszczone.",
-        "date_added": "Data dodania"
+        "date_added": "Data dodania",
+        "multiple_attacks_interval": "Interval between attacks in the same target (minutes)"
     }
 }

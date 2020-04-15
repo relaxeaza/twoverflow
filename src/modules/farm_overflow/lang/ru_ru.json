@@ -17,6 +17,8 @@
         "status_unknown": "Неизвестный статус",
         "status_attacking": "Атаковано",
         "status_waiting_cycle": "Ожидание",
+        "status_user_stop": "Stopped by player",
+        "status_expired_step": "Expired command",
         "not_loaded": "Не загружено.",
         "ignored_targets": "Игнорируемые цели",
         "no_ignored_targets": "Ничего не игнорировать",
@@ -86,6 +88,7 @@
         "no_logs": "Нету зарегистрированного журанал событий",
         "clear_logs": "Очистить журнал события",
         "reseted_logs": "Зарегистрованный журнал событий обнулён.",
-        "date_added": "Данные добавлены"
+        "date_added": "Данные добавлены",
+        "multiple_attacks_interval": "Interval between attacks in the same target (minutes)"
     }
 }

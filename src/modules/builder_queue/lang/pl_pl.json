@@ -22,8 +22,7 @@
         "position": "Pozycja",
         "remove_building": "Usuń budynek z listy",
         "clone": "Klonuj",
-        "tooltip_clone": "Utwórz nowy szablon na podstawie wybranego szablonu",
-        "tooltip_remove_sequence": "Usuń wybrany szablon",
+        "remove_sequence": "Remove selected sequence",
         "name_sequence_min_lenght": "The sequence name must have at least 3 character.",
         "sequence_created": "Nowy szablon %d utworzony.",
         "sequence_updated": "Szablon %d zaktualizowany.",
@@ -33,7 +32,14 @@
         "error_sequence_invalid": "Niektóre z wartości szablonu są niepoprawne.",
         "logs_cleared": "Logi wyczyszczone.",
         "create_sequence": "Utwórz szablon",
-        "settings_preserve_resources": "Zarezerwowane surowce wioski"
+        "settings_preserve_resources": "Zarezerwowane surowce wioski",
+        "discard_changes_title": "Unsaved sequence",
+        "discard_changes_text": "The selected sequence have unsaved changes. Are you sure you want to discard the changes?",
+        "clone_warn_changed_sequence_title": "Changed sequence",
+        "clone_warn_changed_sequence_text": "The sequence you are trying to clone was changed. If you accept, the old version will be cloned.",
+        "clone_sequence": "Clone selected sequence",
+        "amount": "Amount",
+        "empty_sequence": "Empty sequence"
     },
     "builder_queue_add_building_modal": {
         "title": "Dodaj nowy budynek"

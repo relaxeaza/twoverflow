@@ -63,8 +63,8 @@
         "group_only": "Atacar apenas com aldeias dos grupos",
         "attack_interval": "Intervalo entre ataques",
         "preserve_command_slots": "Número de comandos a se preservar",
-        "target_single_attack": "Permitir alvos receber apenas um ataque por aldeia",
-        "target_multiple_farmers": "Permitir alvos a receberem ataques de múltiplas aldeias",
+        "target_single_attack": "Permitir que alvos recebam apenas um ataque por aldeia",
+        "target_multiple_farmers": "Permitir que alvos recebam ataques de múltiplas aldeias",
         "farmer_cycle_interval": "Intervalo entre ciclos de farm (minutos)",
         "ignore_on_loss": "Ignorar alvos que causarem perdas",
         "ignore_full_storage": "Ignorar aldeias com armazém lotado",
@@ -89,6 +89,6 @@
         "clear_logs": "Limpar eventos",
         "reseted_logs": "Registro de eventos resetado.",
         "date_added": "Adicionado na data",
-        "multiple_attacks_interval": "Intervalo entre ataques no mesmo alvo"
+        "multiple_attacks_interval": "Intervalo entre ataques no mesmo alvo (minutos)"
     }
 }

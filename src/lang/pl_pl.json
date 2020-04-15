@@ -83,6 +83,7 @@
         "remove": "Usuń",
         "started_at": "Uruchomiony",
         "arrive": "Dotarcie",
-        "settings_saved": "Ustawienia zapisane"
+        "settings_saved": "Ustawienia zapisane",
+        "discard": "Discard"
     }
 }
