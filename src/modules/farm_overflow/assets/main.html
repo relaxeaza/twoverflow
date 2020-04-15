@@ -114,6 +114,11 @@
                             <td><div range-slider="" min="0" max="120" value="settings[SETTINGS.FARMER_CYCLE_INTERVAL]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.FARMER_CYCLE_INTERVAL]"></td>
                         </tr>
+                        <tr>
+                            <td><span class="ff-cell-fix">{{ 'multiple_attacks_interval' | i18n:loc.ale:'farm_overflow' }}</span></td>
+                            <td><div range-slider="" min="0" max="60" value="settings[SETTINGS.MULTIPLE_ATTACKS_INTERVAL]" enabled="!(settings[SETTINGS.TARGET_SINGLE_ATTACK] && !settings[SETTINGS.TARGET_MULTIPLE_FARMERS])"></div></td>
+                            <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.MULTIPLE_ATTACKS_INTERVAL]" ng-disabled="settings[SETTINGS.TARGET_SINGLE_ATTACK] && !settings[SETTINGS.TARGET_MULTIPLE_FARMERS]"></td>
+                        </tr>
                     </table>
 
                     <table class="tbl-border-light tbl-content tbl-medium-height">

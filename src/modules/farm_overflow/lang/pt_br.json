@@ -88,6 +88,7 @@
         "no_logs": "Nenhum evento registrado",
         "clear_logs": "Limpar eventos",
         "reseted_logs": "Registro de eventos resetado.",
-        "date_added": "Adicionado na data"
+        "date_added": "Adicionado na data",
+        "multiple_attacks_interval": "Intervalo entre ataques no mesmo alvo"
     }
 }

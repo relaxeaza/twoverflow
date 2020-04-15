@@ -11,6 +11,7 @@ define('two/farmOverflow/settings', [], function () {
         MAX_TRAVEL_TIME: 'max_travel_time',
         TARGET_SINGLE_ATTACK: 'target_single_attack',
         TARGET_MULTIPLE_FARMERS: 'target_multiple_farmers',
+        MULTIPLE_ATTACKS_INTERVAL: 'multiple_attacks_interval',
         PRESERVE_COMMAND_SLOTS: 'preserve_command_slots',
         FARMER_CYCLE_INTERVAL: 'farmer_cycle_interval',
         MIN_POINTS: 'min_points',
@@ -104,6 +105,10 @@ define('two/farmOverflow/settings/map', [
             default: true,
             updates: [UPDATES.INTERVAL_TIMERS],
             inputType: 'checkbox'
+        },
+        [SETTINGS.MULTIPLE_ATTACKS_INTERVAL]: {
+            default: 5,
+            updates: [UPDATES.INTERVAL_TIMERS]
         },
         [SETTINGS.PRESERVE_COMMAND_SLOTS]: {
             default: 5,
