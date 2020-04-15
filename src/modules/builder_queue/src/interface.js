@@ -472,13 +472,13 @@ define('two/builderQueue/ui', [
     editorView.modal.addBuilding = function () {
         let modalScope = $rootScope.$new()
         modalScope.buildings = []
-        modalScope.position = 1
+        modalScope.position = editorView.lastAddedIndex
         modalScope.indexLimit = editorView.buildingSequence.length + 1
         modalScope.buildingsData = modelDataService.getGameData().getBuildings()
         modalScope.amount = 1
         modalScope.selectedBuilding = {
-            name: $filter('i18n')(BUILDING_TYPES.HEADQUARTER, $rootScope.loc.ale, 'building_names'),
-            value: BUILDING_TYPES.HEADQUARTER
+            name: $filter('i18n')(editorView.lastAddedBuilding, $rootScope.loc.ale, 'building_names'),
+            value: editorView.lastAddedBuilding
         }
 
         for (let building in gameDataBuildings) {
@@ -494,6 +494,9 @@ define('two/builderQueue/ui', [
             const amount = modalScope.amount
             const buildingName = $filter('i18n')(building, $rootScope.loc.ale, 'building_names')
             const buildingLimit = gameDataBuildings[building].max_level
+
+            editorView.lastAddedBuilding = building
+            editorView.lastAddedIndex = position
 
             if (editorView.addBuilding(building, position, amount)) {
                 modalScope.closeWindow()
@@ -765,6 +768,9 @@ define('two/builderQueue/ui', [
         $scope.editorView.buildingSequence = {}
         $scope.editorView.visibleBuildingSequence = []
         $scope.editorView.selectedSequence = { name: activeSequence, value: activeSequence }
+
+        $scope.editorView.lastAddedBuilding = BUILDING_TYPES.HEADQUARTER
+        $scope.editorView.lastAddedIndex = 1
 
         $scope.settingsView = settingsView
         $scope.settingsView.buildingSequence = {}
