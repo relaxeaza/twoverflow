@@ -332,7 +332,11 @@ define('two/farmOverflow', [
 
             let preset = playerPresets[presetId]
             preset.load = getPresetHaul(preset)
-            preset.travelTime = getPresetTimeTravel(preset, false)
+            preset.travelTime = armyService.calculateTravelTime(preset, {
+                barbarian: false,
+                officers: false
+            })
+
             selectedPresets.push(preset)
         })
 
@@ -449,18 +453,14 @@ define('two/farmOverflow', [
         return haul
     }
 
-    const getPresetTimeTravel = function (preset, barbarian) {
-        return armyService.calculateTravelTime(preset, {
-            barbarian: barbarian,
-            officers: false
-        })
-    }
-
     const checkPresetTime = function (preset, village, target) {
         const limitTime = settings.get(SETTINGS.MAX_TRAVEL_TIME) * 60
         const position = village.getPosition()
         const distance = math.actualDistance(position, target)
-        const travelTime = getPresetTimeTravel(preset, !target.character_id)
+        const travelTime = armyService.calculateTravelTime(preset, {
+            barbarian: !target.character_id,
+            officers: false
+        })
         const totalTravelTime = armyService.getTravelTimeForDistance(preset, travelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
 
         return limitTime > totalTravelTime
@@ -713,6 +713,9 @@ define('two/farmOverflow', [
         let delayTime = 0
         let target
         let checkedLocalCommands = false
+        let otherVillageAttacking
+        let thisVillageAttacking
+        let playerVillages
 
         this.expireTimer = null
 
@@ -834,9 +837,9 @@ define('two/farmOverflow', [
 
         const checkLocalCommands = () => {
             return new Promise((resolve, reject) => {
-                let otherVillageAttacking = false
-
-                const playerVillages = $player.getVillageList()
+                otherVillageAttacking = false
+                playerVillages = $player.getVillageList()
+                
                 const allVillagesLoaded = playerVillages.every((anotherVillage) => anotherVillage.isInitialized(VILLAGE_CONFIG.READY_STATES.OWN_COMMANDS))
 
                 if (allVillagesLoaded) {
@@ -853,16 +856,60 @@ define('two/farmOverflow', [
                     })
                 }
 
-                const attacking = villageCommands.some((command) => {
+                thisVillageAttacking = villageCommands.some((command) => {
                     return command.data.target.id === target.id && command.data.direction === 'forward'
                 })
 
-                if (isTargetBusy(attacking, otherVillageAttacking, allVillagesLoaded)) {
+                if (isTargetBusy(thisVillageAttacking, otherVillageAttacking, allVillagesLoaded)) {
                     return reject(STATUS.BUSY_TARGET)
                 }
 
                 if (allVillagesLoaded) {
                     checkedLocalCommands = true
+                }
+
+                resolve()
+            })
+        }
+
+        const minimumInterval = () => {
+            return new Promise((resolve, reject) => {
+                if (!thisVillageAttacking && !otherVillageAttacking) {
+                    return resolve()
+                }
+
+                // if TARGET_SINGLE_ATTACK is enabled, and TARGET_MULTIPLE_FARMERS is disabled
+                // there's no reason the check, since the target is allowed to receive multiple
+                // attacks simultaneously.
+                const allowMultipleAttacks = !(settings.get(SETTINGS.TARGET_SINGLE_ATTACK) && !settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS))
+
+                if (allowMultipleAttacks) {
+                    const multipleAttacksMinimumInterval = settings.get(SETTINGS.MULTIPLE_ATTACKS_INTERVAL) * 60
+                    const now = Math.round(timeHelper.gameTime() / 1000)
+                    const villages = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS) ? playerVillages : [this.village]
+                    const position = this.village.getPosition()
+                    const distance = math.actualDistance(position, target)
+                    const singleFieldtravelTime = armyService.calculateTravelTime(preset, {
+                        barbarian: !target.character_id,
+                        officers: true,
+                        effects: true
+                    })
+                    const commandTravelTime = armyService.getTravelTimeForDistance(preset, singleFieldtravelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
+
+                    const busyTarget = villages.some((village) => {
+                        const commands = village.getCommandListModel().getOutgoingCommands(true, true)
+                        const targetCommands = commands.filter((command) => command.targetVillageId === target.id && command.data.direction === 'forward')
+
+                        if (targetCommands.length) {
+                            return targetCommands.some((command) => {
+                                return Math.abs((now + commandTravelTime) - command.time_completed) < multipleAttacksMinimumInterval
+                            })
+                        }
+                    })
+
+                    if (busyTarget) {
+                        return reject(STATUS.BUSY_TARGET)
+                    }
                 }
 
                 resolve()
@@ -982,6 +1029,7 @@ define('two/farmOverflow', [
                 .then(checkPreset)
                 .then(checkTarget)
                 .then(checkLocalCommands)
+                .then(minimumInterval)
                 .then(checkTargetPoints)
                 .then(checkLoadedCommands)
                 .then(prepareAttack)
