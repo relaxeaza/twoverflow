@@ -34,7 +34,10 @@ async function init () {
         recursive: true
     })
 
-    await lintCode()
+    if (!options.nolint) {
+        await lintCode()
+    }
+
     await concatCode(overflow.js)
     await compileLess(overflow.css)
     await minifyHTML(overflow.html)

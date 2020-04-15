@@ -27,6 +27,7 @@
   "scripts": {
     "make": "node scripts/make.js --minify",
     "make-dev": "node scripts/make.js --dev",
+    "make-dev-nolint": "node scripts/make.js --dev --nolint",
     "release": "node scripts/make.js --minify && node scripts/release.js",
     "release-testing": "node scripts/make.js --minify --dev && node scripts/release.js --testing",
     "server": "http-server ./dist/ --ssl --cert=scripts/server/cert.pem --key=scripts/server/key.pem -p 2838"
