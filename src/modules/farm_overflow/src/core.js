@@ -967,27 +967,27 @@ define('two/farmOverflow', [
             })
         }
 
-        const errorHandler = (error) => {
+        const stepStatus = (status) => {
             clearTimeout(this.expireTimer)
 
-            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_ERROR, {
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STEP_STATUS, {
                 villageId: this.villageId,
-                error: error
+                error: status
             })
 
-            switch (error) {
+            switch (status) {
             case STATUS.TIME_LIMIT:
             case STATUS.BUSY_TARGET:
             case STATUS.ABANDONED_CONQUERED:
             case STATUS.PROTECTED_VILLAGE:
                 this.index++
-                this.setStatus(error)
+                this.setStatus(status)
                 this.targetStep(options)
                 break
 
             case STATUS.NOT_ALLOWED_POINTS:
                 this.index++
-                this.setStatus(error)
+                this.setStatus(status)
                 farmOverflow.removeTarget(target.id)
                 this.targetStep(options)
                 break
@@ -997,22 +997,23 @@ define('two/farmOverflow', [
             case STATUS.FULL_STORAGE:
             case STATUS.COMMAND_LIMIT:
                 this.index++
-                this.setStatus(error)
-                this.stop(error)
+                this.setStatus(status)
+                this.stop(status)
                 break
 
             case STATUS.TARGET_CYCLE_END:
                 this.index = 0
-                this.setStatus(error)
-                this.stop(error)
+                this.setStatus(status)
+                this.stop(status)
                 break
 
             case STATUS.EXPIRED_STEP:
-                this.setStatus(error)
+                this.setStatus(status)
                 this.targetStep()
                 break
 
             default:
+                console.error('Unknown status:', status)
                 this.index++
                 this.setStatus(STATUS.UNKNOWN)
                 this.stop(STATUS.UNKNOWN)
@@ -1032,7 +1033,6 @@ define('two/farmOverflow', [
                 .then(minimumInterval)
                 .then(checkTargetPoints)
                 .then(checkLoadedCommands)
-                .then(prepareAttack)
                 .then(resolve)
                 .catch(reject)
         })
@@ -1043,10 +1043,9 @@ define('two/farmOverflow', [
             }, STEP_EXPIRE_TIME)
         })
 
-        Promise.race([
-            attackPromise,
-            expirePromise
-        ]).catch(errorHandler)
+        Promise.race([attackPromise, expirePromise])
+            .then(prepareAttack)
+            .catch(stepStatus)
     }
 
     Farmer.prototype.setStatus = function (newStatus) {

@@ -7,7 +7,7 @@ define('two/farmOverflow/events', [], function () {
         FARM_OVERFLOW_INSTANCE_STOP: 'farm_overflow_instance_stop',
         FARM_OVERFLOW_INSTANCE_ERROR_NO_TARGETS: 'farm_overflow_instance_error_no_targets',
         FARM_OVERFLOW_INSTANCE_ERROR_NOT_READY: 'farm_overflow_instance_error_not_ready',
-        FARM_OVERFLOW_INSTANCE_STEP_ERROR: 'farm_overflow_instance_command_error',
+        FARM_OVERFLOW_INSTANCE_STEP_STATUS: 'farm_overflow_instance_command_status',
         FARM_OVERFLOW_PRESETS_LOADED: 'farm_overflow_presets_loaded',
         FARM_OVERFLOW_LOGS_UPDATED: 'farm_overflow_log_updated',
         FARM_OVERFLOW_COMMAND_SENT: 'farm_overflow_command_sent',
