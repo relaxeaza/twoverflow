@@ -54,7 +54,6 @@ define('two/farmOverflow', [
     let unitsData
     let persistentRunningLastCheck = timeHelper.gameTime()
     let persistentRunningTimer = null
-    let persistentRunningBrokenTimes = 0 // REMOVE IT
     const PERSISTENT_RUNNING_CHECK_INTERVAL = 30 * 1000
     const VILLAGE_COMMAND_LIMIT = 50
     const MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
@@ -592,27 +591,10 @@ define('two/farmOverflow', [
             let now = timeHelper.gameTime()
 
             if (now - persistentRunningLastCheck > timeLimit) {
-                console.log('------------- FARMER IS BROKE')
-                persistentRunningBrokenTimes++ // REMOVE IT
-
                 farmOverflow.stop()
-
-                setTimeout(function () {
-                    farmOverflow.start()
-                }, 5000)
-            } else { // REMOVE IT
-                console.log('------------- farmer is fine')
+                setTimeout(farmOverflow.start, 5000)
             }
         }, PERSISTENT_RUNNING_CHECK_INTERVAL)
-    }
-
-    // REMOVE IT
-    window.checkPersistentRunning = function () {
-        let cycleInterval = Math.max(MINIMUM_FARMER_CYCLE_INTERVAL, settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000)
-        let attackInterval = Math.max(MINIMUM_ATTACK_INTERVAL, settings.get(SETTINGS.ATTACK_INTERVAL) * 1000)
-        let timeLimit = cycleInterval + (cycleInterval / 2) + attackInterval
-        let now = timeHelper.gameTime()
-        console.log('(now - persistentRunningLastCheck =', now - persistentRunningLastCheck, ') >', '( timeLimit =', timeLimit, ')', now - persistentRunningLastCheck > timeLimit, ' | Times broken:', persistentRunningBrokenTimes)
     }
 
     const persistentRunningStop = function () {
