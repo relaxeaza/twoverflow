@@ -46,8 +46,8 @@ define('two/farmOverflow', [
     let sendingCommand = false
     let currentTarget = false
     let farmerIndex = 0
-    let farmerTimeoutId = null
-    let targetTimeoutId = null
+    let farmerTimer = null
+    let stepTimer = null
     let exceptionLogs
     let tempVillageReports = {}
     let $player
@@ -129,17 +129,17 @@ define('two/farmOverflow', [
             return
         }
 
-        if (activeFarmer && targetTimeoutId) {
-            clearTimeout(targetTimeoutId)
-            targetTimeoutId = null
+        if (activeFarmer && stepTimer) {
+            clearTimeout(stepTimer)
+            stepTimer = null
             activeFarmer.targetStep({
                 delay: true
             })
         }
 
-        if (farmerTimeoutId) {
-            clearTimeout(farmerTimeoutId)
-            farmerTimeoutId = null
+        if (farmerTimer) {
+            clearTimeout(farmerTimer)
+            farmerTimer = null
             farmerIndex = 0
             farmOverflow.farmerStep()
         }
@@ -689,6 +689,7 @@ define('two/farmOverflow', [
 
     Farmer.prototype.stop = function (reason) {
         this.running = false
+
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_INSTANCE_STOP, {
             villageId: this.villageId,
             reason: reason
@@ -701,10 +702,15 @@ define('two/farmOverflow', [
         this.onCycleEndFn(reason)
         this.onCycleEndFn = noop
         
-        clearTimeout(targetTimeoutId)
+        clearTimeout(stepTimer)
+        stepTimer = null
     }
 
     Farmer.prototype.targetStep = async function (options = {}) {
+        if (!this.running) {
+            return false
+        }
+
         persistentRunningUpdate()
 
         const commandList = this.village.getCommandListModel()
@@ -732,7 +738,7 @@ define('two/farmOverflow', [
                 }
 
                 if (delayTime) {
-                    targetTimeoutId = setTimeout(() => {
+                    stepTimer = setTimeout(() => {
                         if (!this.running) {
                             return reject(STATUS.USER_STOP)
                         }
@@ -953,6 +959,10 @@ define('two/farmOverflow', [
         }
 
         const prepareAttack = () => {
+            if (!this.running) {
+                return false
+            }
+
             this.setStatus(STATUS.ATTACKING)
 
             sendingCommand = true
@@ -975,6 +985,10 @@ define('two/farmOverflow', [
                 error: status
             })
 
+            if (!this.running) {
+                return false
+            }
+
             switch (status) {
             case STATUS.TIME_LIMIT:
             case STATUS.BUSY_TARGET:
@@ -983,6 +997,10 @@ define('two/farmOverflow', [
                 this.index++
                 this.setStatus(status)
                 this.targetStep(options)
+                break
+
+            case STATUS.USER_STOP:
+                this.setStatus(status)
                 break
 
             case STATUS.NOT_ALLOWED_POINTS:
@@ -1039,7 +1057,9 @@ define('two/farmOverflow', [
 
         let expirePromise = new Promise((resolve, reject) => {
             this.expireTimer = setTimeout(() => {
-                reject(STATUS.EXPIRED_STEP)
+                if (this.running) {
+                    reject(STATUS.EXPIRED_STEP)
+                }
             }, STEP_EXPIRE_TIME)
         })
 
@@ -1202,6 +1222,9 @@ define('two/farmOverflow', [
             return false
         }
 
+        farmOverflow.destroyFarmers()
+        farmOverflow.createFarmers()
+
         running = true
         readyFarmers = []
 
@@ -1237,8 +1260,8 @@ define('two/farmOverflow', [
 
         running = false
 
-        clearTimeout(farmerTimeoutId)
-        farmerTimeoutId = null
+        clearTimeout(farmerTimer)
+        farmerTimer = null
 
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
             reason: reason
@@ -1272,11 +1295,22 @@ define('two/farmOverflow', [
             return false
         }
 
-        if (!farmOverflow.getFarmer(villageId)) {
-            farmers.push(new Farmer(villageId))
+        let farmer = farmOverflow.getFarmer(villageId)
+
+        if (!farmer) {
+            farmer = new Farmer(villageId)
+            farmers.push(farmer)
         }
 
-        return farmOverflow.getFarmer(villageId)
+        return farmer
+    }
+
+    farmOverflow.destroyFarmers = function () {
+        if (activeFarmer && activeFarmer.running) {
+            activeFarmer.stop(STATUS.USER_STOP)
+        }
+
+        farmers = []
     }
 
     /**
@@ -1357,8 +1391,8 @@ define('two/farmOverflow', [
                 interval = MINIMUM_FARMER_CYCLE_INTERVAL
             }
 
-            farmerTimeoutId = setTimeout(function () {
-                farmerTimeoutId = null
+            farmerTimer = setTimeout(function () {
+                farmerTimer = null
                 farmerIndex = 0
                 farmOverflow.farmerStep()
             }, interval)
