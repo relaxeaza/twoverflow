@@ -8,7 +8,8 @@ define('two/farmOverflow/ui', [
     'two/Settings',
     'two/EventScope',
     'two/utils',
-    'queues/EventQueue'
+    'queues/EventQueue',
+    'helper/time'
 ], function (
     interfaceOverflow,
     farmOverflow,
@@ -19,7 +20,8 @@ define('two/farmOverflow/ui', [
     Settings,
     EventScope,
     utils,
-    eventQueue
+    eventQueue,
+    timeHelper
 ) {
     let $scope
     let settings
@@ -135,6 +137,19 @@ define('two/farmOverflow/ui', [
         })
     }
 
+    const checkCycleInterval = function () {
+        let nextCycleDate = farmOverflow.getNextCycleDate()
+
+        if (nextCycleDate) {
+            $scope.showCycleTimer = true
+            $scope.nextCycleCountdown = nextCycleDate - timeHelper.gameTime()
+
+            cycleCountdownTimer = setInterval(function () {
+                $scope.nextCycleCountdown -= 1000
+            }, 1000)
+        }
+    }
+
     const eventHandlers = {
         updatePresets: function () {
             $scope.presets = Settings.encodeList(presetList.getPresets(), {
@@ -199,10 +214,10 @@ define('two/farmOverflow/ui', [
         onCycleEnd: function (event, reason) {
             if (reason !== STATUS.USER_STOP) {
                 $scope.showCycleTimer = true
-                $scope.nextCycleCountdown = settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60
+                $scope.nextCycleCountdown = farmOverflow.getCycleInterval()
 
                 cycleCountdownTimer = setInterval(function () {
-                    $scope.nextCycleCountdown--
+                    $scope.nextCycleCountdown -= 1000
                 }, 1000)
             }
         }
@@ -259,6 +274,7 @@ define('two/farmOverflow/ui', [
         eventHandlers.updateGroups()
         updateVisibleLogs()
         loadExceptionsInfo()
+        checkCycleInterval()
 
         // scope functions
         $scope.switchFarm = switchFarm
@@ -271,7 +287,10 @@ define('two/farmOverflow/ui', [
         $scope.removeIgnored = removeIgnored
         $scope.removeIncluded = removeIncluded
 
-        let eventScope = new EventScope('twoverflow_farm_overflow_window')
+        let eventScope = new EventScope('twoverflow_farm_overflow_window', function onDestroy () {
+            clearInterval(cycleCountdownTimer)
+        })
+
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.GROUPS_UPDATED, eventHandlers.updateGroups, true)

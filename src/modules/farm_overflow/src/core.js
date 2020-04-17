@@ -55,6 +55,7 @@ define('two/farmOverflow', [
     let unitsData
     let persistentRunningLastCheck = timeHelper.gameTime()
     let persistentRunningTimer = null
+    let nextCycleDate = null
     const PERSISTENT_RUNNING_CHECK_INTERVAL = 30 * 1000
     const VILLAGE_COMMAND_LIMIT = 50
     const MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
@@ -580,8 +581,8 @@ define('two/farmOverflow', [
     }
 
     const persistentRunningStart = function () {
-        let cycleInterval = Math.max(MINIMUM_FARMER_CYCLE_INTERVAL, settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000)
-        let attackInterval = Math.max(MINIMUM_ATTACK_INTERVAL, settings.get(SETTINGS.ATTACK_INTERVAL) * 1000)
+        let cycleInterval = getCycleInterval()
+        let attackInterval = getAttackInterval()
         let timeLimit = cycleInterval + (cycleInterval / 2) + attackInterval
 
         persistentRunningTimer = setInterval(function () {
@@ -610,6 +611,14 @@ define('two/farmOverflow', [
         cycleTimer = null
         stepDelayTimer = null
         commandExpireTimer = null
+    }
+
+    const getCycleInterval = function () {
+        return Math.max(MINIMUM_FARMER_CYCLE_INTERVAL, settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000)
+    }
+
+    const getAttackInterval = function () {
+        return Math.max(MINIMUM_ATTACK_INTERVAL, settings.get(SETTINGS.ATTACK_INTERVAL) * 1000)
     }
 
     const Farmer = function (villageId) {
@@ -721,7 +730,6 @@ define('two/farmOverflow', [
         const commandList = this.village.getCommandListModel()
         const villageCommands = commandList.getOutgoingCommands(true, true)
         let preset
-        let delayTime = 0
         let target
         let checkedLocalCommands = false
         let otherVillageAttacking
@@ -731,16 +739,6 @@ define('two/farmOverflow', [
         const delayStep = () => {
             return new Promise((resolve, reject) => {
                 if (options.delay) {
-                    delayTime = settings.get(SETTINGS.ATTACK_INTERVAL) * 1000
-
-                    if (delayTime < MINIMUM_ATTACK_INTERVAL) {
-                        delayTime = MINIMUM_ATTACK_INTERVAL
-                    }
-
-                    delayTime = utils.randomSeconds(delayTime)
-                }
-
-                if (delayTime) {
                     stepDelayTimer = setTimeout(() => {
                         stepDelayTimer = null
 
@@ -749,7 +747,7 @@ define('two/farmOverflow', [
                         }
 
                         resolve()
-                    }, delayTime)
+                    }, utils.randomSeconds(getAttackInterval()))
                 } else {
                     resolve()
                 }
@@ -1268,7 +1266,14 @@ define('two/farmOverflow', [
     farmOverflow.stop = function (reason = STATUS.USER_STOP) {
         if (activeFarmer) {
             activeFarmer.stop(reason)
+            
+            if (reason !== STATUS.USER_STOP) {
+                nextCycleDate = timeHelper.gameTime() + getCycleInterval()
+            }
+
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_END, reason)
+        } else {
+            nextCycleDate = null
         }
 
         running = false
@@ -1375,6 +1380,7 @@ define('two/farmOverflow', [
         } else if (farmerIndex >= farmers.length) {
             farmerIndex = 0
             activeFarmer = false
+            nextCycleDate = timeHelper.gameTime() + getCycleInterval()
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_END)
         } else {
             activeFarmer = farmers[farmerIndex]
@@ -1389,23 +1395,19 @@ define('two/farmOverflow', [
             })
 
             if (status === CYCLE_BEGIN) {
+                nextCycleDate = null
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_BEGIN)
             }
-            
+
             activeFarmer.start()
         } else {
-            let interval = settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000
-
-            if (interval < MINIMUM_ATTACK_INTERVAL) {
-                interval = MINIMUM_FARMER_CYCLE_INTERVAL
-            }
-
             cycleTimer = setTimeout(function () {
                 cycleTimer = null
                 farmerIndex = 0
+                nextCycleDate = null
                 eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_BEGIN)
                 farmOverflow.farmerStep()
-            }, interval)
+            }, getCycleInterval())
         }
     }
 
@@ -1472,6 +1474,12 @@ define('two/farmOverflow', [
 
         return logs
     }
+
+    farmOverflow.getNextCycleDate = function () {
+        return nextCycleDate
+    }
+
+    farmOverflow.getCycleInterval = getCycleInterval
 
     return farmOverflow
 })
