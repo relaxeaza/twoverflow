@@ -16,6 +16,8 @@ define('two/farmOverflow/events', [], function () {
         FARM_OVERFLOW_EXCEPTION_VILLAGES_UPDATED: 'farm_overflow_exception_villages_updated',
         FARM_OVERFLOW_FARMER_VILLAGES_UPDATED: 'farm_overflow_farmer_villages_updated',
         FARM_OVERFLOW_REPORTS_UPDATED: 'farm_overflow_reports_updated',
-        FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED: 'farm_overflow_exception_logs_updated'
+        FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED: 'farm_overflow_exception_logs_updated',
+        FARM_OVERFLOW_CYCLE_BEGIN: 'farm_overflow_cycle_begin',
+        FARM_OVERFLOW_CYCLE_END: 'farm_overflow_cycle_end'
     })
 })

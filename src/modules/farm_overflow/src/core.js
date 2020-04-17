@@ -60,7 +60,7 @@ define('two/farmOverflow', [
     const MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
     const MINIMUM_ATTACK_INTERVAL = 1 * 1000
     const STEP_EXPIRE_TIME = 30 * 1000
-
+    const CYCLE_BEGIN = 'cycle_begin'
     const STORAGE_KEYS = {
         LOGS: 'farm_overflow_logs',
         SETTINGS: 'farm_overflow_settings',
@@ -1254,7 +1254,7 @@ define('two/farmOverflow', [
         }
 
         Promise.all(readyFarmers).then(function () {
-            farmOverflow.farmerStep()
+            farmOverflow.farmerStep(CYCLE_BEGIN)
         })
 
         persistentRunningUpdate()
@@ -1270,6 +1270,7 @@ define('two/farmOverflow', [
 
         if (activeFarmer) {
             activeFarmer.stop(reason)
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_END)
         }
 
         running = false
@@ -1368,7 +1369,7 @@ define('two/farmOverflow', [
         return false
     }
 
-    farmOverflow.farmerStep = function () {
+    farmOverflow.farmerStep = function (status) {
         persistentRunningUpdate()
 
         if (!farmers.length) {
@@ -1376,6 +1377,7 @@ define('two/farmOverflow', [
         } else if (farmerIndex >= farmers.length) {
             farmerIndex = 0
             activeFarmer = false
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_END)
         } else {
             activeFarmer = farmers[farmerIndex]
         }
@@ -1387,6 +1389,10 @@ define('two/farmOverflow', [
                     farmOverflow.farmerStep()
                 }
             })
+
+            if (status === CYCLE_BEGIN) {
+                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_BEGIN)
+            }
             
             activeFarmer.start()
         } else {
@@ -1399,6 +1405,7 @@ define('two/farmOverflow', [
             cycleTimer = setTimeout(function () {
                 cycleTimer = null
                 farmerIndex = 0
+                eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_BEGIN)
                 farmOverflow.farmerStep()
             }, interval)
         }
