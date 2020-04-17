@@ -347,7 +347,10 @@ define('two/minimap/ui', [
             textObject: 'minimap'
         })
 
-        let eventScope = new EventScope('twoverflow_minimap_window')
+        let eventScope = new EventScope('twoverflow_minimap_window', function onClose () {
+            minimap.disableRendering()
+        })
+
         eventScope.register(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.highlightUpdate, true)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_EXISTS, eventHandlers.highlightAddErrorExists)
         eventScope.register(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY, eventHandlers.highlightAddErrorNoEntry)
@@ -362,6 +365,10 @@ define('two/minimap/ui', [
         updateHighlightNames()
         appendCanvas()
         minimap.enableRendering()
+
+        if (minimap.isFirstDraw()) {
+            minimap.drawMinimap()
+        }
     }
 
     return init

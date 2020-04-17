@@ -79,6 +79,7 @@ define('two/minimap', [
     const spriteFactory = injector.get('spriteFactory')
     let highlightSprite = spriteFactory.make('hover')
     let currentCoords = {x: null, y: null}
+    let firstDraw = true
 
     /**
      * Calcule the coords from clicked position in the canvas.
@@ -777,7 +778,11 @@ define('two/minimap', [
         return settings
     }
 
-    minimap.update = function () {
+    minimap.drawMinimap = function () {
+        if (firstDraw) {
+            firstDraw = false
+        }
+
         $viewport.style.background = settings.get(SETTINGS.COLOR_BACKGROUND)
         $viewportCacheContext.clearRect(0, 0, $viewportCache.width, $viewportCache.height)
 
@@ -798,6 +803,10 @@ define('two/minimap', [
         enableRendering = false
     }
 
+    minimap.isFirstDraw = function () {
+        return !!firstDraw
+    }
+
     minimap.init = function () {
         minimap.initialized = true
         $viewportCache = document.createElement('canvas')
@@ -810,7 +819,7 @@ define('two/minimap', [
 
         settings.onChange(function (changes, updates) {
             if (updates[UPDATES.MINIMAP]) {
-                minimap.update()
+                minimap.drawMinimap()
             }
         })
 
@@ -850,12 +859,6 @@ define('two/minimap', [
             currentPosition.x = selectedVillage.getX() * villageBlock
             currentPosition.y = selectedVillage.getY() * villageBlock
 
-            if (settings.get(SETTINGS.SHOW_GHOST_VILLAGES)) {
-                drawCachedVillages()
-            }
-
-            drawGrid()
-            drawLoadedVillages()
             cacheVillages(mapData.getTowns())
             renderStep()
 
