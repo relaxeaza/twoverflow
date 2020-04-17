@@ -18,11 +18,11 @@ define('two/autoCollector/ui', [
             if (autoCollector.isRunning()) {
                 autoCollector.stop()
                 autoCollector.secondVillage.stop()
-                utils.emitNotif('success', $filter('i18n')('deactivated', $rootScope.loc.ale, 'auto_collector'))
+                utils.notif('success', $filter('i18n')('deactivated', $rootScope.loc.ale, 'auto_collector'))
             } else {
                 autoCollector.start()
                 autoCollector.secondVillage.start()
-                utils.emitNotif('success', $filter('i18n')('activated', $rootScope.loc.ale, 'auto_collector'))
+                utils.notif('success', $filter('i18n')('activated', $rootScope.loc.ale, 'auto_collector'))
             }
         })
 

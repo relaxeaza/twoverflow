@@ -204,7 +204,7 @@ define('two/minimap/ui', [
 
     const saveSettings = function () {
         settings.setAll(settings.decode($scope.settings))
-        utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, 'minimap'))
+        utils.notif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, 'minimap'))
     }
 
     const resetSettings = function () {
@@ -219,7 +219,7 @@ define('two/minimap/ui', [
 
         modalScope.submit = function submit() {
             settings.resetAll()
-            utils.emitNotif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, 'minimap'))
+            utils.notif('success', $filter('i18n')('settings_reset', $rootScope.loc.ale, 'minimap'))
             modalScope.closeWindow()
         }
 
@@ -257,13 +257,13 @@ define('two/minimap/ui', [
             updateHighlightNames()
         },
         highlightAddErrorExists: function () {
-            utils.emitNotif('error', $filter('i18n')('highlight_add_error_exists', $rootScope.loc.ale, 'minimap'))
+            utils.notif('error', $filter('i18n')('highlight_add_error_exists', $rootScope.loc.ale, 'minimap'))
         },
         highlightAddErrorNoEntry: function () {
-            utils.emitNotif('error', $filter('i18n')('highlight_add_error_no_entry', $rootScope.loc.ale, 'minimap'))
+            utils.notif('error', $filter('i18n')('highlight_add_error_no_entry', $rootScope.loc.ale, 'minimap'))
         },
         highlightAddErrorInvalidColor: function () {
-            utils.emitNotif('error', $filter('i18n')('highlight_add_error_invalid_color', $rootScope.loc.ale, 'minimap'))
+            utils.notif('error', $filter('i18n')('highlight_add_error_invalid_color', $rootScope.loc.ale, 'minimap'))
         },
         onMouseLeaveMinimap: function () {
             hideTooltip()

@@ -268,7 +268,7 @@ define('two/commandQueue/ui', [
 
     const addMapSelected = function () {
         if (!mapSelectedVillage) {
-            return utils.emitNotif('error', $filter('i18n')('error_no_map_selected_village', $rootScope.loc.ale, 'command_queue'))
+            return utils.notif('error', $filter('i18n')('error_no_map_selected_village', $rootScope.loc.ale, 'command_queue'))
         }
 
         commandQueue.getVillageByCoords(mapSelectedVillage.x, mapSelectedVillage.y, function (data) {
@@ -381,63 +381,63 @@ define('two/commandQueue/ui', [
             $scope.searchQuery[type] = ''
         },
         addInvalidOrigin: function () {
-            utils.emitNotif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, 'command_queue'))
+            utils.notif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, 'command_queue'))
         },
         addInvalidTarget: function () {
-            utils.emitNotif('error', $filter('i18n')('error_target', $rootScope.loc.ale, 'command_queue'))
+            utils.notif('error', $filter('i18n')('error_target', $rootScope.loc.ale, 'command_queue'))
         },
         addInvalidDate: function () {
-            utils.emitNotif('error', $filter('i18n')('error_invalid_date', $rootScope.loc.ale, 'command_queue'))
+            utils.notif('error', $filter('i18n')('error_invalid_date', $rootScope.loc.ale, 'command_queue'))
         },
         addNoUnits: function () {
-            utils.emitNotif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, 'command_queue'))
+            utils.notif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, 'command_queue'))
         },
         addAlreadySent: function (event, command) {
             const commandType = $filter('i18n')(command.type, $rootScope.loc.ale, 'common')
             const date = utils.formatDate(command.sendTime)
 
-            utils.emitNotif('error', $filter('i18n')('error_already_sent', $rootScope.loc.ale, 'command_queue', commandType, date))
+            utils.notif('error', $filter('i18n')('error_already_sent', $rootScope.loc.ale, 'command_queue', commandType, date))
         },
         removeCommand: function (event, command) {
             updateWaitingCommands()
             updateVisibleCommands()
             $rootScope.$broadcast(eventTypeProvider.TOOLTIP_HIDE, 'twoverflow-tooltip')
-            utils.emitNotif('success', genNotifText(command.type, 'removed'))
+            utils.notif('success', genNotifText(command.type, 'removed'))
         },
         removeError: function () {
-            utils.emitNotif('error', $filter('i18n')('error_remove_error', $rootScope.loc.ale, 'command_queue'))
+            utils.notif('error', $filter('i18n')('error_remove_error', $rootScope.loc.ale, 'command_queue'))
         },
         sendTimeLimit: function (event, command) {
             updateSentCommands()
             updateExpiredCommands()
             updateWaitingCommands()
             updateVisibleCommands()
-            utils.emitNotif('error', genNotifText(command.type, 'expired'))
+            utils.notif('error', genNotifText(command.type, 'expired'))
         },
         sendNotOwnVillage: function () {
             updateSentCommands()
             updateExpiredCommands()
             updateWaitingCommands()
             updateVisibleCommands()
-            utils.emitNotif('error', $filter('i18n')('error_not_own_village', $rootScope.loc.ale, 'command_queue'))
+            utils.notif('error', $filter('i18n')('error_not_own_village', $rootScope.loc.ale, 'command_queue'))
         },
         sendNoUnitsEnough: function () {
             updateSentCommands()
             updateExpiredCommands()
             updateWaitingCommands()
             updateVisibleCommands()
-            utils.emitNotif('error', $filter('i18n')('error_no_units_enough', $rootScope.loc.ale, 'command_queue'))
+            utils.notif('error', $filter('i18n')('error_no_units_enough', $rootScope.loc.ale, 'command_queue'))
         },
         addCommand: function (event, command) {
             updateWaitingCommands()
             updateVisibleCommands()
-            utils.emitNotif('success', genNotifText(command.type, 'added'))
+            utils.notif('success', genNotifText(command.type, 'added'))
         },
         sendCommand: function (event, command) {
             updateSentCommands()
             updateWaitingCommands()
             updateVisibleCommands()
-            utils.emitNotif('success', genNotifText(command.type, 'sent'))
+            utils.notif('success', genNotifText(command.type, 'sent'))
         },
         start: function (event, data) {
             $scope.running = commandQueue.isRunning()
@@ -446,11 +446,11 @@ define('two/commandQueue/ui', [
                 return false
             }
 
-            utils.emitNotif('success', genNotifText('title', 'activated'))
+            utils.notif('success', genNotifText('title', 'activated'))
         },
         stop: function () {
             $scope.running = commandQueue.isRunning()
-            utils.emitNotif('success', genNotifText('title', 'deactivated'))
+            utils.notif('success', genNotifText('title', 'deactivated'))
         },
         onAutoCompleteOrigin: function (data) {
             commandData.origin = {

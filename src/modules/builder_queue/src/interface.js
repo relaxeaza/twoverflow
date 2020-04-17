@@ -127,11 +127,11 @@ define('two/builderQueue/ui', [
             return true
 
         case SEQUENCE_STATUS.SEQUENCE_EXISTS:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_exists', $rootScope.loc.ale, 'builder_queue'))
+            utils.notif('error', $filter('i18n')('error_sequence_exists', $rootScope.loc.ale, 'builder_queue'))
             return false
 
         case SEQUENCE_STATUS.SEQUENCE_INVALID:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
+            utils.notif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
             return false
         }
     }
@@ -438,11 +438,11 @@ define('two/builderQueue/ui', [
 
             break
         case SEQUENCE_STATUS.SEQUENCE_NO_EXISTS:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, 'builder_queue'))
+            utils.notif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, 'builder_queue'))
 
             break
         case SEQUENCE_STATUS.SEQUENCE_INVALID:
-            utils.emitNotif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
+            utils.notif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
 
             break
         }
@@ -500,9 +500,9 @@ define('two/builderQueue/ui', [
 
             if (editorView.addBuilding(building, position, amount)) {
                 modalScope.closeWindow()
-                utils.emitNotif('success', $filter('i18n')('add_building_success', $rootScope.loc.ale, 'builder_queue', buildingName, position))
+                utils.notif('success', $filter('i18n')('add_building_success', $rootScope.loc.ale, 'builder_queue', buildingName, position))
             } else {
-                utils.emitNotif('error', $filter('i18n')('add_building_limit_exceeded', $rootScope.loc.ale, 'builder_queue', buildingName, buildingLimit))
+                utils.notif('error', $filter('i18n')('add_building_limit_exceeded', $rootScope.loc.ale, 'builder_queue', buildingName, buildingLimit))
             }
         }
 
@@ -519,7 +519,7 @@ define('two/builderQueue/ui', [
 
             modalScope.submit = function () {
                 if (modalScope.name.length < 3) {
-                    utils.emitNotif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, 'builder_queue'))
+                    utils.notif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, 'builder_queue'))
                     return false
                 }
 
@@ -579,7 +579,7 @@ define('two/builderQueue/ui', [
         
         modalScope.submit = function () {
             if (modalScope.name.length < 3) {
-                utils.emitNotif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, 'builder_queue'))
+                utils.notif('error', $filter('i18n')('name_sequence_min_lenght', $rootScope.loc.ale, 'builder_queue'))
                 return false
             }
 
@@ -676,7 +676,7 @@ define('two/builderQueue/ui', [
             logsView.updateVisibleLogs()
         },
         clearLogs: function () {
-            utils.emitNotif('success', $filter('i18n')('logs_cleared', $rootScope.loc.ale, 'builder_queue'))
+            utils.notif('success', $filter('i18n')('logs_cleared', $rootScope.loc.ale, 'builder_queue'))
             eventHandlers.updateLogs()
         },
         buildingSequenceUpdate: function (event, sequenceId) {
@@ -687,13 +687,13 @@ define('two/builderQueue/ui', [
                 settingsView.generateSequences()
             }
 
-            utils.emitNotif('success', $filter('i18n')('sequence_updated', $rootScope.loc.ale, 'builder_queue', sequenceId))
+            utils.notif('success', $filter('i18n')('sequence_updated', $rootScope.loc.ale, 'builder_queue', sequenceId))
         },
         buildingSequenceAdd: function (event, sequenceId) {
             const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
             $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId] = sequences[sequenceId]
             eventHandlers.updateSequences()
-            utils.emitNotif('success', $filter('i18n')('sequence_created', $rootScope.loc.ale, 'builder_queue', sequenceId))
+            utils.notif('success', $filter('i18n')('sequence_created', $rootScope.loc.ale, 'builder_queue', sequenceId))
         },
         buildingSequenceRemoved: function (event, sequenceId) {
             delete $scope.settings[SETTINGS.BUILDING_SEQUENCES][sequenceId]
@@ -710,10 +710,10 @@ define('two/builderQueue/ui', [
                 settingsView.generateSequences()
             }
 
-            utils.emitNotif('success', $filter('i18n')('sequence_removed', $rootScope.loc.ale, 'builder_queue', sequenceId))
+            utils.notif('success', $filter('i18n')('sequence_removed', $rootScope.loc.ale, 'builder_queue', sequenceId))
         },
         saveSettings: function () {
-            utils.emitNotif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, 'builder_queue'))
+            utils.notif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, 'builder_queue'))
         },
         started: function () {
             $scope.running = true
@@ -735,14 +735,14 @@ define('two/builderQueue/ui', [
             running = true
             $button.classList.remove('btn-green')
             $button.classList.add('btn-red')
-            utils.emitNotif('success', $filter('i18n')('started', $rootScope.loc.ale, 'builder_queue'))
+            utils.notif('success', $filter('i18n')('started', $rootScope.loc.ale, 'builder_queue'))
         })
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_STOP, function () {
             running = false
             $button.classList.remove('btn-red')
             $button.classList.add('btn-green')
-            utils.emitNotif('success', $filter('i18n')('stopped', $rootScope.loc.ale, 'builder_queue'))
+            utils.notif('success', $filter('i18n')('stopped', $rootScope.loc.ale, 'builder_queue'))
         })
 
         interfaceOverflow.addTemplate('twoverflow_builder_queue_window', `___builder_queue_html_main`)

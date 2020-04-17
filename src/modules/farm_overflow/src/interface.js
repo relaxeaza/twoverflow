@@ -100,9 +100,7 @@ define('two/farmOverflow/ui', [
     const saveSettings = function () {
         settings.setAll(settings.decode($scope.settings))
 
-        $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-            message: $filter('i18n')('settings_saved', $rootScope.loc.ale, 'farm_overflow')
-        })
+        utils.notif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, 'farm_overflow'))
     }
 
     const removeIgnored = function (villageId) {
@@ -155,25 +153,19 @@ define('two/farmOverflow/ui', [
         start: function () {
             $scope.running = true
 
-            $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                message: $filter('i18n')('farm_started', $rootScope.loc.ale, 'farm_overflow')
-            })
+            utils.notif('success', $filter('i18n')('farm_started', $rootScope.loc.ale, 'farm_overflow'))
         },
         stop: function (event, data) {
             $scope.running = false
 
             switch (data.reason) {
             case ERROR_TYPES.NO_PRESETS:
-                $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                    message: $filter('i18n')('no_preset', $rootScope.loc.ale, 'farm_overflow')
-                })
+                utils.notif('success', $filter('i18n')('no_preset', $rootScope.loc.ale, 'farm_overflow'))
                 break
 
             default:
             case ERROR_TYPES.USER_STOP:
-                $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                    message: $filter('i18n')('farm_stopped', $rootScope.loc.ale, 'farm_overflow')
-                })
+                utils.notif('success', $filter('i18n')('farm_stopped', $rootScope.loc.ale, 'farm_overflow'))
                 break
             }
         },
@@ -182,9 +174,7 @@ define('two/farmOverflow/ui', [
             updateVisibleLogs()
 
             if (!$scope.logs.length) {
-                $rootScope.$broadcast(eventTypeProvider.MESSAGE_SUCCESS, {
-                    message: $filter('i18n')('reseted_logs', $rootScope.loc.ale, 'farm_overflow')
-                })
+                utils.notif('success', $filter('i18n')('reseted_logs', $rootScope.loc.ale, 'farm_overflow'))
             }
         },
         updateFarmerVillages: function () {
