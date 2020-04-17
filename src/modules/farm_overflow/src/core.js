@@ -1265,12 +1265,10 @@ define('two/farmOverflow', [
         addLog(LOG_TYPES.FARM_START)
     }
 
-    farmOverflow.stop = function (reason) {
-        reason = reason || ERROR_TYPES.USER_STOP
-
+    farmOverflow.stop = function (reason = STATUS.USER_STOP) {
         if (activeFarmer) {
             activeFarmer.stop(reason)
-            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_END)
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_END, reason)
         }
 
         running = false
@@ -1283,7 +1281,7 @@ define('two/farmOverflow', [
 
         persistentRunningStop()
 
-        if (reason === ERROR_TYPES.USER_STOP) {
+        if (reason === STATUS.USER_STOP) {
             addLog(LOG_TYPES.FARM_STOP)
         }
     }

@@ -176,8 +176,10 @@
 
                 <!-- villages -->
                 <div class="villages rich-text" ng-show="selectedTab === TAB_TYPES.VILLAGES">
+                    <p ng-show="showCycleTimer" class="text-center">{{ 'next_cycle_in' | i18n:loc.ale:'farm_overflow' }}: {{ nextCycleCountdown | readableSecondsFilter }}</p>
+
                     <h5 class="twx-section">{{ 'farmer_villages' | i18n:loc.ale:'farm_overflow' }}</h5>
-                    <p ng-if="!farmers.length" class="text-center">{{ 'no_farmer_villages' | i18n:loc.ale:'farm_overflow' }}</p>
+                    <p ng-show="!farmers.length" class="text-center">{{ 'no_farmer_villages' | i18n:loc.ale:'farm_overflow' }}</p>
                     <table class="tbl-border-light tbl-striped" ng-show="farmers.length">
                         <colgroup>
                             <col>

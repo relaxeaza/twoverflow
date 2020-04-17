@@ -89,6 +89,7 @@
         "clear_logs": "Limpar eventos",
         "reseted_logs": "Registro de eventos resetado.",
         "date_added": "Adicionado na data",
-        "multiple_attacks_interval": "Intervalo entre ataques no mesmo alvo (minutos)"
+        "multiple_attacks_interval": "Intervalo entre ataques no mesmo alvo (minutos)",
+        "next_cycle_in": "Próximo ciclo começa em"
     }
 }

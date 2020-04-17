@@ -89,6 +89,7 @@
         "clear_logs": "Clear logs",
         "reseted_logs": "Registered logs reseted.",
         "date_added": "Date added",
-        "multiple_attacks_interval": "Interval between attacks in the same target (minutes)"
+        "multiple_attacks_interval": "Interval between attacks in the same target (minutes)",
+        "next_cycle_in": "Next cycle starts in"
     }
 }

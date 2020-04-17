@@ -1,6 +1,7 @@
 define('two/farmOverflow/ui', [
     'two/ui',
     'two/farmOverflow',
+    'two/farmOverflow/types/status',
     'two/farmOverflow/types/errors',
     'two/farmOverflow/types/logs',
     'two/farmOverflow/settings',
@@ -11,6 +12,7 @@ define('two/farmOverflow/ui', [
 ], function (
     interfaceOverflow,
     farmOverflow,
+    STATUS,
     ERROR_TYPES,
     LOG_TYPES,
     SETTINGS,
@@ -26,6 +28,7 @@ define('two/farmOverflow/ui', [
     let $button
     let villagesInfo = {}
     let villagesLabel = {}
+    let cycleCountdownTimer = null
 
     const TAB_TYPES = {
         SETTINGS: 'settings',
@@ -157,6 +160,8 @@ define('two/farmOverflow/ui', [
         },
         stop: function (event, data) {
             $scope.running = false
+            $scope.showCycleTimer = false
+            clearInterval(cycleCountdownTimer)
 
             switch (data.reason) {
             case ERROR_TYPES.NO_PRESETS:
@@ -186,6 +191,20 @@ define('two/farmOverflow/ui', [
         },
         updateExceptionLogs: function () {
             $scope.exceptionLogs = farmOverflow.getExceptionLogs()
+        },
+        onCycleBegin: function () {
+            $scope.showCycleTimer = false
+            clearInterval(cycleCountdownTimer)
+        },
+        onCycleEnd: function (event, reason) {
+            if (reason !== STATUS.USER_STOP) {
+                $scope.showCycleTimer = true
+                $scope.nextCycleCountdown = settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60
+
+                cycleCountdownTimer = setInterval(function () {
+                    $scope.nextCycleCountdown--
+                }, 1000)
+            }
         }
     }
 
@@ -225,6 +244,8 @@ define('two/farmOverflow/ui', [
         $scope.exceptionLogs = farmOverflow.getExceptionLogs()
         $scope.logs = farmOverflow.getLogs()
         $scope.visibleLogs = []
+        $scope.showCycleTimer = false
+        $scope.nextCycleCountdown = 0
 
         $scope.pagination = {
             count: $scope.logs.length,
@@ -262,6 +283,8 @@ define('two/farmOverflow/ui', [
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_FARMER_VILLAGES_UPDATED, eventHandlers.updateFarmerVillages)
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_VILLAGES_UPDATED, eventHandlers.updateExceptionVillages)
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED, eventHandlers.updateExceptionLogs)
+        eventScope.register(eventTypeProvider.FARM_OVERFLOW_CYCLE_BEGIN, eventHandlers.onCycleBegin)
+        eventScope.register(eventTypeProvider.FARM_OVERFLOW_CYCLE_END, eventHandlers.onCycleEnd)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_farm_overflow_window', $scope)
     }
