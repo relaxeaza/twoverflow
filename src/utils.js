@@ -48,6 +48,9 @@ define('two/utils', [
      * @param {String} message - Texto a ser exibido
      */
     utils.emitNotif = function (type, message) {
+        $rootScope.$broadcast(eventTypeProvider.NOTIFICATION_DISABLE)
+        $rootScope.$broadcast(eventTypeProvider.NOTIFICATION_ENABLE)
+
         const eventType = type === 'success'
             ? eventTypeProvider.MESSAGE_SUCCESS
             : eventTypeProvider.MESSAGE_ERROR
