@@ -143,6 +143,10 @@ define('two/Settings', [
 
     Settings.prototype.each = function (callback) {
         for (let id in this.settings) {
+            if (!hasOwn.call(this.settingsMap, id)) {
+                continue
+            }
+            
             let map = this.settingsMap[id]
 
             if (map.inputType === 'checkbox') {
