@@ -102,7 +102,7 @@ define('two/ui', [
         buildMenuContainer()
 
         let $button = document.createElement('div')
-        $button.className = 'btn-border btn-green button'
+        $button.className = 'btn-border btn-orange button'
         $button.innerHTML = label
         $button.style.order = order
         $menu.appendChild($button)

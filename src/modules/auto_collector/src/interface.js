@@ -27,13 +27,13 @@ define('two/autoCollector/ui', [
         })
 
         eventQueue.register(eventTypeProvider.AUTO_COLLECTOR_STARTED, function () {
-            $button.classList.remove('btn-green')
+            $button.classList.remove('btn-orange')
             $button.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.AUTO_COLLECTOR_STOPPED, function () {
             $button.classList.remove('btn-red')
-            $button.classList.add('btn-green')
+            $button.classList.add('btn-orange')
         })
 
         if (autoCollector.isRunning()) {

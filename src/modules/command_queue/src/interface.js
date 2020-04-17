@@ -525,13 +525,13 @@ define('two/commandQueue/ui', [
         $button.addEventListener('click', buildWindow)
 
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_START, function () {
-            $button.classList.remove('btn-green')
+            $button.classList.remove('btn-orange')
             $button.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.COMMAND_QUEUE_STOP, function () {
             $button.classList.remove('btn-red')
-            $button.classList.add('btn-green')
+            $button.classList.add('btn-orange')
         })
 
         $rootScope.$on(eventTypeProvider.SHOW_CONTEXT_MENU, setMapSelectedVillage)

@@ -198,13 +198,13 @@ define('two/farmOverflow/ui', [
         })
 
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_START, function () {
-            $button.classList.remove('btn-green')
+            $button.classList.remove('btn-orange')
             $button.classList.add('btn-red')
         })
 
         eventQueue.register(eventTypeProvider.FARM_OVERFLOW_STOP, function () {
             $button.classList.remove('btn-red')
-            $button.classList.add('btn-green')
+            $button.classList.add('btn-orange')
         })
 
         interfaceOverflow.addTemplate('twoverflow_farm_overflow_window', `___farm_overflow_html_main`)

@@ -10,9 +10,9 @@ define('two/about/ui', [
     }
 
     const init = function () {
-        const $opener = interfaceOverflow.addMenuButton('About', 100)
+        const $button = interfaceOverflow.addMenuButton('About', 100)
 
-        $opener.addEventListener('click', function () {
+        $button.addEventListener('click', function () {
             buildWindow()
         })
 

@@ -733,7 +733,7 @@ define('two/builderQueue/ui', [
 
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_START, function () {
             running = true
-            $button.classList.remove('btn-green')
+            $button.classList.remove('btn-orange')
             $button.classList.add('btn-red')
             utils.notif('success', $filter('i18n')('started', $rootScope.loc.ale, 'builder_queue'))
         })
@@ -741,7 +741,7 @@ define('two/builderQueue/ui', [
         eventQueue.register(eventTypeProvider.BUILDER_QUEUE_STOP, function () {
             running = false
             $button.classList.remove('btn-red')
-            $button.classList.add('btn-green')
+            $button.classList.add('btn-orange')
             utils.notif('success', $filter('i18n')('stopped', $rootScope.loc.ale, 'builder_queue'))
         })
 
