@@ -3,7 +3,8 @@ define('two/minimap/settings', [], function () {
         RIGHT_CLICK_ACTION: 'right_click_action',
         FLOATING_MINIMAP: 'floating_minimap',
         SHOW_CROSS: 'show_cross',
-        SHOW_DEMARCATIONS: 'show_demarcations',
+        SHOW_CONTINENT_DEMARCATIONS: 'show_continent_demarcations',
+        SHOW_PROVINCE_DEMARCATIONS: 'show_province_demarcations',
         SHOW_BARBARIANS: 'show_barbarians',
         SHOW_GHOST_VILLAGES: 'show_ghost_villages',
         SHOW_ONLY_CUSTOM_HIGHLIGHTS: 'show_only_custom_highlights',
@@ -45,7 +46,12 @@ define('two/minimap/settings/map', [
             inputType: 'checkbox',
             updates: [UPDATES.MINIMAP]
         },
-        [SETTINGS.SHOW_DEMARCATIONS]: {
+        [SETTINGS.SHOW_CONTINENT_DEMARCATIONS]: {
+            default: true,
+            inputType: 'checkbox',
+            updates: [UPDATES.MINIMAP]
+        },
+        [SETTINGS.SHOW_PROVINCE_DEMARCATIONS]: {
             default: true,
             inputType: 'checkbox',
             updates: [UPDATES.MINIMAP]

@@ -238,6 +238,25 @@ define('two/minimap', [
     const drawGrid = function () {
         const binUrl = cdn.getPath(conf.getMapPath())
         const villageOffsetX = Math.round(villageBlock / 2)
+        const colorContinent = settings.get(SETTINGS.COLOR_CONTINENT)
+        const colorProvince = settings.get(SETTINGS.COLOR_PROVINCE)
+        const continentEnabled = settings.get(SETTINGS.SHOW_CONTINENT_DEMARCATIONS)
+        const provinceEnabled = settings.get(SETTINGS.SHOW_PROVINCE_DEMARCATIONS)
+
+        if (!continentEnabled && !provinceEnabled) {
+            return false
+        }
+
+        const drawContinent = function (x, y) {
+            $viewportCacheContext.fillStyle = colorContinent
+            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX - 1, y * villageBlock + villageOffsetX - 1, 3, 1)
+            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 2, 1, 3)
+        }
+
+        const drawProvince = function (x, y) {
+            $viewportCacheContext.fillStyle = colorProvince
+            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 1, 1, 1)
+        }
 
         utils.xhrGet(binUrl, function (bin) {
             dataView = new DataView(bin)
@@ -250,12 +269,13 @@ define('two/minimap', [
                     if (tile.key.b) {
                         // is continental border
                         if (tile.key.c) {
-                            $viewportCacheContext.fillStyle = settings.get(SETTINGS.COLOR_CONTINENT)
-                            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX - 1, y * villageBlock + villageOffsetX - 1, 3, 1)
-                            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 2, 1, 3)
-                        } else {
-                            $viewportCacheContext.fillStyle = settings.get(SETTINGS.COLOR_PROVINCE)
-                            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 1, 1, 1)
+                            if (continentEnabled) {
+                                drawContinent(x, y)
+                            } else if (provinceEnabled) {
+                                drawProvince(x, y)
+                            }
+                        } else if (provinceEnabled) {
+                            drawProvince(x, y)
                         }
                     }
                 }
@@ -761,9 +781,7 @@ define('two/minimap', [
         $viewport.style.background = settings.get(SETTINGS.COLOR_BACKGROUND)
         $viewportCacheContext.clearRect(0, 0, $viewportCache.width, $viewportCache.height)
 
-        if (settings.get(SETTINGS.SHOW_DEMARCATIONS)) {
-            drawGrid()
-        }
+        drawGrid()
 
         if (settings.get(SETTINGS.SHOW_GHOST_VILLAGES)) {
             drawCachedVillages()
@@ -832,14 +850,11 @@ define('two/minimap', [
             currentPosition.x = selectedVillage.getX() * villageBlock
             currentPosition.y = selectedVillage.getY() * villageBlock
 
-            if (settings.get(SETTINGS.SHOW_DEMARCATIONS)) {
-                drawGrid()
-            }
-
             if (settings.get(SETTINGS.SHOW_GHOST_VILLAGES)) {
                 drawCachedVillages()
             }
 
+            drawGrid()
             drawLoadedVillages()
             cacheVillages(mapData.getTowns())
             renderStep()
