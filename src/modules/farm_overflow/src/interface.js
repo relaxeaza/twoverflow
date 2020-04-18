@@ -212,14 +212,16 @@ define('two/farmOverflow/ui', [
             clearInterval(cycleCountdownTimer)
         },
         onCycleEnd: function (event, reason) {
-            if (reason !== STATUS.USER_STOP) {
-                $scope.showCycleTimer = true
-                $scope.nextCycleCountdown = farmOverflow.getCycleInterval()
-
-                cycleCountdownTimer = setInterval(function () {
-                    $scope.nextCycleCountdown -= 1000
-                }, 1000)
+            if (reason === STATUS.USER_STOP) {
+                return
             }
+            
+            $scope.showCycleTimer = true
+            $scope.nextCycleCountdown = farmOverflow.getCycleInterval()
+
+            cycleCountdownTimer = setInterval(function () {
+                $scope.nextCycleCountdown -= 1000
+            }, 1000)
         }
     }
 

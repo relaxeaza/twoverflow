@@ -126,7 +126,7 @@ define('two/farmOverflow', [
         })
     }
 
-    const skipStepInterval = function () {
+    const reloadTimers = function () {
         if (!running) {
             return
         }
@@ -138,6 +138,9 @@ define('two/farmOverflow', [
             })
         } else if (cycleTimer) {
             stopTimers()
+
+            eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_CYCLE_BEGIN)
+
             farmerIndex = 0
             farmOverflow.farmerStep()
         }
@@ -1204,7 +1207,7 @@ define('two/farmOverflow', [
             }
 
             if (updates[UPDATES.INTERVAL_TIMERS]) {
-                skipStepInterval()
+                reloadTimers()
             }
         })
 
