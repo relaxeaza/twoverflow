@@ -90,6 +90,7 @@
         "reseted_logs": "Registered logs reseted.",
         "date_added": "Date added",
         "multiple_attacks_interval": "Interval between attacks in the same target (minutes)",
-        "next_cycle_in": "Next cycle starts in"
+        "next_cycle_in": "Next cycle starts in",
+        "target_limit_per_village": "Limit of targets per village"
     }
 }

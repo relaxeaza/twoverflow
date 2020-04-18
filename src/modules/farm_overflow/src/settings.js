@@ -17,7 +17,8 @@ define('two/farmOverflow/settings', [], function () {
         MIN_POINTS: 'min_points',
         MAX_POINTS: 'max_points',
         LOGS_LIMIT: 'logs_limit',
-        IGNORE_ON_LOSS: 'ignore_on_loss'
+        IGNORE_ON_LOSS: 'ignore_on_loss',
+        TARGET_LIMIT: 'target_limit'
     }
 })
 
@@ -159,6 +160,10 @@ define('two/farmOverflow/settings/map', [
         [SETTINGS.LOGS_LIMIT]: {
             default: 500,
             updates: [UPDATES.LOGS]
+        },
+        [SETTINGS.TARGET_LIMIT_PER_VILLAGE]: {
+            default: 25,
+            updates: [UPDATES.TARGETS]
         }
     }
 })

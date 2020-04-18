@@ -1127,6 +1127,7 @@ define('two/farmOverflow', [
             this.targets = calcDistances(loadedTargets, pos)
             this.targets = filterTargets(this.targets, pos)
             this.targets = sortTargets(this.targets)
+            this.targets = this.targets.slice(0, settings.get(SETTINGS.TARGET_LIMIT_PER_VILLAGE))
 
             if (typeof callback === 'function') {
                 callback(this.targets)
