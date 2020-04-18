@@ -44,9 +44,7 @@ async function init () {
 
     allowedTranslations.forEach(function (status) {
         const languageCode = gameLanguageCodes[status.code]
-        const languageFiles = glob.sync(`${options.source}/${status.code}/twoverflow/*.json`)
-
-        console.log(`Generating ${languageCode} translations...`)
+        const languageFiles = glob.sync(`./share/translations/${status.code}/twoverflow/*.json`)
 
         languageFiles.forEach(function (languageFile) {
             let moduleName = path.basename(languageFile, '.json')
