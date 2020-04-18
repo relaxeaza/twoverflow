@@ -89,6 +89,8 @@
         "clear_logs": "Очистить журнал события",
         "reseted_logs": "Зарегистрованный журнал событий обнулён.",
         "date_added": "Данные добавлены",
-        "multiple_attacks_interval": "Interval between attacks in the same target (minutes)"
+        "multiple_attacks_interval": "Interval between attacks in the same target (minutes)",
+        "next_cycle_in": "Next cycle starts in",
+        "target_limit_per_village": "Limit of targets per village"
     }
 }

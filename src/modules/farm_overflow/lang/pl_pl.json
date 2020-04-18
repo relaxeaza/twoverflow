@@ -89,6 +89,8 @@
         "clear_logs": "Wyczyść logi",
         "reseted_logs": "Zarejestrowane logi zostały wyczyszczone.",
         "date_added": "Data dodania",
-        "multiple_attacks_interval": "Interval between attacks in the same target (minutes)"
+        "multiple_attacks_interval": "Interval between attacks in the same target (minutes)",
+        "next_cycle_in": "Next cycle starts in",
+        "target_limit_per_village": "Limit of targets per village"
     }
 }
