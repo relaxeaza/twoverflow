@@ -151,11 +151,8 @@ define('two/attackView', [
             y: command.target_y
         }
         const unitDurationDiff = UNIT_SPEED_ORDER.map(function (unit) {
-            const army = {units: {[unit]: 1}, officers: {}}
-            const travelTime = armyService.calculateTravelTime(army, null, command.command_type)
-            const distance = math.actualDistance(origin, target)
-            const totalTravelTime = armyService.getTravelTimeForDistance(army, travelTime, distance, command.command_type) * 1000
-            const durationDiff = Math.abs(totalTravelTime - command.model.duration)
+            const travelTime = utils.getTravelTime(origin, target, {[unit]: 1}, command.command_type, {}, false)
+            const durationDiff = Math.abs(travelTime - command.model.duration)
 
             return {
                 unit: unit,
