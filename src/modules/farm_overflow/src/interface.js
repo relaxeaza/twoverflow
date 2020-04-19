@@ -31,7 +31,6 @@ define('two/farmOverflow/ui', [
     let villagesInfo = {}
     let villagesLabel = {}
     let cycleCountdownTimer = null
-
     const TAB_TYPES = {
         SETTINGS: 'settings',
         VILLAGES: 'villages',
@@ -104,6 +103,7 @@ define('two/farmOverflow/ui', [
 
     const saveSettings = function () {
         settings.setAll(settings.decode($scope.settings))
+        $scope.saveButtonColor = 'orange'
 
         utils.notif('success', $filter('i18n')('settings_saved', $rootScope.loc.ale, 'farm_overflow'))
     }
@@ -248,6 +248,8 @@ define('two/farmOverflow/ui', [
     }
 
     const buildWindow = function () {
+        let ignoreWatch = true
+
         $scope = $rootScope.$new()
         $scope.SETTINGS = SETTINGS
         $scope.TAB_TYPES = TAB_TYPES
@@ -263,6 +265,7 @@ define('two/farmOverflow/ui', [
         $scope.visibleLogs = []
         $scope.showCycleTimer = false
         $scope.nextCycleCountdown = 0
+        $scope.saveButtonColor = 'orange'
 
         $scope.pagination = {
             count: $scope.logs.length,
@@ -308,6 +311,14 @@ define('two/farmOverflow/ui', [
         eventScope.register(eventTypeProvider.FARM_OVERFLOW_CYCLE_END, eventHandlers.onCycleEnd)
 
         windowManagerService.getScreenWithInjectedScope('!twoverflow_farm_overflow_window', $scope)
+
+        $scope.$watch('settings', function () {
+            if (!ignoreWatch) {
+                $scope.saveButtonColor = 'red'
+            }
+
+            ignoreWatch = false
+        }, true)
     }
 
     return init

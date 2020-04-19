@@ -34,6 +34,7 @@
 
         <div class="box-paper footer">
             <div class="scroll-wrap">
+
                 <!-- settings -->
                 <div class="settings" ng-show="selectedTab === TAB_TYPES.SETTINGS">
                     <table class="tbl-border-light tbl-content tbl-medium-height">
@@ -320,7 +321,7 @@
     <footer class="win-foot">
         <ul class="list-btn list-center">
             <li ng-show="selectedTab === TAB_TYPES.SETTINGS">
-                <a href="#" class="btn-border btn-orange" ng-click="saveSettings()">{{ 'save' | i18n:loc.ale:'common' }}</a>
+                <a href="#" class="btn-border btn-{{ saveButtonColor }}" ng-click="saveSettings()">{{ 'save' | i18n:loc.ale:'common' }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.LOGS">
                 <a href="#" class="btn-border btn-orange" ng-click="clearLogs()">{{ 'clear_logs' | i18n:loc.ale:'farm_overflow' }}</a>
