@@ -128,7 +128,8 @@ define('two/commandQueue/ui', [
                     commandData.target,
                     {[unit]: 1},
                     commandType,
-                    commandData.officers
+                    commandData.officers,
+                    true
                 )
 
                 if ($scope.selectedDateType.value === DATE_TYPES.OUT) {

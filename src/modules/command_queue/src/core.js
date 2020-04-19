@@ -352,7 +352,8 @@ define('two/commandQueue', [
                 command.target,
                 command.units,
                 command.type,
-                command.officers
+                command.officers,
+                true
             )
 
             const inputTime = utils.getTimeFromString(command.date)

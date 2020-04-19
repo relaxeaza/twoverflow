@@ -142,29 +142,30 @@ define('two/attackView', [
      * @return {String} Slowest unit
      */
     const getSlowestUnit = function (command) {
-        const commandDuration = command.model.duration
-        let units = {}
-        const origin = { x: command.origin_x, y: command.origin_y }
-        const target = { x: command.target_x, y: command.target_y }
-        let travelTimes = []
+        const origin = {
+            x: command.origin_x,
+            y: command.origin_y
+        }
+        const target = {
+            x: command.target_x,
+            y: command.target_y
+        }
+        const unitDurationDiff = UNIT_SPEED_ORDER.map(function (unit) {
+            const army = {units: {[unit]: 1}, officers: {}}
+            const travelTime = armyService.calculateTravelTime(army, null, command.command_type)
+            const distance = math.actualDistance(origin, target)
+            const totalTravelTime = armyService.getTravelTimeForDistance(army, travelTime, distance, command.command_type) * 1000
+            const durationDiff = Math.abs(totalTravelTime - command.model.duration)
 
-        UNIT_SPEED_ORDER.forEach(function (unit) {
-            units[unit] = 1
-            
-            travelTimes.push({
+            return {
                 unit: unit,
-                duration: utils.getTravelTime(origin, target, units, command.command_type, {})
-            })
-        })
-
-        travelTimes = travelTimes.map(function (travelTime) {
-            travelTime.duration = Math.abs(travelTime.duration - commandDuration)
-            return travelTime
+                diff: durationDiff
+            }
         }).sort(function (a, b) {
-            return a.duration - b.duration
+            return a.diff - b.diff
         })
 
-        return travelTimes[0].unit
+        return unitDurationDiff[0].unit
     }
 
     /**
