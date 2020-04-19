@@ -58,8 +58,8 @@ define('two/farmOverflow', [
     let nextCycleDate = null
     const PERSISTENT_RUNNING_CHECK_INTERVAL = 30 * 1000
     const VILLAGE_COMMAND_LIMIT = 50
-    const MINIMUM_FARMER_CYCLE_INTERVAL = 5 * 1000
-    const MINIMUM_ATTACK_INTERVAL = 1 * 1000
+    const MINIMUM_FARMER_CYCLE_INTERVAL = 0 // minutes
+    const MINIMUM_ATTACK_INTERVAL = 0 // seconds
     const STEP_EXPIRE_TIME = 30 * 1000
     const CYCLE_BEGIN = 'cycle_begin'
     const STORAGE_KEYS = {
