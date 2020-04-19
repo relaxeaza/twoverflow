@@ -9,7 +9,7 @@ const package = JSON.parse(fs.readFileSync('package.json', 'utf8'))
 const git = require('git-promise')
 const parseOptions = require('./parse-options.js')
 
-const cdnPath = 'cdn'
+const cdnPath = 'share/cdn'
 const releasesPath = `${cdnPath}/public/releases`
 const testingPath = `${releasesPath}/testing`
 
