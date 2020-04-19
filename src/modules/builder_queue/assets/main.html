@@ -268,10 +268,10 @@
                 <a href="#" class="btn-border btn-orange" ng-click="logsView.clearLogs()">{{ 'logs_clear' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
 
-            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail && editorView.itemSelected">
+            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">
                 <a href="#" class="btn-border btn-orange" ng-click="editorView.moveUp()">{{ 'sequences_move_up' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
-            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail && editorView.itemSelected">
+            <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">
                 <a href="#" class="btn-border btn-orange" ng-click="editorView.moveDown()">{{ 'sequences_move_down' | i18n:loc.ale:'builder_queue' }}</a>
             </li>
             <li ng-show="selectedTab === TAB_TYPES.SEQUENCES && editorView.sequencesAvail">
