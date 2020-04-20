@@ -372,26 +372,6 @@ define('two/minimap', [
         window.requestAnimationFrame(renderStep)
     }
 
-    // const drawRect = function () {
-    //     // const tileCoords = mapService.pixel2Tiles(mapState.view.x / mapState.view.z, mapState.view.y / mapState.view.z)
-    //     const tileCoords = mapService.pixel2Tiles(mapState.view.x, mapState.view.y)
-    //     const rectWidth = (mapWrapper.width() / conf.TILESIZE.x / mapState.view.z) * villageBlock
-    //     const rectHeight = (mapWrapper.height() / conf.TILESIZE.y / mapState.view.z) * villageBlock
-
-    //     const x = Math.abs(tileCoords.x) * villageBlock
-    //     const y = Math.abs(tileCoords.y) * villageBlock
-
-
-    //     console.log('tileCoords', x, y, 'rectWidth', rectWidth, 'rectHeight', rectHeight)
-
-    //     $crossContext.beginPath()
-    //     $crossContext.lineWidth = 10
-    //     $crossContext.strokeStyle = '#F00'
-    //     // $crossContext.rect(x, y, rectWidth, rectHeight)
-    //     $crossContext.rect(x, y, 500, 500)
-    //     $crossContext.stroke()
-    // }
-
     const cacheVillages = function (villages) {
         for (let i = 0; i < villages.length; i++) {
             let v = villages[i]
