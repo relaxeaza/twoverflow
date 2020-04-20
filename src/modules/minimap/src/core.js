@@ -598,7 +598,7 @@ define('two/minimap', [
             }
 
             const coords = getCoords(event)
-            mapService.jumpToVillage(coords.x, coords.y, true)
+            mapService.jumpToVillage(coords.x, coords.y)
         },
         onCrossMouseContext: function (event) {
             event.preventDefault()
