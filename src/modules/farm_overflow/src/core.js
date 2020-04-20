@@ -36,6 +36,7 @@ define('two/farmOverflow', [
     let initialized = false
     let running = false
     let settings
+    let farmSettings
     let farmers = []
     let logs = []
     let includedVillages = []
@@ -71,8 +72,8 @@ define('two/farmOverflow', [
     const villageFilters = {
         distance: function (target) {
             return !target.distance.between(
-                settings.get(SETTINGS.MIN_DISTANCE),
-                settings.get(SETTINGS.MAX_DISTANCE)
+                farmSettings[SETTINGS.MIN_DISTANCE],
+                farmSettings[SETTINGS.MAX_DISTANCE]
             )
         },
         ownPlayer: function (target) {
@@ -86,8 +87,8 @@ define('two/farmOverflow', [
         },
         points: function (points) {
             return !points.between(
-                settings.get(SETTINGS.MIN_POINTS),
-                settings.get(SETTINGS.MAX_POINTS)
+                farmSettings[SETTINGS.MIN_POINTS],
+                farmSettings[SETTINGS.MAX_POINTS]
             )
         }
     }
@@ -147,7 +148,7 @@ define('two/farmOverflow', [
     }
 
     const updateIncludedVillage = function () {
-        const groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
+        const groupsInclude = farmSettings[SETTINGS.GROUP_INCLUDE]
 
         includedVillages = []
 
@@ -160,12 +161,12 @@ define('two/farmOverflow', [
     }
 
     const updateIgnoredVillage = function () {
-        const groupIgnored = settings.get(SETTINGS.GROUP_IGNORE)
+        const groupIgnored = farmSettings[SETTINGS.GROUP_IGNORE]
         ignoredVillages = modelDataService.getGroupList().getGroupVillageIds(groupIgnored)
     }
 
     const updateOnlyVillage = function () {
-        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
+        const groupsOnly = farmSettings[SETTINGS.GROUP_ONLY]
 
         onlyVillages = []
 
@@ -220,9 +221,9 @@ define('two/farmOverflow', [
     }
 
     const villageGroupLink = function (event, data) {
-        const groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
-        const groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
-        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
+        const groupsInclude = farmSettings[SETTINGS.GROUP_INCLUDE]
+        const groupIgnore = farmSettings[SETTINGS.GROUP_IGNORE]
+        const groupsOnly = farmSettings[SETTINGS.GROUP_ONLY]
         const isOwnVillage = $player.getVillage(data.village_id)
         let farmerListUpdated = false
 
@@ -268,9 +269,9 @@ define('two/farmOverflow', [
     }
 
     const villageGroupUnlink = function (event, data) {
-        const groupsInclude = settings.get(SETTINGS.GROUP_INCLUDE)
-        const groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
-        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
+        const groupsInclude = farmSettings[SETTINGS.GROUP_INCLUDE]
+        const groupIgnore = farmSettings[SETTINGS.GROUP_IGNORE]
+        const groupsOnly = farmSettings[SETTINGS.GROUP_ONLY]
         const isOwnVillage = $player.getVillage(data.village_id)
         let farmerListUpdated = false
 
@@ -324,7 +325,7 @@ define('two/farmOverflow', [
     const processPresets = function () {
         selectedPresets = []
         const playerPresets = modelDataService.getPresetList().getPresets()
-        const activePresets = settings.get(SETTINGS.PRESETS)
+        const activePresets = farmSettings[SETTINGS.PRESETS]
 
         activePresets.forEach(function (presetId) {
             if (!Object.prototype.hasOwnProperty.call(playerPresets, presetId)) {
@@ -355,7 +356,7 @@ define('two/farmOverflow', [
     }
 
     const ignoreVillage = function (villageId) {
-        const groupIgnore = settings.get(SETTINGS.GROUP_IGNORE)
+        const groupIgnore = farmSettings[SETTINGS.GROUP_IGNORE]
 
         if (!groupIgnore) {
             return false
@@ -384,7 +385,7 @@ define('two/farmOverflow', [
     }
 
     const reportListener = function (event, data) {
-        if (!settings.get(SETTINGS.IGNORE_ON_LOSS) || !settings.get(SETTINGS.GROUP_IGNORE)) {
+        if (!farmSettings[SETTINGS.IGNORE_ON_LOSS] || !farmSettings[SETTINGS.GROUP_IGNORE]) {
             return
         }
 
@@ -455,7 +456,7 @@ define('two/farmOverflow', [
     }
 
     const checkPresetTime = function (preset, village, target) {
-        const limitTime = settings.get(SETTINGS.MAX_TRAVEL_TIME) * 60
+        const limitTime = farmSettings[SETTINGS.MAX_TRAVEL_TIME] * 60
         const position = village.getPosition()
         const distance = math.actualDistance(position, target)
         const travelTime = armyService.calculateTravelTime(preset, {
@@ -498,7 +499,7 @@ define('two/farmOverflow', [
     }
 
     const trimAndSaveLogs = function () {
-        const limit = settings.get(SETTINGS.LOGS_LIMIT)
+        const limit = farmSettings[SETTINGS.LOGS_LIMIT]
 
         if (logs.length > limit) {
             logs.splice(logs.length - limit, logs.length)
@@ -542,8 +543,8 @@ define('two/farmOverflow', [
     }
 
     const isTargetBusy = function (attacking, otherAttacking, allVillagesLoaded) {
-        const multipleFarmers = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS)
-        const singleAttack = settings.get(SETTINGS.TARGET_SINGLE_ATTACK)
+        const multipleFarmers = farmSettings[SETTINGS.TARGET_MULTIPLE_FARMERS]
+        const singleAttack = farmSettings[SETTINGS.TARGET_SINGLE_ATTACK]
 
         if (multipleFarmers && allVillagesLoaded) {
             if (singleAttack && attacking) {
@@ -617,11 +618,11 @@ define('two/farmOverflow', [
     }
 
     const getCycleInterval = function () {
-        return Math.max(MINIMUM_FARMER_CYCLE_INTERVAL, settings.get(SETTINGS.FARMER_CYCLE_INTERVAL) * 60 * 1000)
+        return Math.max(MINIMUM_FARMER_CYCLE_INTERVAL, farmSettings[SETTINGS.FARMER_CYCLE_INTERVAL] * 60 * 1000)
     }
 
     const getAttackInterval = function () {
-        return Math.max(MINIMUM_ATTACK_INTERVAL, settings.get(SETTINGS.ATTACK_INTERVAL) * 1000)
+        return Math.max(MINIMUM_ATTACK_INTERVAL, farmSettings[SETTINGS.ATTACK_INTERVAL] * 1000)
     }
 
     const Farmer = function (villageId) {
@@ -759,7 +760,7 @@ define('two/farmOverflow', [
 
         const checkCommandLimit = () => {
             return new Promise((resolve, reject) => {
-                const limit = VILLAGE_COMMAND_LIMIT - settings.get(SETTINGS.PRESERVE_COMMAND_SLOTS)
+                const limit = VILLAGE_COMMAND_LIMIT - farmSettings[SETTINGS.PRESERVE_COMMAND_SLOTS]
 
                 if (villageCommands.length >= limit) {
                     reject(STATUS.COMMAND_LIMIT)
@@ -771,7 +772,7 @@ define('two/farmOverflow', [
 
         const checkStorage = () => {
             return new Promise((resolve, reject) => {
-                if (settings.get(SETTINGS.IGNORE_FULL_STORAGE)) {
+                if (farmSettings[SETTINGS.IGNORE_FULL_STORAGE]) {
                     const resources = this.village.getResources()
                     const computed = resources.getComputed()
                     const maxStorage = resources.getMaxStorage()
@@ -901,12 +902,12 @@ define('two/farmOverflow', [
                 // if TARGET_SINGLE_ATTACK is enabled, and TARGET_MULTIPLE_FARMERS is disabled
                 // there's no reason the check, since the target is allowed to receive multiple
                 // attacks simultaneously.
-                const allowMultipleAttacks = !(settings.get(SETTINGS.TARGET_SINGLE_ATTACK) && !settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS))
+                const allowMultipleAttacks = !(farmSettings[SETTINGS.TARGET_SINGLE_ATTACK] && !farmSettings[SETTINGS.TARGET_MULTIPLE_FARMERS])
 
                 if (allowMultipleAttacks) {
-                    const multipleAttacksMinimumInterval = settings.get(SETTINGS.MULTIPLE_ATTACKS_INTERVAL) * 60
+                    const multipleAttacksMinimumInterval = farmSettings[SETTINGS.MULTIPLE_ATTACKS_INTERVAL] * 60
                     const now = Math.round(timeHelper.gameTime() / 1000)
-                    const villages = settings.get(SETTINGS.TARGET_MULTIPLE_FARMERS) ? playerVillages : [this.village]
+                    const villages = farmSettings[SETTINGS.TARGET_MULTIPLE_FARMERS] ? playerVillages : [this.village]
                     const position = this.village.getPosition()
                     const distance = math.actualDistance(position, target)
                     const singleFieldtravelTime = armyService.calculateTravelTime(preset, {
@@ -1127,7 +1128,7 @@ define('two/farmOverflow', [
             this.targets = calcDistances(loadedTargets, pos)
             this.targets = filterTargets(this.targets, pos)
             this.targets = sortTargets(this.targets)
-            this.targets = this.targets.slice(0, settings.get(SETTINGS.TARGET_LIMIT_PER_VILLAGE))
+            this.targets = this.targets.slice(0, farmSettings[SETTINGS.TARGET_LIMIT_PER_VILLAGE])
 
             if (typeof callback === 'function') {
                 callback(this.targets)
@@ -1186,6 +1187,8 @@ define('two/farmOverflow', [
         })
 
         settings.onChange(function (changes, updates) {
+            farmSettings = settings.getAll()
+
             if (updates[UPDATES.PRESET]) {
                 updatePresets()
             }
@@ -1211,6 +1214,8 @@ define('two/farmOverflow', [
                 reloadTimers()
             }
         })
+
+        farmSettings = settings.getAll()
 
         updateGroupVillages()
         updatePresets()
@@ -1304,7 +1309,7 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.createFarmer = function (villageId) {
-        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
+        const groupsOnly = farmSettings[SETTINGS.GROUP_ONLY]
 
         villageId = parseInt(villageId, 10)
 
@@ -1331,7 +1336,7 @@ define('two/farmOverflow', [
      * groups-only, only-villages and ignore-villages group filters.
      */
     farmOverflow.flushFarmers = function () {
-        const groupsOnly = settings.get(SETTINGS.GROUP_ONLY)
+        const groupsOnly = farmSettings[SETTINGS.GROUP_ONLY]
         let removeIds = []
 
         farmers.forEach(function (farmer) {

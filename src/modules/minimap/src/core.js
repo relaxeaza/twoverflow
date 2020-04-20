@@ -69,7 +69,8 @@ define('two/minimap', [
     let currentPosition = {}
     let frameSize = {}
     let dataView
-    let settings = {}
+    let settings
+    let minimapSettings
     const STORAGE_KEYS = {
         CACHE_VILLAGES: 'minimap_cache_villages',
         SETTINGS: 'minimap_settings'
@@ -183,7 +184,7 @@ define('two/minimap', [
                     x += villageOffsetX
                 }
 
-                if (settings.get(SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS)) {
+                if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
                     if (v.character_id in highlights.character) {
                         color = highlights.character[v.character_id]
                     } else if (v.tribe_id in highlights.tribe) {
@@ -193,18 +194,18 @@ define('two/minimap', [
                     }
                 } else {
                     if (v.character_id === null) {
-                        if (!settings.get(SETTINGS.SHOW_BARBARIANS)) {
+                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS]) {
                             continue
                         }
 
                         color = villageColors.barbarian
                     } else {
                         if (v.character_id === pid) {
-                            if (v.id === selectedVillage.getId() && settings.get(SETTINGS.HIGHLIGHT_SELECTED)) {
+                            if (v.id === selectedVillage.getId() && minimapSettings[SETTINGS.HIGHLIGHT_SELECTED]) {
                                 color = villageColors.selected
                             } else if (v.character_id in highlights.character) {
                                 color = highlights.character[v.character_id]
-                            } else if (settings.get(SETTINGS.HIGHLIGHT_OWN)) {
+                            } else if (minimapSettings[SETTINGS.HIGHLIGHT_OWN]) {
                                 color = villageColors.player
                             } else {
                                 color = villageColors.ugly
@@ -214,9 +215,9 @@ define('two/minimap', [
                                 color = highlights.character[v.character_id]
                             } else if (v.tribe_id in highlights.tribe) {
                                 color = highlights.tribe[v.tribe_id]
-                            } else if (tid && tid === v.tribe_id && settings.get(SETTINGS.HIGHLIGHT_DIPLOMACY)) {
+                            } else if (tid && tid === v.tribe_id && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
                                 color = villageColors.tribe
-                            } else if ($tribeRelations && settings.get(SETTINGS.HIGHLIGHT_DIPLOMACY)) {
+                            } else if ($tribeRelations && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
                                 if ($tribeRelations.isAlly(v.tribe_id)) {
                                     color = villageColors.ally
                                 } else if ($tribeRelations.isEnemy(v.tribe_id)) {
@@ -242,23 +243,21 @@ define('two/minimap', [
     const drawGrid = function () {
         const binUrl = cdn.getPath(conf.getMapPath())
         const villageOffsetX = Math.round(villageBlock / 2)
-        const colorContinent = settings.get(SETTINGS.COLOR_CONTINENT)
-        const colorProvince = settings.get(SETTINGS.COLOR_PROVINCE)
-        const continentEnabled = settings.get(SETTINGS.SHOW_CONTINENT_DEMARCATIONS)
-        const provinceEnabled = settings.get(SETTINGS.SHOW_PROVINCE_DEMARCATIONS)
+        const continentEnabled = minimapSettings[SETTINGS.SHOW_CONTINENT_DEMARCATIONS]
+        const provinceEnabled = minimapSettings[SETTINGS.SHOW_PROVINCE_DEMARCATIONS]
 
         if (!continentEnabled && !provinceEnabled) {
             return false
         }
 
         const drawContinent = function (x, y) {
-            $viewportCacheContext.fillStyle = colorContinent
+            $viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_CONTINENT]
             $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX - 1, y * villageBlock + villageOffsetX - 1, 3, 1)
             $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 2, 1, 3)
         }
 
         const drawProvince = function (x, y) {
-            $viewportCacheContext.fillStyle = colorProvince
+            $viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_PROVINCE]
             $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 1, 1, 1)
         }
 
@@ -304,7 +303,7 @@ define('two/minimap', [
                     xx += villageOffsetX
                 }
 
-                $viewportCacheContext.fillStyle = settings.get(SETTINGS.COLOR_GHOST)
+                $viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_GHOST]
                 $viewportCacheContext.fillRect(xx, yy, villageSize, villageSize)
             }
         }
@@ -330,7 +329,7 @@ define('two/minimap', [
         const y = ((mapPosition[1] + mapPosition[3] - 2) * villageBlock) - pos.y
 
         // cross
-        $crossContext.fillStyle = settings.get(SETTINGS.COLOR_VIEW_REFERENCE)
+        $crossContext.fillStyle = minimapSettings[SETTINGS.COLOR_VIEW_REFERENCE]
         $crossContext.fillRect(x, 0, 1, lineSize)
         $crossContext.fillRect(0, y, lineSize, 1)
 
@@ -343,7 +342,7 @@ define('two/minimap', [
         $crossContext.clearRect(rectX, rectY, rectWidth, rectHeight)
         $crossContext.beginPath()
         $crossContext.lineWidth = 1
-        $crossContext.strokeStyle = settings.get(SETTINGS.COLOR_VIEW_REFERENCE)
+        $crossContext.strokeStyle = minimapSettings[SETTINGS.COLOR_VIEW_REFERENCE]
         $crossContext.rect(rectX, rectY, rectWidth, rectHeight)
         $crossContext.stroke()
     }
@@ -364,7 +363,7 @@ define('two/minimap', [
 
             drawViewport(pos)
 
-            if (settings.get(SETTINGS.SHOW_VIEW_REFERENCE)) {
+            if (minimapSettings[SETTINGS.SHOW_VIEW_REFERENCE]) {
                 drawViewReference(pos)
             }
         }
@@ -454,7 +453,7 @@ define('two/minimap', [
     }
 
     const highlightVillages = function (villages) {
-        drawVillages(villages, settings.get(SETTINGS.COLOR_QUICK_HIGHLIGHT))
+        drawVillages(villages, minimapSettings[SETTINGS.COLOR_QUICK_HIGHLIGHT])
     }
 
     const unhighlightVillages = function (villages) {
@@ -479,7 +478,7 @@ define('two/minimap', [
 
     const quickHighlight = function (coords) {
         const village = mapData.getTownAt(coords.x, coords.y)
-        const action = settings.get(SETTINGS.RIGHT_CLICK_ACTION)
+        const action = minimapSettings[SETTINGS.RIGHT_CLICK_ACTION]
         let data = {}
 
         if (!village) {
@@ -561,12 +560,12 @@ define('two/minimap', [
                     let village = mapData.getTownAt(coords.x, coords.y)
 
                     // ignore barbarian villages
-                    if (!settings.get(SETTINGS.SHOW_BARBARIANS) && !village.character_id) {
+                    if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
                         return false
                     }
 
                     // check if the village is custom highlighted
-                    if (settings.get(SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS)) {
+                    if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
                         let highlighted = false
 
                         if (village.character_id in highlights.character) {
@@ -753,7 +752,7 @@ define('two/minimap', [
 
     minimap.setViewport = function (element) {
         $viewport = element
-        $viewport.style.background = settings.get(SETTINGS.COLOR_BACKGROUND)
+        $viewport.style.background = minimapSettings[SETTINGS.COLOR_BACKGROUND]
         $viewportContext = $viewport.getContext('2d')
     }
 
@@ -800,12 +799,12 @@ define('two/minimap', [
             firstDraw = false
         }
 
-        $viewport.style.background = settings.get(SETTINGS.COLOR_BACKGROUND)
+        $viewport.style.background = minimapSettings[SETTINGS.COLOR_BACKGROUND]
         $viewportCacheContext.clearRect(0, 0, $viewportCache.width, $viewportCache.height)
 
         drawGrid()
 
-        if (settings.get(SETTINGS.SHOW_GHOST_VILLAGES)) {
+        if (minimapSettings[SETTINGS.SHOW_GHOST_VILLAGES]) {
             drawCachedVillages()
         }
 
@@ -835,11 +834,14 @@ define('two/minimap', [
         })
 
         settings.onChange(function (changes, updates) {
+            minimapSettings = settings.getAll()
+
             if (updates[UPDATES.MINIMAP]) {
                 minimap.drawMinimap()
             }
         })
 
+        minimapSettings = settings.getAll()
         highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
         highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
     }

@@ -60,7 +60,7 @@ define('two/Settings', [
         this.defaults = generateDefaults(this.settingsMap)
         this.settings = angular.merge({}, this.defaults, Lockr.get(this.storageKey, {}))
         this.events = {
-            settingsChange: noop
+            settingsChange: configs.onChange || noop
         }
         this.injected = false
     }
@@ -99,7 +99,7 @@ define('two/Settings', [
 
         this.store()
         this.updateScope()
-        this.events.settingsChange(changes, updates, opt || {})
+        this.events.settingsChange.call(this, changes, updates, opt || {})
 
         return true
     }
@@ -124,7 +124,7 @@ define('two/Settings', [
 
         this.store()
         this.updateScope()
-        this.events.settingsChange(changes, updates, opt || {})
+        this.events.settingsChange.call(this, changes, updates, opt || {})
 
         return true
     }

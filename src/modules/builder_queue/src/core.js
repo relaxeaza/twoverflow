@@ -44,6 +44,7 @@ define('two/builderQueue', [
     let logs
     let sequencesAvail = true
     let settings
+    let builderSettings
     const STORAGE_KEYS = {
         LOGS: 'builder_queue_log',
         SETTINGS: 'builder_queue_settings'
@@ -116,7 +117,7 @@ define('two/builderQueue', [
      * @return {Array}
      */
     const getVillageIds = function () {
-        const groupVillages = settings.get(SETTINGS.GROUP_VILLAGES)
+        const groupVillages = builderSettings[SETTINGS.GROUP_VILLAGES]
         let villages = []
 
         if (groupVillages) {
@@ -142,8 +143,8 @@ define('two/builderQueue', [
         let buildingLevels = angular.copy(village.buildingData.getBuildingLevels())
         const currentQueue = village.buildingQueue.getQueue()
         let sequence = angular.copy(VILLAGE_BUILDINGS)
-        const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
-        const activeSequenceId = settings.get(SETTINGS.ACTIVE_SEQUENCE)
+        const sequences = builderSettings[SETTINGS.BUILDING_SEQUENCES]
+        const activeSequenceId = builderSettings[SETTINGS.ACTIVE_SEQUENCE]
         const activeSequence = sequences[activeSequenceId]
 
         currentQueue.forEach(function (job) {
@@ -185,7 +186,7 @@ define('two/builderQueue', [
                 callback(true, data)
             })
         } else if (upgradeability === UPGRADEABILITY_STATES.NOT_ENOUGH_FOOD) {
-            if (settings.get(SETTINGS.PRIORIZE_FARM)) {
+            if (builderSettings[SETTINGS.PRIORIZE_FARM]) {
                 const limitFarm = buildingSequenceLimit[BUILDING_TYPES.FARM]
                 const villageFarm = village.getBuildingData().getDataForBuilding(BUILDING_TYPES.FARM)
 
@@ -220,9 +221,9 @@ define('two/builderQueue', [
             const resources = village.getResources().getComputed()
 
             if (
-                resources.clay.currentStock - settings.get(SETTINGS.PRESERVE_CLAY) < nextLevelCosts.clay ||
-                resources.iron.currentStock - settings.get(SETTINGS.PRESERVE_IRON) < nextLevelCosts.iron ||
-                resources.wood.currentStock - settings.get(SETTINGS.PRESERVE_WOOD) < nextLevelCosts.wood
+                resources.clay.currentStock - builderSettings[SETTINGS.PRESERVE_CLAY] < nextLevelCosts.clay ||
+                resources.iron.currentStock - builderSettings[SETTINGS.PRESERVE_IRON] < nextLevelCosts.iron ||
+                resources.wood.currentStock - builderSettings[SETTINGS.PRESERVE_WOOD] < nextLevelCosts.wood
             ) {
                 return UPGRADEABILITY_STATES.NOT_ENOUGH_RESOURCES
             }
@@ -276,7 +277,7 @@ define('two/builderQueue', [
      * @return {Object} Maximum level for each building.
      */
     const getSequenceLimit = function (sequenceId) {
-        const sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        const sequences = builderSettings[SETTINGS.BUILDING_SEQUENCES]
         const sequence = sequences[sequenceId]
         let sequenceLimit = angular.copy(VILLAGE_BUILDINGS)
 
@@ -357,7 +358,7 @@ define('two/builderQueue', [
     }
 
     builderQueue.addBuildingSequence = function (id, sequence) {
-        let sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        let sequences = builderSettings[SETTINGS.BUILDING_SEQUENCES]
 
         if (id in sequences) {
             return SEQUENCE_STATUS.SEQUENCE_EXISTS
@@ -377,7 +378,7 @@ define('two/builderQueue', [
     }
 
     builderQueue.updateBuildingSequence = function (id, sequence) {
-        let sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        let sequences = builderSettings[SETTINGS.BUILDING_SEQUENCES]
 
         if (!(id in sequences)) {
             return SEQUENCE_STATUS.SEQUENCE_NO_EXISTS
@@ -397,7 +398,7 @@ define('two/builderQueue', [
     }
 
     builderQueue.removeSequence = function (id) {
-        let sequences = settings.get(SETTINGS.BUILDING_SEQUENCES)
+        let sequences = builderSettings[SETTINGS.BUILDING_SEQUENCES]
 
         if (!(id in sequences)) {
             return SEQUENCE_STATUS.SEQUENCE_NO_EXISTS
@@ -422,6 +423,8 @@ define('two/builderQueue', [
         })
 
         settings.onChange(function (changes, updates, opt) {
+            builderSettings = settings.getAll()
+
             if (running) {
                 if (updates[UPDATES.ANALYSE]) {
                     analyseVillages()
@@ -433,12 +436,14 @@ define('two/builderQueue', [
             }
         })
 
+        builderSettings = settings.getAll()
+
         for (let buildingName in BUILDING_TYPES) {
             VILLAGE_BUILDINGS[BUILDING_TYPES[buildingName]] = 0
         }
 
-        sequencesAvail = Object.keys(settings.get(SETTINGS.BUILDING_SEQUENCES)).length
-        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(settings.get(SETTINGS.ACTIVE_SEQUENCE)) : false
+        sequencesAvail = Object.keys(builderSettings[SETTINGS.BUILDING_SEQUENCES]).length
+        buildingSequenceLimit = sequencesAvail ? getSequenceLimit(builderSettings[SETTINGS.ACTIVE_SEQUENCE]) : false
 
         $rootScope.$on(eventTypeProvider.BUILDING_LEVEL_CHANGED, function (event, data) {
             if (!running) {
