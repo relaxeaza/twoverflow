@@ -762,8 +762,9 @@ define('two/minimap', [
     }
 
     minimap.setCurrentPosition = function (x, y) {
+        const INTERFACE_HEIGHT = 265
         currentPosition.x = x * villageBlock + 50
-        currentPosition.y = y * villageBlock + (1000 - ((document.body.clientHeight - 238) / 2)) + 50
+        currentPosition.y = y * villageBlock + ((document.body.clientHeight - INTERFACE_HEIGHT) / 2)
     }
 
     /**
@@ -860,8 +861,8 @@ define('two/minimap', [
             currentPosition.x = 500 * villageBlock
             currentPosition.y = 500 * villageBlock
 
-            frameSize.x = 701
-            frameSize.y = 2000
+            frameSize.x = 686
+            frameSize.y = 686
 
             $viewport.setAttribute('width', frameSize.x)
             $viewport.setAttribute('height', frameSize.y)
