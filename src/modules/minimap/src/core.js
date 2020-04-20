@@ -15,7 +15,8 @@ define('two/minimap', [
     'conf/colorGroups',
     'conf/conf',
     'version',
-    'states/MapState'
+    'states/MapState',
+    'battlecat'
 ], function (
     ACTION_TYPES,
     SETTINGS,
@@ -33,7 +34,8 @@ define('two/minimap', [
     colorGroups,
     conf,
     gameVersion,
-    mapState
+    mapState,
+    $
 ) {
     let enableRendering = false
     let highlights = {}
@@ -80,6 +82,7 @@ define('two/minimap', [
     let highlightSprite = spriteFactory.make('hover')
     let currentCoords = {x: null, y: null}
     let firstDraw = true
+    let mapWrapper
 
     /**
      * Calcule the coords from clicked position in the canvas.
@@ -321,14 +324,28 @@ define('two/minimap', [
     /**
      * @param {Object} pos - Minimap current position plus center of canvas.
      */
-    const drawCross = function (pos) {
+    const drawViewReference = function (pos) {
         const mapPosition = minimap.getMapPosition()
         const x = ((mapPosition[0] + mapPosition[2] - 2) * villageBlock) - pos.x
         const y = ((mapPosition[1] + mapPosition[3] - 2) * villageBlock) - pos.y
 
-        $crossContext.fillStyle = settings.get(SETTINGS.COLOR_CROSS)
-        $crossContext.fillRect(x | 0, 0, 1, lineSize)
-        $crossContext.fillRect(0, y | 0, lineSize, 1)
+        // cross
+        $crossContext.fillStyle = settings.get(SETTINGS.COLOR_VIEW_REFERENCE)
+        $crossContext.fillRect(x, 0, 1, lineSize)
+        $crossContext.fillRect(0, y, lineSize, 1)
+
+        const rectWidth = (mapWrapper.width() / conf.TILESIZE.x / mapState.view.z) * villageBlock
+        const rectHeight = (mapWrapper.height() / conf.TILESIZE.y / mapState.view.z) * villageBlock
+        const rectX = x - (rectWidth / 2)
+        const rectY = y - (rectHeight / 2)
+
+        // view rect
+        $crossContext.clearRect(rectX, rectY, rectWidth, rectHeight)
+        $crossContext.beginPath()
+        $crossContext.lineWidth = 1
+        $crossContext.strokeStyle = settings.get(SETTINGS.COLOR_VIEW_REFERENCE)
+        $crossContext.rect(rectX, rectY, rectWidth, rectHeight)
+        $crossContext.stroke()
     }
 
     const clearCross = function () {
@@ -347,13 +364,33 @@ define('two/minimap', [
 
             drawViewport(pos)
 
-            if (settings.get(SETTINGS.SHOW_CROSS)) {
-                drawCross(pos)
+            if (settings.get(SETTINGS.SHOW_VIEW_REFERENCE)) {
+                drawViewReference(pos)
             }
         }
 
         window.requestAnimationFrame(renderStep)
     }
+
+    // const drawRect = function () {
+    //     // const tileCoords = mapService.pixel2Tiles(mapState.view.x / mapState.view.z, mapState.view.y / mapState.view.z)
+    //     const tileCoords = mapService.pixel2Tiles(mapState.view.x, mapState.view.y)
+    //     const rectWidth = (mapWrapper.width() / conf.TILESIZE.x / mapState.view.z) * villageBlock
+    //     const rectHeight = (mapWrapper.height() / conf.TILESIZE.y / mapState.view.z) * villageBlock
+
+    //     const x = Math.abs(tileCoords.x) * villageBlock
+    //     const y = Math.abs(tileCoords.y) * villageBlock
+
+
+    //     console.log('tileCoords', x, y, 'rectWidth', rectWidth, 'rectHeight', rectHeight)
+
+    //     $crossContext.beginPath()
+    //     $crossContext.lineWidth = 10
+    //     $crossContext.strokeStyle = '#F00'
+    //     // $crossContext.rect(x, y, rectWidth, rectHeight)
+    //     $crossContext.rect(x, y, 500, 500)
+    //     $crossContext.stroke()
+    // }
 
     const cacheVillages = function (villages) {
         for (let i = 0; i < villages.length; i++) {
@@ -829,6 +866,7 @@ define('two/minimap', [
 
     minimap.run = function () {
         ready(function () {
+            mapWrapper = $('#map')
             $map = document.getElementById('main-canvas')
             $player = modelDataService.getSelectedCharacter()
             $tribeRelations = $player.getTribeRelations()

@@ -2,7 +2,7 @@ define('two/minimap/settings', [], function () {
     return {
         RIGHT_CLICK_ACTION: 'right_click_action',
         FLOATING_MINIMAP: 'floating_minimap',
-        SHOW_CROSS: 'show_cross',
+        SHOW_VIEW_REFERENCE: 'show_view_reference',
         SHOW_CONTINENT_DEMARCATIONS: 'show_continent_demarcations',
         SHOW_PROVINCE_DEMARCATIONS: 'show_province_demarcations',
         SHOW_BARBARIANS: 'show_barbarians',
@@ -16,7 +16,7 @@ define('two/minimap/settings', [], function () {
         COLOR_BACKGROUND: 'color_background',
         COLOR_PROVINCE: 'color_province',
         COLOR_CONTINENT: 'color_continent',
-        COLOR_CROSS: 'color_cross'
+        COLOR_VIEW_REFERENCE: 'color_view_reference'
     }
 })
 
@@ -41,7 +41,7 @@ define('two/minimap/settings/map', [
             inputType: 'select',
             disabledOption: false
         },
-        [SETTINGS.SHOW_CROSS]: {
+        [SETTINGS.SHOW_VIEW_REFERENCE]: {
             default: true,
             inputType: 'checkbox',
             updates: [UPDATES.MINIMAP]
@@ -121,7 +121,7 @@ define('two/minimap/settings/map', [
             inputType: 'color',
             updates: [UPDATES.MINIMAP]
         },
-        [SETTINGS.COLOR_CROSS]: {
+        [SETTINGS.COLOR_VIEW_REFERENCE]: {
             default: '#999999',
             inputType: 'color',
             updates: [UPDATES.MINIMAP]
