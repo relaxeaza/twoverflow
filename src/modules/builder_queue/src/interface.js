@@ -277,6 +277,7 @@ define('two/builderQueue/ui', [
 
     editorView.moveUp = function () {
         let copy = angular.copy(editorView.buildingSequence)
+        let changed = false
 
         for (let i = 0; i < copy.length; i++) {
             let item = copy[i]
@@ -296,6 +297,7 @@ define('two/builderQueue/ui', [
             if (copy[i - 1].building === item.building) {
                 copy[i - 1].level++
                 item.level--
+                changed = true
             }
 
             moveArrayItem(copy, i, i - 1)
@@ -303,11 +305,15 @@ define('two/builderQueue/ui', [
 
         editorView.buildingSequence = copy
         editorView.updateVisibleBuildingSequence()
-        unsavedChanges = true
+
+        if (changed) {
+            unsavedChanges = true
+        }
     }
 
     editorView.moveDown = function () {
         let copy = angular.copy(editorView.buildingSequence)
+        let changed = false
 
         for (let i = copy.length - 1; i >= 0; i--) {
             let item = copy[i]
@@ -327,6 +333,7 @@ define('two/builderQueue/ui', [
             if (copy[i + 1].building === item.building) {
                 copy[i + 1].level--
                 item.level++
+                changed = true
             }
 
             moveArrayItem(copy, i, i + 1)
@@ -334,7 +341,10 @@ define('two/builderQueue/ui', [
 
         editorView.buildingSequence = copy
         editorView.updateVisibleBuildingSequence()
-        unsavedChanges = true
+        
+        if (changed) {
+            unsavedChanges = true
+        }
     }
 
     editorView.addBuilding = function (building, position, amount = 1) {
