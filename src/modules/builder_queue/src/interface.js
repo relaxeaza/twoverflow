@@ -465,6 +465,7 @@ define('two/builderQueue/ui', [
         modalScope.text = $filter('i18n')('text', $rootScope.loc.ale, 'builder_queue_remove_sequence_modal')
         modalScope.submitText = $filter('i18n')('remove', $rootScope.loc.ale, 'common')
         modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, 'common')
+        modalScope.switchColors = true
 
         modalScope.submit = function () {
             modalScope.closeWindow()
@@ -636,6 +637,7 @@ define('two/builderQueue/ui', [
         modalScope.text = $filter('i18n')('discard_changes_text', $rootScope.loc.ale, 'builder_queue')
         modalScope.submitText = $filter('i18n')('discard', $rootScope.loc.ale, 'common')
         modalScope.cancelText = $filter('i18n')('cancel', $rootScope.loc.ale, 'common')
+        modalScope.switchColors = true
 
         modalScope.submit = function () {
             modalScope.closeWindow()
