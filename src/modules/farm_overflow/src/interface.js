@@ -266,6 +266,7 @@ define('two/farmOverflow/ui', [
         $scope.showCycleTimer = false
         $scope.nextCycleCountdown = 0
         $scope.saveButtonColor = 'orange'
+        $scope.settingsMap = settings.settingsMap
 
         $scope.pagination = {
             count: $scope.logs.length,

@@ -75,12 +75,12 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'attack_interval' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="30" value="settings[SETTINGS.ATTACK_INTERVAL]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.ATTACK_INTERVAL].min" max="settingsMap[SETTINGS.ATTACK_INTERVAL].max" value="settings[SETTINGS.ATTACK_INTERVAL]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.ATTACK_INTERVAL]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'preserve_command_slots' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="50" value="settings[SETTINGS.PRESERVE_COMMAND_SLOTS]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.PRESERVE_COMMAND_SLOTS].min" max="settingsMap[SETTINGS.PRESERVE_COMMAND_SLOTS].max" value="settings[SETTINGS.PRESERVE_COMMAND_SLOTS]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_COMMAND_SLOTS]"></td>
                         </tr>
                         <tr>
@@ -93,7 +93,7 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'target_limit_per_village' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="1" max="500" value="settings[SETTINGS.TARGET_LIMIT_PER_VILLAGE]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.TARGET_LIMIT_PER_VILLAGE].min" max="settingsMap[SETTINGS.TARGET_LIMIT_PER_VILLAGE].max" value="settings[SETTINGS.TARGET_LIMIT_PER_VILLAGE]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.TARGET_LIMIT_PER_VILLAGE]"></td>
                         </tr>
                     </table>
@@ -117,12 +117,12 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'farmer_cycle_interval' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="120" value="settings[SETTINGS.FARMER_CYCLE_INTERVAL]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.FARMER_CYCLE_INTERVAL].min" max="settingsMap[SETTINGS.FARMER_CYCLE_INTERVAL].max" value="settings[SETTINGS.FARMER_CYCLE_INTERVAL]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.FARMER_CYCLE_INTERVAL]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'multiple_attacks_interval' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="60" value="settings[SETTINGS.MULTIPLE_ATTACKS_INTERVAL]" enabled="!(settings[SETTINGS.TARGET_SINGLE_ATTACK] && !settings[SETTINGS.TARGET_MULTIPLE_FARMERS])"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.MULTIPLE_ATTACKS_INTERVAL].min" max="settingsMap[SETTINGS.MULTIPLE_ATTACKS_INTERVAL].max" value="settings[SETTINGS.MULTIPLE_ATTACKS_INTERVAL]" enabled="!(settings[SETTINGS.TARGET_SINGLE_ATTACK] && !settings[SETTINGS.TARGET_MULTIPLE_FARMERS])"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.MULTIPLE_ATTACKS_INTERVAL]" ng-disabled="settings[SETTINGS.TARGET_SINGLE_ATTACK] && !settings[SETTINGS.TARGET_MULTIPLE_FARMERS]"></td>
                         </tr>
                     </table>
@@ -138,27 +138,27 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'min_distance' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="50" value="settings[SETTINGS.MIN_DISTANCE]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.MIN_DISTANCE].min" max="settingsMap[SETTINGS.MIN_DISTANCE].max" value="settings[SETTINGS.MIN_DISTANCE]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.MIN_DISTANCE]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'max_distance' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="50" value="settings[SETTINGS.MAX_DISTANCE]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.MAX_DISTANCE].min" max="settingsMap[SETTINGS.MAX_DISTANCE].max" value="settings[SETTINGS.MAX_DISTANCE]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.MAX_DISTANCE]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'min_points' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="13000" value="settings[SETTINGS.MIN_POINTS]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.MIN_POINTS].min" max="settingsMap[SETTINGS.MIN_POINTS].max" value="settings[SETTINGS.MIN_POINTS]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.MIN_POINTS]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'max_points' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="13000" value="settings[SETTINGS.MAX_POINTS]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.MAX_POINTS].min" max="settingsMap[SETTINGS.MAX_POINTS].max" value="settings[SETTINGS.MAX_POINTS]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.MAX_POINTS]"></td>
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'max_travel_time' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="180" value="settings[SETTINGS.MAX_TRAVEL_TIME]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.MAX_TRAVEL_TIME].min" max="settingsMap[SETTINGS.MAX_TRAVEL_TIME].max" value="settings[SETTINGS.MAX_TRAVEL_TIME]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.MAX_TRAVEL_TIME]"></td>
                         </tr>
                     </table>
@@ -174,7 +174,7 @@
                         </tr>
                         <tr>
                             <td><span class="ff-cell-fix">{{ 'logs_limit' | i18n:loc.ale:'farm_overflow' }}</span></td>
-                            <td><div range-slider="" min="0" max="1000" value="settings[SETTINGS.LOGS_LIMIT]" enabled="true"></div></td>
+                            <td><div range-slider="" min="settingsMap[SETTINGS.LOGS_LIMIT].min" max="settingsMap[SETTINGS.LOGS_LIMIT].max" value="settings[SETTINGS.LOGS_LIMIT]" enabled="true"></div></td>
                             <td class="cell-bottom"><input type="text" class="fit textfield-border text-center" ng-model="settings[SETTINGS.LOGS_LIMIT]"></td>
                         </tr>
                     </table>

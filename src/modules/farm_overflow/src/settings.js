@@ -91,11 +91,17 @@ define('two/farmOverflow/settings/map', [
         },
         [SETTINGS.ATTACK_INTERVAL]: {
             default: 2,
-            updates: [UPDATES.INTERVAL_TIMERS]
+            updates: [UPDATES.INTERVAL_TIMERS],
+            inputType: 'number',
+            min: 0,
+            max: 30
         },
         [SETTINGS.FARMER_CYCLE_INTERVAL]: {
             default: 5,
-            updates: [UPDATES.INTERVAL_TIMERS]
+            updates: [UPDATES.INTERVAL_TIMERS],
+            inputType: 'number',
+            min: 0,
+            max: 120
         },
         [SETTINGS.TARGET_SINGLE_ATTACK]: {
             default: true,
@@ -109,11 +115,17 @@ define('two/farmOverflow/settings/map', [
         },
         [SETTINGS.MULTIPLE_ATTACKS_INTERVAL]: {
             default: 5,
-            updates: [UPDATES.INTERVAL_TIMERS]
+            updates: [UPDATES.INTERVAL_TIMERS],
+            inputType: 'number',
+            min: 0,
+            max: 60
         },
         [SETTINGS.PRESERVE_COMMAND_SLOTS]: {
             default: 5,
-            updates: []
+            updates: [],
+            inputType: 'number',
+            min: 0,
+            max: 50
         },
         [SETTINGS.IGNORE_ON_LOSS]: {
             default: true,
@@ -130,40 +142,60 @@ define('two/farmOverflow/settings/map', [
             updates: [
                 UPDATES.TARGETS,
                 UPDATES.INTERVAL_TIMERS
-            ]
+            ],
+            inputType: 'number',
+            min: 0,
+            max: 50
         },
         [SETTINGS.MAX_DISTANCE]: {
             default: 15,
             updates: [
                 UPDATES.TARGETS,
                 UPDATES.INTERVAL_TIMERS
-            ]
+            ],
+            inputType: 'number',
+            min: 0,
+            max: 50
         },
         [SETTINGS.MIN_POINTS]: {
             default: 0,
             updates: [
                 UPDATES.TARGETS,
                 UPDATES.INTERVAL_TIMERS
-            ]
+            ],
+            inputType: 'number',
+            min: 0,
+            max: 11223
         },
         [SETTINGS.MAX_POINTS]: {
-            default: 12500,
+            default: 3600,
             updates: [
                 UPDATES.TARGETS,
                 UPDATES.INTERVAL_TIMERS
-            ]
+            ],
+            inputType: 'number',
+            min: 0,
+            max: 11223
         },
         [SETTINGS.MAX_TRAVEL_TIME]: {
             default: 90,
-            updates: [UPDATES.INTERVAL_TIMERS]
+            updates: [UPDATES.INTERVAL_TIMERS],
+            inputType: 'number',
+            min: 0,
+            max: 300
         },
         [SETTINGS.LOGS_LIMIT]: {
             default: 500,
-            updates: [UPDATES.LOGS]
+            updates: [UPDATES.LOGS],
+            inputType: 'number',
+            min: 0,
+            max: 2000
         },
         [SETTINGS.TARGET_LIMIT_PER_VILLAGE]: {
             default: 25,
-            updates: [UPDATES.TARGETS]
+            updates: [UPDATES.TARGETS],
+            min: 0,
+            max: 500
         }
     }
 })
