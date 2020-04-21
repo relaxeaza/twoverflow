@@ -37,6 +37,8 @@ define('two/minimap/ui', [
     let mapWrapper
     let tooltipWrapper
     let tooltipTimeout
+    let tooltipQueue = {}
+    let currentVillageHash
     let highlightNames = {
         character: {},
         tribe: {}
@@ -117,8 +119,20 @@ define('two/minimap/ui', [
         })
     }
 
-    const showTooltip = function (_, data) {
+    const genVillageHash = function (coords) {
+        return String(coords.x) + String(coords.y)
+    }
+
+    const showTooltip = function (event, data) {
+        let villageHash = genVillageHash(data.coords)
+        currentVillageHash = villageHash
+        tooltipQueue[villageHash] = true
+
         loadVillageData(data.coords.x, data.coords.y).then(function (village) {
+            if (!tooltipQueue[genVillageHash(village)]) {
+                return
+            }
+
             tooltipTimeout = setTimeout(function () {
                 windowWrapper.appendChild(tooltipWrapper)
                 tooltipWrapper.classList.remove('ng-hide')
@@ -157,7 +171,9 @@ define('two/minimap/ui', [
         })
     }
 
-    const hideTooltip = function () {
+    const hideTooltip = function (event, data) {
+        let villageHash = data ? genVillageHash(data.coords) : currentVillageHash
+        delete tooltipQueue[villageHash]
         clearTimeout(tooltipTimeout)
         MapController.tt.visible = false
         tooltipWrapper.classList.add('ng-hide')
@@ -294,6 +310,7 @@ define('two/minimap/ui', [
         },
         onMouseMoveMinimap: function () {
             hideTooltip()
+
             $crossCanvas.style.cursor = 'url(' + cdn.getPath('/img/cursor/grab_pushed.png') + '), move'
         },
         onMouseStopMoveMinimap: function () {

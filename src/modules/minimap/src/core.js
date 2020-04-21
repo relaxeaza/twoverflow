@@ -339,7 +339,9 @@ define('two/minimap', [
         }
 
         hoverVillage = false
-        eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_BLUR)
+        eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_BLUR, {
+            coords: hoverVillage
+        })
     }
 
     const highlightVillages = function (villages) {
