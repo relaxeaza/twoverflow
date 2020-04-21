@@ -93,13 +93,11 @@ define('two/minimap', [
      * @return {Object} X and Y coordinates.
      */
     const getCoords = function (event) {
-        const villageOffsetX = minimap.getVillageAxisOffset()
-        
-        let rawX = Math.ceil(currentPosition.x + event.offsetX) - villageOffsetX
-        let rawY = Math.ceil(currentPosition.y + event.offsetY) + villageOffsetX
+        let rawX = Math.ceil(currentPosition.x + event.offsetX) - villageSizeOffset
+        let rawY = Math.ceil(currentPosition.y + event.offsetY) + villageSizeOffset
 
         if (Math.floor((rawY / villageBlock)) % 2) {
-            rawX += villageOffsetX
+            rawX += villageSizeOffset
         }
 
         rawX -= rawX % villageBlock
@@ -148,7 +146,6 @@ define('two/minimap', [
 
     const drawGrid = function () {
         const binUrl = cdn.getPath(conf.getMapPath())
-        const villageOffsetX = Math.round(villageBlock / 2)
         const continentEnabled = minimapSettings[SETTINGS.SHOW_CONTINENT_DEMARCATIONS]
         const provinceEnabled = minimapSettings[SETTINGS.SHOW_PROVINCE_DEMARCATIONS]
 
@@ -158,13 +155,13 @@ define('two/minimap', [
 
         const drawContinent = function (x, y) {
             $viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_CONTINENT]
-            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX - 1, y * villageBlock + villageOffsetX - 1, 3, 1)
-            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 2, 1, 3)
+            $viewportCacheContext.fillRect(x * villageBlock + villageSizeOffset - 1, y * villageBlock + villageSizeOffset - 1, 3, 1)
+            $viewportCacheContext.fillRect(x * villageBlock + villageSizeOffset, y * villageBlock + villageSizeOffset - 2, 1, 3)
         }
 
         const drawProvince = function (x, y) {
             $viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_PROVINCE]
-            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 1, 1, 1)
+            $viewportCacheContext.fillRect(x * villageBlock + villageSizeOffset, y * villageBlock + villageSizeOffset - 1, 1, 1)
         }
 
         utils.xhrGet(binUrl, function (bin) {
@@ -726,9 +723,12 @@ define('two/minimap', [
             if (updates[UPDATES.MINIMAP]) {
                 minimap.drawMinimap()
             }
+
+            villageSizeOffset = Math.round(villageSize / 2)
         })
 
         minimapSettings = settings.getAll()
+        villageSizeOffset = Math.round(villageSize / 2)
         highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
         highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
     }
@@ -736,7 +736,6 @@ define('two/minimap', [
     const drawVillages = function (villages, _color) {
         const pid = $player.getId()
         const tid = $player.getTribeId()
-        const villageOffsetX = minimap.getVillageAxisOffset()
         const villageColors = $player.getVillagesColors()
 
         for (let i = 0; i < villages.length; i++) {
@@ -757,7 +756,7 @@ define('two/minimap', [
                 y = v.y * villageBlock
 
                 if (v.y % 2) {
-                    x += villageOffsetX
+                    x += villageSizeOffset
                 }
             } else {
                 if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
@@ -814,7 +813,7 @@ define('two/minimap', [
                 y = v.y * villageBlock
 
                 if (v.y % 2) {
-                    x += villageOffsetX
+                    x += villageSizeOffset
                 }
             }
 
