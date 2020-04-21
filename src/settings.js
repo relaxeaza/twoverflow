@@ -86,6 +86,20 @@ define('two/Settings', [
             return false
         }
 
+        const map = this.settingsMap[id]
+        
+        if (map.inputType === 'number') {
+            value = parseInt(value, 10)
+
+            if (hasOwn.call(map, 'min')) {
+                value = Math.max(map.min, value)
+            }
+
+            if (hasOwn.call(map, 'max')) {
+                value = Math.min(map.max, value)
+            }
+        }
+
         const before = angular.copy(this.settings)
         this.settings[id] = value
         const after = angular.copy(this.settings)
@@ -109,7 +123,22 @@ define('two/Settings', [
 
         for (let id in values) {
             if (hasOwn.call(this.settingsMap, id)) {
-                this.settings[id] = values[id]
+                const map = this.settingsMap[id]
+                let value = values[id]
+
+                if (map.inputType === 'number') {
+                    value = parseInt(value, 10)
+
+                    if (hasOwn.call(map, 'min')) {
+                        value = Math.max(map.min, value)
+                    }
+
+                    if (hasOwn.call(map, 'max')) {
+                        value = Math.min(map.max, value)
+                    }
+                }
+
+                this.settings[id] = value
             }
         }
 
