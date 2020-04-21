@@ -77,6 +77,10 @@ define('two/mapData', [
     let mapData = {}
 
     mapData.load = function (origin, callback) {
+        if (!angular.isObject(origin)) {
+            throw new Error('map data load: origin must be obj with x and y coords')
+        }
+
         const cells = getVisibleGridCells(origin)
         let loadId = genLoadingId(cells)
         let requests = []
@@ -109,6 +113,8 @@ define('two/mapData', [
 
                     if (data.villages.length) {
                         villages = villages.concat(data.villages)
+
+                        // $rootScope.$broadcast(eventTypeProvider.MINIMAP_AREA_LOADED, data.villages)
                     }
 
                     resolve(cell)

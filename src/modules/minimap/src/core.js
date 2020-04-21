@@ -6,6 +6,7 @@ define('two/minimap', [
     'two/utils',
     'two/ready',
     'two/Settings',
+    'two/mapData',
     'queues/EventQueue',
     'Lockr',
     'struct/MapData',
@@ -25,6 +26,7 @@ define('two/minimap', [
     utils,
     ready,
     Settings,
+    twoMapData,
     eventQueue,
     Lockr,
     mapData,
@@ -150,95 +152,96 @@ define('two/minimap', [
      * @param {String=} _color - Force the village to use the
      *   specified color.
      */
-    const drawVillages = function (villages, _color) {
-        const pid = $player.getId()
-        const tid = $player.getTribeId()
-        const villageOffsetX = minimap.getVillageAxisOffset()
-        const villageColors = $player.getVillagesColors()
+    // const drawVillages = function (villages, _color) {
+    //     return
+    //     const pid = $player.getId()
+    //     const tid = $player.getTribeId()
+    //     const villageOffsetX = minimap.getVillageAxisOffset()
+    //     const villageColors = $player.getVillagesColors()
 
-        for (let i = 0; i < villages.length; i++) {
-            let v = villages[i]
-            let x
-            let y
-            let color
+    //     for (let i = 0; i < villages.length; i++) {
+    //         let v = villages[i]
+    //         let x
+    //         let y
+    //         let color
 
-            // meta village
-            if (v.id < 0) {
-                continue
-            }
+    //         // meta village
+    //         if (v.id < 0) {
+    //             continue
+    //         }
 
-            if (_color) {
-                color = _color
+    //         if (_color) {
+    //             color = _color
                 
-                x = v[0] * villageBlock
-                y = v[1] * villageBlock
+    //             x = v[0] * villageBlock
+    //             y = v[1] * villageBlock
 
-                if (v[1] % 2) {
-                    x += villageOffsetX
-                }
-            } else {
-                x = v.x * villageBlock
-                y = v.y * villageBlock
+    //             if (v[1] % 2) {
+    //                 x += villageOffsetX
+    //             }
+    //         } else {
+    //             x = v.x * villageBlock
+    //             y = v.y * villageBlock
 
-                if (v.y % 2) {
-                    x += villageOffsetX
-                }
+    //             if (v.y % 2) {
+    //                 x += villageOffsetX
+    //             }
 
-                if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-                    if (v.character_id in highlights.character) {
-                        color = highlights.character[v.character_id]
-                    } else if (v.tribe_id in highlights.tribe) {
-                        color = highlights.tribe[v.tribe_id]
-                    } else {
-                        continue
-                    }
-                } else {
-                    if (v.character_id === null) {
-                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS]) {
-                            continue
-                        }
+    //             if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
+    //                 if (v.character_id in highlights.character) {
+    //                     color = highlights.character[v.character_id]
+    //                 } else if (v.tribe_id in highlights.tribe) {
+    //                     color = highlights.tribe[v.tribe_id]
+    //                 } else {
+    //                     continue
+    //                 }
+    //             } else {
+    //                 if (v.character_id === null) {
+    //                     if (!minimapSettings[SETTINGS.SHOW_BARBARIANS]) {
+    //                         continue
+    //                     }
 
-                        color = villageColors.barbarian
-                    } else {
-                        if (v.character_id === pid) {
-                            if (v.id === selectedVillage.getId() && minimapSettings[SETTINGS.HIGHLIGHT_SELECTED]) {
-                                color = villageColors.selected
-                            } else if (v.character_id in highlights.character) {
-                                color = highlights.character[v.character_id]
-                            } else if (minimapSettings[SETTINGS.HIGHLIGHT_OWN]) {
-                                color = villageColors.player
-                            } else {
-                                color = villageColors.ugly
-                            }
-                        } else {
-                            if (v.character_id in highlights.character) {
-                                color = highlights.character[v.character_id]
-                            } else if (v.tribe_id in highlights.tribe) {
-                                color = highlights.tribe[v.tribe_id]
-                            } else if (tid && tid === v.tribe_id && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
-                                color = villageColors.tribe
-                            } else if ($tribeRelations && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
-                                if ($tribeRelations.isAlly(v.tribe_id)) {
-                                    color = villageColors.ally
-                                } else if ($tribeRelations.isEnemy(v.tribe_id)) {
-                                    color = villageColors.enemy
-                                } else if ($tribeRelations.isNAP(v.tribe_id)) {
-                                    color = villageColors.friendly
-                                } else {
-                                    color = villageColors.ugly
-                                }
-                            } else {
-                                color = villageColors.ugly
-                            }
-                        }
-                    }
-                }
-            }
+    //                     color = villageColors.barbarian
+    //                 } else {
+    //                     if (v.character_id === pid) {
+    //                         if (v.id === selectedVillage.getId() && minimapSettings[SETTINGS.HIGHLIGHT_SELECTED]) {
+    //                             color = villageColors.selected
+    //                         } else if (v.character_id in highlights.character) {
+    //                             color = highlights.character[v.character_id]
+    //                         } else if (minimapSettings[SETTINGS.HIGHLIGHT_OWN]) {
+    //                             color = villageColors.player
+    //                         } else {
+    //                             color = villageColors.ugly
+    //                         }
+    //                     } else {
+    //                         if (v.character_id in highlights.character) {
+    //                             color = highlights.character[v.character_id]
+    //                         } else if (v.tribe_id in highlights.tribe) {
+    //                             color = highlights.tribe[v.tribe_id]
+    //                         } else if (tid && tid === v.tribe_id && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
+    //                             color = villageColors.tribe
+    //                         } else if ($tribeRelations && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
+    //                             if ($tribeRelations.isAlly(v.tribe_id)) {
+    //                                 color = villageColors.ally
+    //                             } else if ($tribeRelations.isEnemy(v.tribe_id)) {
+    //                                 color = villageColors.enemy
+    //                             } else if ($tribeRelations.isNAP(v.tribe_id)) {
+    //                                 color = villageColors.friendly
+    //                             } else {
+    //                                 color = villageColors.ugly
+    //                             }
+    //                         } else {
+    //                             color = villageColors.ugly
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
 
-            $viewportCacheContext.fillStyle = color
-            $viewportCacheContext.fillRect(x, y, villageSize, villageSize)
-        }
-    }
+    //         $viewportCacheContext.fillStyle = color
+    //         $viewportCacheContext.fillRect(x, y, villageSize, villageSize)
+    //     }
+    // }
 
     const drawGrid = function () {
         const binUrl = cdn.getPath(conf.getMapPath())
@@ -287,7 +290,7 @@ define('two/minimap', [
     }
 
     const drawLoadedVillages = function () {
-        drawVillages(mapData.getTowns())
+        drawVillages(twoMapData.getVillages())
     }
 
     const drawCachedVillages = function () {
@@ -847,6 +850,96 @@ define('two/minimap', [
         highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
     }
 
+    const drawVillages = function (villages, _color) {
+        const pid = $player.getId()
+        const tid = $player.getTribeId()
+        const villageOffsetX = minimap.getVillageAxisOffset()
+        const villageColors = $player.getVillagesColors()
+
+        for (let i = 0; i < villages.length; i++) {
+            let v = villages[i]
+            let x
+            let y
+            let color
+
+            // meta village
+            if (v.id < 0) {
+                continue
+            }
+
+            if (_color) {
+                color = _color
+
+                x = v.x * villageBlock
+                y = v.y * villageBlock
+
+                if (v.y % 2) {
+                    x += villageOffsetX
+                }
+            } else {
+                if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
+                    if (v.character_id in highlights.character) {
+                        color = highlights.character[v.character_id]
+                    } else if (v.tribe_id in highlights.tribe) {
+                        color = highlights.tribe[v.tribe_id]
+                    } else {
+                        continue
+                    }
+                } else {
+                    if (v.character_id === null) {
+                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS]) {
+                            continue
+                        }
+
+                        color = villageColors.barbarian
+                    } else {
+                        if (v.character_id === pid) {
+                            if (v.id === selectedVillage.getId() && minimapSettings[SETTINGS.HIGHLIGHT_SELECTED]) {
+                                color = villageColors.selected
+                            } else if (v.character_id in highlights.character) {
+                                color = highlights.character[v.character_id]
+                            } else if (minimapSettings[SETTINGS.HIGHLIGHT_OWN]) {
+                                color = villageColors.player
+                            } else {
+                                color = villageColors.ugly
+                            }
+                        } else {
+                            if (v.character_id in highlights.character) {
+                                color = highlights.character[v.character_id]
+                            } else if (v.tribe_id in highlights.tribe) {
+                                color = highlights.tribe[v.tribe_id]
+                            } else if (tid && tid === v.tribe_id && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
+                                color = villageColors.tribe
+                            } else if ($tribeRelations && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
+                                if ($tribeRelations.isAlly(v.tribe_id)) {
+                                    color = villageColors.ally
+                                } else if ($tribeRelations.isEnemy(v.tribe_id)) {
+                                    color = villageColors.enemy
+                                } else if ($tribeRelations.isNAP(v.tribe_id)) {
+                                    color = villageColors.friendly
+                                } else {
+                                    color = villageColors.ugly
+                                }
+                            } else {
+                                color = villageColors.ugly
+                            }
+                        }
+                    }
+                }
+
+                x = v.x * villageBlock
+                y = v.y * villageBlock
+
+                if (v.y % 2) {
+                    x += villageOffsetX
+                }
+            }
+
+            $viewportCacheContext.fillStyle = color
+            $viewportCacheContext.fillRect(x, y, villageSize, villageSize)
+        }
+    }
+
     minimap.run = function () {
         ready(function () {
             mapWrapper = $('#map')
@@ -880,7 +973,13 @@ define('two/minimap', [
             currentPosition.x = selectedVillage.getX() * villageBlock
             currentPosition.y = selectedVillage.getY() * villageBlock
 
-            cacheVillages(mapData.getTowns())
+            twoMapData.load({
+                x: selectedVillage.getX(),
+                y: selectedVillage.getY()
+            }, function (villages) {
+                drawVillages(villages)
+            })
+
             renderStep()
 
             $cross.addEventListener('mousedown', eventHandlers.onCrossMouseDown)

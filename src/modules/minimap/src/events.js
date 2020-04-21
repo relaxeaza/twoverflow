@@ -8,6 +8,7 @@ define('two/minimap/events', [], function () {
         MINIMAP_VILLAGE_BLUR: 'minimap_village_blur',
         MINIMAP_MOUSE_LEAVE: 'minimap_mouse_leave',
         MINIMAP_START_MOVE: 'minimap_start_move',
-        MINIMAP_STOP_MOVE: 'minimap_stop_move'
+        MINIMAP_STOP_MOVE: 'minimap_stop_move',
+        MINIMAP_AREA_LOADED: 'minimap_area_loaded'
     })
 })
