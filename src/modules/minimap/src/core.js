@@ -41,18 +41,17 @@ define('two/minimap', [
 ) {
     let enableRendering = false
     let highlights = {}
-    let villageSize = 5
+    let villageSize = 5 // 3, 5, 7
     let villageMargin = 1
     let villageBlock = villageSize + villageMargin
     let lineSize = 1000 * (villageSize + villageMargin)
     const rhex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+    let allVillages
     let cache = {
         village: {},
         character: {},
         tribe: {}
     }
-    // Cached villages from previous loaded maps.
-    // Used to draw the "ghost" villages on the map.
     let cachedVillages = {}
     // Data of the village that the user is hovering on the minimap.
     let hoverVillage = null
@@ -107,7 +106,7 @@ define('two/minimap', [
         rawY -= rawY % villageBlock
 
         return {
-            x: Math.ceil((rawX - frameSize.x / 2) / villageBlock),
+            x: Math.ceil((rawX - frameSize.x / 2) / villageBlock) - 1,
             y: Math.ceil((rawY - frameSize.y / 2) / villageBlock)
         }
     }
@@ -146,102 +145,6 @@ define('two/minimap', [
             (wh.y + 3) || 1
         ]
     }
-
-    /**
-     * @param {Array} villages
-     * @param {String=} _color - Force the village to use the
-     *   specified color.
-     */
-    // const drawVillages = function (villages, _color) {
-    //     return
-    //     const pid = $player.getId()
-    //     const tid = $player.getTribeId()
-    //     const villageOffsetX = minimap.getVillageAxisOffset()
-    //     const villageColors = $player.getVillagesColors()
-
-    //     for (let i = 0; i < villages.length; i++) {
-    //         let v = villages[i]
-    //         let x
-    //         let y
-    //         let color
-
-    //         // meta village
-    //         if (v.id < 0) {
-    //             continue
-    //         }
-
-    //         if (_color) {
-    //             color = _color
-                
-    //             x = v[0] * villageBlock
-    //             y = v[1] * villageBlock
-
-    //             if (v[1] % 2) {
-    //                 x += villageOffsetX
-    //             }
-    //         } else {
-    //             x = v.x * villageBlock
-    //             y = v.y * villageBlock
-
-    //             if (v.y % 2) {
-    //                 x += villageOffsetX
-    //             }
-
-    //             if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-    //                 if (v.character_id in highlights.character) {
-    //                     color = highlights.character[v.character_id]
-    //                 } else if (v.tribe_id in highlights.tribe) {
-    //                     color = highlights.tribe[v.tribe_id]
-    //                 } else {
-    //                     continue
-    //                 }
-    //             } else {
-    //                 if (v.character_id === null) {
-    //                     if (!minimapSettings[SETTINGS.SHOW_BARBARIANS]) {
-    //                         continue
-    //                     }
-
-    //                     color = villageColors.barbarian
-    //                 } else {
-    //                     if (v.character_id === pid) {
-    //                         if (v.id === selectedVillage.getId() && minimapSettings[SETTINGS.HIGHLIGHT_SELECTED]) {
-    //                             color = villageColors.selected
-    //                         } else if (v.character_id in highlights.character) {
-    //                             color = highlights.character[v.character_id]
-    //                         } else if (minimapSettings[SETTINGS.HIGHLIGHT_OWN]) {
-    //                             color = villageColors.player
-    //                         } else {
-    //                             color = villageColors.ugly
-    //                         }
-    //                     } else {
-    //                         if (v.character_id in highlights.character) {
-    //                             color = highlights.character[v.character_id]
-    //                         } else if (v.tribe_id in highlights.tribe) {
-    //                             color = highlights.tribe[v.tribe_id]
-    //                         } else if (tid && tid === v.tribe_id && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
-    //                             color = villageColors.tribe
-    //                         } else if ($tribeRelations && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
-    //                             if ($tribeRelations.isAlly(v.tribe_id)) {
-    //                                 color = villageColors.ally
-    //                             } else if ($tribeRelations.isEnemy(v.tribe_id)) {
-    //                                 color = villageColors.enemy
-    //                             } else if ($tribeRelations.isNAP(v.tribe_id)) {
-    //                                 color = villageColors.friendly
-    //                             } else {
-    //                                 color = villageColors.ugly
-    //                             }
-    //                         } else {
-    //                             color = villageColors.ugly
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //         $viewportCacheContext.fillStyle = color
-    //         $viewportCacheContext.fillRect(x, y, villageSize, villageSize)
-    //     }
-    // }
 
     const drawGrid = function () {
         const binUrl = cdn.getPath(conf.getMapPath())
@@ -290,26 +193,7 @@ define('two/minimap', [
     }
 
     const drawLoadedVillages = function () {
-        drawVillages(twoMapData.getVillages())
-    }
-
-    const drawCachedVillages = function () {
-        const villageOffsetX = minimap.getVillageAxisOffset()
-
-        for (let x in cachedVillages) {
-            for (let i = 0; i < cachedVillages[x].length; i++) {
-                let y = cachedVillages[x][i]
-                let xx = x * villageBlock
-                let yy = y * villageBlock
-
-                if (y % 2) {
-                    xx += villageOffsetX
-                }
-
-                $viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_GHOST]
-                $viewportCacheContext.fillRect(xx, yy, villageSize, villageSize)
-            }
-        }
+        drawVillages(allVillages)
     }
 
     /**
@@ -392,7 +276,7 @@ define('two/minimap', [
             }
 
             cache.village[v.x][v.y] = v.character_id || 0
-            cachedVillages[v.x].push(v.y)
+            cachedVillages[v.x][v.y] = v
 
             if (v.character_id) {
                 if (v.character_id in cache.character) {
@@ -410,8 +294,6 @@ define('two/minimap', [
                 }
             }
         }
-
-        Lockr.set(STORAGE_KEYS.CACHE_VILLAGES, cachedVillages)
     }
 
     const onHoverVillage = function (coords, event) {
@@ -456,17 +338,29 @@ define('two/minimap', [
     }
 
     const highlightVillages = function (villages) {
-        drawVillages(villages, minimapSettings[SETTINGS.COLOR_QUICK_HIGHLIGHT])
+        let villagesData = []
+
+        for (let i = 0; i < villages.length; i++) {
+            let x = villages[i][0]
+            let y = villages[i][1]
+
+            villagesData.push(cachedVillages[x][y])
+        }
+
+        drawVillages(villagesData, minimapSettings[SETTINGS.COLOR_QUICK_HIGHLIGHT])
     }
 
     const unhighlightVillages = function (villages) {
-        let _villages = []
+        let villagesData = []
 
         for (let i = 0; i < villages.length; i++) {
-            _villages.push(mapData.getTownAt(villages[i][0], villages[i][1]))
+            let x = villages[i][0]
+            let y = villages[i][1]
+
+            villagesData.push(cachedVillages[x][y])
         }
 
-        drawVillages(_villages)
+        drawVillages(villagesData)
     }
 
     const showHighlightSprite = function (x, y) {
@@ -558,35 +452,56 @@ define('two/minimap', [
 
             currentCoords = coords
 
-            if (coords.x in cache.village) {
-                if (coords.y in cache.village[coords.x]) {
+            let loadVillage = new Promise(function (resolve, reject) {
+                if (coords.x in cache.village && coords.y in cache.village[coords.x]) {
                     let village = mapData.getTownAt(coords.x, coords.y)
 
-                    // ignore barbarian villages
-                    if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
-                        return false
-                    }
-
-                    // check if the village is custom highlighted
-                    if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-                        let highlighted = false
-
-                        if (village.character_id in highlights.character) {
-                            highlighted = true
-                        } else if (village.tribe_id in highlights.tribe) {
-                            highlighted = true
+                    if (village) {
+                        // ignore barbarian villages
+                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
+                            return reject()
                         }
 
-                        if (!highlighted) {
-                            return false
+                        // check if the village is custom highlighted
+                        if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
+                            let highlighted = village.character_id in highlights.character || village.tribe_id in highlights.tribe
+
+                            if (!highlighted) {
+                                return reject()
+                            }
                         }
+
+                        return resolve()
                     }
 
-                    return onHoverVillage(coords, event)
+
+                    mapData.loadTownDataAsync(coords.x, coords.y, 1, 1, function (village) {
+                        // ignore barbarian villages
+                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
+                            return reject()
+                        }
+
+                        // check if the village is custom highlighted
+                        if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
+                            let highlighted = village.character_id in highlights.character || village.tribe_id in highlights.tribe
+
+                            if (!highlighted) {
+                                return reject()
+                            }
+                        }
+
+                        resolve()
+                    })
+                } else {
+                    reject()
                 }
-            }
+            })
 
-            onBlurVillage()
+            loadVillage.then(function () {
+                onHoverVillage(coords, event)
+            }).catch(function () {
+                onBlurVillage()
+            })
         },
         onCrossMouseLeave: function () {
             if (hoverVillage) {
@@ -606,10 +521,6 @@ define('two/minimap', [
         onCrossMouseContext: function (event) {
             event.preventDefault()
             return false
-        },
-        onVillageData: function (event, data) {
-            drawVillages(data.villages)
-            cacheVillages(data.villages)
         },
         onHighlightChange: function () {
             highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
@@ -807,11 +718,6 @@ define('two/minimap', [
         $viewportCacheContext.clearRect(0, 0, $viewportCache.width, $viewportCache.height)
 
         drawGrid()
-
-        if (minimapSettings[SETTINGS.SHOW_GHOST_VILLAGES]) {
-            drawCachedVillages()
-        }
-
         drawLoadedVillages()
     }
 
@@ -946,7 +852,6 @@ define('two/minimap', [
             $map = document.getElementById('main-canvas')
             $player = modelDataService.getSelectedCharacter()
             $tribeRelations = $player.getTribeRelations()
-            cachedVillages = Lockr.get(STORAGE_KEYS.CACHE_VILLAGES, {}, true)
 
             highlightSprite.alpha = 0
             mapState.graph.layers.effects.push(highlightSprite)
@@ -976,8 +881,9 @@ define('two/minimap', [
             twoMapData.load({
                 x: selectedVillage.getX(),
                 y: selectedVillage.getY()
-            }, function (villages) {
-                drawVillages(villages)
+            }, function (loadedVillages) {
+                allVillages = loadedVillages
+                cacheVillages(loadedVillages)
             })
 
             renderStep()
@@ -988,7 +894,6 @@ define('two/minimap', [
             $cross.addEventListener('mouseleave', eventHandlers.onCrossMouseLeave)
             $cross.addEventListener('click', eventHandlers.onCrossMouseClick)
             $cross.addEventListener('contextmenu', eventHandlers.onCrossMouseContext)
-            $rootScope.$on(eventTypeProvider.MAP_VILLAGE_DATA, eventHandlers.onVillageData)
             $rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.onSelectedVillageChange)
             $rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, drawLoadedVillages)
             $rootScope.$on(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.onHighlightChange)
