@@ -94,19 +94,19 @@ define('two/minimap', [
      */
     const getCoords = function (event) {
         const villageOffsetX = minimap.getVillageAxisOffset()
-        let rawX = Math.ceil(currentPosition.x + event.offsetX)
-        let rawY = Math.ceil(currentPosition.y + event.offsetY)
-        const adjustLine = Math.floor((rawY / villageBlock) % 2)
-
-        if (adjustLine % 2) {
-            rawX -= villageOffsetX
-        }
         
+        let rawX = Math.ceil(currentPosition.x + event.offsetX) - villageOffsetX
+        let rawY = Math.ceil(currentPosition.y + event.offsetY) + villageOffsetX
+
+        if (Math.floor((rawY / villageBlock)) % 2) {
+            rawX += villageOffsetX
+        }
+
         rawX -= rawX % villageBlock
         rawY -= rawY % villageBlock
 
         return {
-            x: Math.ceil((rawX - frameSize.x / 2) / villageBlock) - 1,
+            x: Math.ceil((rawX - frameSize.x / 2) / villageBlock),
             y: Math.ceil((rawY - frameSize.y / 2) / villageBlock)
         }
     }
