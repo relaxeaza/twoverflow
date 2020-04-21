@@ -45,15 +45,24 @@ define('two/builderQueue/settings/map', [
         },
         [SETTINGS.PRESERVE_WOOD]: {
             default: 0,
-            updates: [UPDATES.ANALYSE]
+            updates: [UPDATES.ANALYSE],
+            inputType: 'number',
+            min: 0,
+            max: 600000
         },
         [SETTINGS.PRESERVE_CLAY]: {
             default: 0,
-            updates: [UPDATES.ANALYSE]
+            updates: [UPDATES.ANALYSE],
+            inputType: 'number',
+            min: 0,
+            max: 600000
         },
         [SETTINGS.PRESERVE_IRON]: {
             default: 0,
-            updates: [UPDATES.ANALYSE]
+            updates: [UPDATES.ANALYSE],
+            inputType: 'number',
+            min: 0,
+            max: 600000
         },
         [SETTINGS.PRIORIZE_FARM]: {
             default: true,

@@ -46,28 +46,30 @@
                         <tbody>
                             <tr>
                                 <td><span class="ff-cell-fix">{{ 'settings_village_groups' | i18n:loc.ale:'builder_queue' }}</span></td>
-                                <td colspan="2"><div select="" list="groups" selected="settings[SETTINGS.GROUP_VILLAGES]" drop-down="true"></div></td>
+                                <td colspan="2" class="text-right"><div select="" list="groups" selected="settings[SETTINGS.GROUP_VILLAGES]" drop-down="true"></div></td>
                             </tr>
                             <tr ng-show="settingsView.sequencesAvail">
                                 <td><span class="ff-cell-fix">{{ 'settings_building_sequence' | i18n:loc.ale:'builder_queue' }}</span></td>
-                                <td colspan="2"><div select="" list="sequences" selected="settings[SETTINGS.ACTIVE_SEQUENCE]" drop-down="true"></div></td>
+                                <td colspan="2" class="text-right"><div select="" list="sequences" selected="settings[SETTINGS.ACTIVE_SEQUENCE]" drop-down="true"></div></td>
                             </tr>
                             <tr>
-                                <td><span class="ff-cell-fix">{{ 'settings_preserve_resources' | i18n:loc.ale:'builder_queue' }}</span></td>
-                                <td colspan="2">
-                                    <span class="icon-26x26-resource-wood"></span>
-                                    <input type="number" min="0" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_WOOD]">
-
-                                    <span class="icon-26x26-resource-clay"></span>
-                                    <input type="number" min="0" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_CLAY]">
-
-                                    <span class="icon-26x26-resource-iron"></span>
-                                    <input type="number" min="0" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_IRON]">
-                                </td>
+                                <td><span class="ff-cell-fix">{{ 'settings_preserve_wood' | i18n:loc.ale:'builder_queue' }}</span></td>
+                                <td><div range-slider="" min="settingsMap[SETTINGS.PRESERVE_WOOD].min" max="settingsMap[SETTINGS.PRESERVE_WOOD].max" value="settings[SETTINGS.PRESERVE_WOOD]" enabled="true"></div></td>
+                                <td><input type="number" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_WOOD]"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="ff-cell-fix">{{ 'settings_preserve_clay' | i18n:loc.ale:'builder_queue' }}</span></td>
+                                <td><div range-slider="" min="settingsMap[SETTINGS.PRESERVE_CLAY].min" max="settingsMap[SETTINGS.PRESERVE_CLAY].max" value="settings[SETTINGS.PRESERVE_CLAY]" enabled="true"></div></td>
+                                <td><input type="number" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_CLAY]"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="ff-cell-fix">{{ 'settings_preserve_iron' | i18n:loc.ale:'builder_queue' }}</span></td>
+                                <td><div range-slider="" min="settingsMap[SETTINGS.PRESERVE_IRON].min" max="settingsMap[SETTINGS.PRESERVE_IRON].max" value="settings[SETTINGS.PRESERVE_IRON]" enabled="true"></div></td>
+                                <td><input type="number" class="preserve-resource textfield-border text-center" ng-model="settings[SETTINGS.PRESERVE_IRON]"></td>
                             </tr>
                             <tr>
                                 <td colspan="2"><span class="ff-cell-fix">{{ 'settings_priorize_farm' | i18n:loc.ale:'builder_queue' }}</span></td>
-                                <td><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.PRIORIZE_FARM]" vertical="false" size="'56x28'"></div></td>
+                                <td class="text-center"><div switch-slider="" enabled="true" border="true" value="settings[SETTINGS.PRIORIZE_FARM]" vertical="false" size="'56x28'"></div></td>
                             </tr>
                         </tbody>
                     </table>

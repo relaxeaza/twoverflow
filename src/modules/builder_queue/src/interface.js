@@ -772,6 +772,7 @@ define('two/builderQueue/ui', [
         $scope.SETTINGS = SETTINGS
         $scope.running = running
         $scope.pagination = {}
+        $scope.settingsMap = settings.settingsMap
 
         $scope.villagesLabel = villagesLabel
         $scope.villagesInfo = villagesInfo

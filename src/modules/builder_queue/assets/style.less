@@ -46,16 +46,33 @@
 
     table.settings {
         td {
-            padding: 0 5px;
+            padding: 1px 5px;
         }
 
-        td:last-child {
-            text-align: center;
+        td.text-right {
+            text-align: right;
+        }
+
+        div[switch-slider] {
+            display: inline-block;
+            margin-top: 2px;
+        }
+    }
+
+    .small-select {
+        a.select-handler {
+            height: 28px;
+            line-height: 28px;
+        }
+
+        a.select-button {
+            height: 28px;
         }
     }
 
     input.preserve-resource {
         width: 70px;
+        height: 32px;
     }
 
     .icon-26x26-resource-wood,
