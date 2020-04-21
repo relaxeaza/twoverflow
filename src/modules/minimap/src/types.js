@@ -4,3 +4,10 @@ define('two/minimap/types/actions', [], function () {
         HIGHLIGHT_TRIBE: 'highlight_tribe'
     }
 })
+
+define('two/minimap/types/mapSizes', [], function () {
+    return {
+        SMALL: 'small',
+        BIG: 'big'
+    }
+})

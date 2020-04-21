@@ -97,6 +97,10 @@
                                 <th colspan="3">{{ 'misc' | i18n:loc.ale:'minimap' }}</th>
                             </tr>
                             <tr>
+                                <td>{{ 'settings_map_size' | i18n:loc.ale:'minimap' }}</td>
+                                <td colspan="3"><div select="" list="mapSizes" selected="settings[SETTINGS.MAP_SIZE]" drop-down="true"></div></td>
+                            </tr>
+                            <tr>
                                 <td>{{ 'settings_right_click_action' | i18n:loc.ale:'minimap' }}</td>
                                 <td colspan="3"><div select="" list="actionTypes" selected="settings[SETTINGS.RIGHT_CLICK_ACTION]" drop-down="true"></div></td>
                             </tr>
@@ -104,7 +108,6 @@
                                 <td colspan="2">{{ 'settings_show_view_reference' | i18n:loc.ale:'minimap' }}</td>
                                 <td><div switch-slider="" value="settings[SETTINGS.SHOW_VIEW_REFERENCE]" vertical="false" size="'56x28'" enabled="true"></div></td>
                             </tr>
-
                             <tr>
                                 <td colspan="2">{{ 'settings_show_continent_demarcations' | i18n:loc.ale:'minimap' }}</td>
                                 <td><div switch-slider="" value="settings[SETTINGS.SHOW_CONTINENT_DEMARCATIONS]" vertical="false" size="'56x28'" enabled="true"></div></td>
@@ -113,8 +116,6 @@
                                 <td colspan="2">{{ 'settings_show_province_demarcations' | i18n:loc.ale:'minimap' }}</td>
                                 <td><div switch-slider="" value="settings[SETTINGS.SHOW_PROVINCE_DEMARCATIONS]" vertical="false" size="'56x28'" enabled="true"></div></td>
                             </tr>
-
-
                             <tr>
                                 <td colspan="2">{{ 'settings_show_barbarians' | i18n:loc.ale:'minimap' }}</td>
                                 <td><div switch-slider="" value="settings[SETTINGS.SHOW_BARBARIANS]" vertical="false" size="'56x28'" enabled="true"></div></td>

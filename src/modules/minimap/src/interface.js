@@ -2,6 +2,7 @@ define('two/minimap/ui', [
     'two/ui',
     'two/minimap',
     'two/minimap/types/actions',
+    'two/minimap/types/mapSizes',
     'two/minimap/settings',
     'two/minimap/settings/map',
     'two/utils',
@@ -15,6 +16,7 @@ define('two/minimap/ui', [
     interfaceOverflow,
     minimap,
     ACTION_TYPES,
+    MAP_SIZES,
     SETTINGS,
     SETTINGS_MAP,
     utils,
@@ -35,6 +37,8 @@ define('two/minimap/ui', [
     let mapWrapper
     let tooltipWrapper
     let tooltipTimeout
+    let tooltipQueue = {}
+    let currentVillageHash
     let highlightNames = {
         character: {},
         tribe: {}
@@ -101,45 +105,75 @@ define('two/minimap/ui', [
         })
     }
 
-    const showTooltip = function (_, data) {
-        tooltipTimeout = setTimeout(function () {
-            windowWrapper.appendChild(tooltipWrapper)
-            tooltipWrapper.classList.remove('ng-hide')
+    const loadVillageData = function (x, y) {
+        return new Promise(function (resolve) {
+            let village = mapData.getTownAt(x, y)
 
-            MapController.tt.name = data.village.name
-            MapController.tt.x = data.village.x
-            MapController.tt.y = data.village.y
-            MapController.tt.province_name = data.village.province_name
-            MapController.tt.points = data.village.points
-            MapController.tt.character_name = data.village.character_name || '-'
-            MapController.tt.character_points = data.village.character_points || 0
-            MapController.tt.tribe_name = data.village.tribe_name || '-'
-            MapController.tt.tribe_tag = data.village.tribe_tag || '-'
-            MapController.tt.tribe_points = data.village.tribe_points || 0
-            MapController.tt.morale = data.village.morale || 0
-            MapController.tt.position = {}
-            MapController.tt.position.x = data.event.pageX + 50
-            MapController.tt.position.y = data.event.pageY + 50
-            MapController.tt.visible = true
-
-            const tooltipOffset = tooltipWrapper.getBoundingClientRect()
-            const windowOffset = windowWrapper.getBoundingClientRect()
-            const tooltipWrapperSpacerX = tooltipOffset.width + 50
-            const tooltipWrapperSpacerY = tooltipOffset.height + 50
-
-            const onTop = MapController.tt.position.y + tooltipWrapperSpacerY > windowOffset.top + windowOffset.height
-            const onLeft = MapController.tt.position.x + tooltipWrapperSpacerX > windowOffset.width
-
-            if (onTop) {
-                MapController.tt.position.y -= 50
+            if (village) {
+                return resolve(village)
             }
 
-            tooltipWrapper.classList.toggle('left', onLeft)
-            tooltipWrapper.classList.toggle('top', onTop)
-        }, 50)
+            mapData.loadTownDataAsync(x, y, 1, 1, function (village) {
+                resolve(village)
+            })
+        })
     }
 
-    const hideTooltip = function () {
+    const genVillageHash = function (coords) {
+        return String(coords.x) + String(coords.y)
+    }
+
+    const showTooltip = function (event, data) {
+        let villageHash = genVillageHash(data.coords)
+        currentVillageHash = villageHash
+        tooltipQueue[villageHash] = true
+
+        loadVillageData(data.coords.x, data.coords.y).then(function (village) {
+            if (!tooltipQueue[genVillageHash(village)]) {
+                return
+            }
+
+            tooltipTimeout = setTimeout(function () {
+                windowWrapper.appendChild(tooltipWrapper)
+                tooltipWrapper.classList.remove('ng-hide')
+
+                MapController.tt.name = village.name
+                MapController.tt.x = village.x
+                MapController.tt.y = village.y
+                MapController.tt.province_name = village.province_name
+                MapController.tt.points = village.points
+                MapController.tt.character_name = village.character_name || '-'
+                MapController.tt.character_points = village.character_points || 0
+                MapController.tt.tribe_name = village.tribe_name || '-'
+                MapController.tt.tribe_tag = village.tribe_tag || '-'
+                MapController.tt.tribe_points = village.tribe_points || 0
+                MapController.tt.morale = village.morale || 0
+                MapController.tt.position = {}
+                MapController.tt.position.x = data.event.pageX + 50
+                MapController.tt.position.y = data.event.pageY + 50
+                MapController.tt.visible = true
+
+                const tooltipOffset = tooltipWrapper.getBoundingClientRect()
+                const windowOffset = windowWrapper.getBoundingClientRect()
+                const tooltipWrapperSpacerX = tooltipOffset.width + 50
+                const tooltipWrapperSpacerY = tooltipOffset.height + 50
+
+                const onTop = MapController.tt.position.y + tooltipWrapperSpacerY > windowOffset.top + windowOffset.height
+                const onLeft = MapController.tt.position.x + tooltipWrapperSpacerX > windowOffset.width
+
+                if (onTop) {
+                    MapController.tt.position.y -= 50
+                }
+
+                tooltipWrapper.classList.toggle('left', onLeft)
+                tooltipWrapper.classList.toggle('top', onTop)
+            }, 50)
+        })
+    }
+
+    const hideTooltip = function (event, data) {
+        let villageHash = data ? genVillageHash(data.coords) : currentVillageHash
+        delete tooltipQueue[villageHash]
         clearTimeout(tooltipTimeout)
         MapController.tt.visible = false
         tooltipWrapper.classList.add('ng-hide')
@@ -276,6 +310,7 @@ define('two/minimap/ui', [
         },
         onMouseMoveMinimap: function () {
             hideTooltip()
+
             $crossCanvas.style.cursor = 'url(' + cdn.getPath('/img/cursor/grab_pushed.png') + '), move'
         },
         onMouseStopMoveMinimap: function () {
@@ -323,6 +358,10 @@ define('two/minimap/ui', [
         $scope.addHighlightColor = '#000000'
         $scope.highlights = minimap.getHighlights()
         $scope.highlightNames = highlightNames
+        $scope.mapSizes = Settings.encodeList(MAP_SIZES, {
+            textObject: 'minimap',
+            disabled: false
+        })
         $scope.actionTypes = Settings.encodeList(ACTION_TYPES, {
             textObject: 'minimap',
             disabled: false

@@ -1,11 +1,13 @@
 define('two/minimap', [
     'two/minimap/types/actions',
+    'two/minimap/types/mapSizes',
     'two/minimap/settings',
     'two/minimap/settings/map',
     'two/minimap/settings/updates',
     'two/utils',
     'two/ready',
     'two/Settings',
+    'two/mapData',
     'queues/EventQueue',
     'Lockr',
     'struct/MapData',
@@ -19,12 +21,14 @@ define('two/minimap', [
     'battlecat'
 ], function (
     ACTION_TYPES,
+    MAP_SIZES,
     SETTINGS,
     SETTINGS_MAP,
     UPDATES,
     utils,
     ready,
     Settings,
+    twoMapData,
     eventQueue,
     Lockr,
     mapData,
@@ -39,18 +43,18 @@ define('two/minimap', [
 ) {
     let enableRendering = false
     let highlights = {}
-    let villageSize = 5
+    let villageSize
     let villageMargin = 1
-    let villageBlock = villageSize + villageMargin
-    let lineSize = 1000 * (villageSize + villageMargin)
+    let villageBlock
+    let lineSize
+    let villageSizeOffset
     const rhex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+    let allVillages
     let cache = {
         village: {},
         character: {},
         tribe: {}
     }
-    // Cached villages from previous loaded maps.
-    // Used to draw the "ghost" villages on the map.
     let cachedVillages = {}
     // Data of the village that the user is hovering on the minimap.
     let hoverVillage = null
@@ -67,6 +71,7 @@ define('two/minimap', [
     let $tribeRelations
     let selectedVillage
     let currentPosition = {}
+    let currentCoords = {}
     let frameSize = {}
     let dataView
     let settings
@@ -75,13 +80,17 @@ define('two/minimap', [
         CACHE_VILLAGES: 'minimap_cache_villages',
         SETTINGS: 'minimap_settings'
     }
+    const MAP_SIZES_MAP = {
+        [MAP_SIZES.SMALL]: 3,
+        [MAP_SIZES.BIG]: 5
+    }
     const colorService = injector.get('colorService')
     let allowJump = true
     let allowMove = false
     let dragStart = {}
     const spriteFactory = injector.get('spriteFactory')
     let highlightSprite = spriteFactory.make('hover')
-    let currentCoords = {x: null, y: null}
+    let currentMouseCoords = {x: null, y: null}
     let firstDraw = true
     let mapWrapper
 
@@ -92,15 +101,13 @@ define('two/minimap', [
      * @return {Object} X and Y coordinates.
      */
     const getCoords = function (event) {
-        const villageOffsetX = minimap.getVillageAxisOffset()
-        let rawX = Math.ceil(currentPosition.x + event.offsetX)
-        let rawY = Math.ceil(currentPosition.y + event.offsetY)
-        const adjustLine = Math.floor((rawY / villageBlock) % 2)
+        let rawX = Math.ceil(currentPosition.x + event.offsetX) - villageSizeOffset
+        let rawY = Math.ceil(currentPosition.y + event.offsetY) + villageSizeOffset
 
-        if (adjustLine % 2) {
-            rawX -= villageOffsetX
+        if (Math.floor((rawY / villageBlock)) % 2) {
+            rawX += villageSizeOffset
         }
-        
+
         rawX -= rawX % villageBlock
         rawY -= rawY % villageBlock
 
@@ -145,104 +152,8 @@ define('two/minimap', [
         ]
     }
 
-    /**
-     * @param {Array} villages
-     * @param {String=} _color - Force the village to use the
-     *   specified color.
-     */
-    const drawVillages = function (villages, _color) {
-        const pid = $player.getId()
-        const tid = $player.getTribeId()
-        const villageOffsetX = minimap.getVillageAxisOffset()
-        const villageColors = $player.getVillagesColors()
-
-        for (let i = 0; i < villages.length; i++) {
-            let v = villages[i]
-            let x
-            let y
-            let color
-
-            // meta village
-            if (v.id < 0) {
-                continue
-            }
-
-            if (_color) {
-                color = _color
-                
-                x = v[0] * villageBlock
-                y = v[1] * villageBlock
-
-                if (v[1] % 2) {
-                    x += villageOffsetX
-                }
-            } else {
-                x = v.x * villageBlock
-                y = v.y * villageBlock
-
-                if (v.y % 2) {
-                    x += villageOffsetX
-                }
-
-                if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-                    if (v.character_id in highlights.character) {
-                        color = highlights.character[v.character_id]
-                    } else if (v.tribe_id in highlights.tribe) {
-                        color = highlights.tribe[v.tribe_id]
-                    } else {
-                        continue
-                    }
-                } else {
-                    if (v.character_id === null) {
-                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS]) {
-                            continue
-                        }
-
-                        color = villageColors.barbarian
-                    } else {
-                        if (v.character_id === pid) {
-                            if (v.id === selectedVillage.getId() && minimapSettings[SETTINGS.HIGHLIGHT_SELECTED]) {
-                                color = villageColors.selected
-                            } else if (v.character_id in highlights.character) {
-                                color = highlights.character[v.character_id]
-                            } else if (minimapSettings[SETTINGS.HIGHLIGHT_OWN]) {
-                                color = villageColors.player
-                            } else {
-                                color = villageColors.ugly
-                            }
-                        } else {
-                            if (v.character_id in highlights.character) {
-                                color = highlights.character[v.character_id]
-                            } else if (v.tribe_id in highlights.tribe) {
-                                color = highlights.tribe[v.tribe_id]
-                            } else if (tid && tid === v.tribe_id && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
-                                color = villageColors.tribe
-                            } else if ($tribeRelations && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
-                                if ($tribeRelations.isAlly(v.tribe_id)) {
-                                    color = villageColors.ally
-                                } else if ($tribeRelations.isEnemy(v.tribe_id)) {
-                                    color = villageColors.enemy
-                                } else if ($tribeRelations.isNAP(v.tribe_id)) {
-                                    color = villageColors.friendly
-                                } else {
-                                    color = villageColors.ugly
-                                }
-                            } else {
-                                color = villageColors.ugly
-                            }
-                        }
-                    }
-                }
-            }
-
-            $viewportCacheContext.fillStyle = color
-            $viewportCacheContext.fillRect(x, y, villageSize, villageSize)
-        }
-    }
-
     const drawGrid = function () {
         const binUrl = cdn.getPath(conf.getMapPath())
-        const villageOffsetX = Math.round(villageBlock / 2)
         const continentEnabled = minimapSettings[SETTINGS.SHOW_CONTINENT_DEMARCATIONS]
         const provinceEnabled = minimapSettings[SETTINGS.SHOW_PROVINCE_DEMARCATIONS]
 
@@ -252,13 +163,13 @@ define('two/minimap', [
 
         const drawContinent = function (x, y) {
             $viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_CONTINENT]
-            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX - 1, y * villageBlock + villageOffsetX - 1, 3, 1)
-            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 2, 1, 3)
+            $viewportCacheContext.fillRect(x * villageBlock + villageSizeOffset - 1, y * villageBlock + villageSizeOffset - 1, 3, 1)
+            $viewportCacheContext.fillRect(x * villageBlock + villageSizeOffset, y * villageBlock + villageSizeOffset - 2, 1, 3)
         }
 
         const drawProvince = function (x, y) {
             $viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_PROVINCE]
-            $viewportCacheContext.fillRect(x * villageBlock + villageOffsetX, y * villageBlock + villageOffsetX - 1, 1, 1)
+            $viewportCacheContext.fillRect(x * villageBlock + villageSizeOffset, y * villageBlock + villageSizeOffset - 1, 1, 1)
         }
 
         utils.xhrGet(binUrl, function (bin) {
@@ -287,26 +198,7 @@ define('two/minimap', [
     }
 
     const drawLoadedVillages = function () {
-        drawVillages(mapData.getTowns())
-    }
-
-    const drawCachedVillages = function () {
-        const villageOffsetX = minimap.getVillageAxisOffset()
-
-        for (let x in cachedVillages) {
-            for (let i = 0; i < cachedVillages[x].length; i++) {
-                let y = cachedVillages[x][i]
-                let xx = x * villageBlock
-                let yy = y * villageBlock
-
-                if (y % 2) {
-                    xx += villageOffsetX
-                }
-
-                $viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_GHOST]
-                $viewportCacheContext.fillRect(xx, yy, villageSize, villageSize)
-            }
-        }
+        drawVillages(allVillages)
     }
 
     /**
@@ -389,7 +281,7 @@ define('two/minimap', [
             }
 
             cache.village[v.x][v.y] = v.character_id || 0
-            cachedVillages[v.x].push(v.y)
+            cachedVillages[v.x][v.y] = v
 
             if (v.character_id) {
                 if (v.character_id in cache.character) {
@@ -407,8 +299,6 @@ define('two/minimap', [
                 }
             }
         }
-
-        Lockr.set(STORAGE_KEYS.CACHE_VILLAGES, cachedVillages)
     }
 
     const onHoverVillage = function (coords, event) {
@@ -421,7 +311,7 @@ define('two/minimap', [
         }
 
         eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_HOVER, {
-            village: mapData.getTownAt(coords.x, coords.y),
+            coords: coords,
             event: event
         })
 
@@ -449,21 +339,35 @@ define('two/minimap', [
         }
 
         hoverVillage = false
-        eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_BLUR)
+        eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_BLUR, {
+            coords: hoverVillage
+        })
     }
 
     const highlightVillages = function (villages) {
-        drawVillages(villages, minimapSettings[SETTINGS.COLOR_QUICK_HIGHLIGHT])
+        let villagesData = []
+
+        for (let i = 0; i < villages.length; i++) {
+            let x = villages[i][0]
+            let y = villages[i][1]
+
+            villagesData.push(cachedVillages[x][y])
+        }
+
+        drawVillages(villagesData, minimapSettings[SETTINGS.COLOR_QUICK_HIGHLIGHT])
     }
 
     const unhighlightVillages = function (villages) {
-        let _villages = []
+        let villagesData = []
 
         for (let i = 0; i < villages.length; i++) {
-            _villages.push(mapData.getTownAt(villages[i][0], villages[i][1]))
+            let x = villages[i][0]
+            let y = villages[i][1]
+
+            villagesData.push(cachedVillages[x][y])
         }
 
-        drawVillages(_villages)
+        drawVillages(villagesData)
     }
 
     const showHighlightSprite = function (x, y) {
@@ -543,44 +447,47 @@ define('two/minimap', [
             if (allowMove) {
                 currentPosition.x = dragStart.x - event.pageX
                 currentPosition.y = dragStart.y - event.pageY
-                eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
             }
 
             const coords = getCoords(event)
 
-            if (coords.x !== currentCoords.x || coords.y !== currentCoords.y) {
+            if (allowMove) {
+                currentCoords.x = coords.x
+                currentCoords.y = coords.y
+                eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
+            }
+
+            if (coords.x !== currentMouseCoords.x || coords.y !== currentMouseCoords.y) {
                 hideHighlightSprite()
                 showHighlightSprite(coords.x, coords.y)
             }
 
-            currentCoords = coords
+            currentMouseCoords = coords
 
-            if (coords.x in cache.village) {
-                if (coords.y in cache.village[coords.x]) {
-                    let village = mapData.getTownAt(coords.x, coords.y)
+            if (coords.x in cachedVillages && coords.y in cachedVillages[coords.x]) {
+                let village = cachedVillages[coords.x][coords.y]
 
-                    // ignore barbarian villages
-                    if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
+                // ignore barbarian villages
+                if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
+                    return false
+                }
+
+                // check if the village is custom highlighted
+                if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
+                    let highlighted = false
+
+                    if (village.character_id in highlights.character) {
+                        highlighted = true
+                    } else if (village.tribe_id in highlights.tribe) {
+                        highlighted = true
+                    }
+
+                    if (!highlighted) {
                         return false
                     }
-
-                    // check if the village is custom highlighted
-                    if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-                        let highlighted = false
-
-                        if (village.character_id in highlights.character) {
-                            highlighted = true
-                        } else if (village.tribe_id in highlights.tribe) {
-                            highlighted = true
-                        }
-
-                        if (!highlighted) {
-                            return false
-                        }
-                    }
-
-                    return onHoverVillage(coords, event)
                 }
+
+                return onHoverVillage(coords, event)
             }
 
             onBlurVillage()
@@ -603,10 +510,6 @@ define('two/minimap', [
         onCrossMouseContext: function (event) {
             event.preventDefault()
             return false
-        },
-        onVillageData: function (event, data) {
-            drawVillages(data.villages)
-            cacheVillages(data.villages)
         },
         onHighlightChange: function () {
             highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
@@ -637,52 +540,7 @@ define('two/minimap', [
         }
     }
 
-    let minimap = {
-        SETTINGS_MAP: SETTINGS_MAP,
-        ACTION_TYPES: ACTION_TYPES
-    }
-
-    minimap.setVillageSize = function (value) {
-        villageSize = value
-        villageBlock = villageSize + villageMargin
-        lineSize = 1000 * (villageSize + villageMargin)
-    }
-
-    minimap.getVillageSize = function () {
-        return villageSize
-    }
-
-    minimap.setVillageMargin = function (value) {
-        villageMargin = value
-        villageBlock = villageSize + villageMargin
-        lineSize = 1000 * (villageSize + villageMargin)
-    }
-
-    minimap.getVillageMargin = function () {
-        return villageMargin
-    }
-
-    /**
-     * Get the size used by each village on minimap in pixels.
-     *
-     * @return {Number}
-     */
-    minimap.getVillageBlock = function () {
-        return villageBlock
-    }
-
-    minimap.getLineSize = function () {
-        return lineSize
-    }
-
-    /**
-     * Get the center position of a village icon.
-     *
-     * @return {Number}
-     */
-    minimap.getVillageAxisOffset = function () {
-        return Math.round(villageSize / 2)
-    }
+    let minimap = {}
 
     /**
      * @param {Object} item - Highlight item.
@@ -765,6 +623,8 @@ define('two/minimap', [
         const INTERFACE_HEIGHT = 265
         currentPosition.x = x * villageBlock + 50
         currentPosition.y = y * villageBlock + ((document.body.clientHeight - INTERFACE_HEIGHT) / 2)
+        currentCoords.x = Math.ceil(x)
+        currentCoords.y = Math.ceil(y)
     }
 
     /**
@@ -804,11 +664,6 @@ define('two/minimap', [
         $viewportCacheContext.clearRect(0, 0, $viewportCache.width, $viewportCache.height)
 
         drawGrid()
-
-        if (minimapSettings[SETTINGS.SHOW_GHOST_VILLAGES]) {
-            drawCachedVillages()
-        }
-
         drawLoadedVillages()
     }
 
@@ -837,14 +692,118 @@ define('two/minimap', [
         settings.onChange(function (changes, updates) {
             minimapSettings = settings.getAll()
 
+            villageSize = MAP_SIZES_MAP[minimapSettings[SETTINGS.MAP_SIZE]]
+            villageSizeOffset = Math.round(villageSize / 2)
+            villageBlock = villageSize + villageMargin
+            lineSize = (villageSize + villageMargin) * 1000
+
             if (updates[UPDATES.MINIMAP]) {
                 minimap.drawMinimap()
+            }
+
+            if (updates[UPDATES.MAP_POSITION]) {
+                minimap.setCurrentPosition(currentCoords.x, currentCoords.y)
             }
         })
 
         minimapSettings = settings.getAll()
+
+        villageSize = MAP_SIZES_MAP[minimapSettings[SETTINGS.MAP_SIZE]]
+        villageSizeOffset = Math.round(villageSize / 2)
+        villageBlock = villageSize + villageMargin
+        lineSize = (villageSize + villageMargin) * 1000
+
         highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
         highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
+    }
+
+    const drawVillages = function (villages, _color) {
+        const pid = $player.getId()
+        const tid = $player.getTribeId()
+        const villageColors = $player.getVillagesColors()
+
+        for (let i = 0; i < villages.length; i++) {
+            let v = villages[i]
+            let x
+            let y
+            let color
+
+            // meta village
+            if (v.id < 0) {
+                continue
+            }
+
+            if (_color) {
+                color = _color
+
+                x = v.x * villageBlock
+                y = v.y * villageBlock
+
+                if (v.y % 2) {
+                    x += villageSizeOffset
+                }
+            } else {
+                if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
+                    if (v.character_id in highlights.character) {
+                        color = highlights.character[v.character_id]
+                    } else if (v.tribe_id in highlights.tribe) {
+                        color = highlights.tribe[v.tribe_id]
+                    } else {
+                        continue
+                    }
+                } else {
+                    if (v.character_id === null) {
+                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS]) {
+                            continue
+                        }
+
+                        color = villageColors.barbarian
+                    } else {
+                        if (v.character_id === pid) {
+                            if (v.id === selectedVillage.getId() && minimapSettings[SETTINGS.HIGHLIGHT_SELECTED]) {
+                                color = villageColors.selected
+                            } else if (v.character_id in highlights.character) {
+                                color = highlights.character[v.character_id]
+                            } else if (minimapSettings[SETTINGS.HIGHLIGHT_OWN]) {
+                                color = villageColors.player
+                            } else {
+                                color = villageColors.ugly
+                            }
+                        } else {
+                            if (v.character_id in highlights.character) {
+                                color = highlights.character[v.character_id]
+                            } else if (v.tribe_id in highlights.tribe) {
+                                color = highlights.tribe[v.tribe_id]
+                            } else if (tid && tid === v.tribe_id && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
+                                color = villageColors.tribe
+                            } else if ($tribeRelations && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
+                                if ($tribeRelations.isAlly(v.tribe_id)) {
+                                    color = villageColors.ally
+                                } else if ($tribeRelations.isEnemy(v.tribe_id)) {
+                                    color = villageColors.enemy
+                                } else if ($tribeRelations.isNAP(v.tribe_id)) {
+                                    color = villageColors.friendly
+                                } else {
+                                    color = villageColors.ugly
+                                }
+                            } else {
+                                color = villageColors.ugly
+                            }
+                        }
+                    }
+                }
+
+                x = v.x * villageBlock
+                y = v.y * villageBlock
+
+                if (v.y % 2) {
+                    x += villageSizeOffset
+                }
+            }
+
+            $viewportCacheContext.fillStyle = color
+            $viewportCacheContext.fillRect(x, y, villageSize, villageSize)
+        }
     }
 
     minimap.run = function () {
@@ -853,13 +812,9 @@ define('two/minimap', [
             $map = document.getElementById('main-canvas')
             $player = modelDataService.getSelectedCharacter()
             $tribeRelations = $player.getTribeRelations()
-            cachedVillages = Lockr.get(STORAGE_KEYS.CACHE_VILLAGES, {}, true)
 
             highlightSprite.alpha = 0
             mapState.graph.layers.effects.push(highlightSprite)
-
-            currentPosition.x = 500 * villageBlock
-            currentPosition.y = 500 * villageBlock
 
             frameSize.x = 686
             frameSize.y = 686
@@ -877,10 +832,19 @@ define('two/minimap', [
             $crossContext.imageSmoothingEnabled = false
 
             selectedVillage = $player.getSelectedVillage()
+            currentCoords.x = selectedVillage.getX()
+            currentCoords.y = selectedVillage.getY()
             currentPosition.x = selectedVillage.getX() * villageBlock
             currentPosition.y = selectedVillage.getY() * villageBlock
 
-            cacheVillages(mapData.getTowns())
+            twoMapData.load({
+                x: selectedVillage.getX(),
+                y: selectedVillage.getY()
+            }, function (loadedVillages) {
+                allVillages = loadedVillages
+                cacheVillages(loadedVillages)
+            })
+
             renderStep()
 
             $cross.addEventListener('mousedown', eventHandlers.onCrossMouseDown)
@@ -889,7 +853,6 @@ define('two/minimap', [
             $cross.addEventListener('mouseleave', eventHandlers.onCrossMouseLeave)
             $cross.addEventListener('click', eventHandlers.onCrossMouseClick)
             $cross.addEventListener('contextmenu', eventHandlers.onCrossMouseContext)
-            $rootScope.$on(eventTypeProvider.MAP_VILLAGE_DATA, eventHandlers.onVillageData)
             $rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.onSelectedVillageChange)
             $rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, drawLoadedVillages)
             $rootScope.$on(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.onHighlightChange)

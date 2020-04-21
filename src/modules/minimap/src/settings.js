@@ -1,5 +1,6 @@
 define('two/minimap/settings', [], function () {
     return {
+        MAP_SIZE: 'map_size',
         RIGHT_CLICK_ACTION: 'right_click_action',
         FLOATING_MINIMAP: 'floating_minimap',
         SHOW_VIEW_REFERENCE: 'show_view_reference',
@@ -22,20 +23,29 @@ define('two/minimap/settings', [], function () {
 
 define('two/minimap/settings/updates', function () {
     return {
-        MINIMAP: 'minimap'
+        MINIMAP: 'minimap',
+        MAP_POSITION: 'map_position'
     }
 })
 
 define('two/minimap/settings/map', [
     'two/minimap/settings',
     'two/minimap/types/actions',
+    'two/minimap/types/mapSizes',
     'two/minimap/settings/updates'
 ], function (
     SETTINGS,
     ACTION_TYPES,
+    MAP_SIZES,
     UPDATES
 ) {
     return {
+        [SETTINGS.MAP_SIZE]: {
+            default: MAP_SIZES.SMALL,
+            inputType: 'select',
+            updates: [UPDATES.MINIMAP, UPDATES.MAP_POSITION],
+            disabledOption: false
+        },
         [SETTINGS.RIGHT_CLICK_ACTION]: {
             default: ACTION_TYPES.HIGHLIGHT_PLAYER,
             inputType: 'select',
