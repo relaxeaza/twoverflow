@@ -306,7 +306,7 @@ define('two/minimap', [
         }
 
         eventQueue.trigger(eventTypeProvider.MINIMAP_VILLAGE_HOVER, {
-            village: mapData.getTownAt(coords.x, coords.y),
+            coords: coords,
             event: event
         })
 
@@ -452,56 +452,33 @@ define('two/minimap', [
 
             currentCoords = coords
 
-            let loadVillage = new Promise(function (resolve, reject) {
-                if (coords.x in cache.village && coords.y in cache.village[coords.x]) {
-                    let village = mapData.getTownAt(coords.x, coords.y)
+            if (coords.x in cachedVillages && coords.y in cachedVillages[coords.x]) {
+                let village = cachedVillages[coords.x][coords.y]
 
-                    if (village) {
-                        // ignore barbarian villages
-                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
-                            return reject()
-                        }
+                // ignore barbarian villages
+                if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
+                    return false
+                }
 
-                        // check if the village is custom highlighted
-                        if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-                            let highlighted = village.character_id in highlights.character || village.tribe_id in highlights.tribe
+                // check if the village is custom highlighted
+                if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
+                    let highlighted = false
 
-                            if (!highlighted) {
-                                return reject()
-                            }
-                        }
-
-                        return resolve()
+                    if (village.character_id in highlights.character) {
+                        highlighted = true
+                    } else if (village.tribe_id in highlights.tribe) {
+                        highlighted = true
                     }
 
-
-                    mapData.loadTownDataAsync(coords.x, coords.y, 1, 1, function (village) {
-                        // ignore barbarian villages
-                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
-                            return reject()
-                        }
-
-                        // check if the village is custom highlighted
-                        if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-                            let highlighted = village.character_id in highlights.character || village.tribe_id in highlights.tribe
-
-                            if (!highlighted) {
-                                return reject()
-                            }
-                        }
-
-                        resolve()
-                    })
-                } else {
-                    reject()
+                    if (!highlighted) {
+                        return false
+                    }
                 }
-            })
 
-            loadVillage.then(function () {
-                onHoverVillage(coords, event)
-            }).catch(function () {
-                onBlurVillage()
-            })
+                return onHoverVillage(coords, event)
+            }
+
+            onBlurVillage()
         },
         onCrossMouseLeave: function () {
             if (hoverVillage) {
