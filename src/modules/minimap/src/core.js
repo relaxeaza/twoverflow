@@ -1,5 +1,6 @@
 define('two/minimap', [
     'two/minimap/types/actions',
+    'two/minimap/types/mapSizes',
     'two/minimap/settings',
     'two/minimap/settings/map',
     'two/minimap/settings/updates',
@@ -20,6 +21,7 @@ define('two/minimap', [
     'battlecat'
 ], function (
     ACTION_TYPES,
+    MAP_SIZES,
     SETTINGS,
     SETTINGS_MAP,
     UPDATES,
@@ -41,10 +43,11 @@ define('two/minimap', [
 ) {
     let enableRendering = false
     let highlights = {}
-    let villageSize = 5 // 3, 5, 7
+    let villageSize
     let villageMargin = 1
-    let villageBlock = villageSize + villageMargin
-    let lineSize = 1000 * (villageSize + villageMargin)
+    let villageBlock
+    let lineSize
+    let villageSizeOffset
     const rhex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
     let allVillages
     let cache = {
@@ -68,6 +71,7 @@ define('two/minimap', [
     let $tribeRelations
     let selectedVillage
     let currentPosition = {}
+    let currentCoords = {}
     let frameSize = {}
     let dataView
     let settings
@@ -76,13 +80,17 @@ define('two/minimap', [
         CACHE_VILLAGES: 'minimap_cache_villages',
         SETTINGS: 'minimap_settings'
     }
+    const MAP_SIZES_MAP = {
+        [MAP_SIZES.SMALL]: 3,
+        [MAP_SIZES.BIG]: 5
+    }
     const colorService = injector.get('colorService')
     let allowJump = true
     let allowMove = false
     let dragStart = {}
     const spriteFactory = injector.get('spriteFactory')
     let highlightSprite = spriteFactory.make('hover')
-    let currentCoords = {x: null, y: null}
+    let currentMouseCoords = {x: null, y: null}
     let firstDraw = true
     let mapWrapper
 
@@ -437,17 +445,22 @@ define('two/minimap', [
             if (allowMove) {
                 currentPosition.x = dragStart.x - event.pageX
                 currentPosition.y = dragStart.y - event.pageY
-                eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
             }
 
             const coords = getCoords(event)
 
-            if (coords.x !== currentCoords.x || coords.y !== currentCoords.y) {
+            if (allowMove) {
+                currentCoords.x = coords.x
+                currentCoords.y = coords.y
+                eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
+            }
+
+            if (coords.x !== currentMouseCoords.x || coords.y !== currentMouseCoords.y) {
                 hideHighlightSprite()
                 showHighlightSprite(coords.x, coords.y)
             }
 
-            currentCoords = coords
+            currentMouseCoords = coords
 
             if (coords.x in cachedVillages && coords.y in cachedVillages[coords.x]) {
                 let village = cachedVillages[coords.x][coords.y]
@@ -525,52 +538,7 @@ define('two/minimap', [
         }
     }
 
-    let minimap = {
-        SETTINGS_MAP: SETTINGS_MAP,
-        ACTION_TYPES: ACTION_TYPES
-    }
-
-    minimap.setVillageSize = function (value) {
-        villageSize = value
-        villageBlock = villageSize + villageMargin
-        lineSize = 1000 * (villageSize + villageMargin)
-    }
-
-    minimap.getVillageSize = function () {
-        return villageSize
-    }
-
-    minimap.setVillageMargin = function (value) {
-        villageMargin = value
-        villageBlock = villageSize + villageMargin
-        lineSize = 1000 * (villageSize + villageMargin)
-    }
-
-    minimap.getVillageMargin = function () {
-        return villageMargin
-    }
-
-    /**
-     * Get the size used by each village on minimap in pixels.
-     *
-     * @return {Number}
-     */
-    minimap.getVillageBlock = function () {
-        return villageBlock
-    }
-
-    minimap.getLineSize = function () {
-        return lineSize
-    }
-
-    /**
-     * Get the center position of a village icon.
-     *
-     * @return {Number}
-     */
-    minimap.getVillageAxisOffset = function () {
-        return Math.round(villageSize / 2)
-    }
+    let minimap = {}
 
     /**
      * @param {Object} item - Highlight item.
@@ -653,6 +621,8 @@ define('two/minimap', [
         const INTERFACE_HEIGHT = 265
         currentPosition.x = x * villageBlock + 50
         currentPosition.y = y * villageBlock + ((document.body.clientHeight - INTERFACE_HEIGHT) / 2)
+        currentCoords.x = Math.ceil(x)
+        currentCoords.y = Math.ceil(y)
     }
 
     /**
@@ -720,15 +690,27 @@ define('two/minimap', [
         settings.onChange(function (changes, updates) {
             minimapSettings = settings.getAll()
 
+            villageSize = MAP_SIZES_MAP[minimapSettings[SETTINGS.MAP_SIZE]]
+            villageSizeOffset = Math.round(villageSize / 2)
+            villageBlock = villageSize + villageMargin
+            lineSize = (villageSize + villageMargin) * 1000
+
             if (updates[UPDATES.MINIMAP]) {
                 minimap.drawMinimap()
             }
 
-            villageSizeOffset = Math.round(villageSize / 2)
+            if (updates[UPDATES.MAP_POSITION]) {
+                minimap.setCurrentPosition(currentCoords.x, currentCoords.y)
+            }
         })
 
         minimapSettings = settings.getAll()
+
+        villageSize = MAP_SIZES_MAP[minimapSettings[SETTINGS.MAP_SIZE]]
         villageSizeOffset = Math.round(villageSize / 2)
+        villageBlock = villageSize + villageMargin
+        lineSize = (villageSize + villageMargin) * 1000
+
         highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
         highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
     }
@@ -832,9 +814,6 @@ define('two/minimap', [
             highlightSprite.alpha = 0
             mapState.graph.layers.effects.push(highlightSprite)
 
-            currentPosition.x = 500 * villageBlock
-            currentPosition.y = 500 * villageBlock
-
             frameSize.x = 686
             frameSize.y = 686
 
@@ -851,6 +830,8 @@ define('two/minimap', [
             $crossContext.imageSmoothingEnabled = false
 
             selectedVillage = $player.getSelectedVillage()
+            currentCoords.x = selectedVillage.getX()
+            currentCoords.y = selectedVillage.getY()
             currentPosition.x = selectedVillage.getX() * villageBlock
             currentPosition.y = selectedVillage.getY() * villageBlock
 

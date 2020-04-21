@@ -2,6 +2,7 @@ define('two/minimap/ui', [
     'two/ui',
     'two/minimap',
     'two/minimap/types/actions',
+    'two/minimap/types/mapSizes',
     'two/minimap/settings',
     'two/minimap/settings/map',
     'two/utils',
@@ -15,6 +16,7 @@ define('two/minimap/ui', [
     interfaceOverflow,
     minimap,
     ACTION_TYPES,
+    MAP_SIZES,
     SETTINGS,
     SETTINGS_MAP,
     utils,
@@ -339,6 +341,10 @@ define('two/minimap/ui', [
         $scope.addHighlightColor = '#000000'
         $scope.highlights = minimap.getHighlights()
         $scope.highlightNames = highlightNames
+        $scope.mapSizes = Settings.encodeList(MAP_SIZES, {
+            textObject: 'minimap',
+            disabled: false
+        })
         $scope.actionTypes = Settings.encodeList(ACTION_TYPES, {
             textObject: 'minimap',
             disabled: false
