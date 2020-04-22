@@ -168,12 +168,10 @@
                                 <td>{{ 'settings_colors_quick_highlight' | i18n:loc.ale:'minimap' }}</td>
                                 <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_QUICK_HIGHLIGHT)" ng-style="{'background-color': settings[SETTINGS.COLOR_QUICK_HIGHLIGHT] }"></div></td>
                             </tr>
-                            <tr>
-                                <td>{{ 'settings_colors_ghost' | i18n:loc.ale:'minimap' }}</td>
-                                <td><div class="color-container box-border-dark" ng-click="openColorPalette('setting', SETTINGS.COLOR_GHOST)" ng-style="{'background-color': settings[SETTINGS.COLOR_GHOST] }"></div></td>
-                            </tr>
                         </tbody>
                     </table>
+
+                    <p class="text-center">{{ 'default_village_colors_info'| i18n:loc.ale:'minimap' }}</p>
                 </div>
             </div>
         </div>
