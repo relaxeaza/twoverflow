@@ -116,12 +116,12 @@ define('two/minimap/settings/map', [
             updates: [UPDATES.MINIMAP]
         },
         [SETTINGS.COLOR_PROVINCE]: {
-            default: '#ffffff',
+            default: '#74c374',
             inputType: 'color',
             updates: [UPDATES.MINIMAP]
         },
         [SETTINGS.COLOR_CONTINENT]: {
-            default: '#cccccc',
+            default: '#74c374',
             inputType: 'color',
             updates: [UPDATES.MINIMAP]
         },
