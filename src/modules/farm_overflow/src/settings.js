@@ -94,7 +94,7 @@ define('two/farmOverflow/settings/map', [
             updates: [UPDATES.INTERVAL_TIMERS],
             inputType: 'number',
             min: 0,
-            max: 30
+            max: 120
         },
         [SETTINGS.FARMER_CYCLE_INTERVAL]: {
             default: 5,
