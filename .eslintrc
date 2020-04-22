@@ -1,0 +1,51 @@
+---
+extends: eslint:recommended
+parserOptions:
+  ecmaVersion: 2018
+ignorePatterns:
+- src/header.js
+- src/footer.js
+env:
+  browser: true
+  es6: true
+rules:
+  indent:
+  - error
+  - 4
+  quotes:
+  - error
+  - single
+  - allowTemplateLiterals: true
+  semi:
+  - error
+  - never
+  no-unused-vars:
+  - error
+  - vars: all
+    args: after-used
+  no-empty:
+  - error
+  - allowEmptyCatch: true
+  no-console: 0
+globals:
+  angular: true
+  injector: true
+  require: true
+  define: true
+  "$rootScope": true
+  transferredSharedDataService: true
+  modelDataService: true
+  socketService: true
+  routeProvider: true
+  eventTypeProvider: true
+  windowDisplayService: true
+  windowManagerService: true
+  angularHotkeys: true
+  armyService: true
+  villageService: true
+  mapService: true
+  "$filter": true
+  "$timeout": true
+  storageService: true
+  reportService: true
+  noop: true
