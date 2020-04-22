@@ -25,11 +25,11 @@
     "terser": "^4.4.2"
   },
   "scripts": {
-    "make": "node scripts/make.js --minify",
+    "make": "node scripts/make.js --lint --minify",
     "make-dev": "node scripts/make.js --dev",
-    "make-dev-nolint": "node scripts/make.js --dev --nolint",
-    "release": "node scripts/make.js --minify && node scripts/release.js",
-    "release-testing": "node scripts/make.js --minify --dev && node scripts/release.js --testing",
+    "make-dev-lint": "node scripts/make.js --dev --lint",
+    "release": "node scripts/make.js --lint --minify && node scripts/release.js",
+    "release-testing": "node scripts/make.js --lint --minify --dev && node scripts/release.js --testing",
     "server": "http-server ./dist/ --ssl --cert=share/server/cert.pem --key=share/server/key.pem -p 2838"
   }
 }

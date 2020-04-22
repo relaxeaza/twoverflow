@@ -7,24 +7,14 @@ const terser = require('terser')
 const less = require('less')
 const htmlMinifier = require('html-minifier').minify
 const eslint = require('eslint')
-
+const LINT_SEVERITY_CODES = {
+    1: 'WARN',
+    2: 'ERROR'
+}
 const root = path.dirname(__dirname)
 const distDir = `${root}/dist`
 const srcDir = `${root}/src`
 const tempDir = `${root}/tmp`
-
-const terserOptions = {
-    output: {
-        quote_style: 3, // note: it's not working
-        max_line_len: 1000
-    }
-}
-const lessOptions = {
-    compress: true
-}
-const replaceOptions = {
-    delimiters: ['___', '']
-}
 
 async function init () {
     const options = parseOptions()
@@ -34,28 +24,17 @@ async function init () {
         recursive: true
     })
 
-    if (!options.nolint) {
-        await lintCode()
-    }
-
+    if (options.lint) await lintCode()
     await concatCode(overflow.js)
     await compileLess(overflow.css)
     await minifyHTML(overflow.html)
     await replaceInFile(overflow.replaces)
-
-    if (options.minify) {
-        await minifyCode(overflow.js)
-    }
+    if (options.minify) await minifyCode(overflow.js)
 
     fs.rmdirSync(tempDir, { recursive: true })
 }
 
 async function lintCode (data) {
-    let severityCodes = {
-        '1': 'WARN',
-        '2': 'ERROR'
-    }
-
     console.log('Running lint')
 
     let cli = new eslint.CLIEngine()
@@ -72,7 +51,7 @@ async function lintCode (data) {
             console.log(fileLint.filePath)
 
             fileLint.messages.forEach(function (error) {
-                let severityLabel = severityCodes[error.severity]
+                let severityLabel = LINT_SEVERITY_CODES[error.severity]
 
                 console.log(`${error.line}:${error.column}  ${severityLabel}  ${error.message}`)
             })
@@ -118,7 +97,9 @@ async function compileLess (data) {
             recursive: true
         })
 
-        await less.render(source, lessOptions)
+        await less.render(source, {
+            compress: true
+        })
         .then(function (output) {
             fs.writeFileSync(destination, output.css, 'utf8')
         })
@@ -168,6 +149,7 @@ async function minifyHTML (data) {
 async function replaceInFile (data) {
     console.log('Replacing in file')
 
+    const delimiters = ['___', '']
     let target = fs.readFileSync(`${distDir}/tw2overflow.js`, 'utf8')
     let search
     let replace
@@ -189,7 +171,7 @@ async function replaceInFile (data) {
 
     for (search in ordered.file) {
         replace = ordered.file[search]
-        search = `${replaceOptions.delimiters[0]}${search}${replaceOptions.delimiters[1]}`
+        search = `${delimiters[0]}${search}${delimiters[1]}`
 
         target = replaceText(target, search, replace)
 
@@ -198,7 +180,7 @@ async function replaceInFile (data) {
 
     for (search in ordered.text) {
         replace = ordered.text[search]
-        search = `${replaceOptions.delimiters[0]}${search}${replaceOptions.delimiters[1]}`
+        search = `${delimiters[0]}${search}${delimiters[1]}`
 
         target = replaceText(target, search, replace)
 
@@ -216,7 +198,12 @@ async function minifyCode (data) {
 
     const minified = terser.minify({
         'tw2overflow.js': fs.readFileSync(`${distDir}/tw2overflow.js`, 'utf8')
-    }, terserOptions)
+    }, {
+        output: {
+            quote_style: 3, // note: it's not working
+            max_line_len: 1000
+        }
+    })
     
     if (minified.error) {
         const error = minified.error
