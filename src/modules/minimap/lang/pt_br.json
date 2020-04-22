@@ -67,6 +67,6 @@
         "reset_confirm_title": "Resetar configurações",
         "reset_confirm_text": "Todas as configurações serão resetas para as configurações padrões.",
         "reset_confirm_highlights_text": "Todas marcações também serão deletadas",
-        "default_village_colors_info": "Cores de aldeias padrões como abandonadas, aliados, própria tribo, etc. São alteradas pelo o painel de configurações do pŕoprio jogo."
+        "default_village_colors_info": "Cores de aldeias padrões como abandonadas, aliados, própria tribo, etc. São alteradas pelo painel de configurações do próprio jogo."
     }
 }

@@ -67,6 +67,6 @@
         "reset_confirm_title": "Reset settings",
         "reset_confirm_text": "All settings gonna be reseted to the default settings.",
         "reset_confirm_highlights_text": "Also, all highlights are going to be deleted.",
-        "default_village_colors_info": "Color of default villages like abandoned, allies, own tribe, etc. Are altered from the game's own settings panel."
+        "default_village_colors_info": "Color of default villages like abandoned, allies, own tribe, etc. Are altered by the own game's settings panel."
     }
 }
