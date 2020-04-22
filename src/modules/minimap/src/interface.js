@@ -36,8 +36,8 @@ define('two/minimap/ui', [
     let windowWrapper
     let mapWrapper
     let tooltipWrapper
-    let tooltipTimeout
     let tooltipQueue = {}
+    let allowTooltip = false
     let currentVillageHash
     let highlightNames = {
         character: {},
@@ -127,54 +127,57 @@ define('two/minimap/ui', [
         let villageHash = genVillageHash(data.coords)
         currentVillageHash = villageHash
         tooltipQueue[villageHash] = true
+        allowTooltip = true
 
         loadVillageData(data.coords.x, data.coords.y).then(function (village) {
             if (!tooltipQueue[genVillageHash(village)]) {
                 return
             }
 
-            tooltipTimeout = setTimeout(function () {
-                windowWrapper.appendChild(tooltipWrapper)
-                tooltipWrapper.classList.remove('ng-hide')
+            if (!allowTooltip) {
+                return
+            }
 
-                MapController.tt.name = village.name
-                MapController.tt.x = village.x
-                MapController.tt.y = village.y
-                MapController.tt.province_name = village.province_name
-                MapController.tt.points = village.points
-                MapController.tt.character_name = village.character_name || '-'
-                MapController.tt.character_points = village.character_points || 0
-                MapController.tt.tribe_name = village.tribe_name || '-'
-                MapController.tt.tribe_tag = village.tribe_tag || '-'
-                MapController.tt.tribe_points = village.tribe_points || 0
-                MapController.tt.morale = village.morale || 0
-                MapController.tt.position = {}
-                MapController.tt.position.x = data.event.pageX + 50
-                MapController.tt.position.y = data.event.pageY + 50
-                MapController.tt.visible = true
+            windowWrapper.appendChild(tooltipWrapper)
+            tooltipWrapper.classList.remove('ng-hide')
 
-                const tooltipOffset = tooltipWrapper.getBoundingClientRect()
-                const windowOffset = windowWrapper.getBoundingClientRect()
-                const tooltipWrapperSpacerX = tooltipOffset.width + 50
-                const tooltipWrapperSpacerY = tooltipOffset.height + 50
+            MapController.tt.name = village.name
+            MapController.tt.x = village.x
+            MapController.tt.y = village.y
+            MapController.tt.province_name = village.province_name
+            MapController.tt.points = village.points
+            MapController.tt.character_name = village.character_name || '-'
+            MapController.tt.character_points = village.character_points || 0
+            MapController.tt.tribe_name = village.tribe_name || '-'
+            MapController.tt.tribe_tag = village.tribe_tag || '-'
+            MapController.tt.tribe_points = village.tribe_points || 0
+            MapController.tt.morale = village.morale || 0
+            MapController.tt.position = {}
+            MapController.tt.position.x = data.event.pageX + 50
+            MapController.tt.position.y = data.event.pageY + 50
+            MapController.tt.visible = true
 
-                const onTop = MapController.tt.position.y + tooltipWrapperSpacerY > windowOffset.top + windowOffset.height
-                const onLeft = MapController.tt.position.x + tooltipWrapperSpacerX > windowOffset.width
+            const tooltipOffset = tooltipWrapper.getBoundingClientRect()
+            const windowOffset = windowWrapper.getBoundingClientRect()
+            const tooltipWrapperSpacerX = tooltipOffset.width + 50
+            const tooltipWrapperSpacerY = tooltipOffset.height + 50
 
-                if (onTop) {
-                    MapController.tt.position.y -= 50
-                }
+            const onTop = MapController.tt.position.y + tooltipWrapperSpacerY > windowOffset.top + windowOffset.height
+            const onLeft = MapController.tt.position.x + tooltipWrapperSpacerX > windowOffset.width
 
-                tooltipWrapper.classList.toggle('left', onLeft)
-                tooltipWrapper.classList.toggle('top', onTop)
-            }, 50)
+            if (onTop) {
+                MapController.tt.position.y -= 50
+            }
+
+            tooltipWrapper.classList.toggle('left', onLeft)
+            tooltipWrapper.classList.toggle('top', onTop)
         })
     }
 
     const hideTooltip = function (event, data) {
         let villageHash = data ? genVillageHash(data.coords) : currentVillageHash
-        delete tooltipQueue[villageHash]
-        clearTimeout(tooltipTimeout)
+        tooltipQueue[villageHash] = false
+        allowTooltip = false
         MapController.tt.visible = false
         tooltipWrapper.classList.add('ng-hide')
         mapWrapper.appendChild(tooltipWrapper)
