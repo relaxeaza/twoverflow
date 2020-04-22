@@ -100,7 +100,7 @@ define('two/farmOverflow/settings/map', [
             default: 5,
             updates: [UPDATES.INTERVAL_TIMERS],
             inputType: 'number',
-            min: 0,
+            min: 1,
             max: 120
         },
         [SETTINGS.TARGET_SINGLE_ATTACK]: {
