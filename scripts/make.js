@@ -391,6 +391,7 @@ function generateOverflowModule (options) {
         `${root}/src/language.js`,
         `${root}/src/settings.js`,
         `${root}/src/map-data.js`,
+        `${root}/src/ui.js`,
         `${root}/src/init.js`,
         `${root}/src/libs/lockr.js`
     ])
@@ -465,6 +466,26 @@ function generateOverflowModule (options) {
     })
 
     overflow.js.push(`${root}/src/footer.js`)
+
+    // Load core assets, if exists
+    if (fs.existsSync(`${srcDir}/assets`)) {
+        // GOD FORGIVE ME
+        fs.mkdirSync(`${tempDir}/${srcDir}/assets`, {
+            recursive: true
+        })
+
+        glob.sync(`${srcDir}/assets/*.html`).forEach(function (htmlPath) {
+            const filename = path.basename(htmlPath, '.html')
+            overflow.replaces[`overflow_html_${filename}`] = `~read-file:${tempDir}/${htmlPath}`
+            overflow.html[`${tempDir}/${htmlPath}`] = htmlPath
+        })
+
+        glob.sync(`${srcDir}/assets/*.less`).forEach(function (lessPath) {
+            const filename = path.basename(lessPath, '.less')
+            overflow.replaces[`overflow_css_${filename}`] = `~read-file:${tempDir}/${lessPath}`
+            overflow.css[`${tempDir}/${lessPath}`] = lessPath
+        })
+    }
 
     return overflow
 }
