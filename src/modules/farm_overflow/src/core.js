@@ -899,38 +899,43 @@ define('two/farmOverflow', [
                     return resolve()
                 }
 
+                const multipleAttacksInterval = farmSettings[SETTINGS.MULTIPLE_ATTACKS_INTERVAL] * 60
+
+                if (!multipleAttacksInterval) {
+                    return resolve()
+                }
+
                 // if TARGET_SINGLE_ATTACK is enabled, and TARGET_MULTIPLE_FARMERS is disabled
                 // there's no reason the check, since the target is allowed to receive multiple
                 // attacks simultaneously.
-                const allowMultipleAttacks = !(farmSettings[SETTINGS.TARGET_SINGLE_ATTACK] && !farmSettings[SETTINGS.TARGET_MULTIPLE_FARMERS])
+                if (farmSettings[SETTINGS.TARGET_SINGLE_ATTACK] && !farmSettings[SETTINGS.TARGET_MULTIPLE_FARMERS]) {
+                    return resolve()
+                }
 
-                if (allowMultipleAttacks) {
-                    const multipleAttacksMinimumInterval = farmSettings[SETTINGS.MULTIPLE_ATTACKS_INTERVAL] * 60
-                    const now = Math.round(timeHelper.gameTime() / 1000)
-                    const villages = farmSettings[SETTINGS.TARGET_MULTIPLE_FARMERS] ? playerVillages : [this.village]
-                    const position = this.village.getPosition()
-                    const distance = math.actualDistance(position, target)
-                    const singleFieldtravelTime = armyService.calculateTravelTime(preset, {
-                        barbarian: !target.character_id,
-                        officers: true,
-                        effects: true
-                    })
-                    const commandTravelTime = armyService.getTravelTimeForDistance(preset, singleFieldtravelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
+                const now = Math.round(timeHelper.gameTime() / 1000)
+                const villages = farmSettings[SETTINGS.TARGET_MULTIPLE_FARMERS] ? playerVillages : [this.village]
+                const position = this.village.getPosition()
+                const distance = math.actualDistance(position, target)
+                const singleFieldtravelTime = armyService.calculateTravelTime(preset, {
+                    barbarian: !target.character_id,
+                    officers: true,
+                    effects: true
+                })
+                const commandTravelTime = armyService.getTravelTimeForDistance(preset, singleFieldtravelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
 
-                    const busyTarget = villages.some((village) => {
-                        const commands = village.getCommandListModel().getOutgoingCommands(true, true)
-                        const targetCommands = commands.filter((command) => command.targetVillageId === target.id && command.data.direction === 'forward')
+                const busyTarget = villages.some((village) => {
+                    const commands = village.getCommandListModel().getOutgoingCommands(true, true)
+                    const targetCommands = commands.filter((command) => command.targetVillageId === target.id && command.data.direction === 'forward')
 
-                        if (targetCommands.length) {
-                            return targetCommands.some((command) => {
-                                return Math.abs((now + commandTravelTime) - command.time_completed) < multipleAttacksMinimumInterval
-                            })
-                        }
-                    })
-
-                    if (busyTarget) {
-                        return reject(STATUS.BUSY_TARGET)
+                    if (targetCommands.length) {
+                        return targetCommands.some((command) => {
+                            return Math.abs((now + commandTravelTime) - command.time_completed) < multipleAttacksInterval
+                        })
                     }
+                })
+
+                if (busyTarget) {
+                    return reject(STATUS.BUSY_TARGET)
                 }
 
                 resolve()
