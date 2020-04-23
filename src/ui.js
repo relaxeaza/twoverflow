@@ -1,44 +1,21 @@
 define('two/ui', [
     'conf/conf',
-    'conf/cdn'
+    'conf/cdn',
+    'two/ready'
 ], function (
     conf,
-    cdnConf
+    cdnConf,
+    ready
 ) {
     let interfaceOverflow = {}
     let templates = {}
     let initialized = false
-    let containerCreated = false
+    let $menu
 
     let $head = document.querySelector('head')
-    let $wrapper = document.querySelector('#wrapper')
     let httpService = injector.get('httpService')
     let templateManagerService = injector.get('templateManagerService')
     let $templateCache = injector.get('$templateCache')
-
-    let $container
-    let $menu
-    let $mainButton
-
-    const buildMenuContainer = function () {
-        if (containerCreated) {
-            return true
-        }
-
-        $container = document.createElement('div')
-        $container.className = 'two-menu-container'
-        $wrapper.appendChild($container)
-
-        $mainButton = document.createElement('div')
-        $mainButton.className = 'two-main-button'
-        $container.appendChild($mainButton)
-
-        $menu = document.createElement('div')
-        $menu.className = 'two-menu'
-        $container.appendChild($menu)
-
-        containerCreated = true
-    }
 
     templateManagerService.load = function (templateName, onSuccess, opt_onError) {
         let path
@@ -83,8 +60,27 @@ define('two/ui', [
             return false
         }
 
+        let $wrapper = document.querySelector('#wrapper')
+        let $container = document.createElement('div')
+        let $mainButton = document.createElement('div')
+
+        $container.className = 'two-menu-container'
+        $wrapper.appendChild($container)
+
+        $mainButton.className = 'two-main-button'
+        $mainButton.style.display = 'none'
+        $container.appendChild($mainButton)
+
+        $menu = document.createElement('div')
+        $menu.className = 'two-menu'
+        $container.appendChild($menu)
+
         initialized = true
-        interfaceOverflow.addStyle('___interface_css_style')
+        interfaceOverflow.addStyle('___overflow_css_style')
+
+        ready(function () {
+            $mainButton.style.display = 'block'
+        }, ['map'])
     }
 
     interfaceOverflow.addTemplate = function (path, data) {
@@ -99,8 +95,6 @@ define('two/ui', [
     }
 
     interfaceOverflow.addMenuButton = function (label, order, _tooltip) {
-        buildMenuContainer()
-
         let $button = document.createElement('div')
         $button.className = 'btn-border btn-orange button'
         $button.innerHTML = label
@@ -125,4 +119,14 @@ define('two/ui', [
     }
 
     return interfaceOverflow
+})
+
+require([
+    'two/ui'
+], function (interfaceOverflow) {
+    if (interfaceOverflow.isInitialized()) {
+        return false
+    }
+
+    interfaceOverflow.init()
 })
