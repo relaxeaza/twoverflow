@@ -12,23 +12,29 @@
 
     .basic-config input {
         width: 200px;
+        height: 28px;
         font-weight: bold;
-        padding: 5px 8px;
+        padding: 1px 8px 0 8px;
         outline: none;
         border: none;
         color: #000;
         resize: none;
     }
 
-    a.select-handler {
-        -webkit-box-shadow: none;
-        box-shadow: none;
-        height: 22px;
-        line-height: 22px;
-    }
+    span.select-wrapper {
+        height: 27px;
 
-    a.select-button {
-        height: 22px
+        a.select-button {
+            height: 23px;
+        }
+
+        a.select-handler {
+            -webkit-box-shadow: none;
+            box-shadow: none;
+            height: 23px;
+            line-height: 23px;
+            margin-bottom: -1px;
+        }
     }
 
     .custom-select {
@@ -51,8 +57,14 @@
         user-select: none
     }
 
+    .command-village {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
     .add-units {
         td {
+            padding: 2px 0;
             text-align: center;
         }
 
@@ -60,9 +72,12 @@
             top: -1px;
         }
 
+        span[class*="icon-34x34"] {
+            margin-top: -2px !important;
+        }
+
         input {
             height: 34px;
-            line-height: 26px;
             color: #fff3d0;
             border: none;
             outline: none;

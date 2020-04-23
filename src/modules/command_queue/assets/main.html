@@ -6,7 +6,7 @@
         </ul>
     </header>
 
-    <div class="win-main small-select" scrollbar="">
+    <div class="win-main" scrollbar="">
         <div class="tabs tabs-bg">
             <div class="tabs-three-col">
                 <div class="tab" ng-click="selectTab(TAB_TYPES.ADD)" ng-class="{true:'tab-active', false:''}[selectedTab == TAB_TYPES.ADD]">
@@ -51,8 +51,8 @@
                                     <tr>
                                         <td><div auto-complete="autoCompleteOrigin"></div></td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
-                                        <td ng-if="!commandData.origin">{{ 'add_no_village' | i18n:loc.ale:'command_queue' }}</td>
-                                        <td ng-if="commandData.origin">{{ commandData.origin.name }} ({{ commandData.origin.x }}|{{ commandData.origin.y }})</td>
+                                        <td ng-if="!commandData.origin" class="command-village">{{ 'add_no_village' | i18n:loc.ale:'command_queue' }}</td>
+                                        <td ng-if="commandData.origin" class="command-village">{{ commandData.origin.name }} ({{ commandData.origin.x }}|{{ commandData.origin.y }})</td>
                                         <td class="actions">
                                             <a class="btn btn-orange" ng-click="addSelected()" tooltip="" tooltip-content="{{ 'add_selected' | i18n:loc.ale:'command_queue' }}">{{ 'selected' | i18n:loc.ale:'common' }}</a>
                                         </td>
@@ -61,8 +61,8 @@
                                     <tr>
                                         <td><div auto-complete="autoCompleteTarget"></div></td>
                                         <td class="text-center"><span class="icon-26x26-rte-village"></span></td>
-                                        <td ng-if="!commandData.target">{{ 'add_no_village' | i18n:loc.ale:'command_queue' }}</td>
-                                        <td ng-if="commandData.target">{{ commandData.target.name }} ({{ commandData.target.x }}|{{ commandData.target.y }})</td>
+                                        <td ng-if="!commandData.target" class="command-village">{{ 'add_no_village' | i18n:loc.ale:'command_queue' }}</td>
+                                        <td ng-if="commandData.target" class="command-village">{{ commandData.target.name }} ({{ commandData.target.x }}|{{ commandData.target.y }})</td>
                                         <td class="actions">
                                             <a class="btn btn-orange" ng-click="addMapSelected()" tooltip="" tooltip-content="{{ 'add_map_selected' | i18n:loc.ale:'command_queue' }}">{{ 'selected' | i18n:loc.ale:'common' }}</a>
                                         </td>
@@ -195,30 +195,30 @@
                                 </tr>
 
                                 <tr ng-repeat="i in [] | range:(unitOrder.length / 4);">
-                                    <td class="cell-space-left">
+                                    <td>
                                         <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4]" tooltip="" tooltip-content="{{ unitOrder[i * 4] | i18n:loc.ale:'unit_names' }}"></span>
                                         <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4]] }}" ng-focus="onUnitInputFocus(unitOrder[i * 4])" ng-blur="onUnitInputBlur(unitOrder[i * 4])">
                                     </td>
-                                    <td class="cell-space-left">
+                                    <td>
                                         <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 1]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 1] | i18n:loc.ale:'unit_names' }}"></span>
                                         <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 1]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 1]] }}" ng-focus="onUnitInputFocus(unitOrder[i * 4 + 1])" ng-blur="onUnitInputBlur(unitOrder[i * 4 + 1])">
                                     </td>
-                                    <td class="cell-space-left">
+                                    <td>
                                         <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 2]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 2] | i18n:loc.ale:'unit_names' }}"></span>
                                         <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 2]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 2]] }}" ng-focus="onUnitInputFocus(unitOrder[i * 4 + 2])" ng-blur="onUnitInputBlur(unitOrder[i * 4 + 2])">
                                     </td>
-                                    <td class="cell-space-left">
+                                    <td>
                                         <span class="icon-bg-black" ng-class="'icon-34x34-unit-' + unitOrder[i * 4 + 3]" tooltip="" tooltip-content="{{ unitOrder[i * 4 + 3] | i18n:loc.ale:'unit_names' }}"></span>
                                         <input remove-zero="" type="text" ng-model="commandData.units[unitOrder[i * 4 + 3]]" maxlength="5" placeholder="{{ commandData.units[unitOrder[i * 4 + 3]] }}" ng-focus="onUnitInputFocus(unitOrder[i * 4 + 3])" ng-blur="onUnitInputBlur(unitOrder[i * 4 + 3])">
                                     </td>
                                 </tr>
 
                                 <tr>
-                                    <td class="cell-space-left">
+                                    <td>
                                         <span class="icon-bg-black icon-34x34-unit-catapult" tooltip="" tooltip-content="{{ 'catapult' | i18n:loc.ale:'unit_names' }}"></span>
                                         <input remove-zero="" type="text" ng-model="commandData.units.catapult" maxlength="5" placeholder="{{ commandData.units.catapult }}" ng-keyup="catapultTargetVisibility()" ng-focus="onUnitInputFocus('catapult')" ng-blur="onUnitInputBlur('catapult')">
                                     </td>
-                                    <td class="cell-space-left" colspan="3">
+                                    <td colspan="3">
                                         <div ng-visible="showCatapultSelect">
                                             <div class="unit-border box-slider">
                                                 <div class="height-wrapper">
