@@ -119,18 +119,18 @@ define('two/minimap/ui', [
         })
     }
 
-    const genVillageHash = function (coords) {
-        return String(coords.x) + String(coords.y)
+    const genVillageHash = function (x, y) {
+        return String(x) + String(y)
     }
 
     const showTooltip = function (event, data) {
-        let villageHash = genVillageHash(data.coords)
+        let villageHash = genVillageHash(data.x, data.y)
         currentVillageHash = villageHash
         tooltipQueue[villageHash] = true
         allowTooltip = true
 
-        loadVillageData(data.coords.x, data.coords.y).then(function (village) {
-            if (!tooltipQueue[genVillageHash(village)]) {
+        loadVillageData(data.x, data.y).then(function (village) {
+            if (!tooltipQueue[genVillageHash(village.x, village.y)]) {
                 return
             }
 
@@ -174,8 +174,8 @@ define('two/minimap/ui', [
         })
     }
 
-    const hideTooltip = function (event, data) {
-        let villageHash = data ? genVillageHash(data.coords) : currentVillageHash
+    const hideTooltip = function (event, coords) {
+        let villageHash = coords ? genVillageHash(coords) : currentVillageHash
         tooltipQueue[villageHash] = false
         allowTooltip = false
         MapController.tt.visible = false
