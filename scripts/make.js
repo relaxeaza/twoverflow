@@ -7,6 +7,7 @@ const terser = require('terser')
 const less = require('less')
 const htmlMinifier = require('html-minifier').minify
 const eslint = require('eslint')
+const notifySend = require('node-notifier')
 const LINT_SEVERITY_CODES = {
     1: 'WARN',
     2: 'ERROR'
@@ -30,6 +31,14 @@ async function init () {
     await minifyHTML(overflow.html)
     await replaceInFile(overflow.replaces)
     if (options.minify) await minifyCode(overflow.js)
+
+    if (notifySend) {
+        notifySend.notify({
+            title: 'TWOverflow',
+            message: 'Build complete',
+            timeout: 1000
+        })
+    }
 
     fs.rmdirSync(tempDir, { recursive: true })
 }
