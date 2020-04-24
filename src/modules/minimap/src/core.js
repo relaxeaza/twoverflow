@@ -78,6 +78,7 @@ define('two/minimap', [
     let settings
     let minimapSettings
     let minimapDataPromise
+    let dataLoaded = false
     const STORAGE_KEYS = {
         CACHE_VILLAGES: 'minimap_cache_villages',
         SETTINGS: 'minimap_settings'
@@ -161,7 +162,7 @@ define('two/minimap', [
         ]
     }
 
-    const drawGrid = function () {
+    const drawBorders = function () {
         const binUrl = cdn.getPath(conf.getMapPath())
         const continentEnabled = minimapSettings[SETTINGS.SHOW_CONTINENT_DEMARCATIONS]
         const provinceEnabled = minimapSettings[SETTINGS.SHOW_PROVINCE_DEMARCATIONS]
@@ -177,13 +178,13 @@ define('two/minimap', [
             viewportCacheContext.fillRect(x * villageBlock + blockOffset, y * villageBlock + blockOffset - 1, 1, 1)
         }
 
-        const loadData = new Promise(function (resolve) {
+        const loadBorderData = new Promise(function (resolve) {
             utils.xhrGet(binUrl, function (bin) {
                 resolve(new DataView(bin))
             }, 'arraybuffer')
         })
 
-        loadData.then(function (dataView) {
+        loadBorderData.then(function (dataView) {
             const paddedBoundariesXA = boundariesXA - BORDER_PADDING
             const paddedBoundariesXB = boundariesXB + BORDER_PADDING
             const paddedBoundariesYA = boundariesYA - BORDER_PADDING
@@ -809,7 +810,7 @@ define('two/minimap', [
         viewportCacheContext.clearRect(0, 0, $viewportCache.width, $viewportCache.height)
 
         minimapDataPromise.then(function () {
-            drawGrid()
+            drawBorders()
             drawLoadedVillages()
         })
     }
@@ -824,6 +825,10 @@ define('two/minimap', [
 
     minimap.isFirstDraw = function () {
         return !!firstDraw
+    }
+
+    minimap.isDataLoaded = function () {
+        return dataLoaded
     }
 
     minimap.init = function () {
@@ -899,9 +904,14 @@ define('two/minimap', [
                 }, function (loadedVillages) {
                     allVillages = loadedVillages
                     cacheVillages(loadedVillages)
+                    dataLoaded = true
                     setVillageBoundaries()
                     resolve()
                 })
+            })
+
+            minimapDataPromise.then(function () {
+                $rootScope.$broadcast(eventTypeProvider.MINIMAP_DATA_LOADED)
             })
 
             renderStep()
