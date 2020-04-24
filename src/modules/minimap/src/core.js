@@ -166,10 +166,6 @@ define('two/minimap', [
         const continentEnabled = minimapSettings[SETTINGS.SHOW_CONTINENT_DEMARCATIONS]
         const provinceEnabled = minimapSettings[SETTINGS.SHOW_PROVINCE_DEMARCATIONS]
 
-        if (!continentEnabled && !provinceEnabled) {
-            return false
-        }
-
         const drawContinent = function (x, y) {
             viewportCacheContext.fillStyle = minimapSettings[SETTINGS.COLOR_CONTINENT]
             viewportCacheContext.fillRect(x * villageBlock + blockOffset - 1, y * villageBlock + blockOffset - 1, 3, 1)
@@ -193,21 +189,23 @@ define('two/minimap', [
             const paddedBoundariesYA = boundariesYA - BORDER_PADDING
             const paddedBoundariesYB = boundariesYB + BORDER_PADDING
 
-            for (let x = paddedBoundariesXA; x < paddedBoundariesXB; x++) {
-                for (let y = paddedBoundariesYA; y < paddedBoundariesYB; y++) {
-                    let tile = mapconvert.toTile(dataView, x, y)
+            if (continentEnabled || provinceEnabled) {
+                for (let x = paddedBoundariesXA; x < paddedBoundariesXB; x++) {
+                    for (let y = paddedBoundariesYA; y < paddedBoundariesYB; y++) {
+                        let tile = mapconvert.toTile(dataView, x, y)
 
-                    // is border
-                    if (tile.key.b) {
-                        // is continental border
-                        if (tile.key.c) {
-                            if (continentEnabled) {
-                                drawContinent(x, y)
+                        // is border
+                        if (tile.key.b) {
+                            // is continental border
+                            if (tile.key.c) {
+                                if (continentEnabled) {
+                                    drawContinent(x, y)
+                                } else if (provinceEnabled) {
+                                    drawProvince(x, y)
+                                }
                             } else if (provinceEnabled) {
                                 drawProvince(x, y)
                             }
-                        } else if (provinceEnabled) {
-                            drawProvince(x, y)
                         }
                     }
                 }
@@ -762,7 +760,7 @@ define('two/minimap', [
         viewportContext = $viewport.getContext('2d')
     }
 
-    minimap.setCross = function (element) {
+    minimap.setViewportRef = function (element) {
         $viewportRef = element
         viewportRefContext = $viewportRef.getContext('2d')
     }

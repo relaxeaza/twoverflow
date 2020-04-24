@@ -30,7 +30,7 @@ define('two/minimap/ui', [
     let $scope
     let $button
     let $minimapCanvas
-    let $crossCanvas
+    let $viewportRefCanvas
     let $minimapContainer
     let MapController
     let windowWrapper
@@ -64,7 +64,7 @@ define('two/minimap/ui', [
     const appendCanvas = function () {
         $minimapContainer = document.querySelector('#two-minimap .minimap-container')
         $minimapContainer.appendChild($minimapCanvas)
-        $minimapContainer.appendChild($crossCanvas)
+        $minimapContainer.appendChild($viewportRefCanvas)
     }
 
     const getTribeData = function (data, callback) {
@@ -305,7 +305,7 @@ define('two/minimap/ui', [
         onMouseLeaveMinimap: function () {
             hideTooltip()
 
-            $crossCanvas.dispatchEvent(new MouseEvent('mouseup', {
+            $viewportRefCanvas.dispatchEvent(new MouseEvent('mouseup', {
                 view: window,
                 bubbles: true,
                 cancelable: true
@@ -314,10 +314,10 @@ define('two/minimap/ui', [
         onMouseMoveMinimap: function () {
             hideTooltip()
 
-            $crossCanvas.style.cursor = 'url(' + cdn.getPath('/img/cursor/grab_pushed.png') + '), move'
+            $viewportRefCanvas.style.cursor = 'url(' + cdn.getPath('/img/cursor/grab_pushed.png') + '), move'
         },
         onMouseStopMoveMinimap: function () {
-            $crossCanvas.style.cursor = ''
+            $viewportRefCanvas.style.cursor = ''
         }
     }
 
@@ -326,11 +326,11 @@ define('two/minimap/ui', [
         MapController = transferredSharedDataService.getSharedData('MapController')
         $minimapCanvas = document.createElement('canvas')
         $minimapCanvas.className = 'minimap'
-        $crossCanvas = document.createElement('canvas')
-        $crossCanvas.className = 'cross'
+        $viewportRefCanvas = document.createElement('canvas')
+        $viewportRefCanvas.className = 'cross'
 
         minimap.setViewport($minimapCanvas)
-        minimap.setCross($crossCanvas)
+        minimap.setViewportRef($viewportRefCanvas)
 
         tooltipWrapper = document.querySelector('#map-tooltip')
         windowWrapper = document.querySelector('#wrapper')
