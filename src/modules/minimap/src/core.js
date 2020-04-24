@@ -54,6 +54,8 @@ define('two/minimap', [
         character: {},
         tribe: {}
     }
+    let boundariesX
+    let boundariesY
     let selectedVillage
     let currentPosition = {}
     let currentCoords = {}
@@ -71,7 +73,6 @@ define('two/minimap', [
     let $mapWrapper
     let $player
     let tribeRelations
-    let dataView
     let settings
     let minimapSettings
     let minimapDataPromise
@@ -177,11 +178,20 @@ define('two/minimap', [
             viewportCacheContext.fillRect(x * villageBlock + blockOffset, y * villageBlock + blockOffset - 1, 1, 1)
         }
 
-        utils.xhrGet(binUrl, function (bin) {
-            dataView = new DataView(bin)
+        const loadData = new Promise(function (resolve) {
+            utils.xhrGet(binUrl, function (bin) {
+                resolve(new DataView(bin))
+            }, 'arraybuffer')
+        })
 
-            for (let x = 1; x < 999; x++) {
-                for (let y = 1; y < 999; y++) {
+        loadData.then(function (dataView) {
+            const xa = boundariesX[0] - 10
+            const xb = boundariesX[1] + 10
+            const ya = boundariesY[0] - 10
+            const yb = boundariesY[1] + 10
+
+            for (let x = xa; x < xb; x++) {
+                for (let y = ya; y < xb; y++) {
                     let tile = mapconvert.toTile(dataView, x, y)
                     
                     // is border
@@ -199,7 +209,18 @@ define('two/minimap', [
                     }
                 }
             }
-        }, 'arraybuffer')
+
+            const borderX = (xa * villageBlock)
+            const borderY = (ya * villageBlock)
+            const borderWidth = ((xb - xa) * villageBlock)
+            const borderHeight = ((yb - ya - 5) * villageBlock)
+
+            viewportCacheContext.beginPath()
+            viewportCacheContext.lineWidth = 2
+            viewportCacheContext.strokeStyle = '#000000'
+            viewportCacheContext.rect(borderX, borderY, borderWidth, borderHeight)
+            viewportCacheContext.stroke()
+        })
     }
 
     const drawLoadedVillages = function () {
@@ -306,6 +327,31 @@ define('two/minimap', [
                 }
             }
         }
+    }
+
+    const setVillageBoundaries = function () {
+        let allX = []
+        let allY = []
+
+        for (let x in mappedData.village) {
+            allX.push(x)
+
+            for (let y in mappedData.village[x]) {
+                allY.push(y)
+            }
+        }
+
+        const sortedX = allX.sort((a, b) => a - b)
+        const sortedY = allY.sort((a, b) => a - b)
+        
+        boundariesX = [
+            parseInt(sortedX[0], 10),
+            parseInt(sortedX[sortedX.length - 1], 10)
+        ]
+        boundariesY = [
+            parseInt(sortedY[0], 10),
+            parseInt(sortedY[sortedY.length - 1], 10)
+        ]
     }
 
     const onHoverVillage = function (coords, event) {
@@ -765,8 +811,10 @@ define('two/minimap', [
         $viewport.style.background = minimapSettings[SETTINGS.COLOR_BACKGROUND]
         viewportCacheContext.clearRect(0, 0, $viewportCache.width, $viewportCache.height)
 
-        drawGrid()
-        drawLoadedVillages()
+        minimapDataPromise.then(function () {
+            drawGrid()
+            drawLoadedVillages()
+        })
     }
 
     minimap.enableRendering = function () {
@@ -854,6 +902,7 @@ define('two/minimap', [
                 }, function (loadedVillages) {
                     allVillages = loadedVillages
                     cacheVillages(loadedVillages)
+                    setVillageBoundaries()
                     resolve()
                 })
             })
