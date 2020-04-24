@@ -54,8 +54,10 @@ define('two/minimap', [
         character: {},
         tribe: {}
     }
-    let boundariesX
-    let boundariesY
+    let boundariesXA
+    let boundariesXB
+    let boundariesYA
+    let boundariesYB
     let selectedVillage
     let currentPosition = {}
     let currentCoords = {}
@@ -87,6 +89,7 @@ define('two/minimap', [
     const FRAME_WIDTH = 686
     const FRAME_HEIGHT = 686
     const INTERFACE_HEIGHT = 265
+    const BORDER_PADDING = 10
     const colorService = injector.get('colorService')
     const spriteFactory = injector.get('spriteFactory')
     
@@ -185,15 +188,15 @@ define('two/minimap', [
         })
 
         loadData.then(function (dataView) {
-            const xa = boundariesX[0] - 10
-            const xb = boundariesX[1] + 10
-            const ya = boundariesY[0] - 10
-            const yb = boundariesY[1] + 10
+            const paddedBoundariesXA = boundariesXA - BORDER_PADDING
+            const paddedBoundariesXB = boundariesXB + BORDER_PADDING
+            const paddedBoundariesYA = boundariesYA - BORDER_PADDING
+            const paddedBoundariesYB = boundariesYB + BORDER_PADDING
 
-            for (let x = xa; x < xb; x++) {
-                for (let y = ya; y < xb; y++) {
+            for (let x = paddedBoundariesXA; x < paddedBoundariesXB; x++) {
+                for (let y = paddedBoundariesYA; y < paddedBoundariesYB; y++) {
                     let tile = mapconvert.toTile(dataView, x, y)
-                    
+
                     // is border
                     if (tile.key.b) {
                         // is continental border
@@ -210,10 +213,10 @@ define('two/minimap', [
                 }
             }
 
-            const borderX = (xa * villageBlock)
-            const borderY = (ya * villageBlock)
-            const borderWidth = ((xb - xa) * villageBlock)
-            const borderHeight = ((yb - ya - 5) * villageBlock)
+            const borderX = (paddedBoundariesXA * villageBlock)
+            const borderY = (paddedBoundariesYA * villageBlock)
+            const borderWidth = ((paddedBoundariesXB - paddedBoundariesXA) * villageBlock)
+            const borderHeight = ((paddedBoundariesYB - paddedBoundariesYA) * villageBlock)
 
             viewportCacheContext.beginPath()
             viewportCacheContext.lineWidth = 2
@@ -343,15 +346,11 @@ define('two/minimap', [
 
         const sortedX = allX.sort((a, b) => a - b)
         const sortedY = allY.sort((a, b) => a - b)
-        
-        boundariesX = [
-            parseInt(sortedX[0], 10),
-            parseInt(sortedX[sortedX.length - 1], 10)
-        ]
-        boundariesY = [
-            parseInt(sortedY[0], 10),
-            parseInt(sortedY[sortedY.length - 1], 10)
-        ]
+
+        boundariesXA = parseInt(sortedX[0], 10)
+        boundariesXB = parseInt(sortedX[sortedX.length - 1], 10)
+        boundariesYA = parseInt(sortedY[0], 10)
+        boundariesYB = parseInt(sortedY[sortedY.length - 1], 10)
     }
 
     const onHoverVillage = function (coords, event) {
