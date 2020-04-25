@@ -52,10 +52,11 @@ define('two/minimap', [
         character: {},
         tribe: {}
     }
-    let boundariesXA
-    let boundariesXB
-    let boundariesYA
-    let boundariesYB
+
+    let boundariesX = { a: 0, b: 0 }
+    let boundariesY = { a: 0, b: 0 }
+    let viewBoundariesX = { a: 0, b: 0 }
+    let viewBoundariesY = { a: 0, b: 0 }
     let selectedVillage
     let currentPosition = {}
     let currentCoords = {}
@@ -180,14 +181,18 @@ define('two/minimap', [
         })
 
         loadBorderData.then(function (dataView) {
-            const paddedBoundariesXA = boundariesXA - BORDER_PADDING
-            const paddedBoundariesXB = boundariesXB + BORDER_PADDING
-            const paddedBoundariesYA = boundariesYA - BORDER_PADDING
-            const paddedBoundariesYB = boundariesYB + BORDER_PADDING
+            const paddedBoundariesX = {
+                a: boundariesX.a - BORDER_PADDING,
+                b: boundariesX.b + BORDER_PADDING
+            }
+            const paddedBoundariesY = {
+                a: boundariesY.a - BORDER_PADDING,
+                b: boundariesY.b + BORDER_PADDING
+            }
 
             if (continentEnabled || provinceEnabled) {
-                for (let x = paddedBoundariesXA; x < paddedBoundariesXB; x++) {
-                    for (let y = paddedBoundariesYA; y < paddedBoundariesYB; y++) {
+                for (let x = paddedBoundariesX.a; x < paddedBoundariesX.b; x++) {
+                    for (let y = paddedBoundariesY.a; y < paddedBoundariesY.b; y++) {
                         let tile = mapconvert.toTile(dataView, x, y)
 
                         // is border
@@ -207,10 +212,10 @@ define('two/minimap', [
                 }
             }
 
-            const borderX = (paddedBoundariesXA * villageBlock)
-            const borderY = (paddedBoundariesYA * villageBlock)
-            const borderWidth = ((paddedBoundariesXB - paddedBoundariesXA) * villageBlock)
-            const borderHeight = ((paddedBoundariesYB - paddedBoundariesYA) * villageBlock)
+            const borderX = paddedBoundariesX.a * villageBlock
+            const borderY = paddedBoundariesY.a * villageBlock
+            const borderWidth = (paddedBoundariesX.b - paddedBoundariesX.a) * villageBlock
+            const borderHeight = (paddedBoundariesY.b - paddedBoundariesY.a) * villageBlock
 
             viewportCacheContext.beginPath()
             viewportCacheContext.lineWidth = 2
@@ -323,7 +328,7 @@ define('two/minimap', [
         }
     }
 
-    const setVillageBoundaries = function () {
+    const setBoundaries = function () {
         let allX = []
         let allY = []
 
@@ -338,10 +343,15 @@ define('two/minimap', [
         const sortedX = allX.sort((a, b) => a - b)
         const sortedY = allY.sort((a, b) => a - b)
 
-        boundariesXA = parseInt(sortedX[0], 10)
-        boundariesXB = parseInt(sortedX[sortedX.length - 1], 10)
-        boundariesYA = parseInt(sortedY[0], 10)
-        boundariesYB = parseInt(sortedY[sortedY.length - 1], 10)
+        boundariesX.a = parseInt(sortedX[0], 10)
+        boundariesX.b = parseInt(sortedX[sortedX.length - 1], 10)
+        boundariesY.a = parseInt(sortedY[0], 10)
+        boundariesY.b = parseInt(sortedY[sortedY.length - 1], 10)
+
+        viewBoundariesX.a = (boundariesX.a - 50) * villageBlock
+        viewBoundariesX.b = (boundariesX.b + 50) * villageBlock
+        viewBoundariesY.a = (boundariesY.a - 20) * villageBlock
+        viewBoundariesY.b = (boundariesY.b + 20) * villageBlock
     }
 
     const onHoverVillage = function (coords, event) {
@@ -550,6 +560,30 @@ define('two/minimap', [
         }
     }
 
+    const updateMinimapValues = function () {
+        villageSize = MAP_SIZES_MAP[minimapSettings[SETTINGS.MAP_SIZE]]
+        blockOffset = Math.round(villageSize / 2)
+        villageBlock = villageSize + villageMargin
+        lineSize = villageBlock * 1000
+        viewBoundariesX.a = (boundariesX.a - 50) * villageBlock
+        viewBoundariesX.b = (boundariesX.b + 50) * villageBlock
+        viewBoundariesY.a = (boundariesY.a - 20) * villageBlock
+        viewBoundariesY.b = (boundariesY.b + 20) * villageBlock
+    }
+
+    const setViewportSize = function () {
+        const WIDTH = 686
+        const HEIGHT = document.body.clientHeight - INTERFACE_HEIGHT
+
+        $viewport.width = WIDTH
+        $viewport.height = HEIGHT
+        $viewportRef.width = WIDTH
+        $viewportRef.height = HEIGHT
+
+        viewportContext.imageSmoothingEnabled = false
+        viewportRefContext.imageSmoothingEnabled = false
+    }
+
     const eventHandlers = {
         onViewportRefMouseDown: function (event) {
             event.preventDefault()
@@ -584,17 +618,8 @@ define('two/minimap', [
             allowJump = false
 
             if (allowMove) {
-                currentPosition.x = dragStart.x - event.pageX
-                currentPosition.y = dragStart.y - event.pageY
-
-                currentPosition.x = currentPosition.x.bound(
-                    (boundariesXA - 50) * villageBlock,
-                    (boundariesXB + 50) * villageBlock
-                )
-                currentPosition.y = currentPosition.y.bound(
-                    (boundariesYA - 50 + 72) * villageBlock,
-                    (boundariesYB + 50) * villageBlock
-                )
+                currentPosition.x = (dragStart.x - event.pageX).bound(viewBoundariesX.a, viewBoundariesX.b)
+                currentPosition.y = (dragStart.y - event.pageY).bound(viewBoundariesY.a, viewBoundariesY.b)
             }
 
             const coords = getCoords(event)
@@ -838,11 +863,7 @@ define('two/minimap', [
 
         settings.onChange(function (changes, updates) {
             minimapSettings = settings.getAll()
-
-            villageSize = MAP_SIZES_MAP[minimapSettings[SETTINGS.MAP_SIZE]]
-            blockOffset = Math.round(villageSize / 2)
-            villageBlock = villageSize + villageMargin
-            lineSize = (villageSize + villageMargin) * 1000
+            updateMinimapValues()
 
             if (updates[UPDATES.MINIMAP]) {
                 minimap.drawMinimap()
@@ -854,27 +875,9 @@ define('two/minimap', [
         })
 
         minimapSettings = settings.getAll()
-
-        villageSize = MAP_SIZES_MAP[minimapSettings[SETTINGS.MAP_SIZE]]
-        blockOffset = Math.round(villageSize / 2)
-        villageBlock = villageSize + villageMargin
-        lineSize = (villageSize + villageMargin) * 1000
-
         highlights.tribe = colorService.getCustomColorsByGroup(colorGroups.TRIBE_COLORS) || {}
         highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
-    }
-
-    const setViewportSize = function () {
-        const WIDTH = 686
-        const HEIGHT = document.body.clientHeight - INTERFACE_HEIGHT
-
-        $viewport.width = WIDTH
-        $viewport.height = HEIGHT
-        $viewportRef.width = WIDTH
-        $viewportRef.height = HEIGHT
-
-        viewportContext.imageSmoothingEnabled = false
-        viewportRefContext.imageSmoothingEnabled = false
+        updateMinimapValues()
     }
 
     minimap.run = function () {
@@ -899,7 +902,7 @@ define('two/minimap', [
             currentPosition.x = selectedVillage.getX() * villageBlock
             currentPosition.y = selectedVillage.getY() * villageBlock
 
-            window.addEventListener('resize', setViewportSize, false);
+            window.addEventListener('resize', setViewportSize, false)
             $viewportRef.addEventListener('mousedown', eventHandlers.onViewportRefMouseDown)
             $viewportRef.addEventListener('mouseup', eventHandlers.onViewportRefMouseUp)
             $viewportRef.addEventListener('mousemove', eventHandlers.onViewportRefMouseMove)
@@ -910,7 +913,7 @@ define('two/minimap', [
             twoMapData.load(function () {
                 allVillages = twoMapData.getVillages()
                 cacheVillages(allVillages)
-                setVillageBoundaries()
+                setBoundaries()
                 renderStep()
 
                 $rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.onSelectedVillageChange)
