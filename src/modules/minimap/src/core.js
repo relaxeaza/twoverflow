@@ -41,7 +41,7 @@ define('two/minimap', [
     mapState,
     $
 ) {
-    let enableRendering = false
+    let renderingEnabled = false
     let highlights = {}
     let villageSize
     let villageMargin = 1
@@ -77,8 +77,6 @@ define('two/minimap', [
     let tribeRelations
     let settings
     let minimapSettings
-    let minimapDataPromise
-    let dataLoaded = false
     const STORAGE_KEYS = {
         CACHE_VILLAGES: 'minimap_cache_villages',
         SETTINGS: 'minimap_settings'
@@ -226,9 +224,7 @@ define('two/minimap', [
     }
 
     const drawLoadedVillages = function () {
-        minimapDataPromise.then(function () {
-            drawVillages(allVillages)
-        })
+        drawVillages(allVillages)
     }
 
     /**
@@ -274,7 +270,7 @@ define('two/minimap', [
     }
 
     const renderStep = function () {
-        if (enableRendering) {
+        if (renderingEnabled) {
             const pos =  {
                 x: currentPosition.x - (FRAME_WIDTH / 2),
                 y: currentPosition.y - (FRAME_HEIGHT / 2)
@@ -282,7 +278,6 @@ define('two/minimap', [
 
             clearViewport()
             clearCross()
-
             drawViewport(pos)
 
             if (minimapSettings[SETTINGS.SHOW_VIEW_REFERENCE]) {
@@ -809,26 +804,22 @@ define('two/minimap', [
         $viewport.style.background = minimapSettings[SETTINGS.COLOR_BACKGROUND]
         viewportCacheContext.clearRect(0, 0, $viewportCache.width, $viewportCache.height)
 
-        minimapDataPromise.then(function () {
+        ready(function () {
             drawBorders()
             drawLoadedVillages()
-        })
+        }, ['minimap_data'])
     }
 
-    minimap.enableRendering = function () {
-        enableRendering = true
+    minimap.enableRendering = function enableRendering () {
+        renderingEnabled = true
     }
 
-    minimap.disableRendering = function () {
-        enableRendering = false
+    minimap.disableRendering = function disableRendering () {
+        renderingEnabled = false
     }
 
     minimap.isFirstDraw = function () {
         return !!firstDraw
-    }
-
-    minimap.isDataLoaded = function () {
-        return dataLoaded
     }
 
     minimap.init = function () {
@@ -897,34 +888,22 @@ define('two/minimap', [
             currentPosition.x = selectedVillage.getX() * villageBlock
             currentPosition.y = selectedVillage.getY() * villageBlock
 
-            minimapDataPromise = new Promise(function (resolve) {
-                twoMapData.load({
-                    x: selectedVillage.getX(),
-                    y: selectedVillage.getY()
-                }, function (loadedVillages) {
-                    allVillages = loadedVillages
-                    cacheVillages(loadedVillages)
-                    dataLoaded = true
-                    setVillageBoundaries()
-                    resolve()
-                })
+            twoMapData.load(function () {
+                allVillages = twoMapData.getVillages()
+                cacheVillages(allVillages)
+                setVillageBoundaries()
+                renderStep()
+
+                $viewportRef.addEventListener('mousedown', eventHandlers.onViewportRefMouseDown)
+                $viewportRef.addEventListener('mouseup', eventHandlers.onViewportRefMouseUp)
+                $viewportRef.addEventListener('mousemove', eventHandlers.onViewportRefMouseMove)
+                $viewportRef.addEventListener('mouseleave', eventHandlers.onViewportRefMouseLeave)
+                $viewportRef.addEventListener('click', eventHandlers.onViewportRefMouseClick)
+                $viewportRef.addEventListener('contextmenu', eventHandlers.onViewportRefMouseContext)
+                $rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.onSelectedVillageChange)
+                $rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, drawLoadedVillages)
+                $rootScope.$on(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.onHighlightChange)
             })
-
-            minimapDataPromise.then(function () {
-                $rootScope.$broadcast(eventTypeProvider.MINIMAP_DATA_LOADED)
-            })
-
-            renderStep()
-
-            $viewportRef.addEventListener('mousedown', eventHandlers.onViewportRefMouseDown)
-            $viewportRef.addEventListener('mouseup', eventHandlers.onViewportRefMouseUp)
-            $viewportRef.addEventListener('mousemove', eventHandlers.onViewportRefMouseMove)
-            $viewportRef.addEventListener('mouseleave', eventHandlers.onViewportRefMouseLeave)
-            $viewportRef.addEventListener('click', eventHandlers.onViewportRefMouseClick)
-            $viewportRef.addEventListener('contextmenu', eventHandlers.onViewportRefMouseContext)
-            $rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.onSelectedVillageChange)
-            $rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, drawLoadedVillages)
-            $rootScope.$on(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.onHighlightChange)
         }, ['initial_village', 'tribe_relations'])
     }
 

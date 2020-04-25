@@ -23,7 +23,7 @@ define('two/farmOverflow', [
     SETTINGS_MAP,
     UPDATES,
     LOG_TYPES,
-    mapData,
+    twoMapData,
     utils,
     math,
     timeHelper,
@@ -1129,7 +1129,7 @@ define('two/farmOverflow', [
     Farmer.prototype.loadTargets = function (callback) {
         const pos = this.village.getPosition()
 
-        mapData.load(pos, (loadedTargets) => {
+        twoMapData.load((loadedTargets) => {
             this.targets = calcDistances(loadedTargets, pos)
             this.targets = filterTargets(this.targets, pos)
             this.targets = sortTargets(this.targets)
@@ -1449,9 +1449,11 @@ define('two/farmOverflow', [
     }
 
     farmOverflow.reloadTargets = function () {
-        farmers.forEach(function (farmer) {
-            farmer.loadTargets()
-        })
+        twoMapData.load(function () {
+            farmers.forEach(function (farmer) {
+                farmer.loadTargets()
+            })
+        }, true)
     }
 
     farmOverflow.getSettings = function () {

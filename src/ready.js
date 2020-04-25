@@ -1,10 +1,16 @@
 define('two/ready', [
-    'conf/gameStates'
+    'conf/gameStates',
+    'two/mapData'
 ], function (
-    GAME_STATES
+    GAME_STATES,
+    twoMapData
 ) {
     const ready = function (callback, which) {
         which = which || ['map']
+
+        if (typeof which === 'string') {
+            which = [which]
+        }
 
         const readyStep = function (item) {
             which = which.filter(function (_item) {
@@ -64,6 +70,15 @@ define('two/ready', [
 
                 $rootScope.$on(eventTypeProvider.GAME_STATE_ALL_VILLAGES_READY, function () {
                     readyStep('all_villages_ready')
+                })
+            },
+            'minimap_data': function () {
+                if (twoMapData.isLoaded()) {
+                    return readyStep('minimap_data')
+                }
+
+                twoMapData.load(function () {
+                    readyStep('minimap_data')
                 })
             }
         }

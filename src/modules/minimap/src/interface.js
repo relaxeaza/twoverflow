@@ -124,6 +124,10 @@ define('two/minimap/ui', [
     }
 
     const showTooltip = function (event, data) {
+        if (!tooltipWrapper) {
+            return
+        }
+
         let villageHash = genVillageHash(data.x, data.y)
         currentVillageHash = villageHash
         tooltipQueue[villageHash] = true
@@ -175,6 +179,10 @@ define('two/minimap/ui', [
     }
 
     const hideTooltip = function (event, coords) {
+        if (!tooltipWrapper) {
+            return
+        }
+
         let villageHash = coords ? genVillageHash(coords) : currentVillageHash
         tooltipQueue[villageHash] = false
         allowTooltip = false

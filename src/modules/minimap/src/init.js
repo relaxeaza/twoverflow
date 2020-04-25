@@ -23,5 +23,5 @@ require([
         minimap.init()
         minimapInterface()
         minimap.run()
-    })
+    }, 'map')
 })
