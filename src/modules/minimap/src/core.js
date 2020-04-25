@@ -16,7 +16,6 @@ define('two/minimap', [
     'conf/colors',
     'conf/colorGroups',
     'conf/conf',
-    'version',
     'states/MapState',
     'battlecat'
 ], function (
@@ -37,7 +36,6 @@ define('two/minimap', [
     colors,
     colorGroups,
     conf,
-    gameVersion,
     mapState,
     $
 ) {
@@ -776,13 +774,7 @@ define('two/minimap', [
             return false
         }
 
-        let view
-
-        if (gameVersion.product.major === 1 && gameVersion.product.minor < 94) {
-            view = window.twx.game.map.engine.getView()
-        } else {
-            view = mapData.getMap().engine.getView()
-        }
+        let view = mapData.getMap().engine.getView()
 
         return convert([
             -view.x,
