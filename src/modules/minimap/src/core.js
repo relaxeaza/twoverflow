@@ -588,6 +588,15 @@ define('two/minimap', [
             if (allowMove) {
                 currentPosition.x = dragStart.x - event.pageX
                 currentPosition.y = dragStart.y - event.pageY
+
+                currentPosition.x = currentPosition.x.bound(
+                    (boundariesXA - 50) * villageBlock,
+                    (boundariesXB + 50) * villageBlock
+                )
+                currentPosition.y = currentPosition.y.bound(
+                    (boundariesYA - 50 + 72) * villageBlock,
+                    (boundariesYB + 50) * villageBlock
+                )
             }
 
             const coords = getCoords(event)
