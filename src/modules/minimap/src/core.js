@@ -87,6 +87,7 @@ define('two/minimap', [
     const FRAME_HEIGHT = 686
     const INTERFACE_HEIGHT = 265
     const BORDER_PADDING = 10
+    const BORDER_COLOR = '#2B4700'
     const colorService = injector.get('colorService')
     const spriteFactory = injector.get('spriteFactory')
     
@@ -215,7 +216,7 @@ define('two/minimap', [
 
             viewportCacheContext.beginPath()
             viewportCacheContext.lineWidth = 2
-            viewportCacheContext.strokeStyle = '#000000'
+            viewportCacheContext.strokeStyle = BORDER_COLOR
             viewportCacheContext.rect(borderX, borderY, borderWidth, borderHeight)
             viewportCacheContext.stroke()
         })
