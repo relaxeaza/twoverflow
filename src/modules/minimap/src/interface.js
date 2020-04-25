@@ -352,8 +352,8 @@ define('two/minimap/ui', [
                 return false
             }
 
-            minimap.setCurrentPosition(current[0], current[1])
             buildWindow()
+            minimap.setCurrentPosition(current.x, current.y)
         })
 
         interfaceOverflow.addTemplate('twoverflow_minimap_window', `___minimap_html_main`)

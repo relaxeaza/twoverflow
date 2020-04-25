@@ -83,8 +83,6 @@ define('two/minimap', [
         [MAP_SIZES.SMALL]: 3,
         [MAP_SIZES.BIG]: 5
     }
-    const FRAME_WIDTH = 686
-    const FRAME_HEIGHT = 686
     const INTERFACE_HEIGHT = 265
     const BORDER_PADDING = 10
     const BORDER_COLOR = '#2B4700'
@@ -119,8 +117,8 @@ define('two/minimap', [
         rawY -= rawY % villageBlock
 
         return {
-            x: Math.ceil((rawX - FRAME_WIDTH / 2) / villageBlock),
-            y: Math.ceil((rawY - FRAME_HEIGHT / 2) / villageBlock)
+            x: Math.ceil((rawX - $viewport.width / 2) / villageBlock),
+            y: Math.ceil((rawY - $viewport.height / 2) / villageBlock)
         }
     }
 
@@ -242,8 +240,8 @@ define('two/minimap', [
      */
     const drawViewReference = function (pos) {
         const mapPosition = minimap.getMapPosition()
-        const x = ((mapPosition[0] + mapPosition[2] - 2) * villageBlock) - pos.x
-        const y = ((mapPosition[1] + mapPosition[3] - 2) * villageBlock) - pos.y
+        const x = ((mapPosition.x - 2) * villageBlock) - pos.x
+        const y = ((mapPosition.y - 2) * villageBlock) - pos.y
 
         // cross
         viewportRefContext.fillStyle = minimapSettings[SETTINGS.COLOR_VIEW_REFERENCE]
@@ -271,8 +269,8 @@ define('two/minimap', [
     const renderStep = function () {
         if (renderingEnabled) {
             const pos =  {
-                x: currentPosition.x - (FRAME_WIDTH / 2),
-                y: currentPosition.y - (FRAME_HEIGHT / 2)
+                x: currentPosition.x - ($viewport.width / 2),
+                y: currentPosition.y - ($viewport.height / 2)
             }
 
             clearViewport()
@@ -770,8 +768,8 @@ define('two/minimap', [
     }
 
     minimap.setCurrentPosition = function (x, y) {
-        currentPosition.x = x * villageBlock + 50
-        currentPosition.y = y * villageBlock + ((document.body.clientHeight - INTERFACE_HEIGHT) / 2)
+        currentPosition.x = (x * villageBlock)
+        currentPosition.y = (y * villageBlock)
         currentCoords.x = Math.ceil(x)
         currentCoords.y = Math.ceil(y)
     }
@@ -785,13 +783,17 @@ define('two/minimap', [
         }
 
         let view = mapData.getMap().engine.getView()
-
-        return convert([
+        let converted = convert([
             -view.x,
             -view.y,
             $map.width / 2,
             $map.height / 2
         ], view.z)
+
+        return {
+            x: converted[0] + converted[2],
+            y: converted[1] + converted[3]
+        }
     }
 
     minimap.getSettings = function () {
@@ -862,6 +864,19 @@ define('two/minimap', [
         highlights.character = colorService.getCustomColorsByGroup(colorGroups.PLAYER_COLORS) || {}
     }
 
+    const setViewportSize = function () {
+        const WIDTH = 686
+        const HEIGHT = document.body.clientHeight - INTERFACE_HEIGHT
+
+        $viewport.width = WIDTH
+        $viewport.height = HEIGHT
+        $viewportRef.width = WIDTH
+        $viewportRef.height = HEIGHT
+
+        viewportContext.imageSmoothingEnabled = false
+        viewportRefContext.imageSmoothingEnabled = false
+    }
+
     minimap.run = function () {
         ready(function () {
             $mapWrapper = $('#map')
@@ -872,17 +887,11 @@ define('two/minimap', [
             highlightSprite.alpha = 0
             mapState.graph.layers.effects.push(highlightSprite)
 
-            $viewport.setAttribute('width', FRAME_WIDTH)
-            $viewport.setAttribute('height', FRAME_HEIGHT)
-            viewportContext.imageSmoothingEnabled = false
+            setViewportSize()
 
             $viewportCache.setAttribute('width', 1000 * villageBlock)
             $viewportCache.setAttribute('height', 1000 * villageBlock)
-            $viewportCache.imageSmoothingEnabled = false
-
-            $viewportRef.setAttribute('width', FRAME_WIDTH)
-            $viewportRef.setAttribute('height', FRAME_HEIGHT)
-            viewportRefContext.imageSmoothingEnabled = false
+            viewportCacheContext.imageSmoothingEnabled = false
 
             selectedVillage = $player.getSelectedVillage()
             currentCoords.x = selectedVillage.getX()
@@ -890,18 +899,20 @@ define('two/minimap', [
             currentPosition.x = selectedVillage.getX() * villageBlock
             currentPosition.y = selectedVillage.getY() * villageBlock
 
+            window.addEventListener('resize', setViewportSize, false);
+            $viewportRef.addEventListener('mousedown', eventHandlers.onViewportRefMouseDown)
+            $viewportRef.addEventListener('mouseup', eventHandlers.onViewportRefMouseUp)
+            $viewportRef.addEventListener('mousemove', eventHandlers.onViewportRefMouseMove)
+            $viewportRef.addEventListener('mouseleave', eventHandlers.onViewportRefMouseLeave)
+            $viewportRef.addEventListener('click', eventHandlers.onViewportRefMouseClick)
+            $viewportRef.addEventListener('contextmenu', eventHandlers.onViewportRefMouseContext)
+
             twoMapData.load(function () {
                 allVillages = twoMapData.getVillages()
                 cacheVillages(allVillages)
                 setVillageBoundaries()
                 renderStep()
 
-                $viewportRef.addEventListener('mousedown', eventHandlers.onViewportRefMouseDown)
-                $viewportRef.addEventListener('mouseup', eventHandlers.onViewportRefMouseUp)
-                $viewportRef.addEventListener('mousemove', eventHandlers.onViewportRefMouseMove)
-                $viewportRef.addEventListener('mouseleave', eventHandlers.onViewportRefMouseLeave)
-                $viewportRef.addEventListener('click', eventHandlers.onViewportRefMouseClick)
-                $viewportRef.addEventListener('contextmenu', eventHandlers.onViewportRefMouseContext)
                 $rootScope.$on(eventTypeProvider.VILLAGE_SELECTED_CHANGED, eventHandlers.onSelectedVillageChange)
                 $rootScope.$on(eventTypeProvider.TRIBE_RELATION_CHANGED, drawLoadedVillages)
                 $rootScope.$on(eventTypeProvider.GROUPS_VILLAGES_CHANGED, eventHandlers.onHighlightChange)
