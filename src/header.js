@@ -27,3 +27,4 @@ const $timeout = injector.get('$timeout')
 const storageService = injector.get('storageService')
 const reportService = injector.get('reportService')
 const noop = function () {}
+

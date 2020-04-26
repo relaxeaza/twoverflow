@@ -84,6 +84,8 @@
         "started_at": "Gestartet um",
         "arrive": "Ankommen",
         "settings_saved": "Einstellungen gespeichert",
-        "discard": "Discard"
+        "discard": "Discard",
+        "new_version": "[b]TWOverflow updated to version %d[/b]",
+        "check_changes": "Check the changes here"
     }
 }
