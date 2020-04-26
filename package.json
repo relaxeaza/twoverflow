@@ -8,8 +8,7 @@
     "email": "twoverflow@outlook.com"
   },
   "private": true,
-  "version": "1.0.7",
-  "dev-version": "2.0.0",
+  "version": "2.0.0",
   "license": "WTFPL",
   "repository": {
     "type": "git",
