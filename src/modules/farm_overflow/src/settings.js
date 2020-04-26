@@ -104,7 +104,7 @@ define('two/farmOverflow/settings/map', [
             max: 120
         },
         [SETTINGS.TARGET_SINGLE_ATTACK]: {
-            default: true,
+            default: false,
             updates: [],
             inputType: 'checkbox'
         },
