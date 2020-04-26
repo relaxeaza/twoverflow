@@ -114,6 +114,13 @@ define('two/ui', [
         return $menu.appendChild($button)
     }
 
+    interfaceOverflow.addDivisor = function (order) {
+        let $div = document.createElement('div')
+        $div.className = 'divisor'
+        $div.style.order = order
+        $menu.appendChild($div)
+    }
+
     interfaceOverflow.isInitialized = function () {
         return initialized
     }
