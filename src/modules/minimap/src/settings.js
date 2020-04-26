@@ -56,7 +56,7 @@ define('two/minimap/settings/map', [
             updates: [UPDATES.MINIMAP]
         },
         [SETTINGS.SHOW_CONTINENT_DEMARCATIONS]: {
-            default: true,
+            default: false,
             inputType: 'checkbox',
             updates: [UPDATES.MINIMAP]
         },
