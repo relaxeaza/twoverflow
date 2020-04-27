@@ -2,7 +2,6 @@ const fs = require('fs')
 const glob = require('glob')
 const path = require('path')
 const https = require('https')
-const request = require('request')
 const projectRoot = __dirname.replace(/\\/g, '/')
 
 const approvedMinRequired = 0 // %

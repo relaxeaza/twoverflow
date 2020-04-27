@@ -20,7 +20,9 @@ async function init () {
     await compileLess(overflow.css)
     await minifyHTML(overflow.html)
     await replaceInFile(overflow.replaces)
-    if (argv.minify) await minifyCode(overflow.js)
+    if (argv.minify) {
+        await minifyCode(overflow.js)
+    }
 
     if (notifySend) {
         notifySend.notify({
@@ -303,7 +305,7 @@ function generateModule (moduleId, moduleDir) {
 
     // Load languages, if exists
     if (fs.existsSync(`${projectRoot}${modulePath}/lang`)) {
-        data.lang = glob.sync(`${modulePath}/lang/*.json`).map(function (langPath) {
+        data.lang = glob.sync(`${projectRoot}${modulePath}/lang/*.json`).map(function (langPath) {
             return langPath.replace(projectRoot, '')
         })
 
@@ -322,7 +324,7 @@ function generateLocaleFile (module) {
 
     module.lang.forEach(function (langPath) {
         const id = path.basename(langPath, '.json')
-        const data = JSON.parse(fs.readFileSync(langPath, 'utf8'))
+        const data = JSON.parse(fs.readFileSync(`${projectRoot}${langPath}`, 'utf8'))
 
         langData[id] = data
     })
@@ -395,8 +397,12 @@ function generateOverflowModule () {
     ])
 
     // Generate the common translations
+    const coreLangFiles = glob.sync(`${projectRoot}/src/lang/*.json`).map(function (langPath) {
+        return langPath.replace(projectRoot, '')
+    })
+
     generateLocaleFile({
-        lang: glob.sync(`src/lang/*.json`),
+        lang: coreLangFiles,
         dir: 'core'
     })
 
