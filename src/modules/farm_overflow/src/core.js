@@ -13,6 +13,7 @@ define('two/farmOverflow', [
     'queues/EventQueue',
     'conf/commandTypes',
     'conf/village',
+    'conf/resourceTypes',
     'struct/MapData',
     'Lockr'
 ], function (
@@ -30,6 +31,7 @@ define('two/farmOverflow', [
     eventQueue,
     COMMAND_TYPES,
     VILLAGE_CONFIG,
+    RESOURCE_TYPES,
     $mapData,
     Lockr
 ) {
@@ -68,6 +70,11 @@ define('two/farmOverflow', [
         SETTINGS: 'farm_overflow_settings',
         EXCEPTION_LOGS: 'farm_overflow_exception_logs'
     }
+    const RESOURCES = [
+        RESOURCE_TYPES.WOOD,
+        RESOURCE_TYPES.CLAY,
+        RESOURCE_TYPES.IRON,
+    ]
 
     const villageFilters = {
         distance: function (target) {
@@ -187,7 +194,7 @@ define('two/farmOverflow', [
         let modified = false
 
         exceptionVillages.forEach(function (villageId) {
-            if (!Object.prototype.hasOwnProperty.call(exceptionLogs, villageId)) { 
+            if (!hasOwn.call(exceptionLogs, villageId)) { 
                 exceptionLogs[villageId] = {
                     time: timeHelper.gameTime(),
                     report: false
@@ -328,7 +335,7 @@ define('two/farmOverflow', [
         const activePresets = farmSettings[SETTINGS.PRESETS]
 
         activePresets.forEach(function (presetId) {
-            if (!Object.prototype.hasOwnProperty.call(playerPresets, presetId)) {
+            if (!hasOwn.call(playerPresets, presetId)) {
                 return
             }
 
@@ -436,13 +443,6 @@ define('two/farmOverflow', [
         }
     }
 
-    const assignPresets = function (villageId, presetIds, callback) {
-        socketService.emit(routeProvider.ASSIGN_PRESETS, {
-            village_id: villageId,
-            preset_ids: presetIds
-        }, callback)
-    }
-
     const getPresetHaul = function (preset) {
         let haul = 0
 
@@ -453,19 +453,6 @@ define('two/farmOverflow', [
         })
 
         return haul
-    }
-
-    const checkPresetTime = function (preset, village, target) {
-        const limitTime = farmSettings[SETTINGS.MAX_TRAVEL_TIME] * 60
-        const position = village.getPosition()
-        const distance = math.actualDistance(position, target)
-        const travelTime = armyService.calculateTravelTime(preset, {
-            barbarian: !target.character_id,
-            officers: false
-        })
-        const totalTravelTime = armyService.getTravelTimeForDistance(preset, travelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
-
-        return limitTime > totalTravelTime
     }
 
     const addExceptionLog = function (villageId) {
@@ -509,39 +496,6 @@ define('two/farmOverflow', [
         eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_LOGS_UPDATED)
     }
 
-    const getPreset = function (village, target) {
-        const units = village.getUnitInfo().getUnits()
-
-        for (let i = 0; i < selectedPresets.length; i++) {
-            let preset = selectedPresets[i]
-            let avail = true
-
-            for (let unit in preset.units) {
-                if (!Object.prototype.hasOwnProperty.call(preset.units, unit)) {
-                    continue
-                }
-
-                if (!preset.units[unit]) {
-                    continue
-                }
-
-                if (units[unit].in_town < preset.units[unit]) {
-                    avail = false
-                }
-            }
-
-            if (avail) {
-                if (checkPresetTime(preset, village, target)) {
-                    return preset
-                } else {
-                    return STATUS.TIME_LIMIT
-                }
-            }
-        }
-
-        return STATUS.NO_UNITS
-    }
-
     const isTargetBusy = function (attacking, otherAttacking, allVillagesLoaded) {
         const multipleFarmers = farmSettings[SETTINGS.TARGET_MULTIPLE_FARMERS]
         const singleAttack = farmSettings[SETTINGS.TARGET_SINGLE_ATTACK]
@@ -561,27 +515,34 @@ define('two/farmOverflow', [
         return false
     }
 
-    const genPresetList = function (villageId) {
+    const enableRequiredPresets = function (villageId, callback) {
         const villagePresets = modelDataService.getPresetList().getPresetsByVillageId(villageId)
-        let needAssign = false
-        let which = []
+        let missingPresets = []
 
         selectedPresets.forEach(function (preset) {
-            if (!Object.prototype.hasOwnProperty.call(villagePresets, preset.id)) {
-                needAssign = true
-                which.push(preset.id)
+            if (!hasOwn.call(villagePresets, preset.id)) {
+                missingPresets.push(preset.id)
             }
         })
 
-        if (needAssign) {
+        if (missingPresets.length) {
+            // include already enabled presets because you can't only enable
+            // missing ones, you need to emit all you want enabled.
             for (let id in villagePresets) {
-                which.push(id)
+                if (hasOwn.call(villagePresets, id)) {
+                    missingPresets.push(id)
+                }
             }
 
-            return which
+            socketService.emit(routeProvider.ASSIGN_PRESETS, {
+                village_id: villageId,
+                preset_ids: missingPresets
+            }, callback)
+
+            return
         }
 
-        return false
+        callback()
     }
 
     const persistentRunningStart = function () {
@@ -733,7 +694,7 @@ define('two/farmOverflow', [
 
         const commandList = this.village.getCommandListModel()
         const villageCommands = commandList.getOutgoingCommands(true, true)
-        let preset
+        let selectedPreset = false
         let target
         let checkedLocalCommands = false
         let otherVillageAttacking
@@ -776,7 +737,7 @@ define('two/farmOverflow', [
                     const resources = this.village.getResources()
                     const computed = resources.getComputed()
                     const maxStorage = resources.getMaxStorage()
-                    const isFull = ['wood', 'clay', 'iron'].every((type) => computed[type].currentStock === maxStorage)
+                    const isFull = RESOURCES.every((type) => computed[type].currentStock === maxStorage)
 
                     if (isFull) {
                         return reject(STATUS.FULL_STORAGE)
@@ -787,7 +748,7 @@ define('two/farmOverflow', [
             })
         }
 
-        const checkTargets = () => {
+        const selectTarget = () => {
             return new Promise((resolve, reject) => {
                 if (!this.targets.length) {
                     return reject(STATUS.NO_TARGETS)
@@ -797,41 +758,7 @@ define('two/farmOverflow', [
                     return reject(STATUS.TARGET_CYCLE_END)
                 }
 
-                resolve()
-            })
-        }
-
-        const checkVillagePresets = () => {
-            return new Promise((resolve, reject) => {
-                const neededPresets = genPresetList(this.villageId)
-
-                if (neededPresets) {
-                    assignPresets(this.villageId, neededPresets, () => {
-                        if (this.running) {
-                            resolve()
-                        } else {
-                            reject(STATUS.USER_STOP)
-                        }
-                    })
-                } else {
-                    resolve()
-                }
-            })
-        }
-
-        const checkPreset = () => {
-            return new Promise((resolve, reject) => {
                 target = this.targets[this.index]
-
-                if (!target) {
-                    return reject(STATUS.UNKNOWN)
-                }
-
-                preset = getPreset(this.village, target)
-
-                if (typeof preset === 'string') {
-                    return reject(preset)
-                }
 
                 resolve()
             })
@@ -839,20 +766,80 @@ define('two/farmOverflow', [
 
         const checkTarget = () => {
             return new Promise((resolve, reject) => {
-                socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
-                    target_id: target.id
-                }, (data) => {
-                    if (!this.running) {
-                        reject(STATUS.USER_STOP)
-                    // abandoned village conquered by some noob.
-                    } else if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
-                        reject(STATUS.ABANDONED_CONQUERED)
-                    } else if (target.attack_protection) {
-                        reject(STATUS.PROTECTED_VILLAGE)
-                    } else {
+                $mapData.getTownAtAsync(target.x, target.y, (data) => {
+                    if (villageFilters.points(data.points)) {
+                        return reject(STATUS.NOT_ALLOWED_POINTS)
+                    }
+
+                    socketService.emit(routeProvider.GET_ATTACKING_FACTOR, {
+                        target_id: target.id
+                    }, (data) => {
+                        if (!this.running) {
+                            reject(STATUS.USER_STOP)
+                        // abandoned village conquered by some noob.
+                        } else if (target.character_id === null && data.owner_id !== null && !includedVillages.includes(target.id)) {
+                            reject(STATUS.ABANDONED_CONQUERED)
+                        } else if (target.attack_protection) {
+                            reject(STATUS.PROTECTED_VILLAGE)
+                        } else {
+                            resolve()
+                        }
+                    })
+                })
+            })
+        }
+
+        const checkPresets = () => {
+            return new Promise((resolve, reject) => {
+                enableRequiredPresets(this.villageId, () => {
+                    if (this.running) {
                         resolve()
+                    } else {
+                        reject(STATUS.USER_STOP)
                     }
                 })
+            })
+        }
+
+        const selectPreset = () => {
+            return new Promise((resolve, reject) => {
+                const villageUnits = this.village.getUnitInfo().getUnits()
+                const maxTravelTime = farmSettings[SETTINGS.MAX_TRAVEL_TIME] * 60
+                const villagePosition = this.village.getPosition()
+                const targetDistance = math.actualDistance(villagePosition, target)
+
+                utils.each(selectedPresets, (preset) => {
+                    let enoughUnits = !Object.entries(preset.units).some((unit) => {
+                        const name = unit[0]
+                        const amount = unit[1]
+                        
+                        return villageUnits[name].in_town < amount
+                    })
+
+                    if (!enoughUnits) {
+                        return
+                    }
+
+                    const travelTime = armyService.calculateTravelTime(preset, {
+                        barbarian: !target.character_id,
+                        officers: false
+                    })
+
+                    if (maxTravelTime > travelTime * targetDistance) {
+                        selectedPreset = preset
+                        resolve()
+                    } else {
+                        // why reject with TIME_LIMIT if there are more presets to check?
+                        // because the preset list is sorted by travel time.
+                        reject(STATUS.TIME_LIMIT)
+                    }
+
+                    return false
+                })
+
+                if (!selectedPreset) {
+                    reject(STATUS.NO_UNITS)
+                }
             })
         }
 
@@ -916,12 +903,12 @@ define('two/farmOverflow', [
                 const villages = farmSettings[SETTINGS.TARGET_MULTIPLE_FARMERS] ? playerVillages : [this.village]
                 const position = this.village.getPosition()
                 const distance = math.actualDistance(position, target)
-                const singleFieldtravelTime = armyService.calculateTravelTime(preset, {
+                const singleFieldtravelTime = armyService.calculateTravelTime(selectedPreset, {
                     barbarian: !target.character_id,
                     officers: true,
                     effects: true
                 })
-                const commandTravelTime = armyService.getTravelTimeForDistance(preset, singleFieldtravelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
+                const commandTravelTime = armyService.getTravelTimeForDistance(selectedPreset, singleFieldtravelTime, distance, COMMAND_TYPES.TYPES.ATTACK)
 
                 const busyTarget = villages.some((village) => {
                     const commands = village.getCommandListModel().getOutgoingCommands(true, true)
@@ -939,22 +926,6 @@ define('two/farmOverflow', [
                 }
 
                 resolve()
-            })
-        }
-
-        const checkTargetPoints = () => {
-            return new Promise((resolve, reject) => {
-                $mapData.getTownAtAsync(target.x, target.y, (data) => {
-                    if (!this.running) {
-                        return reject(STATUS.USER_STOP)
-                    }
-
-                    if (villageFilters.points(data.points)) {
-                        return reject(STATUS.NOT_ALLOWED_POINTS)
-                    }
-
-                    resolve()
-                })
             })
         }
 
@@ -1000,7 +971,7 @@ define('two/farmOverflow', [
             socketService.emit(routeProvider.SEND_PRESET, {
                 start_village: this.villageId,
                 target_village: target.id,
-                army_preset_id: preset.id,
+                army_preset_id: selectedPreset.id,
                 type: COMMAND_TYPES.TYPES.ATTACK
             })
         }
@@ -1067,13 +1038,12 @@ define('two/farmOverflow', [
             delayStep()
                 .then(checkCommandLimit)
                 .then(checkStorage)
-                .then(checkTargets)
-                .then(checkVillagePresets)
-                .then(checkPreset)
+                .then(selectTarget)
                 .then(checkTarget)
+                .then(checkPresets)
+                .then(selectPreset)
                 .then(checkLocalCommands)
                 .then(minimumInterval)
-                .then(checkTargetPoints)
                 .then(checkLoadedCommands)
                 .then(resolve)
                 .catch(reject)
