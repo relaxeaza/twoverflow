@@ -1,9 +1,10 @@
+const projectRoot = __dirname.replace(/\\/g, '/')
 const fs = require('fs')
-const package = JSON.parse(fs.readFileSync(`${__dirname}/package.json`, 'utf8'))
+const package = JSON.parse(fs.readFileSync(`${projectRoot}/package.json`, 'utf8'))
 const git = require('git-promise')
 const argv = require('yargs').argv
 
-const cdnPath = `${__dirname}/share/cdn`
+const cdnPath = `${projectRoot}/share/cdn`
 const releasesPath = `${cdnPath}/public/releases`
 const testingPath = `${releasesPath}/testing`
 
@@ -85,8 +86,8 @@ function gitDeploy () {
 
 function deployTesting () {
     let files = {}
-    files[`${__dirname}/dist/tw2overflow.js`] = `${testingPath}/tw2overflow.js`
-    files[`${__dirname}/dist/tw2overflow.min.js`] = `${testingPath}/tw2overflow.min.js`
+    files[`${projectRoot}/dist/tw2overflow.js`] = `${testingPath}/tw2overflow.js`
+    files[`${projectRoot}/dist/tw2overflow.min.js`] = `${testingPath}/tw2overflow.min.js`
 
     const copied = copyFiles(files, true)
 

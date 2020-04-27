@@ -3,11 +3,10 @@ const glob = require('glob')
 const path = require('path')
 const https = require('https')
 const request = require('request')
-const parseOptions = require('./parse-options.js')
+const projectRoot = __dirname.replace(/\\/g, '/')
 
 const approvedMinRequired = 0 // %
 const translatedMinRequired = 50 // %
-const options = parseOptions()
 
 const gameLanguageCodes = {
     'cs': 'cs_cz',
@@ -44,7 +43,7 @@ async function init () {
 
     allowedTranslations.forEach(function (status) {
         const languageCode = gameLanguageCodes[status.code]
-        const languageFiles = glob.sync(`./share/translations/${status.code}/twoverflow/*.json`)
+        const languageFiles = glob.sync(`${projectRoot}/share/translations/${status.code}/twoverflow/*.json`)
 
         languageFiles.forEach(function (languageFile) {
             let moduleName = path.basename(languageFile, '.json')
@@ -52,9 +51,9 @@ async function init () {
             let destPath
 
             if (moduleName === 'twoverflow') {
-                destPath = `./src/lang/${languageCode}.json`
+                destPath = `${projectRoot}/src/lang/${languageCode}.json`
             } else {
-                destPath = `./src/modules/${moduleName}/lang/${languageCode}.json`
+                destPath = `${projectRoot}/src/modules/${moduleName}/lang/${languageCode}.json`
             }
 
             fs.writeFileSync(destPath, languageStream, 'utf8')
@@ -91,16 +90,16 @@ async function getTranslationStatus (key) {
 }
 
 function getCrowdinKey () {
-    if (!fs.existsSync('./share/keys/crowdin.key')) {
+    if (!fs.existsSync(`${projectRoot}/share/keys/crowdin.key`)) {
         return false
     }
 
-    return fs.readFileSync('./share/keys/crowdin.key', 'utf8').trim()
+    return fs.readFileSync(`${projectRoot}/share/keys/crowdin.key`, 'utf8').trim()
 }
 
 function validSource () {
     return Object.keys(gameLanguageCodes).every(function (languageDir) {
-        return fs.existsSync(`./share/translations/${languageDir}/twoverflow/twoverflow.json`)
+        return fs.existsSync(`${projectRoot}/share/translations/${languageDir}/twoverflow/twoverflow.json`)
     })
 }
 
