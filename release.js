@@ -1,15 +1,9 @@
 const fs = require('fs')
-
-if (!fs.existsSync('package.json')) {
-    console.log('Run this script from project\'s root!')
-    process.exit()
-}
-
-const package = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+const package = JSON.parse(fs.readFileSync(`${__dirname}/package.json`, 'utf8'))
 const git = require('git-promise')
-const parseOptions = require('./parse-options.js')
+const argv = require('yargs').argv
 
-const cdnPath = 'share/cdn'
+const cdnPath = `${__dirname}/share/cdn`
 const releasesPath = `${cdnPath}/public/releases`
 const testingPath = `${releasesPath}/testing`
 
@@ -18,11 +12,9 @@ const gitOptions = {
 }
 
 function run () {
-    const options = parseOptions()
-
-    if (options.testing) {
+    if (argv.testing) {
         deployTesting()
-    } else if (options.production) {
+    } else if (argv.production) {
         deployProduction()
     }
 }
@@ -92,10 +84,11 @@ function gitDeploy () {
 }
 
 function deployTesting () {
-    const copied = copyFiles({
-        'dist/tw2overflow.js': `${testingPath}/tw2overflow.js`,
-        'dist/tw2overflow.min.js': `${testingPath}/tw2overflow.min.js`
-    }, true)
+    let files = {}
+    files[`${__dirname}/dist/tw2overflow.js`] = `${testingPath}/tw2overflow.js`
+    files[`${__dirname}/dist/tw2overflow.min.js`] = `${testingPath}/tw2overflow.min.js`
+
+    const copied = copyFiles(files, true)
 
     if (copied) {
         gitDeploy()

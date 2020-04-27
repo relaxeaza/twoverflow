@@ -22,14 +22,15 @@
     "http-server": "^0.12.1",
     "less": "^3.10.3",
     "node-notifier": "^7.0.0",
-    "terser": "^4.4.2"
+    "terser": "^4.4.2",
+    "yargs": "^15.3.1"
   },
   "scripts": {
-    "make": "node scripts/make.js --lint --minify",
-    "make-dev": "node scripts/make.js --dev",
-    "make-dev-lint": "node scripts/make.js --dev --lint",
-    "release": "node scripts/make.js --lint --minify && node scripts/release.js",
-    "release-testing": "node scripts/make.js --lint --minify --dev && node scripts/release.js --testing",
+    "make": "node make.js --lint --minify",
+    "make-dev": "node make.js --dev",
+    "make-dev-lint": "node make.js --dev --lint",
+    "release": "node make.js --lint --minify && node release.js",
+    "release-testing": "node make.js --lint --minify --dev && node release.js --testing",
     "server": "http-server ./dist/ --ssl --cert=share/server/cert.pem --key=share/server/key.pem -p 2838"
   },
   "dependencies": {}

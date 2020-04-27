@@ -1,33 +1,25 @@
 const fs = require('fs')
 const glob = require('glob')
 const path = require('path')
-const pkg = require('../package.json')
-const parseOptions = require('./parse-options.js')
-const terser = require('terser')
-const less = require('less')
-const htmlMinifier = require('html-minifier').minify
-const eslint = require('eslint')
+const pkg = require('./package.json')
 const notifySend = require('node-notifier')
-const LINT_SEVERITY_CODES = {
-    1: 'WARN',
-    2: 'ERROR'
-}
-const projectRoot = path.dirname(__dirname)
+const argv = require('yargs').argv
 
 async function init () {
-    const options = parseOptions()
-    const overflow = generateOverflowModule(options)
+    const overflow = generateOverflowModule()
 
-    fs.mkdirSync(`${projectRoot}/dist`, {
+    fs.mkdirSync(`${__dirname}/dist`, {
         recursive: true
     })
 
-    if (options.lint) await lintCode()
+    if (argv.lint) {
+        await lintCode()
+    }
     await concatCode(overflow.js)
     await compileLess(overflow.css)
     await minifyHTML(overflow.html)
     await replaceInFile(overflow.replaces)
-    if (options.minify) await minifyCode(overflow.js)
+    if (argv.minify) await minifyCode(overflow.js)
 
     if (notifySend) {
         notifySend.notify({
@@ -37,7 +29,7 @@ async function init () {
         })
     }
 
-    fs.rmdirSync(`${projectRoot}/tmp`, {
+    fs.rmdirSync(`${__dirname}/tmp`, {
         recursive: true
     })
 }
@@ -45,8 +37,13 @@ async function init () {
 async function lintCode (data) {
     console.log('Running lint')
 
-    let cli = new eslint.CLIEngine()
-    let lint = cli.executeOnFiles(`${projectRoot}/src`)
+    const LINT_SEVERITY_CODES = {
+        1: 'WARN',
+        2: 'ERROR'
+    }
+    const eslint = require('eslint')
+    const cli = new eslint.CLIEngine()
+    let lint = cli.executeOnFiles(`${__dirname}/src`)
     let clean = !(lint.warningCount + lint.errorCount)
 
     if (!clean) {
@@ -80,10 +77,10 @@ async function concatCode (data) {
     console.log('Concatenating scripts')
 
     const code = data.map(function (file) {
-        return fs.readFileSync(`${projectRoot}/${file}`, 'utf8')
+        return fs.readFileSync(`${__dirname}/${file}`, 'utf8')
     })
 
-    fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, code.join('\n'), 'utf8')
+    fs.writeFileSync(`${__dirname}/dist/tw2overflow.js`, code.join('\n'), 'utf8')
 
     console.log('OK')
     console.log('')
@@ -94,15 +91,15 @@ async function compileLess (data) {
 
     for (let destination in data) {
         const sourceLocation = data[destination]
-        const source = fs.readFileSync(`${projectRoot}${sourceLocation}`, 'utf8')
+        const source = fs.readFileSync(`${__dirname}${sourceLocation}`, 'utf8')
         const fileName = path.basename(destination)
-        const destinationDir = projectRoot + path.dirname(destination)
+        const destinationDir = __dirname + path.dirname(destination)
 
         fs.mkdirSync(destinationDir, {
             recursive: true
         })
 
-        await less.render(source, {
+        await require('less').render(source, {
             compress: true
         })
         .then(function (output) {
@@ -123,9 +120,9 @@ async function minifyHTML (data) {
 
     for (let destination in data) {
         const sourceLocation = data[destination]
-        const source = fs.readFileSync(`${projectRoot}${sourceLocation}`, 'utf8')
+        const source = fs.readFileSync(`${__dirname}${sourceLocation}`, 'utf8')
 
-        let output = htmlMinifier(source, {
+        let output = require('html-minifier').minify(source, {
             removeRedundantAttributes: true,
             removeOptionalTags: true,
             collapseWhitespace: true,
@@ -137,7 +134,7 @@ async function minifyHTML (data) {
         // workaround! waiting https://github.com/terser/terser/issues/518
         output = output.replace(/"/g, '\\"')
 
-        fs.writeFileSync(`${projectRoot}${destination}`, output, 'utf8')
+        fs.writeFileSync(`${__dirname}${destination}`, output, 'utf8')
     }
 
     console.log('OK')
@@ -148,7 +145,7 @@ async function replaceInFile (data) {
     console.log('Replacing values')
 
     const delimiters = ['___', '']
-    let target = fs.readFileSync(`${projectRoot}/dist/tw2overflow.js`, 'utf8')
+    let target = fs.readFileSync(`${__dirname}/dist/tw2overflow.js`, 'utf8')
     let search
     let replace
     let ordered = {
@@ -160,7 +157,7 @@ async function replaceInFile (data) {
         replace = data[search]
 
         if (replace.slice(0, 11) === '~read-file:') {
-            ordered.file[search] = fs.readFileSync(projectRoot + replace.slice(11), 'utf8')
+            ordered.file[search] = fs.readFileSync(__dirname + replace.slice(11), 'utf8')
         } else {
             ordered.text[search] = replace
         }
@@ -180,7 +177,7 @@ async function replaceInFile (data) {
         target = replaceText(target, search, replace)
     }
 
-    fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, target, 'utf8')
+    fs.writeFileSync(`${__dirname}/dist/tw2overflow.js`, target, 'utf8')
 
     console.log('OK')
     console.log('')
@@ -189,8 +186,8 @@ async function replaceInFile (data) {
 async function minifyCode (data) {
     console.log('Compressing script')
 
-    const minified = terser.minify({
-        'tw2overflow.js': fs.readFileSync(`${projectRoot}/dist/tw2overflow.js`, 'utf8')
+    const minified = require('terser').minify({
+        'tw2overflow.js': fs.readFileSync(`${__dirname}/dist/tw2overflow.js`, 'utf8')
     }, {
         output: {
             quote_style: 3, // note: it's not working
@@ -209,7 +206,7 @@ async function minifyCode (data) {
         process.exit()
     }
 
-    fs.writeFileSync(`${projectRoot}/dist/tw2overflow.min.js`, minified.code, 'utf8')
+    fs.writeFileSync(`${__dirname}/dist/tw2overflow.min.js`, minified.code, 'utf8')
 
     console.log('OK')
     console.log('')
@@ -243,8 +240,8 @@ function generateModule (moduleId, moduleDir) {
     }
 
     // Load module info file
-    if (fs.existsSync(`${projectRoot}${modulePath}/module.json`)) {
-        const modulePackage = JSON.parse(fs.readFileSync(`${projectRoot}${modulePath}/module.json`, 'utf8'))
+    if (fs.existsSync(`${__dirname}${modulePath}/module.json`)) {
+        const modulePackage = JSON.parse(fs.readFileSync(`${__dirname}${modulePath}/module.json`, 'utf8'))
 
         for (let key in modulePackage) {
             data.replaces[`${moduleId}_${key}`] = modulePackage[key]
@@ -254,26 +251,26 @@ function generateModule (moduleId, moduleDir) {
     }
 
     // Load the main js source
-    if (fs.existsSync(`${projectRoot}${modulePath}/src/core.js`)) {
+    if (fs.existsSync(`${__dirname}${modulePath}/src/core.js`)) {
         data.js.push(`${modulePath}/src/core.js`)
     } else {
         return console.error(`Module "${moduleId}" is missing "core.js"`)
     }
 
     // Load all complementaty js sources
-    const source = glob.sync(`${projectRoot}${modulePath}/src/*.js`, {
+    const source = glob.sync(`${__dirname}${modulePath}/src/*.js`, {
         ignore: [
-            `${projectRoot}${modulePath}/src/core.js`,
-            `${projectRoot}${modulePath}/src/init.js`
+            `${__dirname}${modulePath}/src/core.js`,
+            `${__dirname}${modulePath}/src/init.js`
         ]
     })
 
     source.forEach(function (filePath) {
-        data.js.push(filePath.replace(projectRoot, ''))
+        data.js.push(filePath.replace(__dirname, ''))
     })
 
     // Load the initialization source
-    if (fs.existsSync(`${projectRoot}${modulePath}/src/init.js`)) {
+    if (fs.existsSync(`${__dirname}${modulePath}/src/init.js`)) {
         data.js.push(`${modulePath}/src/init.js`)
     } else {
         return console.error(`Module "${moduleId}" is missing "init.js"`)
@@ -281,32 +278,32 @@ function generateModule (moduleId, moduleDir) {
 
 
     // Load assets, if exists
-    if (fs.existsSync(`${projectRoot}${modulePath}/assets`)) {
-        data.html = glob.sync(`${projectRoot}${modulePath}/assets/*.html`).map(function (htmlPath) {
-            return htmlPath.replace(projectRoot, '')
+    if (fs.existsSync(`${__dirname}${modulePath}/assets`)) {
+        data.html = glob.sync(`${__dirname}${modulePath}/assets/*.html`).map(function (htmlPath) {
+            return htmlPath.replace(__dirname, '')
         })
-        data.css = glob.sync(`${projectRoot}${modulePath}/assets/*.less`).map(function (cssPath) {
-            return cssPath.replace(projectRoot, '')
+        data.css = glob.sync(`${__dirname}${modulePath}/assets/*.less`).map(function (cssPath) {
+            return cssPath.replace(__dirname, '')
         })
 
         data.html.forEach(function (htmlPath) {
-            htmlPath = htmlPath.replace(projectRoot, '')
+            htmlPath = htmlPath.replace(__dirname, '')
 
             const filename = path.basename(htmlPath, '.html')
             data.replaces[`${moduleId}_html_${filename}`] = htmlPath
         })
 
         data.css.forEach(function (cssPath) {
-            cssPath = cssPath.replace(projectRoot, '')
+            cssPath = cssPath.replace(__dirname, '')
             const filename = path.basename(cssPath, '.less')
             data.replaces[`${moduleId}_css_${filename}`] = cssPath
         })
     }
 
     // Load languages, if exists
-    if (fs.existsSync(`${projectRoot}${modulePath}/lang`)) {
+    if (fs.existsSync(`${__dirname}${modulePath}/lang`)) {
         data.lang = glob.sync(`${modulePath}/lang/*.json`).map(function (langPath) {
-            return langPath.replace(projectRoot, '')
+            return langPath.replace(__dirname, '')
         })
 
         generateLocaleFile(data)
@@ -331,34 +328,34 @@ function generateLocaleFile (module) {
 
     langData = JSON.stringify(langData)
 
-    fs.mkdirSync(`${projectRoot}/tmp/src/modules/${module.dir}/lang`, {
+    fs.mkdirSync(`${__dirname}/tmp/src/modules/${module.dir}/lang`, {
         recursive: true
     })
 
-    fs.writeFileSync(`${projectRoot}/tmp/src/modules/${module.dir}/lang/lang.json`, langData, 'utf8')
+    fs.writeFileSync(`${__dirname}/tmp/src/modules/${module.dir}/lang/lang.json`, langData, 'utf8')
 }
 
 /**
  * Parse all modules inside /src/modules and generate info objects
  * from each with generateModule().
  */
-function generateModules (options) {
+function generateModules () {
     let modules = []
 
-    fs.readdirSync(`${projectRoot}/src/modules/`).forEach(function (moduleDir) {
-        if (!fs.existsSync(`${projectRoot}/src/modules/${moduleDir}/module.json`)) {
+    fs.readdirSync(`${__dirname}/src/modules/`).forEach(function (moduleDir) {
+        if (!fs.existsSync(`${__dirname}/src/modules/${moduleDir}/module.json`)) {
             return false
         }
 
-        const info = JSON.parse(fs.readFileSync(`${projectRoot}/src/modules/${moduleDir}/module.json`, 'utf8'))
+        const info = JSON.parse(fs.readFileSync(`${__dirname}/src/modules/${moduleDir}/module.json`, 'utf8'))
 
-        if (options.only && options.only !== info.id && info.id !== 'interface') {
+        if (argv.only && argv.only !== info.id && info.id !== 'interface') {
             console.log(`Ignoring module ${info.id}`)
 
             return false
         }
 
-        if (options.ignore && options.ignore.split(',').includes(info.id)) {
+        if (argv.ignore && argv.ignore.split(',').includes(info.id)) {
             console.log(`Ignoring module ${info.id}`)
 
             return false
@@ -370,11 +367,8 @@ function generateModules (options) {
     return modules
 }
 
-function generateOverflowModule (options) {
-    const modules = generateModules({
-        ignore: options.ignore,
-        only: options.only
-    })
+function generateOverflowModule () {
+    const modules = generateModules()
 
     // Store information from all modules as a single module to be build.
     let overflow = {
@@ -407,13 +401,13 @@ function generateOverflowModule (options) {
 
     // Generate the common replaces
     overflow.replaces['overflow_name'] = pkg.name
-    overflow.replaces['overflow_version'] = pkg.version + (options.dev ? '-dev' : '')
+    overflow.replaces['overflow_version'] = pkg.version + (argv.dev ? '-dev' : '')
     overflow.replaces['overflow_author_name'] = pkg.author.name
     overflow.replaces['overflow_author_url'] = pkg.author.url
     overflow.replaces['overflow_author_email'] = pkg.author.email
     overflow.replaces['overflow_author'] = JSON.stringify(pkg.author)
     overflow.replaces['overflow_date'] = new Date().toUTCString()
-    // overflow.replaces['overflow_lang'] = fs.readFileSync(`${projectRoot}/tmp/src/modules/core/lang/lang.json`, 'utf8')
+    // overflow.replaces['overflow_lang'] = fs.readFileSync(`${__dirname}/tmp/src/modules/core/lang/lang.json`, 'utf8')
     overflow.replaces['overflow_lang'] = `~read-file:/tmp/src/modules/core/lang/lang.json`
 
     // Move all modules information to a single module (overflow)
@@ -443,7 +437,7 @@ function generateOverflowModule (options) {
 
             // If the replace value is a file, create a template to
             // grunt replace later.
-            if (fs.existsSync(`${projectRoot}/${value}`)) {
+            if (fs.existsSync(`${__dirname}/${value}`)) {
                 let filePath = value
                 const ext = path.extname(value)
 
@@ -466,22 +460,22 @@ function generateOverflowModule (options) {
     overflow.js.push(`/src/footer.js`)
 
     // Load core assets, if exists
-    if (fs.existsSync(`${projectRoot}/src/assets`)) {
-        fs.mkdirSync(`${projectRoot}/tmp/src/assets`, {
+    if (fs.existsSync(`${__dirname}/src/assets`)) {
+        fs.mkdirSync(`${__dirname}/tmp/src/assets`, {
             recursive: true
         })
 
-        glob.sync(`${projectRoot}/src/assets/*.html`).forEach(function (htmlPath) {
-            htmlPath = htmlPath.replace(projectRoot, '')
+        glob.sync(`${__dirname}/src/assets/*.html`).forEach(function (htmlPath) {
+            htmlPath = htmlPath.replace(__dirname, '')
 
             const filename = path.basename(htmlPath, '.html')
 
             overflow.replaces[`overflow_html_${filename}`] = `~read-file:/tmp${htmlPath}`
-            overflow.html[`${projectRoot}/tmp${htmlPath}`] = `${projectRoot}${htmlPath}`
+            overflow.html[`${__dirname}/tmp${htmlPath}`] = `${__dirname}${htmlPath}`
         })
 
-        glob.sync(`${projectRoot}/src/assets/*.less`).forEach(function (lessPath) {
-            lessPath = lessPath.replace(projectRoot, '')
+        glob.sync(`${__dirname}/src/assets/*.less`).forEach(function (lessPath) {
+            lessPath = lessPath.replace(__dirname, '')
 
             const filename = path.basename(lessPath, '.less')
 
