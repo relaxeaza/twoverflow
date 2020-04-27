@@ -762,7 +762,7 @@ define('two/minimap', [
     }
 
     minimap.getHighlight = function (type, item) {
-        if (Object.prototype.hasOwnProperty.call(highlights[type], item)) {
+        if (hasOwn.call(highlights[type], item)) {
             return highlights[type][item]
         } else {
             return false

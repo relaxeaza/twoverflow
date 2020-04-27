@@ -3,8 +3,6 @@ define('two/Settings', [
 ], function (
     Lockr
 ) {
-    const hasOwn = Object.prototype.hasOwnProperty
-
     const generateDiff = function (before, after) {
         let changes = {}
 

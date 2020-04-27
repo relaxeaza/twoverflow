@@ -49,3 +49,4 @@ globals:
   storageService: true
   reportService: true
   noop: true
+  hasOwn: true

@@ -138,7 +138,7 @@ define('two/builderQueue/ui', [
 
     const selectSome = function (obj) {
         for (let i in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, i)) {
+            if (hasOwn.call(obj, i)) {
                 return i
             }
         }

@@ -279,7 +279,7 @@ define('two/utils', [
             }
         } else if (typeof obj === 'object' && obj !== null) {
             for (let i in obj) {
-                if (Object.prototype.hasOwnProperty.call(obj, i)) {
+                if (hasOwn.call(obj, i)) {
                     if (callback(obj[i], i) === false) {
                         break
                     }
