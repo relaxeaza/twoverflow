@@ -1,5 +1,4 @@
 require([
-    'two/language',
     'two/ready',
     'two/minimap',
     'two/minimap/ui',
@@ -9,7 +8,6 @@ require([
     'two/minimap/settings/updates',
     'two/minimap/settings/map'
 ], function (
-    twoLanguage,
     ready,
     minimap,
     minimapInterface
@@ -19,7 +17,6 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('___minimap_id', ___minimap_lang) // eslint-disable-line
         minimap.init()
         minimapInterface()
         minimap.run()

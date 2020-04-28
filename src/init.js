@@ -22,13 +22,15 @@ require([
         }
 
         if (versionNumber(currentVersion) > versionNumber(storedVersion)) {
+            const firefoxUrl = 'https://www.mozilla.org/en-US/firefox/new/'
             const changelogUrl = 'https://gitlab.com/relaxeaza/twoverflow/blob/master/CHANGELOG.md'
-            const newVersionMsg = $filter('i18n')('new_version', $rootScope.loc.ale, 'common', currentVersion)
-            const checkChangelogMsg = $filter('i18n')('check_changes', $rootScope.loc.ale, 'common')
-            const changelogBB = `[url=${changelogUrl}]${checkChangelogMsg}[/url]`
+            const changelogMsg = $filter('i18n')('check_changes', $rootScope.loc.ale, 'common')
+            const firefoxMsg = $filter('i18n')('firefox_shill', $rootScope.loc.ale, 'common', firefoxUrl)
 
             $rootScope.$broadcast(eventTypeProvider.NOTIFICATION_NEW, {
-                message: newVersionMsg + '\n\n' + changelogBB
+                message: $filter('i18n')('new_version', $rootScope.loc.ale, 'common', currentVersion)
+                    + `\n[url=${changelogUrl}]${changelogMsg}[/url]`
+                    + '\n\n' + firefoxMsg
             })
 
             Lockr.set('twoverflow_version', currentVersion)
@@ -36,7 +38,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('core', ___overflow_lang) // eslint-disable-line
+        twoLanguage.init()
         checkNewVersion()
     })
 })

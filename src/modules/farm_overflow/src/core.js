@@ -8,6 +8,7 @@ define('two/farmOverflow', [
     'two/farmOverflow/types/logs',
     'two/mapData',
     'two/utils',
+    'two/ready',
     'helper/math',
     'helper/time',
     'queues/EventQueue',
@@ -26,6 +27,7 @@ define('two/farmOverflow', [
     LOG_TYPES,
     twoMapData,
     utils,
+    ready,
     math,
     timeHelper,
     eventQueue,
@@ -354,14 +356,6 @@ define('two/farmOverflow', [
         })
     }
 
-    const updatePresets = function () {
-        if (modelDataService.getPresetList().isLoaded()) {
-            processPresets()
-        } else {
-            socketService.emit(routeProvider.GET_PRESETS, {}, processPresets)
-        }
-    }
-
     const ignoreVillage = function (villageId) {
         const groupIgnore = farmSettings[SETTINGS.GROUP_IGNORE]
 
@@ -378,7 +372,7 @@ define('two/farmOverflow', [
     }
 
     const presetListener = function () {
-        updatePresets()
+        processPresets()
 
         if (!selectedPresets.length) {
             eventQueue.trigger(eventTypeProvider.FARM_OVERFLOW_STOP, {
@@ -1165,7 +1159,7 @@ define('two/farmOverflow', [
             farmSettings = settings.getAll()
 
             if (updates[UPDATES.PRESET]) {
-                updatePresets()
+                processPresets()
             }
 
             if (updates[UPDATES.GROUPS]) {
@@ -1193,8 +1187,17 @@ define('two/farmOverflow', [
         farmSettings = settings.getAll()
 
         updateGroupVillages()
-        updatePresets()
         farmOverflow.createFarmers()
+
+        ready(function () {
+            processPresets()
+        }, 'presets')
+
+        ready(function () {
+            farmers.forEach(function (farmer) {
+                farmer.loadTargets()
+            })
+        }, 'minimap_data')
 
         $rootScope.$on(eventTypeProvider.ARMY_PRESET_UPDATE, presetListener)
         $rootScope.$on(eventTypeProvider.ARMY_PRESET_DELETED, presetListener)

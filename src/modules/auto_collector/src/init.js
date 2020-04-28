@@ -1,5 +1,4 @@
 require([
-    'two/language',
     'two/ready',
     'two/autoCollector',
     'two/autoCollector/ui',
@@ -8,7 +7,6 @@ require([
     'two/autoCollector/secondVillage',
     'two/autoCollector/events'
 ], function (
-    twoLanguage,
     ready,
     autoCollector,
     autoCollectorInterface,
@@ -24,7 +22,6 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('___auto_collector_id', ___auto_collector_lang) // eslint-disable-line
         autoCollector.init()
         autoCollector.secondVillage.init()
         autoCollectorInterface()

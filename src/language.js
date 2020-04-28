@@ -1,52 +1,22 @@
-define('two/language', ['helper/i18n'], function (i18n) {
+define('two/language', [
+    'helper/i18n'
+], function (
+    i18n
+) {
     let initialized = false
-    let moduleLanguages = {}
-    let selectedLanguage
-    const defaultLanguage = 'en_us'
-    const sharedLanguages = {
+    const languages = ___overflow_lang // eslint-disable-line
+    const DEFAULT_LANG = 'en_us'
+    const SHARED_LANGS = {
         'en_dk': 'en_us',
         'pt_pt': 'pt_br'
     }
 
-    const injectLanguage = function (moduleId) {
-        if (!initialized) {
-            throw new Error('Language module not initialized.')
-        }
-
-        if (!(moduleId in moduleLanguages)) {
-            throw new Error('Language data for ' + moduleId + ' does not exists.')
-        }
-
-        const moduleLanguage = moduleLanguages[moduleId][selectedLanguage] || moduleLanguages[moduleId][defaultLanguage]
-
-        i18n.setJSON(moduleLanguage)
-    }
-
-    const selectLanguage = function (language) {
-        selectedLanguage = language
-
-        if (selectedLanguage in sharedLanguages) {
-            selectedLanguage = sharedLanguages[selectedLanguage]
-        }
-
-        return selectedLanguage
+    function selectLanguage (langId) {
+        langId = hasOwn.call(SHARED_LANGS, langId) ? SHARED_LANGS[langId] : langId
+        i18n.setJSON(languages[langId] || languages[DEFAULT_LANG])
     }
 
     let twoLanguage = {}
-
-    twoLanguage.add = function (moduleId, languages) {
-        if (!initialized) {
-            twoLanguage.init()
-        }
-
-        if (moduleId in moduleLanguages) {
-            return false
-        }
-
-        moduleLanguages[moduleId] = languages
-
-        injectLanguage(moduleId)
-    }
 
     twoLanguage.init = function () {
         if (initialized) {
@@ -54,18 +24,13 @@ define('two/language', ['helper/i18n'], function (i18n) {
         }
 
         initialized = true
-        selectedLanguage = selectLanguage($rootScope.loc.ale)
+        
+        selectLanguage($rootScope.loc.ale)
 
         // trigger eventTypeProvider.LANGUAGE_SELECTED_CHANGED you dumb fucks
         $rootScope.$watch('loc.ale', function (newValue, oldValue) {
-            if (newValue === oldValue) {
-                return false
-            }
-
-            selectLanguage($rootScope.loc.ale)
-
-            for (let moduleId in moduleLanguages) {
-                injectLanguage(moduleId)
+            if (newValue !== oldValue) {
+                selectLanguage($rootScope.loc.ale)
             }
         })
     }

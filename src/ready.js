@@ -5,6 +5,8 @@ define('two/ready', [
     GAME_STATES,
     twoMapData
 ) {
+    let queueRequests = {}
+
     const ready = function (callback, which) {
         which = which || ['map']
 
@@ -79,6 +81,19 @@ define('two/ready', [
 
                 twoMapData.load(function () {
                     readyStep('minimap_data')
+                })
+            },
+            'presets': function () {
+                if (modelDataService.getPresetList().isLoaded()) {
+                    return readyStep('presets')
+                }
+
+                queueRequests.presets = queueRequests.presets || new Promise(function (resolve) {
+                    socketService.emit(routeProvider.GET_PRESETS, {}, resolve)
+                })
+
+                queueRequests.presets.then(function () {
+                    readyStep('presets')
                 })
             }
         }

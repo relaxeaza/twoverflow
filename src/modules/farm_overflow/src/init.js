@@ -1,11 +1,9 @@
 require([
-    'two/language',
     'two/ready',
     'two/farmOverflow',
     'two/farmOverflow/ui',
     'two/farmOverflow/events'
 ], function (
-    twoLanguage,
     ready,
     farmOverflow,
     farmOverflowInterface
@@ -15,8 +13,7 @@ require([
     }
 
     ready(function () {
-        twoLanguage.add('___farm_overflow_id', ___farm_overflow_lang) // eslint-disable-line
         farmOverflow.init()
         farmOverflowInterface()
-    }, ['map'])
+    }, ['map', 'presets'])
 })
