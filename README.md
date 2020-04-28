@@ -39,7 +39,7 @@ cd twoverflow
 npm install
 ```
 
-To compile run `npm run make` or `node scripts/make.js`. The script will be compiled inside `dist/`
+To compile run `npm run make` or `node make.js`. The script will be compiled inside `dist/`
 
 ### Compile flags
 
@@ -48,6 +48,6 @@ You can use some flags to customize the resulting file.
 - `--minify` to generate a minified file.
 - `--ignore` to ignore specific modules by ID (check _module.json_ for ID).
 - `--only` compile only a specific module by ID (check _module.json_ for ID).
-- `--nolint` compile without checking the source for errors.
+- `--lint` check source for errors.
 
-Example: `node scripts/make.js --ignore=farm_overflow,minimap --minify` ignores both modules farm_overflow and minimap and will generate an minified file.
+Example: `node make.js --ignore=farm_overflow,minimap --minify` ignores both modules farm_overflow and minimap and will generate an minified file.
