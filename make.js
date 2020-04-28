@@ -5,214 +5,364 @@ const pkg = require('./package.json')
 const notifySend = require('node-notifier')
 const argv = require('yargs').argv
 const projectRoot = __dirname.replace(/\\/g, '/')
+const hasOwn = Object.prototype.hasOwnProperty
+const MINIMUM_TRANSLATED = 50
+const LANG_ID_SOURCE = 'en_us'
+const overflow = generateOverflowModule()
 
-async function init () {
-    const overflow = generateOverflowModule()
-
+function init () {
     fs.mkdirSync(`${projectRoot}/dist`, {
         recursive: true
     })
 
-    if (argv.lint) {
-        await lintCode()
-    }
-    await concatCode(overflow.js)
-    await compileLess(overflow.css)
-    await minifyHTML(overflow.html)
-    await replaceInFile(overflow.replaces)
-    if (argv.minify) {
-        await minifyCode(overflow.js)
-    }
+    lintCode()
+        .then(concatCode)
+        .then(compileLess)
+        .then(minifyHTML)
+        .then(generateLanguageFile)
+        .then(replaceInFile)
+        .then(minifyCode)
+        .then(function () {
+            console.log('Build finished')
 
-    if (notifySend) {
-        notifySend.notify({
-            title: 'TWOverflow',
-            message: 'Build complete',
-            timeout: 1000
-        })
-    }
-
-    fs.rmdirSync(`${projectRoot}/tmp`, {
-        recursive: true
-    })
-}
-
-async function lintCode (data) {
-    console.log('Running lint')
-
-    const LINT_SEVERITY_CODES = {
-        1: 'WARN',
-        2: 'ERROR'
-    }
-    const eslint = require('eslint')
-    const cli = new eslint.CLIEngine()
-    let lint = cli.executeOnFiles(`${projectRoot}/src`)
-    let clean = !(lint.warningCount + lint.errorCount)
-
-    if (!clean) {
-        console.log(`Warnings: ${lint.warningCount}  Errors: ${lint.errorCount}`)
-        console.log('')
-    }
-
-    lint.results.forEach(function (fileLint) {
-        if (fileLint.messages.length) {
-            console.log(fileLint.filePath)
-
-            fileLint.messages.forEach(function (error) {
-                let severityLabel = LINT_SEVERITY_CODES[error.severity]
-
-                console.log(`${error.line}:${error.column}  ${severityLabel}  ${error.message}`)
+            fs.rmdirSync(`${projectRoot}/tmp`, {
+                recursive: true
             })
 
-            console.log('')
-        }
-    })
-
-    if (clean) {
-        console.log('OK')
-        console.log('')
-    } else {
-        process.exit()
-    }
-}
-
-async function concatCode (data) {
-    console.log('Concatenating scripts')
-
-    const code = data.map(function (file) {
-        return fs.readFileSync(`${projectRoot}/${file}`, 'utf8')
-    })
-
-    fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, code.join('\n'), 'utf8')
-
-    console.log('OK')
-    console.log('')
-}
-
-async function compileLess (data) {
-    console.log('Compiling styles')
-
-    for (let destination in data) {
-        const sourceLocation = data[destination]
-        const source = fs.readFileSync(`${projectRoot}${sourceLocation}`, 'utf8')
-        const fileName = path.basename(destination)
-        const destinationDir = projectRoot + path.dirname(destination)
-
-        fs.mkdirSync(destinationDir, {
-            recursive: true
-        })
-
-        await require('less').render(source, {
-            compress: true
-        })
-        .then(function (output) {
-            fs.writeFileSync(`${destinationDir}/${fileName}`, output.css, 'utf8')
+            notifySend.notify({
+                title: 'TWOverflow',
+                message: 'Build complete',
+                timeout: 1000
+            })
         })
         .catch(function (error) {
-            console.log(error)
-            process.exit()
-        })
-    }
+            console.log('Build failed')
 
-    console.log('OK')
-    console.log('')
+            fs.rmdirSync(`${projectRoot}/tmp`, {
+                recursive: true
+            })
+
+            if (typeof error !== 'undefined') {
+                console.log(error)
+            }
+
+            notifySend.notify({
+                title: 'TWOverflow',
+                message: 'Build failed',
+                timeout: 2000
+            })
+        })
 }
 
-async function minifyHTML (data) {
-    console.log('Minifying templates')
-
-    for (let destination in data) {
-        const sourceLocation = data[destination]
-        const source = fs.readFileSync(`${projectRoot}${sourceLocation}`, 'utf8')
-
-        let output = require('html-minifier').minify(source, {
-            removeRedundantAttributes: true,
-            removeOptionalTags: true,
-            collapseWhitespace: true,
-            removeComments: true,
-            removeTagWhitespace: false,
-            quoteCharacter: '"'
-        })
-
-        // workaround! waiting https://github.com/terser/terser/issues/518
-        output = output.replace(/"/g, '\\"')
-
-        fs.writeFileSync(`${projectRoot}${destination}`, output, 'utf8')
-    }
-
-    console.log('OK')
-    console.log('')
-}
-
-async function replaceInFile (data) {
-    console.log('Replacing values')
-
-    const delimiters = ['___', '']
-    let target = fs.readFileSync(`${projectRoot}/dist/tw2overflow.js`, 'utf8')
-    let search
-    let replace
-    let ordered = {
-        file: {},
-        text: {}
-    }
-
-    for (search in data) {
-        replace = data[search]
-
-        if (replace.slice(0, 11) === '~read-file:') {
-            ordered.file[search] = fs.readFileSync(projectRoot + replace.slice(11), 'utf8')
-        } else {
-            ordered.text[search] = replace
+function lintCode () {
+    return new Promise(function (resolve, reject) {
+        if (!argv.lint) {
+            return resolve()
         }
-    }
 
-    for (search in ordered.file) {
-        replace = ordered.file[search]
-        search = `${delimiters[0]}${search}${delimiters[1]}`
+        console.log('Running lint')
 
-        target = replaceText(target, search, replace)
-    }
+        const LINT_SEVERITY_CODES = { 1: 'WARN', 2: 'ERROR' }
+        const CLIEngine = require('eslint').CLIEngine
+        const cli = new CLIEngine()
+        let lint = cli.executeOnFiles(`${projectRoot}/src`)
+        let clean = !(lint.warningCount + lint.errorCount)
 
-    for (search in ordered.text) {
-        replace = ordered.text[search]
-        search = `${delimiters[0]}${search}${delimiters[1]}`
+        if (!clean) {
+            console.log(`Warnings: ${lint.warningCount}  Errors: ${lint.errorCount}`)
+            console.log('')
+        }
 
-        target = replaceText(target, search, replace)
-    }
+        lint.results.forEach(function (fileLint) {
+            if (fileLint.messages.length) {
+                console.log(fileLint.filePath)
 
-    fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, target, 'utf8')
+                fileLint.messages.forEach(function (error) {
+                    let severityLabel = LINT_SEVERITY_CODES[error.severity]
 
-    console.log('OK')
-    console.log('')
-}
+                    console.log(`${error.line}:${error.column}  ${severityLabel}  ${error.message}`)
+                })
 
-async function minifyCode (data) {
-    console.log('Compressing script')
+                console.log('')
+            }
+        })
 
-    const minified = require('terser').minify({
-        'tw2overflow.js': fs.readFileSync(`${projectRoot}/dist/tw2overflow.js`, 'utf8')
-    }, {
-        output: {
-            quote_style: 3, // note: it's not working
-            max_line_len: 1000
+        if (clean) {
+            console.log('OK')
+            console.log('')
+            resolve()
+        } else {
+            reject()
         }
     })
-    
-    if (minified.error) {
-        const error = minified.error
+}
 
-        console.log('')
-        console.log(error.filename)
-        console.log(`${error.line}:${error.col}  ${error.name}  ${error.message}`)
-        console.log('')
+function concatCode () {
+    return new Promise(function (resolve) {
+        console.log('Concatenating scripts')
 
-        process.exit()
+        const code = overflow.js.map(function (file) {
+            return fs.readFileSync(`${projectRoot}/${file}`, 'utf8')
+        })
+
+        fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, code.join('\n'), 'utf8')
+
+        console.log('OK')
+        console.log('')
+        resolve()
+    })
+}
+
+function compileLess () {
+    return new Promise(function (resolve, reject) {
+        console.log('Compiling styles')
+
+        let lessPromises = []
+
+        for (let destination in overflow.css) {
+            const sourceLocation = overflow.css[destination]
+            const source = fs.readFileSync(`${projectRoot}${sourceLocation}`, 'utf8')
+            const fileName = path.basename(destination)
+            const destinationDir = projectRoot + path.dirname(destination)
+
+            fs.mkdirSync(destinationDir, {
+                recursive: true
+            })
+
+            let promise = require('less').render(source, {
+                compress: true
+            }).then(function (output) {
+                fs.writeFileSync(`${destinationDir}/${fileName}`, output.css, 'utf8')
+            })
+
+            lessPromises.push(promise)
+        }
+
+        Promise.all(lessPromises).then(function () {
+            console.log('OK')
+            console.log('')
+            resolve()
+        }).catch(function (error) {
+            reject(error)
+        })
+    })
+}
+
+function minifyHTML () {
+    return new Promise(function (resolve) {
+        console.log('Minifying templates')
+
+        for (let destination in overflow.html) {
+            const sourceLocation = overflow.html[destination]
+            const source = fs.readFileSync(`${projectRoot}${sourceLocation}`, 'utf8')
+
+            let output = require('html-minifier').minify(source, {
+                removeRedundantAttributes: true,
+                removeOptionalTags: true,
+                collapseWhitespace: true,
+                removeComments: true,
+                removeTagWhitespace: false,
+                quoteCharacter: '"'
+            })
+
+            // workaround! waiting https://github.com/terser/terser/issues/518
+            output = output.replace(/"/g, '\\"')
+
+            fs.writeFileSync(`${projectRoot}${destination}`, output, 'utf8')
+        }
+
+        console.log('OK')
+        console.log('')
+        resolve()
+    })
+}
+
+function generateLanguageFile () {
+    return new Promise(function (resolve, reject) {
+        const modules = fs.readdirSync(`${projectRoot}/src/i18n/`, {
+            withFileTypes: true
+        }).filter(function (dirent) {
+            return dirent.isDirectory()
+        }).map(function (moduleDir) {
+            return moduleDir.name
+        })
+
+        const mergedTranslations = {}
+
+        for (let a = 0; a < modules.length; a++) {
+            const moduleId = modules[a]
+            const sourceTranslations = JSON.parse(fs.readFileSync(`${projectRoot}/src/i18n/${moduleId}.json`, 'utf8'))
+            const sourceTotalEntries = getTranslationEntries(sourceTranslations)
+            const moduleTranslations = fs.readdirSync(`${projectRoot}/src/i18n/${moduleId}`)
+
+            mergedTranslations[LANG_ID_SOURCE] = {
+                ...mergedTranslations[LANG_ID_SOURCE],
+                ...sourceTranslations
+            }
+
+            for (let b = 0; b < moduleTranslations.length; b++) {
+                const translationFile = moduleTranslations[b]
+                const translationId = translationFile.replace('.json', '')
+                const translation = JSON.parse(fs.readFileSync(`${projectRoot}/src/i18n/${moduleId}/${translationFile}`, 'utf8'))
+                const translationStatus = getTranslationStatus(moduleId, translationId, sourceTranslations, translation)
+
+                if (!translationStatus.valid) {
+                    return reject(translationStatus.msg)
+                }
+
+                const translationTotalEntries = getTranslationEntries(translation)
+                const percentageTranslated = Math.floor(translationTotalEntries / sourceTotalEntries * 100)
+
+                if (percentageTranslated >= MINIMUM_TRANSLATED) {
+                    mergedTranslations[translationId] = mergedTranslations[translationId] || {}
+                    mergedTranslations[translationId] = {
+                        ...mergedTranslations[translationId],
+                        ...mergeSouceIntoTranslation(sourceTranslations, translation)
+                    }
+                }
+            }
+        }
+
+        fs.writeFileSync(`${projectRoot}/tmp/i18n.json`, JSON.stringify(mergedTranslations, null, 4), 'utf8')
+
+        resolve()
+    })
+}
+
+function replaceInFile () {
+    return new Promise(function (resolve) {
+        console.log('Replacing values')
+
+        const delimiters = ['___', '']
+        let target = fs.readFileSync(`${projectRoot}/dist/tw2overflow.js`, 'utf8')
+        let search
+        let replace
+        let ordered = {
+            file: {},
+            text: {}
+        }
+
+        for (search in overflow.replaces) {
+            replace = overflow.replaces[search]
+
+            if (replace.slice(0, 11) === '~read-file:') {
+                ordered.file[search] = fs.readFileSync(projectRoot + replace.slice(11), 'utf8')
+            } else {
+                ordered.text[search] = replace
+            }
+        }
+
+        for (search in ordered.file) {
+            replace = ordered.file[search]
+            search = `${delimiters[0]}${search}${delimiters[1]}`
+
+            target = replaceText(target, search, replace)
+        }
+
+        for (search in ordered.text) {
+            replace = ordered.text[search]
+            search = `${delimiters[0]}${search}${delimiters[1]}`
+
+            target = replaceText(target, search, replace)
+        }
+
+        fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, target, 'utf8')
+
+        console.log('OK')
+        console.log('')
+        resolve()
+    })
+}
+
+function minifyCode () {
+    return new Promise(function (resolve, reject) {
+        if (!argv.minify) {
+            return resolve()
+        }
+
+        console.log('Compressing script')
+
+        const minified = require('terser').minify({
+            'tw2overflow.js': fs.readFileSync(`${projectRoot}/dist/tw2overflow.js`, 'utf8')
+        }, {
+            output: {
+                quote_style: 3, // note: it's not working
+                max_line_len: 1000
+            }
+        })
+        
+        if (minified.error) {
+            const error = minified.error
+
+            console.log('')
+            console.log(error.filename)
+            console.log(`${error.line}:${error.col}  ${error.name}  ${error.message}`)
+            console.log('')
+
+            return reject()
+        }
+
+        fs.writeFileSync(`${projectRoot}/dist/tw2overflow.min.js`, minified.code, 'utf8')
+
+        console.log('OK')
+        console.log('')
+        resolve()
+    })
+}
+
+function getTranslationEntries (translation) {
+    let entries = 0
+
+    for (let category in translation) {
+        for (let key in translation[category]) {
+            if (translation[category][key]) {
+                entries++
+            }
+        }
     }
 
-    fs.writeFileSync(`${projectRoot}/dist/tw2overflow.min.js`, minified.code, 'utf8')
+    return entries
+}
 
-    console.log('OK')
-    console.log('')
+function mergeSouceIntoTranslation (source, translation) {
+    let merged = {}
+
+    for (let category in source) {
+        merged[category] = {}
+
+        for (let key in source[category]) {
+            if (translation[category][key]) {
+                merged[category][key] = translation[category][key]
+            } else {
+                merged[category][key] = source[category][key]
+            }
+        }
+    }
+
+    return merged
+}
+
+function getTranslationStatus (moduleId, translationId, source, translation) {
+    let status = {
+        valid: true,
+        msg: 'Valid translation'
+    }
+
+    for (let category in source) {
+        if (!hasOwn.call(translation, category)) {
+            status.valid = false
+            status.msg = `Translation "${translationId}" from module "${moduleId}" missing category: ${category}`
+        }
+
+        for (let key in source[category]) {
+            if (!hasOwn.call(translation[category], key)) {
+                status.valid = false
+                status.msg = `Translation "${translationId}" from module "${moduleId}" missing key: ${category}:${key}`
+            }
+        }
+    }
+
+    return status
 }
 
 /**
@@ -303,39 +453,7 @@ function generateModule (moduleId, moduleDir) {
         })
     }
 
-    // Load languages, if exists
-    if (fs.existsSync(`${projectRoot}${modulePath}/lang`)) {
-        data.lang = glob.sync(`${projectRoot}${modulePath}/lang/*.json`).map(function (langPath) {
-            return langPath.replace(projectRoot, '')
-        })
-
-        generateLocaleFile(data)
-    }
-
     return data
-}
-
-/**
- * generateLocaleFile will load generate a single .json file from
- * all .json inside the {module}/lang folder.
- */
-function generateLocaleFile (module) {
-    let langData = {}
-
-    module.lang.forEach(function (langPath) {
-        const id = path.basename(langPath, '.json')
-        const data = JSON.parse(fs.readFileSync(`${projectRoot}${langPath}`, 'utf8'))
-
-        langData[id] = data
-    })
-
-    langData = JSON.stringify(langData)
-
-    fs.mkdirSync(`${projectRoot}/tmp/src/modules/${module.dir}/lang`, {
-        recursive: true
-    })
-
-    fs.writeFileSync(`${projectRoot}/tmp/src/modules/${module.dir}/lang/lang.json`, langData, 'utf8')
 }
 
 /**
@@ -401,11 +519,6 @@ function generateOverflowModule () {
         return langPath.replace(projectRoot, '')
     })
 
-    generateLocaleFile({
-        lang: coreLangFiles,
-        dir: 'core'
-    })
-
     // Generate the common replaces
     overflow.replaces['overflow_name'] = pkg.name
     overflow.replaces['overflow_version'] = pkg.version + (argv.dev ? '-dev' : '')
@@ -414,8 +527,7 @@ function generateOverflowModule () {
     overflow.replaces['overflow_author_email'] = pkg.author.email
     overflow.replaces['overflow_author'] = JSON.stringify(pkg.author)
     overflow.replaces['overflow_date'] = new Date().toUTCString()
-    // overflow.replaces['overflow_lang'] = fs.readFileSync(`${projectRoot}/tmp/src/modules/core/lang/lang.json`, 'utf8')
-    overflow.replaces['overflow_lang'] = `~read-file:/tmp/src/modules/core/lang/lang.json`
+    overflow.replaces['overflow_lang'] = `~read-file:/tmp/i18n.json`
 
     // Move all modules information to a single module (overflow)
     modules.forEach(function (module) {
@@ -492,12 +604,6 @@ function generateOverflowModule () {
     }
 
     return overflow
-}
-
-function concatFiles (files) {
-    return files.map(function (file) {
-        return fs.readFileSync(file, 'utf8')
-    }).join('\n')
 }
 
 function replaceText (source, token, replace) {

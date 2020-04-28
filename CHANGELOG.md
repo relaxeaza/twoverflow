@@ -17,6 +17,7 @@
  - **FarmOverflow:** Fixed farm gettings stuck on "Full storage" even after use resources.
  - **FarmOverflow:** Fixed village last status showing "Attacking" after stopping the farmer.
  - **FarmOverflow:** Fixed bug where some commands were being sent with less units than specified on presets.
+ - **FarmOverflow:** Fixed bug where opening the window before the preset list load causing the preset input list to never show up.
  - **Minimap:** The entire minimap is now loaded at once.
  - **Minimap:** Show a rect with the current map view instead of a simple cross.
  - **Minimap:** Only draw province demarcations where villages are available.
