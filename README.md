@@ -51,13 +51,3 @@ You can use some flags to customize the resulting file.
 - `--nolint` compile without checking the source for errors.
 
 Example: `node scripts/make.js --ignore=farm_overflow,minimap --minify` ignores both modules farm_overflow and minimap and will generate an minified file.
-
-### Sync translations from Crowdin
-
-Extract the build translations from Crowdin to the directory `share/translations/`
-
-Create the file `share/keys/crowdin.key` with the crowdin api key.
-
-Run `node scripts/translations.js`
-
-A language needs at least 50% of the words translated to be merged into the project's source code.

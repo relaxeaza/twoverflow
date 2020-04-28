@@ -1,6 +1,5 @@
 node_modules/
 dist/
 share/cdn/
-share/translations/*
 share/keys/
 tmp/
