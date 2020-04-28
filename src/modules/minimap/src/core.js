@@ -720,16 +720,14 @@ define('two/minimap', [
 
     /**
      * @param {Object} item - Highlight item.
-     * @param {String} item.type - village, player or tribe
-     * @param {String} item.id - village/player/tribe id
-     * @param {Number=} item.x - village X coord.
-     * @param {Number=} item.y - village Y coord.
+     * @param {String} item.type - player or tribe
+     * @param {String} item.id - player/tribe id
      * @param {String} color - Hex color
      *
      * @return {Boolean} true if successfully added
      */
     minimap.addHighlight = function (item, color) {
-        if (!item || !item.type || !item.id) {
+        if (!item || !item.type || !item.id || !hasOwn.call(highlights, item.type)) {
             eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_NO_ENTRY)
             return false
         }
@@ -750,18 +748,21 @@ define('two/minimap', [
     }
 
     minimap.removeHighlight = function (type, itemId) {
-        if (highlights[type][itemId]) {
-            delete highlights[type][itemId]
-            const colorGroup = type === 'character' ? colorGroups.PLAYER_COLORS : colorGroups.TRIBE_COLORS
-            colorService.setCustomColorsByGroup(colorGroup, highlights[type])
-            $rootScope.$broadcast(eventTypeProvider.GROUPS_VILLAGES_CHANGED)
-
-            drawLoadedVillages()
-
-            return true
+        if (typeof itemId === 'undefined' || !hasOwn.call(highlights, type)) {
+            return false
         }
 
-        return false
+        if (!hasOwn.call(highlights[type], itemId)) {
+            return false
+        }
+        
+        delete highlights[type][itemId]
+        const colorGroup = type === 'character' ? colorGroups.PLAYER_COLORS : colorGroups.TRIBE_COLORS
+        colorService.setCustomColorsByGroup(colorGroup, highlights[type])
+        $rootScope.$broadcast(eventTypeProvider.GROUPS_VILLAGES_CHANGED)
+        drawLoadedVillages()
+
+        return true
     }
 
     minimap.getHighlight = function (type, item) {

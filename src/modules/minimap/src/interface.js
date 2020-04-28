@@ -378,7 +378,7 @@ define('two/minimap/ui', [
             disabled: false
         })
         $scope.autoComplete = {
-            type: ['character', 'tribe', 'village'],
+            type: ['character', 'tribe'],
             placeholder: $filter('i18n')('placeholder_search', $rootScope.loc.ale, 'minimap'),
             onEnter: eventHandlers.addHighlightAutoCompleteSelect
         }
