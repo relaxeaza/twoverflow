@@ -1,6 +1,6 @@
-node_modules
-dist
-share/cdn
-package-lock.json
+node_modules/
+dist/
+share/cdn/
 share/translations/*
-share/keys
+share/keys/
+tmp/
