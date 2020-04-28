@@ -85,8 +85,8 @@
         "arrive": "Chegada",
         "settings_saved": "Configurações salvas",
         "discard": "Descartar",
-        "new_version": "[b]TWOverflow atualizado para a versão %d[/b]",
-        "check_changes": "Cheque as alterações aqui",
-        "firefox_shill": "Se você quiser que o script funcione de fundo corretamente, use [url=%d]Firefox[/url]."
+        "new_version": "TWOverflow atualizado para a versão %d",
+        "check_changes": "Clique aqui para ver as alterações",
+        "firefox_shill": "Se você quiser que o script funcione de fundo corretamente, use Firefox ao invés de navegadores baseado no Chrome."
     }
 }
