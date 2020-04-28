@@ -438,37 +438,40 @@ define('two/minimap', [
         highlightSprite.alpha = 0
     }
 
-    const quickHighlight = function (coords) {
-        const village = mapData.getTownAt(coords.x, coords.y)
-        const action = minimapSettings[SETTINGS.RIGHT_CLICK_ACTION]
-        let data = {}
-
-        if (!village) {
-            return false
-        }
-
-        switch (action) {
-        case ACTION_TYPES.HIGHLIGHT_PLAYER:
-            if (!village.character_id) {
+    const quickHighlight = function (x, y) {
+        mapData.getTownAtAsync(x, y, function (village) {
+            if (!village) {
                 return false
             }
 
-            data.type = 'character'
-            data.id = village.character_id
+            const color = '#' + colors.palette.random().random()
 
-            break
-        case ACTION_TYPES.HIGHLIGHT_TRIBE:
-            if (!village.tribe_id) {
-                return false
+            switch (minimapSettings[SETTINGS.RIGHT_CLICK_ACTION]) {
+            case ACTION_TYPES.HIGHLIGHT_PLAYER:
+                if (!village.character_id) {
+                    return false
+                }
+
+                minimap.addHighlight({
+                    type: 'character',
+                    id: village.character_id
+                }, color)
+
+                break
+
+            case ACTION_TYPES.HIGHLIGHT_TRIBE:
+                if (!village.tribe_id) {
+                    return false
+                }
+
+                minimap.addHighlight({
+                    type: 'tribe',
+                    id: village.tribe_id
+                }, color)
+
+                break
             }
-
-            data.type = 'tribe'
-            data.id = village.tribe_id
-
-            break
-        }
-
-        minimap.addHighlight(data, '#' + colors.palette.random().random())
+        })
     }
 
     const drawVillages = function (villages, _color) {
@@ -602,7 +605,7 @@ define('two/minimap', [
 
                 // right click
                 if (event.which === 3) {
-                    quickHighlight(hoveredVillage)
+                    quickHighlight(hoveredVillageX, hoveredVillageY)
                 }
             }
         },
