@@ -204,10 +204,13 @@ function generateLanguageFile () {
                 const translationFile = moduleTranslations[b]
                 const translationId = translationFile.replace('.json', '')
                 const translation = JSON.parse(fs.readFileSync(`${projectRoot}/src/i18n/${moduleId}/${translationFile}`, 'utf8'))
-                const translationStatus = getTranslationStatus(moduleId, translationId, sourceTranslations, translation)
 
-                if (!translationStatus.valid) {
-                    return reject(translationStatus.msg)
+                if (!argv.dev) {
+                    const translationStatus = getTranslationStatus(moduleId, translationId, sourceTranslations, translation)
+
+                    if (!translationStatus.valid) {
+                        return reject(translationStatus.msg)
+                    }
                 }
 
                 const translationTotalEntries = getTranslationEntries(translation)
