@@ -20,7 +20,7 @@ define('two/minimap', [
     'battlecat'
 ], function (
     ACTION_TYPES,
-    MAP_SIZES,
+    MAP_SIZE_TYPES,
     SETTINGS,
     SETTINGS_MAP,
     UPDATES,
@@ -82,9 +82,10 @@ define('two/minimap', [
         CACHE_VILLAGES: 'minimap_cache_villages',
         SETTINGS: 'minimap_settings'
     }
-    const MAP_SIZES_MAP = {
-        [MAP_SIZES.SMALL]: 3,
-        [MAP_SIZES.BIG]: 5
+    const MAP_SIZES = {
+        [MAP_SIZE_TYPES.VERY_SMALL]: 2,
+        [MAP_SIZE_TYPES.SMALL]: 3,
+        [MAP_SIZE_TYPES.BIG]: 5
     }
     const INTERFACE_HEIGHT = 265
     const BORDER_PADDING = 10
@@ -546,7 +547,7 @@ define('two/minimap', [
     }
 
     const updateMinimapValues = function () {
-        villageSize = MAP_SIZES_MAP[minimapSettings[SETTINGS.MAP_SIZE]]
+        villageSize = MAP_SIZES[minimapSettings[SETTINGS.MAP_SIZE]]
         blockOffset = Math.round(villageSize / 2)
         villageBlock = villageSize + villageMargin
         lineSize = villageBlock * 1000
