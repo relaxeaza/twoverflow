@@ -52,7 +52,6 @@ define('two/minimap', [
         character: {},
         tribe: {}
     }
-
     let boundariesX = { a: 0, b: 0 }
     let boundariesY = { a: 0, b: 0 }
     let viewBoundariesX = { a: 0, b: 0 }
@@ -73,6 +72,9 @@ define('two/minimap', [
     let $map
     let $mapWrapper
     let $player
+    let playerId
+    let playerTribeId
+    let villageColors
     let tribeRelations
     let settings
     let minimapSettings
@@ -474,89 +476,69 @@ define('two/minimap', [
         })
     }
 
-    const drawVillages = function (villages, _color) {
-        const pid = $player.getId()
-        const tid = $player.getTribeId()
-        const villageColors = $player.getVillagesColors()
+    const getVillageColor = function (village) {
+        if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
+            if (village.character_id in highlights.character) {
+                return highlights.character[village.character_id]
+            } else if (village.tribe_id in highlights.tribe) {
+                return highlights.tribe[village.tribe_id]
+            }
 
+            return false
+        }
+
+        if (!village.character_id) {
+            if (minimapSettings[SETTINGS.SHOW_BARBARIANS]) {
+                return villageColors.barbarian
+            }
+
+            return false
+        }
+
+        if (village.character_id === playerId) {
+            if (village.id === selectedVillage.getId() && minimapSettings[SETTINGS.HIGHLIGHT_SELECTED]) {
+                return villageColors.selected
+            } else if (village.character_id in highlights.character) {
+                return highlights.character[village.character_id]
+            } else if (minimapSettings[SETTINGS.HIGHLIGHT_OWN]) {
+                return villageColors.player
+            }
+        } else if (village.character_id in highlights.character) {
+            return highlights.character[village.character_id]
+        } else if (village.tribe_id in highlights.tribe) {
+            return highlights.tribe[village.tribe_id]
+        } else if (playerTribeId && playerTribeId === village.tribe_id && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
+            return villageColors.tribe
+        } else if (tribeRelations && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
+            if (tribeRelations.isAlly(village.tribe_id)) {
+                return villageColors.ally
+            } else if (tribeRelations.isEnemy(village.tribe_id)) {
+                return villageColors.enemy
+            } else if (tribeRelations.isNAP(village.tribe_id)) {
+                return villageColors.friendly
+            }
+        }
+
+        return villageColors.ugly
+    }
+
+    const drawVillages = function (villages, predefinedColor) {
         for (let i = 0; i < villages.length; i++) {
-            let v = villages[i]
-            let x
-            let y
-            let color
+            const village = villages[i]
 
             // meta village
-            if (v.id < 0) {
+            if (village.id < 0) {
                 continue
             }
 
-            if (_color) {
-                color = _color
+            const color = predefinedColor || getVillageColor(village)
 
-                x = v.x * villageBlock
-                y = v.y * villageBlock
-
-                if (v.y % 2) {
-                    x += blockOffset
-                }
-            } else {
-                if (minimapSettings[SETTINGS.SHOW_ONLY_CUSTOM_HIGHLIGHTS]) {
-                    if (v.character_id in highlights.character) {
-                        color = highlights.character[v.character_id]
-                    } else if (v.tribe_id in highlights.tribe) {
-                        color = highlights.tribe[v.tribe_id]
-                    } else {
-                        continue
-                    }
-                } else {
-                    if (v.character_id === null) {
-                        if (!minimapSettings[SETTINGS.SHOW_BARBARIANS]) {
-                            continue
-                        }
-
-                        color = villageColors.barbarian
-                    } else {
-                        if (v.character_id === pid) {
-                            if (v.id === selectedVillage.getId() && minimapSettings[SETTINGS.HIGHLIGHT_SELECTED]) {
-                                color = villageColors.selected
-                            } else if (v.character_id in highlights.character) {
-                                color = highlights.character[v.character_id]
-                            } else if (minimapSettings[SETTINGS.HIGHLIGHT_OWN]) {
-                                color = villageColors.player
-                            } else {
-                                color = villageColors.ugly
-                            }
-                        } else {
-                            if (v.character_id in highlights.character) {
-                                color = highlights.character[v.character_id]
-                            } else if (v.tribe_id in highlights.tribe) {
-                                color = highlights.tribe[v.tribe_id]
-                            } else if (tid && tid === v.tribe_id && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
-                                color = villageColors.tribe
-                            } else if (tribeRelations && minimapSettings[SETTINGS.HIGHLIGHT_DIPLOMACY]) {
-                                if (tribeRelations.isAlly(v.tribe_id)) {
-                                    color = villageColors.ally
-                                } else if (tribeRelations.isEnemy(v.tribe_id)) {
-                                    color = villageColors.enemy
-                                } else if (tribeRelations.isNAP(v.tribe_id)) {
-                                    color = villageColors.friendly
-                                } else {
-                                    color = villageColors.ugly
-                                }
-                            } else {
-                                color = villageColors.ugly
-                            }
-                        }
-                    }
-                }
-
-                x = v.x * villageBlock
-                y = v.y * villageBlock
-
-                if (v.y % 2) {
-                    x += blockOffset
-                }
+            if (!color) {
+                continue
             }
+
+            const x = village.x * villageBlock + (village.y % 2 ? blockOffset : 0)
+            const y = village.y * villageBlock
 
             viewportCacheContext.fillStyle = color
             viewportCacheContext.fillRect(x, y, villageSize, villageSize)
@@ -890,6 +872,9 @@ define('two/minimap', [
             $map = document.getElementById('main-canvas')
             $player = modelDataService.getSelectedCharacter()
             tribeRelations = $player.getTribeRelations()
+            playerId = $player.getId()
+            playerTribeId = $player.getTribeId()
+            villageColors = $player.getVillagesColors()
 
             highlightSprite.alpha = 0
             mapState.graph.layers.effects.push(highlightSprite)
