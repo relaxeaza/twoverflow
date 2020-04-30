@@ -33,8 +33,9 @@ define('two/EventScope', [
     EventScope.prototype.destroy = function () {
         this.listeners.forEach((unregister) => {
             unregister()
-            this.onDestroy()
         })
+
+        this.onDestroy()
     }
 
     return EventScope
