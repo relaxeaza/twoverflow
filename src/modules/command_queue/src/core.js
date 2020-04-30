@@ -23,6 +23,7 @@ define('two/commandQueue', [
     mapData,
     Lockr
 ) {
+    const relocateEnabled = modelDataService.getWorldConfig().isRelocateUnitsEnabled()
     const CHECKS_PER_SECOND = 10
     const ERROR_CODES = {
         INVALID_ORIGIN: 'invalid_rigin',
@@ -315,6 +316,10 @@ define('two/commandQueue', [
 
         if (!command.units || angular.equals(command.units, {})) {
             return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, command)
+        }
+
+        if (command.type === COMMAND_TYPES.RELOCATE && !relocateEnabled) {
+            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_RELOCATE_DISABLED, command)
         }
 
         let getOriginVillage = new Promise(function (resolve, reject) {

@@ -44,6 +44,7 @@ define('two/commandQueue/ui', [
     }
     const DEFAULT_TAB = TAB_TYPES.ADD
     const DEFAULT_CATAPULT_TARGET = 'wall'
+    const relocateEnabled = modelDataService.getWorldConfig().isRelocateUnitsEnabled()
     let attackableBuildingsList = []
     let unitList = {}
     let officerList = {}
@@ -364,6 +365,9 @@ define('two/commandQueue/ui', [
 
             utils.notif('error', $filter('i18n')('error_already_sent', $rootScope.loc.ale, 'command_queue', commandType, date))
         },
+        relocateDisabled: function () {
+            utils.notif('error', $filter('i18n')('error_relocate_disabled', $rootScope.loc.ale, 'command_queue'))
+        },
         removeCommand: function (event, command) {
             updateWaitingCommands()
             updateVisibleCommands()
@@ -574,6 +578,7 @@ define('two/commandQueue/ui', [
         $scope.FILTER_TYPES = FILTER_TYPES
         $scope.TAB_TYPES = TAB_TYPES
         $scope.COMMAND_TYPES = COMMAND_TYPES
+        $scope.relocateEnabled = relocateEnabled
 
         // functions
         $scope.onUnitInputFocus = onUnitInputFocus
@@ -625,6 +630,7 @@ define('two/commandQueue/ui', [
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, eventHandlers.addInvalidDate)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, eventHandlers.addNoUnits)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, eventHandlers.addAlreadySent)
+        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_RELOCATE_DISABLED, eventHandlers.relocateDisabled)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_REMOVE, eventHandlers.removeCommand)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_REMOVE_ERROR, eventHandlers.removeError)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND_TIME_LIMIT, eventHandlers.sendTimeLimit)

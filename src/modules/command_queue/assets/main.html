@@ -98,7 +98,7 @@
                                             <div>
                                                 <div class="box-time-sub-icon time-attack {{ travelTimes.attack.light_cavalry.status }}"><div class="time-icon icon-20x20-attack-check" tooltip="" tooltip-content="{{ 'travel_time_attack' | i18n:loc.ale:'military_operations' }}"></div>{{ travelTimes.attack.light_cavalry.travelTime }}</div>
                                                 <div class="box-time-sub-icon time-support {{ travelTimes.support.light_cavalry.status }}"><div class="time-icon icon-20x20-support-check" tooltip="" tooltip-content="{{ 'travel_time_support' | i18n:loc.ale:'military_operations' }}"></div>{{ travelTimes.support.light_cavalry.travelTime }}</div>
-                                                <div class="box-time-sub-icon time-relocate {{ travelTimes.relocate.light_cavalry.status }}"><div class="time-icon icon-20x20-relocate" tooltip="" tooltip-content="{{ 'travel_time_relocate' | i18n:loc.ale:'military_operations' }}"></div>{{ travelTimes.relocate.light_cavalry.travelTime }}</div>
+                                                <div ng-if="relocateEnabled" class="box-time-sub-icon time-relocate {{ travelTimes.relocate.light_cavalry.status }}"><div class="time-icon icon-20x20-relocate" tooltip="" tooltip-content="{{ 'travel_time_relocate' | i18n:loc.ale:'military_operations' }}"></div>{{ travelTimes.relocate.light_cavalry.travelTime }}</div>
                                             </div>
                                         </td>
                                         <td>
@@ -109,7 +109,7 @@
                                             <div>
                                                 <div class="box-time-sub time-attack {{ travelTimes.attack.heavy_cavalry.status }}">{{ travelTimes.attack.heavy_cavalry.travelTime }}</div>
                                                 <div class="box-time-sub time-support {{ travelTimes.support.heavy_cavalry.status }}">{{ travelTimes.support.heavy_cavalry.travelTime }}</div>
-                                                <div class="box-time-sub time-relocate {{ travelTimes.relocate.heavy_cavalry.status }}">{{ travelTimes.relocate.heavy_cavalry.travelTime }}</div>
+                                                <div ng-if="relocateEnabled" class="box-time-sub time-relocate {{ travelTimes.relocate.heavy_cavalry.status }}">{{ travelTimes.relocate.heavy_cavalry.travelTime }}</div>
                                             </div>
                                         </td>
                                         <td class="odd">
@@ -123,7 +123,7 @@
                                             <div>
                                                 <div class="box-time-sub time-attack {{ travelTimes.attack.archer.status }}">{{ travelTimes.attack.archer.travelTime }}</div>
                                                 <div class="box-time-sub time-support {{ travelTimes.support.archer.status }}">{{ travelTimes.support.archer.travelTime }}</div>
-                                                <div class="box-time-sub time-relocate {{ travelTimes.relocate.archer.status }}">{{ travelTimes.relocate.archer.travelTime }}</div>
+                                                <div ng-if="relocateEnabled" class="box-time-sub time-relocate {{ travelTimes.relocate.archer.status }}">{{ travelTimes.relocate.archer.travelTime }}</div>
                                             </div>
                                         </td>
                                         <td>
@@ -134,7 +134,7 @@
                                             <div>
                                                 <div class="box-time-sub time-attack {{ travelTimes.attack.sword.status }}">{{ travelTimes.attack.sword.travelTime }}</div>
                                                 <div class="box-time-sub time-support {{ travelTimes.support.sword.status }}">{{ travelTimes.support.sword.travelTime }}</div>
-                                                <div class="box-time-sub time-relocate {{ travelTimes.relocate.sword.status }}">{{ travelTimes.relocate.sword.travelTime }}</div>
+                                                <div ng-if="relocateEnabled" class="box-time-sub time-relocate {{ travelTimes.relocate.sword.status }}">{{ travelTimes.relocate.sword.travelTime }}</div>
                                             </div>
                                         </td>
                                         <td class="odd">
@@ -146,7 +146,7 @@
                                             <div>
                                                 <div class="box-time-sub time-attack {{ travelTimes.attack.ram.status }}">{{ travelTimes.attack.ram.travelTime }}</div>
                                                 <div class="box-time-sub time-support {{ travelTimes.support.ram.status }}">{{ travelTimes.support.ram.travelTime }}</div>
-                                                <div class="box-time-sub time-relocate {{ travelTimes.relocate.ram.status }}">{{ travelTimes.relocate.ram.travelTime }}</div>
+                                                <div ng-if="relocateEnabled" class="box-time-sub time-relocate {{ travelTimes.relocate.ram.status }}">{{ travelTimes.relocate.ram.travelTime }}</div>
                                             </div>
                                         </td>
                                         <td>
@@ -157,7 +157,7 @@
                                             <div>
                                                 <div class="box-time-sub time-attack {{ travelTimes.attack.snob.status }}">{{ travelTimes.attack.snob.travelTime }}</div>
                                                 <div class="box-time-sub time-support {{ travelTimes.support.snob.status }}">{{ travelTimes.support.snob.travelTime }}</div>
-                                                <div class="box-time-sub time-relocate {{ travelTimes.relocate.snob.status }}">-</div>
+                                                <div ng-if="relocateEnabled" class="box-time-sub time-relocate {{ travelTimes.relocate.snob.status }}">-</div>
                                             </div>
                                         </td>
                                         <td class="odd">
@@ -168,7 +168,7 @@
                                             <div>
                                                 <div class="box-time-sub time-attack {{ travelTimes.attack.trebuchet.status }}">{{ travelTimes.attack.trebuchet.travelTime }}</div>
                                                 <div class="box-time-sub time-support {{ travelTimes.support.trebuchet.status }}">{{ travelTimes.support.trebuchet.travelTime }}</div>
-                                                <div class="box-time-sub time-relocate {{ travelTimes.relocate.trebuchet.status }}">{{ travelTimes.relocate.trebuchet.travelTime }}</div>
+                                                <div ng-if="relocateEnabled" class="box-time-sub time-relocate {{ travelTimes.relocate.trebuchet.status }}">{{ travelTimes.relocate.trebuchet.travelTime }}</div>
                                             </div>
                                         </td>
                                     </tr>
@@ -277,7 +277,7 @@
                                         <div ng-class="{'active': activeFilters[FILTER_TYPES.SUPPORT]}" ng-click="toggleFilter(FILTER_TYPES.SUPPORT, true)" class="box-border-dark icon allowedTypes" tooltip="" tooltip-content="{{ 'filters_support' | i18n:loc.ale:'command_queue' }}">
                                             <span class="icon-34x34-support icon-bg-black"></span>
                                         </div>
-                                        <div ng-class="{'active': activeFilters[FILTER_TYPES.RELOCATE]}" ng-click="toggleFilter(FILTER_TYPES.RELOCATE, true)" class="box-border-dark icon allowedTypes" tooltip="" tooltip-content="{{ 'filters_relocate' | i18n:loc.ale:'command_queue' }}">
+                                        <div ng-if="relocateEnabled" ng-class="{'active': activeFilters[FILTER_TYPES.RELOCATE]}" ng-click="toggleFilter(FILTER_TYPES.RELOCATE, true)" class="box-border-dark icon allowedTypes" tooltip="" tooltip-content="{{ 'filters_relocate' | i18n:loc.ale:'command_queue' }}">
                                             <span class="icon-34x34-relocate icon-bg-black"></span>
                                         </div>
                                         <div class="text">
@@ -439,7 +439,7 @@
             <li ng-show="selectedTab === TAB_TYPES.ADD">
                 <a class="btn-orange btn-border add" ng-click="addCommand(COMMAND_TYPES.SUPPORT)"><span class="icon-26x26-support"></span> {{ COMMAND_TYPES.SUPPORT | i18n:loc.ale:'common' }}</a>
             </li>
-            <li ng-show="selectedTab === TAB_TYPES.ADD">
+            <li ng-show="relocateEnabled && selectedTab === TAB_TYPES.ADD">
                 <a class="btn-orange btn-border add" ng-click="addCommand(COMMAND_TYPES.RELOCATE)"><span class="icon-26x26-relocate"></span> {{ COMMAND_TYPES.RELOCATE | i18n:loc.ale:'common' }}</a>
             </li>
 

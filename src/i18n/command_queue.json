@@ -52,6 +52,7 @@
         "error_no_units": "No units specified!",
         "error_invalid_date": "Invalid date",
         "error_already_sent": "This %d should have left %d",
+        "error_relocate_disabled": "Relocate is not enabled in this world.",
         "error_no_map_selected_village": "No selected village on the map.",
         "error_remove_error": "Error removing command.",
         "tab_add": "Add command",

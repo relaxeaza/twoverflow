@@ -10,6 +10,7 @@ define('two/commandQueue/events', [], function () {
         COMMAND_QUEUE_ADD_INVALID_DATE: 'commandqueue_add_invalid_date',
         COMMAND_QUEUE_ADD_NO_UNITS: 'commandqueue_add_no_units',
         COMMAND_QUEUE_ADD_ALREADY_SENT: 'commandqueue_add_already_sent',
+        COMMAND_QUEUE_ADD_RELOCATE_DISABLED: 'command_queue_add_relocate_disabled',
         COMMAND_QUEUE_REMOVE: 'commandqueue_remove',
         COMMAND_QUEUE_REMOVE_ERROR: 'commandqueue_remove_error',
         COMMAND_QUEUE_START: 'commandqueue_start',
