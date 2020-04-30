@@ -8,6 +8,7 @@ define('two/commandQueue/ui', [
     'two/commandQueue/types/filters',
     'two/commandQueue/types/commands',
     'two/commandQueue/storageKeys',
+    'two/commandQueue/errorCodes',
     'queues/EventQueue',
     'struct/MapData',
     'helper/time',
@@ -23,6 +24,7 @@ define('two/commandQueue/ui', [
     FILTER_TYPES,
     COMMAND_TYPES,
     STORAGE_KEYS,
+    ERROR_CODES,
     eventQueue,
     mapData,
     $timeHelper,
@@ -276,11 +278,47 @@ define('two/commandQueue/ui', [
         $scope.showCatapultSelect = false
     }
 
-    const addCommand = function (type) {
-        let copy = angular.copy(commandData)
-        copy.type = type
+    const addCommand = function (commandType) {
+        commandQueue.addCommand(
+            commandData.origin,
+            commandData.target,
+            commandData.date,
+            commandData.dateType,
+            commandData.units,
+            commandData.officers,
+            commandType,
+            commandData.catapultTarget
+        ).then(function (command) {
+            updateWaitingCommands()
+            updateVisibleCommands()
+            utils.notif('success', genNotifText(command.type, 'added'))
+        }).catch(function (error) {
+            switch (error) {
+            case ERROR_CODES.INVALID_ORIGIN:
+                utils.notif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, 'command_queue'))
+                break
 
-        commandQueue.addCommand(copy)
+            case ERROR_CODES.INVALID_TARGET:
+                utils.notif('error', $filter('i18n')('error_target', $rootScope.loc.ale, 'command_queue'))
+                break
+
+            case ERROR_CODES.INVALID_DATE:
+                utils.notif('error', $filter('i18n')('error_invalid_date', $rootScope.loc.ale, 'command_queue'))
+                break
+
+            case ERROR_CODES.NO_UNITS:
+                utils.notif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, 'command_queue'))
+                break
+
+            case ERROR_CODES.RELOCATE_DISABLED:
+                utils.notif('error', $filter('i18n')('error_relocate_disabled', $rootScope.loc.ale, 'command_queue'))
+                break
+
+            case ERROR_CODES.ALREADY_SENT:
+                utils.notif('error', $filter('i18n')('error_already_sent_' + commandType, $rootScope.loc.ale, 'command_queue'))
+                break
+            }
+        })
     }
 
     const clearRegisters = function () {
@@ -349,27 +387,6 @@ define('two/commandQueue/ui', [
 
             $scope.searchQuery[type] = ''
         },
-        addInvalidOrigin: function () {
-            utils.notif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, 'command_queue'))
-        },
-        addInvalidTarget: function () {
-            utils.notif('error', $filter('i18n')('error_target', $rootScope.loc.ale, 'command_queue'))
-        },
-        addInvalidDate: function () {
-            utils.notif('error', $filter('i18n')('error_invalid_date', $rootScope.loc.ale, 'command_queue'))
-        },
-        addNoUnits: function () {
-            utils.notif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, 'command_queue'))
-        },
-        addAlreadySent: function (event, command) {
-            const commandType = $filter('i18n')(command.type, $rootScope.loc.ale, 'common')
-            const date = utils.formatDate(command.sendTime)
-
-            utils.notif('error', $filter('i18n')('error_already_sent', $rootScope.loc.ale, 'command_queue', commandType, date))
-        },
-        relocateDisabled: function () {
-            utils.notif('error', $filter('i18n')('error_relocate_disabled', $rootScope.loc.ale, 'command_queue'))
-        },
         removeCommand: function (event, command) {
             updateWaitingCommands()
             updateVisibleCommands()
@@ -399,11 +416,6 @@ define('two/commandQueue/ui', [
             updateWaitingCommands()
             updateVisibleCommands()
             utils.notif('error', $filter('i18n')('error_no_units_enough', $rootScope.loc.ale, 'command_queue'))
-        },
-        addCommand: function (event, command) {
-            updateWaitingCommands()
-            updateVisibleCommands()
-            utils.notif('success', genNotifText(command.type, 'added'))
         },
         sendCommand: function (event, command) {
             updateSentCommands()
@@ -627,18 +639,11 @@ define('two/commandQueue/ui', [
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.SELECT_SELECTED, eventHandlers.autoCompleteSelected, true)
-        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, eventHandlers.addInvalidOrigin)
-        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, eventHandlers.addInvalidTarget)
-        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, eventHandlers.addInvalidDate)
-        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, eventHandlers.addNoUnits)
-        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, eventHandlers.addAlreadySent)
-        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD_RELOCATE_DISABLED, eventHandlers.relocateDisabled)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_REMOVE, eventHandlers.removeCommand)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_REMOVE_ERROR, eventHandlers.removeError)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND_TIME_LIMIT, eventHandlers.sendTimeLimit)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND_NOT_OWN_VILLAGE, eventHandlers.sendNotOwnVillage)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND_NO_UNITS_ENOUGH, eventHandlers.sendNoUnitsEnough)
-        eventScope.register(eventTypeProvider.COMMAND_QUEUE_ADD, eventHandlers.addCommand)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_SEND, eventHandlers.sendCommand)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_START, eventHandlers.start)
         eventScope.register(eventTypeProvider.COMMAND_QUEUE_STOP, eventHandlers.stop)

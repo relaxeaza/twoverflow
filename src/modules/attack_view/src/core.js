@@ -6,6 +6,7 @@ define('two/attackView', [
     'two/attackView/types/filters',
     'two/attackView/unitSpeedOrder',
     'conf/unitTypes',
+    'conf/buildingTypes',
     'Lockr',
     'helper/math',
     'helper/mapconvert',
@@ -19,6 +20,7 @@ define('two/attackView', [
     FILTER_TYPES,
     UNIT_SPEED_ORDER,
     UNIT_TYPES,
+    BUILDING_TYPES,
     Lockr,
     math,
     convert,
@@ -336,32 +338,14 @@ define('two/attackView', [
         closestNonHostileVillage(command.targetVillage, function (closestVillage) {
             const origin = command.targetVillage
             const target = closestVillage
-            const type = target.character_id === null ? 'attack' : 'support'
+            const commandType = target.character_id ? COMMAND_TYPES.SUPPORT : COMMAND_TYPES.ATTACK
+            let units = {}
 
-            commandQueue.addCommand({
-                origin: origin,
-                target: target,
-                date: date,
-                dateType: COMMAND_QUEUE_DATE_TYPES.OUT,
-                units: {
-                    spear: '*',
-                    sword: '*',
-                    axe: '*',
-                    archer: '*',
-                    light_cavalry: '*',
-                    mounted_archer: '*',
-                    heavy_cavalry: '*',
-                    ram: '*',
-                    catapult: '*',
-                    snob: '*',
-                    knight: '*',
-                    doppelsoldner: '*',
-                    trebuchet: '*'
-                },
-                officers: {},
-                type: type,
-                catapultTarget: 'wall'
+            utils.each(UNIT_TYPES, function (unit) {
+                units[unit] = '*'
             })
+
+            commandQueue.addCommand(origin, target, date, COMMAND_QUEUE_DATE_TYPES.OUT, units, {}, commandType , BUILDING_TYPES.WALL)
 
             if (!commandQueue.isRunning()) {
                 commandQueue.start()

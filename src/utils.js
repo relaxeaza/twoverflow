@@ -274,20 +274,22 @@ define('two/utils', [
         if (Array.isArray(obj)) {
             for (let i = 0; i < obj.length; i++) {
                 if (callback(obj[i], i) === false) {
-                    break
+                    return false
                 }
             }
         } else if (typeof obj === 'object' && obj !== null) {
             for (let i in obj) {
                 if (hasOwn.call(obj, i)) {
                     if (callback(obj[i], i) === false) {
-                        break
+                        return false
                     }
                 }
             }
         } else {
             throw new Error('utils.each: fucked up obj')
         }
+
+        return true
     }
 
     return utils

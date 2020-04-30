@@ -44,6 +44,10 @@ define('two/commandQueue/errorCodes', [], function () {
         ALREADY_SENT: 'already_sent',
         RELOCATE_DISABLED: 'relocate_disabled',
         INVALID_DATE_TYPE: 'invalid_date_type',
-        INVALID_OFFICER: 'invalid_officer'
+        INVALID_OFFICER: 'invalid_officer',
+        INVALID_COMMAND_TYPE: 'invalid_command_type',
+        INVALID_CATAPULT_TARGET: 'invalid_catapult_target',
+        INVALID_UNIT_TYPE: 'invalid_unit_type',
+        INVALID_OFFICER_TYPE: 'invalid_officer_type'
     }
 })

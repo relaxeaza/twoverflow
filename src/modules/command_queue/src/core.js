@@ -12,7 +12,8 @@ define('two/commandQueue', [
     'struct/MapData',
     'Lockr',
     'conf/buildingTypes',
-    'conf/officerTypes'
+    'conf/officerTypes',
+    'conf/unitTypes'
 ], function (
     utils,
     DATE_TYPES,
@@ -27,11 +28,16 @@ define('two/commandQueue', [
     mapData,
     Lockr,
     BUILDING_TYPES,
-    OFFICER_TYPES
+    OFFICER_TYPES,
+    UNIT_TYPES
 ) {
     const relocateEnabled = modelDataService.getWorldConfig().isRelocateUnitsEnabled()
     const CHECKS_PER_SECOND = 10
-    const OFFICER_LIST = Object.values(OFFICER_TYPES)
+    const COMMAND_TYPE_LIST = Object.values(COMMAND_TYPES)
+    const DATE_TYPE_LIST = Object.values(DATE_TYPES)
+    const UNIT_TYPE_LIST = Object.values(UNIT_TYPES)
+    const OFFICER_TYPE_LIST = Object.values(OFFICER_TYPES)
+    const BUILDING_TYPE_LIST = Object.values(BUILDING_TYPES)
     let waitingCommands = []
     let waitingCommandsObject = {}
     let sentCommands = []
@@ -84,32 +90,8 @@ define('two/commandQueue', [
         }
     }
 
-    const isTimeToSend = function (sendTime) {
+    const timeToSend = function (sendTime) {
         return sendTime < (timeHelper.gameTime() + timeOffset)
-    }
-
-    /**
-     * Remove os zeros das unidades passadas pelo jogador.
-     * A razão de remover é por que o próprio não os envia
-     * quando os comandos são enviados manualmente, então
-     * caso seja enviado as unidades com valores zero poderia
-     * ser uma forma de detectar os comandos automáticos.
-     *
-     * @param  {Object} units - Unidades a serem analisadas
-     * @return {Object} Objeto sem nenhum valor zero
-     */
-    const cleanZeroUnits = function (units) {
-        let cleanUnits = {}
-
-        for (let unit in units) {
-            let amount = units[unit]
-
-            if (amount === '*' || amount !== 0) {
-                cleanUnits[unit] = amount
-            }
-        }
-
-        return cleanUnits
     }
 
     const sortWaitingQueue = function () {
@@ -223,7 +205,7 @@ define('two/commandQueue', [
             }
 
             waitingCommands.some(function (command) {
-                if (isTimeToSend(command.sendTime)) {
+                if (timeToSend(command.sendTime)) {
                     if (running) {
                         commandQueue.sendCommand(command)
                     } else {
@@ -290,118 +272,132 @@ define('two/commandQueue', [
         commandQueue.removeCommand(command, eventCode)
     }
 
-    /**
-     * UPDATE THIS SHIT BELOW
-     *
-     * @param {Object} command
-     * @param {String} command.origin - Coordenadas da aldeia de origem.
-     * @param {String} command.target - Coordenadas da aldeia alvo.
-     * @param {String} command.date - Data e hora que o comando deve chegar.
-     * @param {String} command.dateType - Indica se o comando vai sair ou
-     *   chegar na data especificada.
-     * @param {Object} command.units - Unidades que serão enviados pelo comando.
-     * @param {Object} command.officers - Oficiais que serão enviados pelo comando.
-     * @param {String} command.type - Tipo de comando.
-     * @param {String=} command.catapultTarget - Alvo da catapulta, caso o comando seja um ataque.
-     */
-    commandQueue.addCommand = function (command) {
+    commandQueue.addCommand = function (origin, target, date, dateType, units, officers, commandType, catapultTarget) {
+        let parsedUnits = {}
+        let parsedOfficers = {}
+
         return new Promise(function (resolve, reject) {
-            if (!command.origin) {
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, command)
+            if (!origin || typeof origin.x !== 'number' || typeof origin.y !== 'number') {
                 return reject(ERROR_CODES.INVALID_ORIGIN)
             }
 
-            if (!command.target) {
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, command)
+            if (!target || typeof target.x !== 'number' || typeof target.y !== 'number') {
                 return reject(ERROR_CODES.INVALID_TARGET)
             }
 
-            if (!utils.isValidDateTime(command.date)) {
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, command)
+            if (!utils.isValidDateTime(date)) {
                 return reject(ERROR_CODES.INVALID_DATE)
             }
 
-            if (!command.units || angular.equals(command.units, {})) {
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, command)
+            if (angular.isObject(units)) {
+                let validUnitType = utils.each(units, function (amount, unitName) {
+                    if (!UNIT_TYPE_LIST.includes(unitName)) {
+                        return false
+                    }
+
+                    amount = isNaN(amount) ? amount : parseInt(amount, 10)
+
+                    if (amount === '*' || typeof amount === 'number' && amount !== 0) {
+                        parsedUnits[unitName] = amount
+                    }
+                })
+
+                if (!validUnitType) {
+                    return reject(ERROR_CODES.INVALID_UNIT_TYPE)
+                }
+            }
+
+            if (angular.equals(parsedUnits, {})) {
                 return reject(ERROR_CODES.NO_UNITS)
             }
 
-            if (command.type === COMMAND_TYPES.RELOCATE && !relocateEnabled) {
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_RELOCATE_DISABLED, command)
+            if (angular.isObject(officers)) {
+                let validOfficerType = utils.each(officers, function (status, officerName) {
+                    if (!OFFICER_TYPE_LIST.includes(officerName)) {
+                        return false
+                    }
+
+                    if (officers[officerName]) {
+                        parsedOfficers[officerName] = true
+                    }
+                })
+
+                if (!validOfficerType) {
+                    return reject(ERROR_CODES.INVALID_OFFICER_TYPE)
+                }
+            }
+
+            if (!COMMAND_TYPE_LIST.includes(commandType)) {
+                return reject(ERROR_CODES.INVALID_COMMAND_TYPE)
+            }
+
+            if (commandType === COMMAND_TYPES.RELOCATE && !relocateEnabled) {
                 return reject(ERROR_CODES.RELOCATE_DISABLED)
             }
 
-            // load data of target and origin villages
-            Promise.all([
-                new Promise((resolve) => mapData.loadTownDataAsync(command.origin.x, command.origin.y, 1, 1, resolve)),
-                new Promise((resolve) => mapData.loadTownDataAsync(command.target.x, command.target.y, 1, 1, resolve))
-            ]).then(function (villages) {
-                command.origin = villages[0]
-                command.target = villages[1]
+            if (commandType === COMMAND_TYPES.ATTACK && parsedOfficers[OFFICER_TYPES.SUPPORTER]) {
+                delete parsedOfficers[OFFICER_TYPES.SUPPORTER]
+            }
 
-                if (!command.origin) {
-                    eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, command)
+            if (typeof catapultTarget === 'string' && !BUILDING_TYPE_LIST.includes(catapultTarget)) {
+                return reject(ERROR_CODES.INVALID_CATAPULT_TARGET)
+            }
+
+            if (commandType === COMMAND_TYPES.ATTACK && parsedUnits[UNIT_TYPES.CATAPULT]) {
+                catapultTarget = catapultTarget || BUILDING_TYPES.HEADQUARTER
+            } else {
+                catapultTarget = false
+            }
+
+            if (!DATE_TYPE_LIST.includes(dateType)) {
+                return reject(ERROR_CODES.INVALID_DATE_TYPE)
+            }
+
+            Promise.all([
+                new Promise((resolve) => mapData.loadTownDataAsync(origin.x, origin.y, 1, 1, resolve)),
+                new Promise((resolve) => mapData.loadTownDataAsync(target.x, target.y, 1, 1, resolve))
+            ]).then(function (villages) {
+                origin = villages[0]
+                target = villages[1]
+
+                if (!origin) {
                     return reject(ERROR_CODES.INVALID_ORIGIN)
                 }
 
-                if (angular.isObject(command.officers)) {
-                    for (let officer in command.officers) {
-                        if (!OFFICER_LIST.includes(officer)) {
-                            eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_OFFICER, command)
-                            return reject(ERROR_CODES.INVALID_OFFICER)
-                        }
-
-                        if (command.officers[officer]) {
-                            command.officers[officer] = 1
-                        } else {
-                            delete command.officers[officer]
-                        }
-                    }
-                } else {
-                    command.officers = false
+                if (!target) {
+                    return reject(ERROR_CODES.INVALID_TARGET)
                 }
 
-                command.units = cleanZeroUnits(command.units)
-                command.travelTime = utils.getTravelTime(command.origin, command.target, command.units, command.type, command.officers, true)
+                const inputTime = utils.getTimeFromString(date)
+                const travelTime = utils.getTravelTime(origin, target, parsedUnits, commandType, parsedOfficers, true)
+                const sendTime = dateType === DATE_TYPES.ARRIVE ? (inputTime - travelTime) : inputTime
+                const arriveTime = dateType === DATE_TYPES.ARRIVE ? inputTime : (inputTime + travelTime)
 
-                const inputTime = utils.getTimeFromString(command.date)
-
-                if (command.dateType === DATE_TYPES.ARRIVE) {
-                    command.sendTime = inputTime - command.travelTime
-                    command.arriveTime = inputTime
-                } else if (command.dateType === DATE_TYPES.OUT) {
-                    command.sendTime = inputTime
-                    command.arriveTime = inputTime + command.travelTime
-                } else {
-                    return reject(ERROR_CODES.INVALID_DATE_TYPE)
-                }
-
-                if (isTimeToSend(command.sendTime)) {
-                    eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, command)
+                if (timeToSend(sendTime)) {
                     return reject(ERROR_CODES.ALREADY_SENT)
                 }
 
-                if (command.type === COMMAND_TYPES.ATTACK && OFFICER_TYPES.SUPPORTER in command.officers) {
-                    delete command.officers.supporter
+                const command = {
+                    id: utils.guid(),
+                    travelTime: travelTime,
+                    arriveTime: arriveTime,
+                    sendTime: sendTime,
+                    origin: origin,
+                    target: target,
+                    date: date,
+                    dateType: dateType,
+                    units: parsedUnits,
+                    officers: parsedOfficers,
+                    type: commandType,
+                    catapultTarget: catapultTarget
                 }
-
-                if (command.type === COMMAND_TYPES.ATTACK && command.units.catapult) {
-                    command.catapultTarget = command.catapultTarget || BUILDING_TYPES.HEADQUARTER
-                } else {
-                    command.catapultTarget = null
-                }
-
-                command.id = utils.guid()
 
                 waitingCommandHelpers(command)
                 pushWaitingCommand(command)
                 pushCommandObject(command)
                 sortWaitingQueue()
                 storeWaitingQueue()
-
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD, command)
-
-                resolve()
+                resolve(command)
             })
         })
     }
