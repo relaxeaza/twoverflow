@@ -99,7 +99,7 @@ define('two/utils', [
      * Inverte a posição do dia com o mês.
      */
     utils.fixDate = function (dateTime) {
-        const dateAndTime = dateTime.split(' ')
+        const dateAndTime = dateTime.trim().split(' ')
         const time = dateAndTime[0]
         const date = dateAndTime[1].split('/')
 
@@ -124,7 +124,7 @@ define('two/utils', [
      * @return {Number} Timestamp (milisegundos)
      */
     utils.getTimeFromString = function (dateString, offset) {
-        const dateSplit = dateString.trim().split(' ')
+        const dateSplit = utils.fixDate(dateString).split(' ')
         const time = dateSplit[0].split(':')
         const date = dateSplit[1].split('/')
 

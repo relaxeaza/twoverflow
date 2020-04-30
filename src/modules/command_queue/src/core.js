@@ -346,7 +346,6 @@ define('two/commandQueue', [
             command.origin = villages[0]
             command.target = villages[1]
             command.units = cleanZeroUnits(command.units)
-            command.date = utils.fixDate(command.date)
             command.travelTime = utils.getTravelTime(
                 command.origin,
                 command.target,

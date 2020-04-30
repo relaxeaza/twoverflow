@@ -38,6 +38,7 @@
  - **BuilderQueue:** Initial building sequence "Essential" is shuffled for every new user to avoid bot detection by use pattern.
  - **BuilderQueue:** Village names on logs aren't hard coded anymore.
  - **CommandQueue:** Fixed travel times with effects being calculated the same as no effect.
+ - **CommandQueue:** Fixed some units on travel time calculator not showing as valid time travel even though the time travel was valid.
  - **CommandQueue:** Fixed commands diplaying the wrong send date.
  - **CommandQueue:** Remember last selected date type. #
  - **CommandQueue:** The last date type selected is now remembered next time the window is open.

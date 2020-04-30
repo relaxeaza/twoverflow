@@ -50,19 +50,15 @@ define('two/commandQueue/ui', [
     let timeOffset
     let activeFilters
     let filtersData
-    /**
-     * Name of one unity for each speed category.
-     * Used to generate travel times.
-     */
-    const UNITS_BY_SPEED = [
-        'light_cavalry',
-        'heavy_cavalry',
-        'archer',
-        'sword',
-        'ram',
-        'snob',
-        'trebuchet'
-    ]
+    const travelTimeArmy = {
+        light_cavalry: { light_cavalry: 1 },
+        heavy_cavalry: { heavy_cavalry: 1 },
+        archer: { archer: 1 },
+        sword: { sword: 1 },
+        ram: { ram: 1 },
+        snob: { snob: 1 },
+        trebuchet: { trebuchet: 1 }
+    }
     const FILTER_ORDER = [
         FILTER_TYPES.SELECTED_VILLAGE,
         FILTER_TYPES.BARBARIAN_TARGET,
@@ -102,7 +98,6 @@ define('two/commandQueue/ui', [
             return ''
         }
 
-        date = utils.fixDate(date)
         date = utils.getTimeFromString(date)
         date += diff
 
@@ -113,62 +108,32 @@ define('two/commandQueue/ui', [
         $scope.isValidDate = utils.isValidDateTime(commandData.date)
 
         if (!commandData.origin || !commandData.target) {
-            return false
+            return
         }
 
-        for (let i in COMMAND_TYPES) {
-            let valueType
-            let commandType = COMMAND_TYPES[i]
+        const commandTime = $scope.isValidDate ? utils.getTimeFromString(commandData.date) : false
+        const isArrive = $scope.selectedDateType.value === DATE_TYPES.ARRIVE
 
-            $scope.travelTimes[commandType] = {}
-
-            UNITS_BY_SPEED.forEach(function (unit) {
-                let travelTime = utils.getTravelTime(
-                    commandData.origin,
-                    commandData.target,
-                    {[unit]: 1},
-                    commandType,
-                    commandData.officers,
-                    true
-                )
-
-                if ($scope.selectedDateType.value === DATE_TYPES.OUT) {
-                    if ($scope.isValidDate) {
-                        let date = utils.fixDate(commandData.date)
-                        let outTime = utils.getTimeFromString(date)
-                        valueType = isValidSendTime(outTime) ? 'valid' : 'invalid'
-                    } else {
-                        valueType = 'neutral'
-                    }
-                } else if ($scope.selectedDateType.value === DATE_TYPES.ARRIVE) {
-                    if ($scope.isValidDate) {
-                        let date = utils.fixDate(commandData.date)
-                        let arriveTime = utils.getTimeFromString(date)
-                        let sendTime = arriveTime - travelTime
-                        valueType = isValidSendTime(sendTime) ? 'valid' : 'invalid'
-                    } else {
-                        valueType = 'invalid'
-                    }
-                }
-
-                $scope.travelTimes[commandType][unit] = {
-                    value: $filter('readableMillisecondsFilter')(travelTime),
-                    valueType: valueType
-                }
+        utils.each(COMMAND_TYPES, function (commandType) {
+            utils.each(travelTimeArmy, function (army, unit) {
+                const travelTime = utils.getTravelTime(commandData.origin, commandData.target, army, commandType, commandData.officers, true)
+                
+                $scope.travelTimes[commandType][unit].travelTime = $filter('readableMillisecondsFilter')(travelTime)
+                $scope.travelTimes[commandType][unit].status = commandTime ? sendTimeStatus(isArrive ? commandTime - travelTime : commandTime) : 'neutral'
             })
-        }
+        })
     }
 
     /**
      * @param  {Number}  time - Command date input in milliseconds.
      * @return {Boolean}
      */
-    const isValidSendTime = function (time) {
-        if (!$scope.isValidDate) {
-            return false
+    const sendTimeStatus = function (time) {
+        if (!time || !$scope.isValidDate) {
+            return 'neutral'
         }
 
-        return ($timeHelper.gameTime() + timeOffset) < time
+        return ($timeHelper.gameTime() + timeOffset) < time  ? 'valid' : 'invalid'
     }
 
     const updateDateType = function () {
@@ -550,6 +515,15 @@ define('two/commandQueue/ui', [
         $scope.inventory = modelDataService.getInventory()
         $scope.presets = utils.obj2selectOptions(presetList.getPresets())
         $scope.travelTimes = {}
+
+        utils.each(COMMAND_TYPES, function (commandType) {
+            $scope.travelTimes[commandType] = {}
+
+            utils.each(travelTimeArmy, function (army, unit) {
+                $scope.travelTimes[commandType][unit] = { travelTime: 0, status: 'neutral' }
+            })
+        })
+
         $scope.unitOrder = unitOrder
         $scope.officers = $gameData.getOrderedOfficerNames()
         $scope.searchQuery = {
@@ -627,7 +601,22 @@ define('two/commandQueue/ui', [
         $scope.$watch('catapultTarget.value', updateCatapultTarget)
         $scope.$watch('filtersData[FILTER_TYPES.TEXT_MATCH]', textMatchFilter)
 
-        let eventScope = new EventScope('twoverflow_queue_window')
+        let travelTimesTimer
+
+        $scope.$watch('selectedTab', function () {
+            if ($scope.selectedTab === TAB_TYPES.ADD) {
+                travelTimesTimer = setInterval(function () {
+                    updateTravelTimes()
+                }, 2500)
+            } else {
+                clearInterval(travelTimesTimer)
+            }
+        })
+
+        let eventScope = new EventScope('twoverflow_queue_window', function () {
+            clearInterval(travelTimesTimer)
+        })
+
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.ARMY_PRESET_DELETED, eventHandlers.updatePresets, true)
         eventScope.register(eventTypeProvider.SELECT_SELECTED, eventHandlers.autoCompleteSelected, true)
