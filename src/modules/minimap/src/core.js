@@ -102,6 +102,7 @@ define('two/minimap', [
         y: 0
     }
     let firstDraw = true
+    const rhexcolor = /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
 
     /**
      * Calcule the coords from clicked position in the canvas.
@@ -447,8 +448,6 @@ define('two/minimap', [
                 return false
             }
 
-            const color = '#' + colors.palette.random().random()
-
             switch (minimapSettings[SETTINGS.RIGHT_CLICK_ACTION]) {
                 case ACTION_TYPES.HIGHLIGHT_PLAYER: {
                     if (!village.character_id) {
@@ -458,7 +457,7 @@ define('two/minimap', [
                     minimap.addHighlight({
                         type: 'character',
                         id: village.character_id
-                    }, color)
+                    }, colors.palette.flat().random())
 
                     break
                 }
@@ -470,7 +469,7 @@ define('two/minimap', [
                     minimap.addHighlight({
                         type: 'tribe',
                         id: village.tribe_id
-                    }, color)
+                    }, colors.palette.flat().random())
 
                     break
                 }
@@ -716,12 +715,12 @@ define('two/minimap', [
             return false
         }
 
-        if (!/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color)) {
+        if (!rhexcolor.test(color)) {
             eventQueue.trigger(eventTypeProvider.MINIMAP_HIGHLIGHT_ADD_ERROR_INVALID_COLOR)
             return false
         }
 
-        highlights[item.type][item.id] = color
+        highlights[item.type][item.id] = color[0] !== '#' ? '#' + color : color
         const colorGroup = item.type === 'character' ? colorGroups.PLAYER_COLORS : colorGroups.TRIBE_COLORS
         colorService.setCustomColorsByGroup(colorGroup, highlights[item.type])
         $rootScope.$broadcast(eventTypeProvider.GROUPS_VILLAGES_CHANGED)

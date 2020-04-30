@@ -227,7 +227,7 @@ define('two/minimap/ui', [
                 minimap.addHighlight({
                     id: itemId,
                     type: colorGroup
-                }, '#' + modalScope.selectedColor)
+                }, modalScope.selectedColor)
                 modalScope.closeWindow()
             }
         }
