@@ -9,6 +9,7 @@ define('two/commandQueue/ui', [
     'two/commandQueue/types/commands',
     'two/commandQueue/storageKeys',
     'queues/EventQueue',
+    'struct/MapData',
     'helper/time',
     'helper/util',
     'Lockr'
@@ -23,6 +24,7 @@ define('two/commandQueue/ui', [
     COMMAND_TYPES,
     STORAGE_KEYS,
     eventQueue,
+    mapData,
     $timeHelper,
     util,
     Lockr
@@ -238,7 +240,7 @@ define('two/commandQueue/ui', [
             return utils.notif('error', $filter('i18n')('error_no_map_selected_village', $rootScope.loc.ale, 'command_queue'))
         }
 
-        commandQueue.getVillageByCoords(mapSelectedVillage.x, mapSelectedVillage.y, function (data) {
+        mapData.loadTownDataAsync(mapSelectedVillage.x, mapSelectedVillage.y, 1, 1, function (data) {
             commandData.target = data
         })
     }

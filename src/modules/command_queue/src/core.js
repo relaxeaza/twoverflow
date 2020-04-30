@@ -5,11 +5,14 @@ define('two/commandQueue', [
     'two/commandQueue/types/filters',
     'two/commandQueue/types/commands',
     'two/commandQueue/storageKeys',
+    'two/commandQueue/errorCodes',
     'queues/EventQueue',
     'helper/time',
     'helper/math',
     'struct/MapData',
-    'Lockr'
+    'Lockr',
+    'conf/buildingTypes',
+    'conf/officerTypes'
 ], function (
     utils,
     DATE_TYPES,
@@ -17,18 +20,18 @@ define('two/commandQueue', [
     FILTER_TYPES,
     COMMAND_TYPES,
     STORAGE_KEYS,
+    ERROR_CODES,
     eventQueue,
     timeHelper,
     $math,
     mapData,
-    Lockr
+    Lockr,
+    BUILDING_TYPES,
+    OFFICER_TYPES
 ) {
     const relocateEnabled = modelDataService.getWorldConfig().isRelocateUnitsEnabled()
     const CHECKS_PER_SECOND = 10
-    const ERROR_CODES = {
-        INVALID_ORIGIN: 'invalid_rigin',
-        INVALID_TARGET: 'invalid_target'
-    }
+    const OFFICER_LIST = Object.values(OFFICER_TYPES)
     let waitingCommands = []
     let waitingCommandsObject = {}
     let sentCommands = []
@@ -302,110 +305,104 @@ define('two/commandQueue', [
      * @param {String=} command.catapultTarget - Alvo da catapulta, caso o comando seja um ataque.
      */
     commandQueue.addCommand = function (command) {
-        if (!command.origin) {
-            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, command)
-        }
-
-        if (!command.target) {
-            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, command)
-        }
-
-        if (!utils.isValidDateTime(command.date)) {
-            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, command)
-        }
-
-        if (!command.units || angular.equals(command.units, {})) {
-            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, command)
-        }
-
-        if (command.type === COMMAND_TYPES.RELOCATE && !relocateEnabled) {
-            return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_RELOCATE_DISABLED, command)
-        }
-
-        let getOriginVillage = new Promise(function (resolve, reject) {
-            commandQueue.getVillageByCoords(command.origin.x, command.origin.y, function (data) {
-                data ? resolve(data) : reject(ERROR_CODES.INVALID_ORIGIN)
-            })
-        })
-
-        let getTargetVillage = new Promise(function (resolve, reject) {
-            commandQueue.getVillageByCoords(command.target.x, command.target.y, function (data) {
-                data ? resolve(data) : reject(ERROR_CODES.INVALID_TARGET)
-            })
-        })
-
-        let loadVillagesData = Promise.all([
-            getOriginVillage,
-            getTargetVillage
-        ])
-
-        for (let officer in command.officers) {
-            if (command.officers[officer]) {
-                command.officers[officer] = 1
-            } else {
-                delete command.officers[officer]
-            }
-        }
-
-        loadVillagesData.then(function (villages) {
-            command.origin = villages[0]
-            command.target = villages[1]
-            command.units = cleanZeroUnits(command.units)
-            command.travelTime = utils.getTravelTime(
-                command.origin,
-                command.target,
-                command.units,
-                command.type,
-                command.officers,
-                true
-            )
-
-            const inputTime = utils.getTimeFromString(command.date)
-
-            if (command.dateType === DATE_TYPES.ARRIVE) {
-                command.sendTime = inputTime - command.travelTime
-                command.arriveTime = inputTime
-            } else if (command.dateType === DATE_TYPES.OUT) {
-                command.sendTime = inputTime
-                command.arriveTime = inputTime + command.travelTime
-            } else {
-                throw new Error('CommandQueue: wrong dateType:' + command.dateType)
-            }
-
-            if (isTimeToSend(command.sendTime)) {
-                return eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, command)
-            }
-
-            if (command.type === COMMAND_TYPES.ATTACK && 'supporter' in command.officers) {
-                delete command.officers.supporter
-            }
-
-            if (command.type === COMMAND_TYPES.ATTACK && command.units.catapult) {
-                command.catapultTarget = command.catapultTarget || 'headquarter'
-            } else {
-                command.catapultTarget = null
-            }
-
-            command.id = utils.guid()
-
-            waitingCommandHelpers(command)
-            pushWaitingCommand(command)
-            pushCommandObject(command)
-            sortWaitingQueue()
-            storeWaitingQueue()
-
-            eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD, command)
-        })
-
-        loadVillagesData.catch(function (errorCode) {
-            switch (errorCode) {
-            case ERROR_CODES.INVALID_ORIGIN:
+        return new Promise(function (resolve, reject) {
+            if (!command.origin) {
                 eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, command)
-                break
-            case ERROR_CODES.INVALID_TARGET:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, command)
-                break
+                return reject(ERROR_CODES.INVALID_ORIGIN)
             }
+
+            if (!command.target) {
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_TARGET, command)
+                return reject(ERROR_CODES.INVALID_TARGET)
+            }
+
+            if (!utils.isValidDateTime(command.date)) {
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_DATE, command)
+                return reject(ERROR_CODES.INVALID_DATE)
+            }
+
+            if (!command.units || angular.equals(command.units, {})) {
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_NO_UNITS, command)
+                return reject(ERROR_CODES.NO_UNITS)
+            }
+
+            if (command.type === COMMAND_TYPES.RELOCATE && !relocateEnabled) {
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_RELOCATE_DISABLED, command)
+                return reject(ERROR_CODES.RELOCATE_DISABLED)
+            }
+
+            // load data of target and origin villages
+            Promise.all([
+                new Promise((resolve) => mapData.loadTownDataAsync(command.origin.x, command.origin.y, 1, 1, resolve)),
+                new Promise((resolve) => mapData.loadTownDataAsync(command.target.x, command.target.y, 1, 1, resolve))
+            ]).then(function (villages) {
+                command.origin = villages[0]
+                command.target = villages[1]
+
+                if (!command.origin) {
+                    eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_ORIGIN, command)
+                    return reject(ERROR_CODES.INVALID_ORIGIN)
+                }
+
+                if (angular.isObject(command.officers)) {
+                    for (let officer in command.officers) {
+                        if (!OFFICER_LIST.includes(officer)) {
+                            eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_INVALID_OFFICER, command)
+                            return reject(ERROR_CODES.INVALID_OFFICER)
+                        }
+
+                        if (command.officers[officer]) {
+                            command.officers[officer] = 1
+                        } else {
+                            delete command.officers[officer]
+                        }
+                    }
+                } else {
+                    command.officers = false
+                }
+
+                command.units = cleanZeroUnits(command.units)
+                command.travelTime = utils.getTravelTime(command.origin, command.target, command.units, command.type, command.officers, true)
+
+                const inputTime = utils.getTimeFromString(command.date)
+
+                if (command.dateType === DATE_TYPES.ARRIVE) {
+                    command.sendTime = inputTime - command.travelTime
+                    command.arriveTime = inputTime
+                } else if (command.dateType === DATE_TYPES.OUT) {
+                    command.sendTime = inputTime
+                    command.arriveTime = inputTime + command.travelTime
+                } else {
+                    return reject(ERROR_CODES.INVALID_DATE_TYPE)
+                }
+
+                if (isTimeToSend(command.sendTime)) {
+                    eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD_ALREADY_SENT, command)
+                    return reject(ERROR_CODES.ALREADY_SENT)
+                }
+
+                if (command.type === COMMAND_TYPES.ATTACK && OFFICER_TYPES.SUPPORTER in command.officers) {
+                    delete command.officers.supporter
+                }
+
+                if (command.type === COMMAND_TYPES.ATTACK && command.units.catapult) {
+                    command.catapultTarget = command.catapultTarget || BUILDING_TYPES.HEADQUARTER
+                } else {
+                    command.catapultTarget = null
+                }
+
+                command.id = utils.guid()
+
+                waitingCommandHelpers(command)
+                pushWaitingCommand(command)
+                pushCommandObject(command)
+                sortWaitingQueue()
+                storeWaitingQueue()
+
+                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_ADD, command)
+
+                resolve()
+            })
         })
     }
 
@@ -489,10 +486,6 @@ define('two/commandQueue', [
 
     commandQueue.getExpiredCommands = function () {
         return expiredCommands
-    }
-
-    commandQueue.getVillageByCoords = function (x, y, callback) {
-        mapData.loadTownDataAsync(x, y, 1, 1, callback)
     }
 
     /**

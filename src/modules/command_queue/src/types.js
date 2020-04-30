@@ -34,3 +34,16 @@ define('two/commandQueue/types/filters', [], function () {
         TEXT_MATCH: 'text_match'
     }
 })
+
+define('two/commandQueue/errorCodes', [], function () {
+    return {
+        INVALID_ORIGIN: 'invalid_origin',
+        INVALID_TARGET: 'invalid_target',
+        INVALID_DATE: 'invalid_date',
+        NO_UNITS: 'no_units',
+        ALREADY_SENT: 'already_sent',
+        RELOCATE_DISABLED: 'relocate_disabled',
+        INVALID_DATE_TYPE: 'invalid_date_type',
+        INVALID_OFFICER: 'invalid_officer'
+    }
+})
