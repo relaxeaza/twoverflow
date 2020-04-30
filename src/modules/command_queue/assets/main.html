@@ -326,7 +326,7 @@
                                         <div class="unit" ng-repeat="(unit, amount) in command.units">
                                             <span class="icon-34x34-unit-{{ unit }} icon"></span>
                                             <span class="amount">{{ amount }}</span>
-                                            <span ng-if="unit === 'catapult' && command.type === COMMAND_TYPES.ATTACK">({{ command.catapultTarget | i18n:loc.ale:'common' }})</span>
+                                            <span ng-if="unit === 'catapult' && command.type === COMMAND_TYPES.ATTACK">({{ command.catapultTarget | i18n:loc.ale:'building_names' }})</span>
                                         </div>
 
                                         <div class="officer" ng-repeat="(officer, enabled) in command.officers">
