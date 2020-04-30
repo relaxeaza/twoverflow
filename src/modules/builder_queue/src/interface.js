@@ -123,16 +123,17 @@ define('two/builderQueue/ui', [
         const status = builderQueue.addBuildingSequence(sequenceId, sequence)
 
         switch (status) {
-        case SEQUENCE_STATUS.SEQUENCE_SAVED:
-            return true
-
-        case SEQUENCE_STATUS.SEQUENCE_EXISTS:
-            utils.notif('error', $filter('i18n')('error_sequence_exists', $rootScope.loc.ale, 'builder_queue'))
-            return false
-
-        case SEQUENCE_STATUS.SEQUENCE_INVALID:
-            utils.notif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
-            return false
+            case SEQUENCE_STATUS.SEQUENCE_SAVED: {
+                return true
+            }
+            case SEQUENCE_STATUS.SEQUENCE_EXISTS: {
+                utils.notif('error', $filter('i18n')('error_sequence_exists', $rootScope.loc.ale, 'builder_queue'))
+                return false
+            }
+            case SEQUENCE_STATUS.SEQUENCE_INVALID: {
+                utils.notif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
+                return false
+            }
         }
     }
 
@@ -443,18 +444,18 @@ define('two/builderQueue/ui', [
         const status = builderQueue.updateBuildingSequence(selectedSequence, parsedSequence)
 
         switch (status) {
-        case SEQUENCE_STATUS.SEQUENCE_SAVED:
-            unsavedChanges = false
-
-            break
-        case SEQUENCE_STATUS.SEQUENCE_NO_EXISTS:
-            utils.notif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, 'builder_queue'))
-
-            break
-        case SEQUENCE_STATUS.SEQUENCE_INVALID:
-            utils.notif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
-
-            break
+            case SEQUENCE_STATUS.SEQUENCE_SAVED: {
+                unsavedChanges = false
+                break
+            }
+            case SEQUENCE_STATUS.SEQUENCE_NO_EXISTS: {
+                utils.notif('error', $filter('i18n')('error_sequence_no_exits', $rootScope.loc.ale, 'builder_queue'))
+                break
+            }
+            case SEQUENCE_STATUS.SEQUENCE_INVALID: {
+                utils.notif('error', $filter('i18n')('error_sequence_invalid', $rootScope.loc.ale, 'builder_queue'))
+                break
+            }
         }
     }
 

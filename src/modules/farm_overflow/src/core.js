@@ -979,52 +979,53 @@ define('two/farmOverflow', [
             })
 
             switch (status) {
-            case STATUS.TIME_LIMIT:
-            case STATUS.BUSY_TARGET:
-            case STATUS.ABANDONED_CONQUERED:
-            case STATUS.PROTECTED_VILLAGE:
-                this.index++
-                this.setStatus(status)
-                this.targetStep(options)
-                break
-
-            case STATUS.USER_STOP:
-                this.setStatus(status)
-                break
-
-            case STATUS.NOT_ALLOWED_POINTS:
-                this.index++
-                this.setStatus(status)
-                removeTarget(target.id)
-                this.targetStep(options)
-                break
-
-            case STATUS.NO_UNITS:
-            case STATUS.NO_TARGETS:
-            case STATUS.FULL_STORAGE:
-            case STATUS.COMMAND_LIMIT:
-                this.index++
-                this.setStatus(status)
-                this.stop(status)
-                break
-
-            case STATUS.TARGET_CYCLE_END:
-                this.index = 0
-                this.setStatus(status)
-                this.stop(status)
-                break
-
-            case STATUS.EXPIRED_STEP:
-                this.setStatus(status)
-                this.targetStep()
-                break
-
-            default:
-                console.error('Unknown status:', status)
-                this.index++
-                this.setStatus(STATUS.UNKNOWN)
-                this.stop(STATUS.UNKNOWN)
-                break
+                case STATUS.TIME_LIMIT:
+                case STATUS.BUSY_TARGET:
+                case STATUS.ABANDONED_CONQUERED:
+                case STATUS.PROTECTED_VILLAGE: {
+                    this.index++
+                    this.setStatus(status)
+                    this.targetStep(options)
+                    break
+                }
+                case STATUS.USER_STOP: {
+                    this.setStatus(status)
+                    break
+                }
+                case STATUS.NOT_ALLOWED_POINTS: {
+                    this.index++
+                    this.setStatus(status)
+                    removeTarget(target.id)
+                    this.targetStep(options)
+                    break
+                }
+                case STATUS.NO_UNITS:
+                case STATUS.NO_TARGETS:
+                case STATUS.FULL_STORAGE:
+                case STATUS.COMMAND_LIMIT: {
+                    this.index++
+                    this.setStatus(status)
+                    this.stop(status)
+                    break
+                }
+                case STATUS.TARGET_CYCLE_END: {
+                    this.index = 0
+                    this.setStatus(status)
+                    this.stop(status)
+                    break
+                }
+                case STATUS.EXPIRED_STEP: {
+                    this.setStatus(status)
+                    this.targetStep()
+                    break
+                }
+                default: {
+                    console.error('Unknown status:', status)
+                    this.index++
+                    this.setStatus(STATUS.UNKNOWN)
+                    this.stop(STATUS.UNKNOWN)
+                    break
+                }
             }
         }
 

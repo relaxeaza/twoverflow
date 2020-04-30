@@ -294,29 +294,30 @@ define('two/commandQueue/ui', [
             utils.notif('success', genNotifText(command.type, 'added'))
         }).catch(function (error) {
             switch (error) {
-            case ERROR_CODES.INVALID_ORIGIN:
-                utils.notif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, 'command_queue'))
-                break
-
-            case ERROR_CODES.INVALID_TARGET:
-                utils.notif('error', $filter('i18n')('error_target', $rootScope.loc.ale, 'command_queue'))
-                break
-
-            case ERROR_CODES.INVALID_DATE:
-                utils.notif('error', $filter('i18n')('error_invalid_date', $rootScope.loc.ale, 'command_queue'))
-                break
-
-            case ERROR_CODES.NO_UNITS:
-                utils.notif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, 'command_queue'))
-                break
-
-            case ERROR_CODES.RELOCATE_DISABLED:
-                utils.notif('error', $filter('i18n')('error_relocate_disabled', $rootScope.loc.ale, 'command_queue'))
-                break
-
-            case ERROR_CODES.ALREADY_SENT:
-                utils.notif('error', $filter('i18n')('error_already_sent_' + commandType, $rootScope.loc.ale, 'command_queue'))
-                break
+                case ERROR_CODES.INVALID_ORIGIN: {
+                    utils.notif('error', $filter('i18n')('error_origin', $rootScope.loc.ale, 'command_queue'))
+                    break
+                }
+                case ERROR_CODES.INVALID_TARGET: {
+                    utils.notif('error', $filter('i18n')('error_target', $rootScope.loc.ale, 'command_queue'))
+                    break
+                }
+                case ERROR_CODES.INVALID_DATE: {
+                    utils.notif('error', $filter('i18n')('error_invalid_date', $rootScope.loc.ale, 'command_queue'))
+                    break
+                }
+                case ERROR_CODES.NO_UNITS: {
+                    utils.notif('error', $filter('i18n')('error_no_units', $rootScope.loc.ale, 'command_queue'))
+                    break
+                }
+                case ERROR_CODES.RELOCATE_DISABLED: {
+                    utils.notif('error', $filter('i18n')('error_relocate_disabled', $rootScope.loc.ale, 'command_queue'))
+                    break
+                }
+                case ERROR_CODES.ALREADY_SENT: {
+                    utils.notif('error', $filter('i18n')('error_already_sent_' + commandType, $rootScope.loc.ale, 'command_queue'))
+                    break
+                }
             }
         })
     }

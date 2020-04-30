@@ -238,76 +238,79 @@ define('two/Settings', [
                 }
 
                 switch (map.type) {
-                case 'presets':
-                    if (map.multiSelect) {
-                        let multiValues = []
+                    case 'presets': {
+                        if (map.multiSelect) {
+                            let multiValues = []
 
-                        value.forEach(function (presetId) {
-                            if (!presets[presetId]) {
+                            value.forEach(function (presetId) {
+                                if (!presets[presetId]) {
+                                    return
+                                }
+
+                                multiValues.push({
+                                    name: presets[presetId].name,
+                                    value: presetId
+                                })
+                            })
+
+                            encoded[id] = multiValues.length ? multiValues : [disabledOption()]
+                        } else {
+                            if (!presets[value] && map.disabledOption) {
+                                encoded[id] = disabledOption()
                                 return
                             }
 
-                            multiValues.push({
-                                name: presets[presetId].name,
-                                value: presetId
-                            })
-                        })
-
-                        encoded[id] = multiValues.length ? multiValues : [disabledOption()]
-                    } else {
-                        if (!presets[value] && map.disabledOption) {
-                            encoded[id] = disabledOption()
-                            return
+                            encoded[id] = {
+                                name: presets[value].name,
+                                value: value
+                            }
                         }
 
-                        encoded[id] = {
-                            name: presets[value].name,
-                            value: value
-                        }
+                        break
                     }
+                    case 'groups': {
+                        if (map.multiSelect) {
+                            let multiValues = []
 
-                    break
-                case 'groups':
-                    if (map.multiSelect) {
-                        let multiValues = []
+                            value.forEach(function (groupId) {
+                                if (!groups[groupId]) {
+                                    return
+                                }
 
-                        value.forEach(function (groupId) {
-                            if (!groups[groupId]) {
+                                multiValues.push({
+                                    name: groups[groupId].name,
+                                    value: groupId,
+                                    leftIcon: groups[groupId].icon
+                                })
+                            })
+
+                            encoded[id] = multiValues.length ? multiValues : [disabledOption()]
+                        } else {
+                            if (!groups[value] && map.disabledOption) {
+                                encoded[id] = disabledOption()
                                 return
                             }
 
-                            multiValues.push({
-                                name: groups[groupId].name,
-                                value: groupId,
-                                leftIcon: groups[groupId].icon
-                            })
-                        })
-
-                        encoded[id] = multiValues.length ? multiValues : [disabledOption()]
-                    } else {
-                        if (!groups[value] && map.disabledOption) {
-                            encoded[id] = disabledOption()
-                            return
+                            encoded[id] = {
+                                name: groups[value].name,
+                                value: value
+                            }
                         }
 
+                        break
+                    }
+                    default: {
                         encoded[id] = {
-                            name: groups[value].name,
+                            name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
                             value: value
                         }
-                    }
 
-                    break
-                default:
-                    encoded[id] = {
-                        name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
-                        value: value
-                    }
+                        if (opt.multiSelect) {
+                            encoded[id] = [encoded[id]]
+                        }
 
-                    if (opt.multiSelect) {
-                        encoded[id] = [encoded[id]]
+                        break
                     }
-
-                    break
                 }
             } else {
                 encoded[id] = value
@@ -357,47 +360,51 @@ define('two/Settings', [
         }
 
         switch (opt.type) {
-        case 'keys':
-            for (let prop in list) {
-                encoded.push({
-                    name: prop,
-                    value: prop
-                })
+            case 'keys': {
+                for (let prop in list) {
+                    encoded.push({
+                        name: prop,
+                        value: prop
+                    })
+                }
+
+                break
             }
+            case 'groups': {
+                for (let prop in list) {
+                    let value = list[prop]
 
-            break
-        case 'groups':
-            for (let prop in list) {
-                let value = list[prop]
+                    encoded.push({
+                        name: value.name,
+                        value: value.id,
+                        leftIcon: value.icon
+                    })
+                }
 
-                encoded.push({
-                    name: value.name,
-                    value: value.id,
-                    leftIcon: value.icon
-                })
+                break
             }
+            case 'presets': {
+                for (let prop in list) {
+                    let value = list[prop]
 
-            break
-        case 'presets':
-            for (let prop in list) {
-                let value = list[prop]
+                    encoded.push({
+                        name: value.name,
+                        value: value.id
+                    })
+                }
 
-                encoded.push({
-                    name: value.name,
-                    value: value.id
-                })
+                break
             }
+            case 'values':
+            default: {
+                for (let prop in list) {
+                    let value = list[prop]
 
-            break
-        case 'values':
-        default:
-            for (let prop in list) {
-                let value = list[prop]
-
-                encoded.push({
-                    name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
-                    value: value
-                })
+                    encoded.push({
+                        name: opt.textObject ? $filter('i18n')(value, $rootScope.loc.ale, opt.textObject) : value,
+                        value: value
+                    })
+                }
             }
         }
 

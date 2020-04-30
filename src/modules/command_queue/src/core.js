@@ -424,18 +424,22 @@ define('two/commandQueue', [
 
         if (removed) {
             switch (eventCode) {
-            case EVENT_CODES.TIME_LIMIT:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_TIME_LIMIT, command)
-                break
-            case EVENT_CODES.NOT_OWN_VILLAGE:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NOT_OWN_VILLAGE, command)
-                break
-            case EVENT_CODES.NOT_ENOUGH_UNITS:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NO_UNITS_ENOUGH, command)
-                break
-            case EVENT_CODES.COMMAND_REMOVED:
-                eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_REMOVE, command)
-                break
+                case EVENT_CODES.TIME_LIMIT: {
+                    eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_TIME_LIMIT, command)
+                    break
+                }
+                case EVENT_CODES.NOT_OWN_VILLAGE: {
+                    eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NOT_OWN_VILLAGE, command)
+                    break
+                }
+                case EVENT_CODES.NOT_ENOUGH_UNITS: {
+                    eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_SEND_NO_UNITS_ENOUGH, command)
+                    break
+                }
+                case EVENT_CODES.COMMAND_REMOVED: {
+                    eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_REMOVE, command)
+                    break
+                }
             }
 
             return true

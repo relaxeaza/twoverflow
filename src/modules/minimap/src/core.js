@@ -450,29 +450,30 @@ define('two/minimap', [
             const color = '#' + colors.palette.random().random()
 
             switch (minimapSettings[SETTINGS.RIGHT_CLICK_ACTION]) {
-            case ACTION_TYPES.HIGHLIGHT_PLAYER:
-                if (!village.character_id) {
-                    return false
+                case ACTION_TYPES.HIGHLIGHT_PLAYER: {
+                    if (!village.character_id) {
+                        return false
+                    }
+
+                    minimap.addHighlight({
+                        type: 'character',
+                        id: village.character_id
+                    }, color)
+
+                    break
                 }
+                case ACTION_TYPES.HIGHLIGHT_TRIBE: {
+                    if (!village.tribe_id) {
+                        return false
+                    }
 
-                minimap.addHighlight({
-                    type: 'character',
-                    id: village.character_id
-                }, color)
+                    minimap.addHighlight({
+                        type: 'tribe',
+                        id: village.tribe_id
+                    }, color)
 
-                break
-
-            case ACTION_TYPES.HIGHLIGHT_TRIBE:
-                if (!village.tribe_id) {
-                    return false
+                    break
                 }
-
-                minimap.addHighlight({
-                    type: 'tribe',
-                    id: village.tribe_id
-                }, color)
-
-                break
             }
         })
     }

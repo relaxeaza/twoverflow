@@ -59,15 +59,16 @@ define('two/attackView', [
 
                 if (filters[toArray[i]][j]) {
                     switch (toArray[i]) {
-                    case FILTER_TYPES.COMMAND_TYPES:
-                        if (j === COMMAND_TYPES.ATTACK) {
-                            arrays[toArray[i]].push(COMMAND_TYPES.ATTACK)
-                        } else if (j === COMMAND_TYPES.SUPPORT) {
-                            arrays[toArray[i]].push(COMMAND_TYPES.SUPPORT)
-                        } else if (j === COMMAND_TYPES.RELOCATE) {
-                            arrays[toArray[i]].push(COMMAND_TYPES.RELOCATE)
+                        case FILTER_TYPES.COMMAND_TYPES: {
+                            if (j === COMMAND_TYPES.ATTACK) {
+                                arrays[toArray[i]].push(COMMAND_TYPES.ATTACK)
+                            } else if (j === COMMAND_TYPES.SUPPORT) {
+                                arrays[toArray[i]].push(COMMAND_TYPES.SUPPORT)
+                            } else if (j === COMMAND_TYPES.RELOCATE) {
+                                arrays[toArray[i]].push(COMMAND_TYPES.RELOCATE)
+                            }
+                            break
                         }
-                        break
                     }
                 }
             }

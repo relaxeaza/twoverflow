@@ -179,14 +179,14 @@ define('two/farmOverflow/ui', [
             clearInterval(cycleCountdownTimer)
 
             switch (data.reason) {
-            case ERROR_TYPES.NO_PRESETS:
-                utils.notif('success', $filter('i18n')('no_preset', $rootScope.loc.ale, 'farm_overflow'))
-                break
-
-            default:
-            case ERROR_TYPES.USER_STOP:
-                utils.notif('success', $filter('i18n')('farm_stopped', $rootScope.loc.ale, 'farm_overflow'))
-                break
+                case ERROR_TYPES.NO_PRESETS: {
+                    utils.notif('success', $filter('i18n')('no_preset', $rootScope.loc.ale, 'farm_overflow'))
+                    break
+                }
+                case ERROR_TYPES.USER_STOP: {
+                    utils.notif('success', $filter('i18n')('farm_stopped', $rootScope.loc.ale, 'farm_overflow'))
+                    break
+                }
             }
         },
         updateLogs: function () {
