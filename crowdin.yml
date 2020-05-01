@@ -1,3 +1,22 @@
-files:
-  - source: /src/i18n/*.json
-    translation: /src/i18n/%file_name%/%locale_with_underscore%.json
+files: [
+  {
+    source: /src/i18n/en_en/*.json,
+    translation: /src/i18n/%locale_with_underscore%/%original_file_name%
+  }
+]
+
+languages_mapping: {
+ locale_with_underscore: {
+    "de": "de_de",
+    "pt-BR": "pt_br",
+    "pl": "pl_pl",
+    "ru": "ru_ru"
+  }
+}
+
+export_languages: [
+  "de_de",
+  "pt_br",
+  "pl_pl",
+  "ru_ru"
+]
