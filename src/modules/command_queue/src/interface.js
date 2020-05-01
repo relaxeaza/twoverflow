@@ -616,6 +616,7 @@ define('two/commandQueue/ui', [
         $scope.$watch('commandData.origin', updateTravelTimes)
         $scope.$watch('commandData.target', updateTravelTimes)
         $scope.$watch('commandData.date', updateTravelTimes)
+        $scope.$watch('commandData.officers', updateTravelTimes)
         $scope.$watch('selectedDateType.value', updateDateType)
         $scope.$watch('selectedInsertPreset.value', insertPreset)
         $scope.$watch('catapultTarget.value', updateCatapultTarget)
