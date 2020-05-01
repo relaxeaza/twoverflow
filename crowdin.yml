@@ -1,21 +1,20 @@
----
 files:
-- source: "/src/i18n/en_en/*.json"
-  translation: "/src/i18n/%locale_with_underscore%/%original_file_name%"
-  languages_mapping:
-    locale_with_underscore:
-      ro: ro_ro
-      fr: fr_fr
-      es-ES: es_es
-      cs: cs_cz
-      de: de_de
-      el: el_gr
-      nl: nl_nl
-      pl: pl_pl
-      ru: ru_ru
-      pt-BR: pt_br
+  - source: /src/i18n/en_en/*.json
+    translation: /src/i18n/%locale_with_underscore%/%original_file_name%
+    languages_mapping:
+      locale_with_underscore:
+        ro: ro_ro
+        fr: fr_fr
+        es-ES: es_es
+        cs: cs_cz
+        de: de_de
+        el: el_gr
+        nl: nl_nl
+        pl: pl_pl
+        ru: ru_ru
+        pt-BR: pt_br
 export_languages:
-- de
-- pt-BR
-- pl
-- ru
+  - de
+  - pt-BR
+  - pl
+  - ru
