@@ -178,56 +178,44 @@ function minifyHTML () {
 }
 
 function generateLanguageFile () {
+    console.log('Merging i18n files')
+
     return new Promise(function (resolve, reject) {
-        const modules = fs.readdirSync(`${projectRoot}/src/i18n/`, {
+        const langs = fs.readdirSync(`${projectRoot}/src/i18n/`, {
             withFileTypes: true
         }).filter(function (dirent) {
-            return dirent.isDirectory()
+            return dirent.isDirectory() && dirent.name !== LANG_ID_SOURCE
         }).map(function (moduleDir) {
             return moduleDir.name
         })
 
         const mergedTranslations = {}
+        mergedTranslations[LANG_ID_SOURCE] = {}
 
-        for (let a = 0; a < modules.length; a++) {
-            const moduleId = modules[a]
-            const sourceTranslations = JSON.parse(fs.readFileSync(`${projectRoot}/src/i18n/${moduleId}.json`, 'utf8'))
-            const sourceTotalEntries = getTranslationEntries(sourceTranslations)
-            const moduleTranslations = fs.readdirSync(`${projectRoot}/src/i18n/${moduleId}`)
+        langs.forEach(function (langId) {
+            const modules = fs.readdirSync(`${projectRoot}/src/i18n/${langId}/`)
+            mergedTranslations[langId] = {}
 
-            mergedTranslations[LANG_ID_SOURCE] = {
-                ...mergedTranslations[LANG_ID_SOURCE],
-                ...sourceTranslations
-            }
+            modules.forEach(function (moduleId) {
+                const sourceTranslations = JSON.parse(fs.readFileSync(`${projectRoot}/src/i18n/${LANG_ID_SOURCE}/${moduleId}`, 'utf8'))
+                const moduleTranslations = JSON.parse(fs.readFileSync(`${projectRoot}/src/i18n/${langId}/${moduleId}`, 'utf8'))
 
-            for (let b = 0; b < moduleTranslations.length; b++) {
-                const translationFile = moduleTranslations[b]
-                const translationId = translationFile.replace('.json', '')
-                const translation = JSON.parse(fs.readFileSync(`${projectRoot}/src/i18n/${moduleId}/${translationFile}`, 'utf8'))
-
-                if (!argv.dev) {
-                    const translationStatus = getTranslationStatus(moduleId, translationId, sourceTranslations, translation)
-
-                    if (!translationStatus.valid) {
-                        return reject(translationStatus.msg)
-                    }
+                mergedTranslations[LANG_ID_SOURCE] = {
+                    ...mergedTranslations[LANG_ID_SOURCE],
+                    ...sourceTranslations
                 }
 
-                const translationTotalEntries = getTranslationEntries(translation)
-                const percentageTranslated = Math.floor(translationTotalEntries / sourceTotalEntries * 100)
-
-                if (percentageTranslated >= MINIMUM_TRANSLATED) {
-                    mergedTranslations[translationId] = mergedTranslations[translationId] || {}
-                    mergedTranslations[translationId] = {
-                        ...mergedTranslations[translationId],
-                        ...mergeSouceIntoTranslation(sourceTranslations, translation)
-                    }
+                mergedTranslations[langId] = {
+                    ...mergedTranslations[langId],
+                    ...mergeSouceIntoTranslation(sourceTranslations, moduleTranslations)
                 }
-            }
-        }
+            })
+        })
 
         fs.writeFileSync(`${projectRoot}/tmp/i18n.json`, JSON.stringify(mergedTranslations, null, 4), 'utf8')
 
+        console.log('OK')
+        console.log('')
         resolve()
     })
 }
@@ -313,19 +301,19 @@ function minifyCode () {
     })
 }
 
-function getTranslationEntries (translation) {
-    let entries = 0
+// function getTranslationEntries (translation) {
+//     let entries = 0
 
-    for (let category in translation) {
-        for (let key in translation[category]) {
-            if (translation[category][key]) {
-                entries++
-            }
-        }
-    }
+//     for (let category in translation) {
+//         for (let key in translation[category]) {
+//             if (translation[category][key]) {
+//                 entries++
+//             }
+//         }
+//     }
 
-    return entries
-}
+//     return entries
+// }
 
 function mergeSouceIntoTranslation (source, translation) {
     let merged = {}
@@ -345,44 +333,29 @@ function mergeSouceIntoTranslation (source, translation) {
     return merged
 }
 
-function getTranslationStatus (moduleId, translationId, source, translation) {
-    let status = {
-        valid: true,
-        msg: 'Valid translation'
-    }
+// function getTranslationStatus (moduleId, translationId, source, translation) {
+//     let status = {
+//         valid: true,
+//         msg: 'Valid translation'
+//     }
 
-    for (let category in source) {
-        if (!hasOwn.call(translation, category)) {
-            status.valid = false
-            status.msg = `Translation "${translationId}" from module "${moduleId}" missing category: ${category}`
-        }
+//     for (let category in source) {
+//         if (!hasOwn.call(translation, category)) {
+//             status.valid = false
+//             status.msg = `Translation "${translationId}" from module "${moduleId}" missing category: ${category}`
+//         }
 
-        for (let key in source[category]) {
-            if (!hasOwn.call(translation[category], key)) {
-                status.valid = false
-                status.msg = `Translation "${translationId}" from module "${moduleId}" missing key: ${category}:${key}`
-            }
-        }
-    }
+//         for (let key in source[category]) {
+//             if (!hasOwn.call(translation[category], key)) {
+//                 status.valid = false
+//                 status.msg = `Translation "${translationId}" from module "${moduleId}" missing key: ${category}:${key}`
+//             }
+//         }
+//     }
 
-    return status
-}
+//     return status
+// }
 
-/**
- * generateModule will generate a object with all information/sources from
- * the the module.
- *
- * Module required files
- * - /module.json
- * - /src/core.js
- * - /src/init.js
- *
- * Module optional folders/files
- * - /src/*.js
- * - /assets/*.html
- * - /assets/*.less
- * - /lang/*.json
- */
 function generateModule (moduleId, moduleDir) {
     const modulePath = `/src/modules/${moduleDir}`
     let data = {
