@@ -9,6 +9,7 @@ define('two/minimap/types/mapSizes', [], function () {
     return {
         VERY_SMALL: 'very_small',
         SMALL: 'small',
-        BIG: 'big'
+        BIG: 'big',
+        VERY_BIG: 'very_big'
     }
 })

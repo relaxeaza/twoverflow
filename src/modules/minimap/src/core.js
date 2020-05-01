@@ -16,8 +16,7 @@ define('two/minimap', [
     'conf/colors',
     'conf/colorGroups',
     'conf/conf',
-    'states/MapState',
-    'battlecat'
+    'states/MapState'
 ], function (
     ACTION_TYPES,
     MAP_SIZE_TYPES,
@@ -36,8 +35,7 @@ define('two/minimap', [
     colors,
     colorGroups,
     conf,
-    mapState,
-    $
+    mapState
 ) {
     let renderingEnabled = false
     let highlights = {}
@@ -85,7 +83,8 @@ define('two/minimap', [
     const MAP_SIZES = {
         [MAP_SIZE_TYPES.VERY_SMALL]: 2,
         [MAP_SIZE_TYPES.SMALL]: 3,
-        [MAP_SIZE_TYPES.BIG]: 5
+        [MAP_SIZE_TYPES.BIG]: 5,
+        [MAP_SIZE_TYPES.VERY_BIG]: 7
     }
     const INTERFACE_HEIGHT = 265
     const BORDER_PADDING = 10
@@ -257,17 +256,18 @@ define('two/minimap', [
         viewportRefContext.fillRect(x, 0, 1, lineSize)
         viewportRefContext.fillRect(0, y, lineSize, 1)
 
-        const rectWidth = ($mapWrapper.width() / conf.TILESIZE.x / mapState.view.z) * villageBlock
-        const rectHeight = ($mapWrapper.height() / conf.TILESIZE.y / mapState.view.z) * villageBlock
-        const rectX = x - (rectWidth / 2)
-        const rectY = y - (rectHeight / 2)
+        const mapRect = $mapWrapper.getBoundingClientRect()
+        const refRectWidth = (mapRect.width / conf.TILESIZE.x / mapState.view.z) * villageBlock
+        const refRectHeight = (mapRect.height / conf.TILESIZE.y / mapState.view.z) * villageBlock
+        const refRectX = x - (refRectWidth / 2)
+        const refRectY = y - (refRectHeight / 2)
 
         // view rect
-        viewportRefContext.clearRect(rectX, rectY, rectWidth, rectHeight)
+        viewportRefContext.clearRect(refRectX, refRectY, refRectWidth, refRectHeight)
         viewportRefContext.beginPath()
         viewportRefContext.lineWidth = 1
         viewportRefContext.strokeStyle = minimapSettings[SETTINGS.COLOR_VIEW_REFERENCE]
-        viewportRefContext.rect(rectX, rectY, rectWidth, rectHeight)
+        viewportRefContext.rect(refRectX, refRectY, refRectWidth, refRectHeight)
         viewportRefContext.stroke()
     }
 
@@ -555,6 +555,10 @@ define('two/minimap', [
         viewBoundariesX.b = (boundariesX.b + 50) * villageBlock
         viewBoundariesY.a = (boundariesY.a - 20) * villageBlock
         viewBoundariesY.b = (boundariesY.b + 20) * villageBlock
+
+        $viewportCache.width = 1000 * villageBlock
+        $viewportCache.height = 1000 * villageBlock
+        viewportCacheContext.imageSmoothingEnabled = false
     }
 
     const setViewportSize = function () {
@@ -738,7 +742,7 @@ define('two/minimap', [
         if (!hasOwn.call(highlights[type], itemId)) {
             return false
         }
-        
+
         delete highlights[type][itemId]
         const colorGroup = type === 'character' ? colorGroups.PLAYER_COLORS : colorGroups.TRIBE_COLORS
         colorService.setCustomColorsByGroup(colorGroup, highlights[type])
@@ -823,7 +827,7 @@ define('two/minimap', [
         ready(function () {
             drawBorders()
             drawLoadedVillages()
-        }, ['minimap_data'])
+        }, 'minimap_data')
     }
 
     minimap.enableRendering = function enableRendering () {
@@ -852,12 +856,12 @@ define('two/minimap', [
             minimapSettings = settings.getAll()
             updateMinimapValues()
 
-            if (updates[UPDATES.MINIMAP]) {
-                minimap.drawMinimap()
-            }
-
             if (updates[UPDATES.MAP_POSITION]) {
                 minimap.setCurrentPosition(currentCoords.x, currentCoords.y)
+            }
+
+            if (updates[UPDATES.MINIMAP]) {
+                minimap.drawMinimap()
             }
         })
 
@@ -869,7 +873,7 @@ define('two/minimap', [
 
     minimap.run = function () {
         ready(function () {
-            $mapWrapper = $('#map')
+            $mapWrapper = document.getElementById('map')
             $map = document.getElementById('main-canvas')
             $player = modelDataService.getSelectedCharacter()
             tribeRelations = $player.getTribeRelations()
@@ -881,10 +885,6 @@ define('two/minimap', [
             mapState.graph.layers.effects.push(highlightSprite)
 
             setViewportSize()
-
-            $viewportCache.setAttribute('width', 1000 * villageBlock)
-            $viewportCache.setAttribute('height', 1000 * villageBlock)
-            viewportCacheContext.imageSmoothingEnabled = false
 
             selectedVillage = $player.getSelectedVillage()
             currentCoords.x = selectedVillage.getX()

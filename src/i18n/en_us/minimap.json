@@ -7,6 +7,7 @@
         "very_small": "Very small",
         "small": "Small",
         "big": "Big",
+        "very_big": "Very big",
         "placeholder_search": "Search player/tribe",
         "highlight_add_success": "Highlight added",
         "highlight_add_error": "Specify a highlight first",
