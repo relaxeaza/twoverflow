@@ -177,13 +177,8 @@ define('two/minimap', [
             viewportCacheContext.fillRect(x * villageBlock + blockOffset, y * villageBlock + blockOffset - 1, 1, 1)
         }
 
-        const loadBorderData = new Promise(function (resolve) {
-            utils.xhrGet(binUrl, function (bin) {
-                resolve(new DataView(bin))
-            }, 'arraybuffer')
-        })
-
-        loadBorderData.then(function (dataView) {
+        utils.xhrGet(binUrl, 'arraybuffer').then(function (xhr) {
+            const dataView = new DataView(xhr.response)
             const paddedBoundariesX = {
                 a: boundariesX.a - BORDER_PADDING,
                 b: boundariesX.b + BORDER_PADDING
@@ -196,7 +191,7 @@ define('two/minimap', [
             if (continentEnabled || provinceEnabled) {
                 for (let x = paddedBoundariesX.a; x < paddedBoundariesX.b; x++) {
                     for (let y = paddedBoundariesY.a; y < paddedBoundariesY.b; y++) {
-                        let tile = mapconvert.toTile(dataView, x, y)
+                        const tile = mapconvert.toTile(dataView, x, y)
 
                         // is border
                         if (tile.key.b) {
@@ -277,7 +272,7 @@ define('two/minimap', [
 
     const renderStep = function () {
         if (renderingEnabled) {
-            const pos =  {
+            const pos = {
                 x: currentPosition.x - ($viewport.width / 2),
                 y: currentPosition.y - ($viewport.height / 2)
             }
@@ -295,7 +290,7 @@ define('two/minimap', [
     }
 
     const cacheVillages = function (villages) {
-        for (let i = 0; i < villages.length; i++) {
+        for (let i = 0, l = villages.length; i < l; i++) {
             let v = villages[i]
 
             // meta village
@@ -344,18 +339,15 @@ define('two/minimap', [
             }
         }
 
-        const sortedX = allX.sort((a, b) => a - b)
-        const sortedY = allY.sort((a, b) => a - b)
+        boundariesX.a = Math.min(...allX)
+        boundariesX.b = Math.max(...allX)
+        boundariesY.a = Math.min(...allY)
+        boundariesY.b = Math.max(...allY)
 
-        boundariesX.a = parseInt(sortedX[0], 10)
-        boundariesX.b = parseInt(sortedX[sortedX.length - 1], 10)
-        boundariesY.a = parseInt(sortedY[0], 10)
-        boundariesY.b = parseInt(sortedY[sortedY.length - 1], 10)
-
-        viewBoundariesX.a = (boundariesX.a - 50) * villageBlock
-        viewBoundariesX.b = (boundariesX.b + 50) * villageBlock
-        viewBoundariesY.a = (boundariesY.a - 20) * villageBlock
-        viewBoundariesY.b = (boundariesY.b + 20) * villageBlock
+        viewBoundariesX.a = boundariesX.a * villageBlock
+        viewBoundariesX.b = boundariesX.b * villageBlock
+        viewBoundariesY.a = boundariesY.a * villageBlock
+        viewBoundariesY.b = boundariesY.b * villageBlock
     }
 
     const onHoverVillage = function (coords, event) {
@@ -551,10 +543,11 @@ define('two/minimap', [
         blockOffset = Math.round(villageSize / 2)
         villageBlock = villageSize + villageMargin
         lineSize = villageBlock * 1000
-        viewBoundariesX.a = (boundariesX.a - 50) * villageBlock
-        viewBoundariesX.b = (boundariesX.b + 50) * villageBlock
-        viewBoundariesY.a = (boundariesY.a - 20) * villageBlock
-        viewBoundariesY.b = (boundariesY.b + 20) * villageBlock
+        
+        viewBoundariesX.a = boundariesX.a * villageBlock
+        viewBoundariesX.b = boundariesX.b * villageBlock
+        viewBoundariesY.a = boundariesY.a * villageBlock
+        viewBoundariesY.b = boundariesY.b * villageBlock
 
         $viewportCache.width = 1000 * villageBlock
         $viewportCache.height = 1000 * villageBlock

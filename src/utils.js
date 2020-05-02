@@ -170,22 +170,21 @@ define('two/utils', [
         return localOffset + serverOffset
     }
 
-    utils.xhrGet = function (url, _callback, _dataType) {
-        if (!url) {
-            return false
-        }
+    utils.xhrGet = function (url, dataType = 'text') {
+        return new Promise(function (resolve, reject) {
+            if (!url) {
+                return reject()
+            }
 
-        _dataType = _dataType || 'text'
-        _callback = _callback || noop
+            let xhr = new XMLHttpRequest()
+            xhr.open('GET', url, true)
+            xhr.responseType = dataType
+            xhr.addEventListener('load', function () {
+                resolve(xhr)
+            }, false)
 
-        let xhr = new XMLHttpRequest()
-        xhr.open('GET', url, true)
-        xhr.responseType = _dataType
-        xhr.addEventListener('load', function () {
-            _callback(xhr.response)
-        }, false)
-
-        xhr.send()
+            xhr.send()
+        })
     }
 
     utils.obj2selectOptions = function (obj, _includeIcon) {
