@@ -7,6 +7,7 @@
         "very_small": "Muito pequeno",
         "small": "Pequeno",
         "big": "Grande",
+        "very_big": "Muito grande",
         "placeholder_search": "Procurar jogador/tribo",
         "highlight_add_success": "Marcação adicionada",
         "highlight_add_error": "Especifique uma marcação primeiro",
