@@ -126,7 +126,7 @@ define('two/builderQueue', [
                 return $player.getVillage(vid)
             })
         } else {
-            angular.forEach($player.getVillages(), function (village) {
+            utils.each($player.getVillages(), function (village) {
                 villages.push(village.getId())
             })
         }
@@ -364,7 +364,7 @@ define('two/builderQueue', [
             return SEQUENCE_STATUS.SEQUENCE_EXISTS
         }
 
-        if (!angular.isArray(sequence)) {
+        if (!Array.isArray(sequence)) {
             return SEQUENCE_STATUS.SEQUENCE_INVALID
         }
 
@@ -384,7 +384,7 @@ define('two/builderQueue', [
             return SEQUENCE_STATUS.SEQUENCE_NO_EXISTS
         }
 
-        if (!angular.isArray(sequence) || !validSequence(sequence)) {
+        if (!Array.isArray(sequence) || !validSequence(sequence)) {
             return SEQUENCE_STATUS.SEQUENCE_INVALID
         }
 

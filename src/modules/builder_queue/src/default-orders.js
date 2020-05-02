@@ -15,7 +15,7 @@ define('two/builderQueue/defaultOrders', [
         for (let i = 0; i < rawSequence.length; i++) {
             let item = rawSequence[i]
 
-            if (angular.isArray(item)) {
+            if (Array.isArray(item)) {
                 shuffle(item)
                 parsed = parsed.concat(item)
             } else {

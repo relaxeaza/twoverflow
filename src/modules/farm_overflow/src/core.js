@@ -205,7 +205,7 @@ define('two/farmOverflow', [
             }
         })
 
-        angular.forEach(exceptionLogs, function (time, villageId) {
+        utils.each(exceptionLogs, function (time, villageId) {
             villageId = parseInt(villageId, 10)
             
             if (!exceptionVillages.includes(villageId)) {
@@ -440,7 +440,7 @@ define('two/farmOverflow', [
     const getPresetHaul = function (preset) {
         let haul = 0
 
-        angular.forEach(preset.units, function (unitAmount, unitName) {
+        utils.each(preset.units, function (unitAmount, unitName) {
             if (unitAmount) {
                 haul += unitsData[unitName].load * unitAmount
             }
@@ -1166,7 +1166,7 @@ define('two/farmOverflow', [
     }
 
     const createFarmers = function () {
-        angular.forEach($player.getVillages(), function (village, villageId) {
+        utils.each($player.getVillages(), function (village, villageId) {
             createFarmer(villageId)
         })
 

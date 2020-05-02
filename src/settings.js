@@ -1,6 +1,8 @@
 define('two/Settings', [
+    'two/utils',
     'Lockr'
 ], function (
+    utils,
     Lockr
 ) {
     const generateDiff = function (before, after) {
@@ -198,7 +200,7 @@ define('two/Settings', [
 
         $scope.settings = this.encode(opt)
 
-        angular.forEach(this.settingsMap, function (map, id) {
+        utils.each(this.settingsMap, function (map, id) {
             if (map.inputType === 'select') {
                 $scope.$watch(function () {
                     return $scope.settings[id]

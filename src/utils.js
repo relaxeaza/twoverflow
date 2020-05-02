@@ -265,27 +265,25 @@ define('two/utils', [
         return totalTravelTime * 1000
     }
 
-    utils.each = function (obj, callback) {
-        if (typeof callback !== 'function') {
-            throw new Error('utils.each: fucked up callback')
+    utils.each = function (obj, iterator) {
+        if (typeof iterator !== 'function') {
+            iterator = noop
         }
 
         if (Array.isArray(obj)) {
-            for (let i = 0; i < obj.length; i++) {
-                if (callback(obj[i], i) === false) {
+            for (let i = 0, l = obj.length; i < l; i++) {
+                if (iterator(obj[i], i) === false) {
                     return false
                 }
             }
-        } else if (typeof obj === 'object' && obj !== null) {
+        } else if (angular.isObject(obj)) {
             for (let i in obj) {
                 if (hasOwn.call(obj, i)) {
-                    if (callback(obj[i], i) === false) {
+                    if (iterator(obj[i], i) === false) {
                         return false
                     }
                 }
             }
-        } else {
-            throw new Error('utils.each: fucked up obj')
         }
 
         return true

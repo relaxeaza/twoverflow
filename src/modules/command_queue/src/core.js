@@ -131,19 +131,15 @@ define('two/commandQueue', [
     const loadStoredCommands = function () {
         const storedQueue = Lockr.get(STORAGE_KEYS.QUEUE_COMMANDS, [], true)
 
-        if (storedQueue.length) {
-            for (let i = 0; i < storedQueue.length; i++) {
-                let command = storedQueue[i]
-
-                if (timeHelper.gameTime() > command.sendTime) {
-                    commandQueue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
-                } else {
-                    waitingCommandHelpers(command)
-                    pushWaitingCommand(command)
-                    pushCommandObject(command)
-                }
+        utils.each(storedQueue, function (command) {
+            if (timeHelper.gameTime() > command.sendTime) {
+                commandQueue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
+            } else {
+                waitingCommandHelpers(command)
+                pushWaitingCommand(command)
+                pushCommandObject(command)
             }
-        }
+        })
     }
 
     const waitingCommandHelpers = function (command) {
@@ -166,36 +162,37 @@ define('two/commandQueue', [
 
         const villageUnits = village.unitInfo.units
         let parsedUnits = {}
+        let error = false
 
-        for (let unit in command.units) {
-            let amount = command.units[unit]
-
+        utils.each(command.units, function (amount, unit) {
             if (amount === '*') {
                 amount = villageUnits[unit].available
 
                 if (amount === 0) {
-                    continue
+                    return
                 }
             } else if (amount < 0) {
                 amount = villageUnits[unit].available - Math.abs(amount)
 
                 if (amount < 0) {
-                    return EVENT_CODES.NOT_ENOUGH_UNITS
+                    error = EVENT_CODES.NOT_ENOUGH_UNITS
+                    return false
                 }
             } else if (amount > 0) {
                 if (amount > villageUnits[unit].available) {
-                    return EVENT_CODES.NOT_ENOUGH_UNITS
+                    error = EVENT_CODES.NOT_ENOUGH_UNITS
+                    return false
                 }
             }
 
             parsedUnits[unit] = amount
-        }
+        })
 
         if (angular.equals({}, parsedUnits)) {
-            return EVENT_CODES.NOT_ENOUGH_UNITS
+            error = EVENT_CODES.NOT_ENOUGH_UNITS
         }
 
-        return parsedUnits
+        return error || parsedUnits
     }
 
     const listenCommands = function () {
@@ -290,7 +287,7 @@ define('two/commandQueue', [
             }
 
             if (angular.isObject(units)) {
-                let validUnitType = utils.each(units, function (amount, unitName) {
+                const validUnitType = utils.each(units, function (amount, unitName) {
                     if (!UNIT_TYPE_LIST.includes(unitName)) {
                         return false
                     }
@@ -312,7 +309,7 @@ define('two/commandQueue', [
             }
 
             if (angular.isObject(officers)) {
-                let validOfficerType = utils.each(officers, function (status, officerName) {
+                const validOfficerType = utils.each(officers, function (status, officerName) {
                     if (!OFFICER_TYPE_LIST.includes(officerName)) {
                         return false
                     }
@@ -402,25 +399,16 @@ define('two/commandQueue', [
         })
     }
 
-    /**
-     * @param  {Object} command - Dados do comando a ser removido.
-     * @param {Number} eventCode - Code indicating the reason of the remotion.
-     *
-     * @return {Boolean} If the command was successfully removed.
-     */
     commandQueue.removeCommand = function (command, eventCode) {
-        let removed = false
         delete waitingCommandsObject[command.id]
 
-        for (let i = 0; i < waitingCommands.length; i++) {
-            if (waitingCommands[i].id == command.id) {
-                waitingCommands.splice(i, 1)
+        const removed = waitingCommands.some(function (waitingCommand, index) {
+            if (waitingCommand.id == command.id) {
+                waitingCommands.splice(index, 1)
                 storeWaitingQueue()
-                removed = true
-
-                break
+                return true
             }
-        }
+        })
 
         if (removed) {
             switch (eventCode) {
@@ -441,12 +429,11 @@ define('two/commandQueue', [
                     break
                 }
             }
-
-            return true
         } else {
             eventQueue.trigger(eventTypeProvider.COMMAND_QUEUE_REMOVE_ERROR, command)
-            return false
         }
+
+        return removed
     }
 
     commandQueue.clearRegisters = function () {
@@ -489,18 +476,14 @@ define('two/commandQueue', [
     }
 
     /**
-     * @param  {String} filterId - Identificação do filtro.
-     * @param {Array=} _options - Valores a serem passados para os filtros.
-     * @param {Array=} _commandsDeepFilter - Usa os comandos passados
-     * pelo parâmetro ao invés da lista de comandos completa.
-     * @return {Array} Comandos filtrados.
+     * @param {Array} _deep - recursive command list
      */
-    commandQueue.filterCommands = function (filterId, _options, _commandsDeepFilter) {
-        const filterHandler = commandFilters[filterId]
-        const commands = _commandsDeepFilter || waitingCommands
+    commandQueue.filterCommands = function (filterId, filterArgs, _deep) {
+        const filter = commandFilters[filterId]
+        const commands = _deep || waitingCommands
 
         return commands.filter(function (command) {
-            return filterHandler(command, _options)
+            return filter(command, filterArgs)
         })
     }
 
