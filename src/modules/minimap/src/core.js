@@ -588,6 +588,8 @@ define('two/minimap', [
                     quickHighlight(hoveredVillageX, hoveredVillageY)
                 }
             }
+
+            eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
         },
         onViewportRefMouseUp: function () {
             allowMove = false
@@ -606,7 +608,7 @@ define('two/minimap', [
                 currentPosition.y = (dragStart.y - event.pageY).bound(viewBoundariesY.a, viewBoundariesY.b)
                 currentCoords.x = currentMouseCoords.x
                 currentCoords.y = currentMouseCoords.y
-                eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
+                return false
             }
 
             if (currentCoords.x !== currentMouseCoords.x || currentCoords.y !== currentMouseCoords.y) {
