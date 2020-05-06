@@ -48,7 +48,6 @@ define('two/commandQueue/ui', [
     }
     const DEFAULT_TAB = TAB_TYPES.ADD
     const DEFAULT_CATAPULT_TARGET = 'wall'
-    const relocateEnabled = modelDataService.getWorldConfig().isRelocateUnitsEnabled()
     let attackableBuildingsList = []
     let unitList = {}
     let officerList = {}
@@ -593,7 +592,7 @@ define('two/commandQueue/ui', [
         $scope.FILTER_TYPES = FILTER_TYPES
         $scope.TAB_TYPES = TAB_TYPES
         $scope.COMMAND_TYPES = COMMAND_TYPES
-        $scope.relocateEnabled = relocateEnabled
+        $scope.relocateEnabled = modelDataService.getWorldConfig().isRelocateUnitsEnabled()
 
         // functions
         $scope.onUnitInputFocus = onUnitInputFocus

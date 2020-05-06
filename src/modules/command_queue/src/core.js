@@ -31,7 +31,6 @@ define('two/commandQueue', [
     OFFICER_TYPES,
     UNIT_TYPES
 ) {
-    const relocateEnabled = modelDataService.getWorldConfig().isRelocateUnitsEnabled()
     const CHECKS_PER_SECOND = 10
     const COMMAND_TYPE_LIST = Object.values(COMMAND_TYPES)
     const DATE_TYPE_LIST = Object.values(DATE_TYPES)
@@ -328,7 +327,7 @@ define('two/commandQueue', [
                 return reject(ERROR_CODES.INVALID_COMMAND_TYPE)
             }
 
-            if (commandType === COMMAND_TYPES.RELOCATE && !relocateEnabled) {
+            if (commandType === COMMAND_TYPES.RELOCATE && !modelDataService.getWorldConfig().isRelocateUnitsEnabled()) {
                 return reject(ERROR_CODES.RELOCATE_DISABLED)
             }
 

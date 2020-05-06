@@ -95,6 +95,13 @@ define('two/ready', [
                 queueRequests.presets.then(function () {
                     readyStep('presets')
                 })
+            },
+            'world_config': function () {
+                if (modelDataService.getWorldConfig && modelDataService.getWorldConfig()) {
+                    return readyStep('world_config')
+                }
+
+                setTimeout(handlers['world_config'], 100)
             }
         }
 

@@ -19,5 +19,5 @@ require([
         if (commandQueue.getWaitingCommands().length > 0) {
             commandQueue.start(true)
         }
-    })
+    }, ['map', 'world_config'])
 })
