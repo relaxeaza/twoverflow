@@ -95,7 +95,7 @@ define('two/minimap', [
     let allowJump = true
     let allowMove = false
     let dragStart = {}
-    let highlightSprite = spriteFactory.make('hover')
+    let highlightSprite
     let currentMouseCoords = {
         x: 0,
         y: 0
@@ -835,6 +835,7 @@ define('two/minimap', [
         minimap.initialized = true
         $viewportCache = document.createElement('canvas')
         viewportCacheContext = $viewportCache.getContext('2d')
+        highlightSprite = spriteFactory.make('hover')
         
         settings = new Settings({
             settingsMap: SETTINGS_MAP,
