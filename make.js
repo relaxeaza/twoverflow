@@ -66,33 +66,29 @@ function lintCode () {
         const CLIEngine = require('eslint').CLIEngine
         const cli = new CLIEngine()
         let lint = cli.executeOnFiles(`${projectRoot}/src`)
-        let clean = !(lint.warningCount + lint.errorCount)
-
-        if (!clean) {
-            console.log(`Warnings: ${lint.warningCount}  Errors: ${lint.errorCount}`)
-            console.log('')
-        }
 
         lint.results.forEach(function (fileLint) {
             if (fileLint.messages.length) {
-                console.log(fileLint.filePath)
+                console.log('  ' + fileLint.filePath)
 
                 fileLint.messages.forEach(function (error) {
                     let severityLabel = LINT_SEVERITY_CODES[error.severity]
 
-                    console.log(`${error.line}:${error.column}  ${severityLabel}  ${error.message}`)
+                    console.log(`    ${error.line}:${error.column}  ${severityLabel}  ${error.message}`)
                 })
 
                 console.log('')
             }
         })
 
-        if (clean) {
-            console.log('OK')
-            console.log('')
-            resolve()
-        } else {
+        if (lint.errorCount) {
             reject()
+        } else {
+            if (!lint.warningCount) {
+                console.log('OK\n')
+            }
+
+            resolve()
         }
     })
 }
@@ -107,8 +103,7 @@ function concatCode () {
 
         fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, code.join('\n'), 'utf8')
 
-        console.log('OK')
-        console.log('')
+        console.log('OK\n')
         resolve()
     })
 }
@@ -139,8 +134,7 @@ function compileLess () {
         }
 
         Promise.all(lessPromises).then(function () {
-            console.log('OK')
-            console.log('')
+            console.log('OK\n')
             resolve()
         }).catch(function (error) {
             reject(error)
@@ -171,8 +165,7 @@ function minifyHTML () {
             fs.writeFileSync(`${projectRoot}${destination}`, output, 'utf8')
         }
 
-        console.log('OK')
-        console.log('')
+        console.log('OK\n')
         resolve()
     })
 }
@@ -214,8 +207,7 @@ function generateLanguageFile () {
 
         fs.writeFileSync(`${projectRoot}/tmp/i18n.json`, JSON.stringify(mergedTranslations, null, 4), 'utf8')
 
-        console.log('OK')
-        console.log('')
+        console.log('OK\n')
         resolve()
     })
 }
@@ -259,8 +251,7 @@ function replaceInFile () {
 
         fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, target, 'utf8')
 
-        console.log('OK')
-        console.log('')
+        console.log('OK\n')
         resolve()
     })
 }
@@ -285,18 +276,15 @@ function minifyCode () {
         if (minified.error) {
             const error = minified.error
 
-            console.log('')
-            console.log(error.filename)
-            console.log(`${error.line}:${error.col}  ${error.name}  ${error.message}`)
-            console.log('')
+            console.log('\n' + error.filename)
+            console.log(`${error.line}:${error.col}  ${error.name}  ${error.message}\n`)
 
             return reject()
         }
 
         fs.writeFileSync(`${projectRoot}/dist/tw2overflow.min.js`, minified.code, 'utf8')
 
-        console.log('OK')
-        console.log('')
+        console.log('OK\n')
         resolve()
     })
 }

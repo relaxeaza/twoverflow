@@ -27,7 +27,8 @@ rules:
   no-empty:
   - error
   - allowEmptyCatch: true
-  no-console: 0
+  no-console:
+  - warn
 globals:
   angular: true
   injector: true

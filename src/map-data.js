@@ -94,6 +94,7 @@ define('two/mapData', [
 
             callbackQueue = []
         }).catch(function (error) {
+            // eslint-disable-next-line no-console
             console.error(error.message)
         })
     }

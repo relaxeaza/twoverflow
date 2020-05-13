@@ -1039,6 +1039,7 @@ define('two/farmOverflow', [
                     break
                 }
                 default: {
+                    // eslint-disable-next-line no-console
                     console.error('Unknown status:', status)
                     this.index++
                     this.setStatus(STATUS.UNKNOWN)
@@ -1317,7 +1318,6 @@ define('two/farmOverflow', [
         })
 
         settings.onChange(function (changes, updates, _flag) {
-            console.log('_flag', _flag)
             farmSettings = settings.getAll()
 
             if (_flag === IGNORE_UPDATES) {
