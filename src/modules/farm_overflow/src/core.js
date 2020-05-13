@@ -67,6 +67,7 @@ define('two/farmOverflow', [
     const MINIMUM_ATTACK_INTERVAL = 0 // seconds
     const STEP_EXPIRE_TIME = 30 * 1000
     const CYCLE_BEGIN = 'cycle_begin'
+    const IGNORE_UPDATES = 'ignore_update'
     const STORAGE_KEYS = {
         LOGS: 'farm_overflow_logs',
         SETTINGS: 'farm_overflow_settings',
@@ -323,7 +324,25 @@ define('two/farmOverflow', [
         }
     }
 
+    const validGroups = function (_flag) {
+        const gameGroups = modelDataService.getGroupList().getGroups()
+        const groupIgnore = farmSettings[SETTINGS.GROUP_IGNORE]
+
+        const groupsOnly = farmSettings[SETTINGS.GROUP_ONLY]
+        const groupsInclude = farmSettings[SETTINGS.GROUP_INCLUDE]
+        const validedGroupIgnore = hasOwn.call(gameGroups, groupIgnore) ? groupIgnore : settings.getDefault(SETTINGS.GROUP_IGNORE)
+        const validedGroupsOnly = groupsOnly.filter(groupId => hasOwn.call(gameGroups, groupId))
+        const validedGroupsInclude = groupsInclude.filter(groupId => hasOwn.call(gameGroups, groupId))
+
+        settings.setAll({
+            [SETTINGS.GROUP_IGNORE]: validedGroupIgnore,
+            [SETTINGS.GROUP_ONLY]: validedGroupsOnly,
+            [SETTINGS.GROUP_INCLUDE]: validedGroupsInclude
+        }, _flag)
+    }
+
     const removedGroupListener = function () {
+        validGroups()
         updateGroupVillages()
 
         flushFarmers()
@@ -1297,8 +1316,13 @@ define('two/farmOverflow', [
             storageKey: STORAGE_KEYS.SETTINGS
         })
 
-        settings.onChange(function (changes, updates) {
+        settings.onChange(function (changes, updates, _flag) {
+            console.log('_flag', _flag)
             farmSettings = settings.getAll()
+
+            if (_flag === IGNORE_UPDATES) {
+                return
+            }
 
             if (updates[UPDATES.PRESET]) {
                 processPresets()
@@ -1328,6 +1352,7 @@ define('two/farmOverflow', [
 
         farmSettings = settings.getAll()
 
+        validGroups(IGNORE_UPDATES)
         updateGroupVillages()
         createFarmers()
 
