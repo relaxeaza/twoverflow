@@ -95,7 +95,7 @@ define('two/minimap', [
     let allowJump = true
     let allowMove = false
     let dragStart = {}
-    let highlightSprite = spriteFactory.make('hover')
+    let highlightSprite
     let currentMouseCoords = {
         x: 0,
         y: 0
@@ -588,6 +588,8 @@ define('two/minimap', [
                     quickHighlight(hoveredVillageX, hoveredVillageY)
                 }
             }
+
+            eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
         },
         onViewportRefMouseUp: function () {
             allowMove = false
@@ -599,29 +601,23 @@ define('two/minimap', [
         },
         onViewportRefMouseMove: function (event) {
             allowJump = false
+            currentMouseCoords = getCoords(event)
 
             if (allowMove) {
                 currentPosition.x = (dragStart.x - event.pageX).bound(viewBoundariesX.a, viewBoundariesX.b)
                 currentPosition.y = (dragStart.y - event.pageY).bound(viewBoundariesY.a, viewBoundariesY.b)
+                currentCoords.x = currentMouseCoords.x
+                currentCoords.y = currentMouseCoords.y
+                return false
             }
 
-            const coords = getCoords(event)
-
-            if (allowMove) {
-                currentCoords.x = coords.x
-                currentCoords.y = coords.y
-                eventQueue.trigger(eventTypeProvider.MINIMAP_START_MOVE)
-            }
-
-            if (coords.x !== currentMouseCoords.x || coords.y !== currentMouseCoords.y) {
+            if (currentCoords.x !== currentMouseCoords.x || currentCoords.y !== currentMouseCoords.y) {
                 hideHighlightSprite()
-                showHighlightSprite(coords.x, coords.y)
+                showHighlightSprite(currentMouseCoords.x, currentMouseCoords.y)
             }
 
-            currentMouseCoords = coords
-
-            if (coords.x in mappedVillages && coords.y in mappedVillages[coords.x]) {
-                let village = mappedVillages[coords.x][coords.y]
+            if (currentMouseCoords.x in mappedVillages && currentMouseCoords.y in mappedVillages[currentMouseCoords.x]) {
+                let village = mappedVillages[currentMouseCoords.x][currentMouseCoords.y]
 
                 // ignore barbarian villages
                 if (!minimapSettings[SETTINGS.SHOW_BARBARIANS] && !village.character_id) {
@@ -643,7 +639,7 @@ define('two/minimap', [
                     }
                 }
 
-                return onHoverVillage(coords, event)
+                return onHoverVillage(currentMouseCoords, event)
             }
 
             onBlurVillage()
@@ -839,6 +835,7 @@ define('two/minimap', [
         minimap.initialized = true
         $viewportCache = document.createElement('canvas')
         viewportCacheContext = $viewportCache.getContext('2d')
+        highlightSprite = spriteFactory.make('hover')
         
         settings = new Settings({
             settingsMap: SETTINGS_MAP,
