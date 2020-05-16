@@ -636,9 +636,6 @@ define('two/commandQueue/ui', [
         })
         
         $scope.waitingCommands.forEach((command) => {
-            command.updateCountdown = () => {
-                command.countdown = command.sendTime - $timeHelper.gameTime
-            }
             $timeHelper.timer.add(command.updateCountdown)
         })
 
