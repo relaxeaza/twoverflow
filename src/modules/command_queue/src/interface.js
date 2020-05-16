@@ -634,6 +634,13 @@ define('two/commandQueue/ui', [
                 clearInterval(travelTimesTimer)
             }
         })
+        
+        $scope.waitingCommands.forEach((command) => {
+            command.updateCountdown = () => {
+                command.countdown = command.sendTime - $timeHelper.gameTime
+            }
+            $timeHelper.timer.add(command.updateCountdown)
+        })
 
         let eventScope = new EventScope('twoverflow_queue_window', function () {
             clearInterval(travelTimesTimer)

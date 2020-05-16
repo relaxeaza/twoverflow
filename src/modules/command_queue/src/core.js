@@ -134,15 +134,10 @@ define('two/commandQueue', [
             if (timeHelper.gameTime() > command.sendTime) {
                 commandQueue.expireCommand(command, EVENT_CODES.TIME_LIMIT)
             } else {
-                waitingCommandHelpers(command)
                 pushWaitingCommand(command)
                 pushCommandObject(command)
             }
         })
-    }
-
-    const waitingCommandHelpers = function (command) {
-        timeHelper.timer.add(command.updateCountdown)
     }
 
     const parseDynamicUnits = function (command) {
@@ -386,7 +381,6 @@ define('two/commandQueue', [
                     }
                 }
 
-                waitingCommandHelpers(command)
                 pushWaitingCommand(command)
                 pushCommandObject(command)
                 sortWaitingQueue()
