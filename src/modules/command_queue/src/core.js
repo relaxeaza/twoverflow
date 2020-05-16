@@ -142,13 +142,7 @@ define('two/commandQueue', [
     }
 
     const waitingCommandHelpers = function (command) {
-        if (hasOwn.call(command, 'countdown')) {
-            return false
-        }
-
-        command.countdown = function () {
-            return timeHelper.readableMilliseconds((timeHelper.gameTime() + timeOffset) - command.sendTime)
-        }
+        timeHelper.timer.add(command.updateCountdown)
     }
 
     const parseDynamicUnits = function (command) {
@@ -385,7 +379,11 @@ define('two/commandQueue', [
                     units: parsedUnits,
                     officers: parsedOfficers,
                     type: commandType,
-                    catapultTarget: catapultTarget
+                    catapultTarget: catapultTarget,
+                    countdown: sendTime - timeHelper.gameTime(),
+                    updateCountdown: function() {
+                        this.countdown = this.sendTime - timeHelper.gameTime()
+                    }
                 }
 
                 waitingCommandHelpers(command)

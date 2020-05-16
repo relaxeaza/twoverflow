@@ -388,6 +388,7 @@ define('two/commandQueue/ui', [
             $scope.searchQuery[type] = ''
         },
         removeCommand: function (event, command) {
+            if(!$timeHelper.timer.remove(command.updateArrivalTime)) utils.notif('error', 'Error stopping command countdown. Command still removed.'); // TODO
             updateWaitingCommands()
             updateVisibleCommands()
             $rootScope.$broadcast(eventTypeProvider.TOOLTIP_HIDE, 'twoverflow-tooltip')
@@ -418,6 +419,7 @@ define('two/commandQueue/ui', [
             utils.notif('error', $filter('i18n')('error_no_units_enough', $rootScope.loc.ale, 'command_queue'))
         },
         sendCommand: function (event, command) {
+            if(!$timeHelper.timer.remove(command.updateArrivalTime)) utils.notif('error', 'Error stopping command countdown. Command still sent.');
             updateSentCommands()
             updateWaitingCommands()
             updateVisibleCommands()
