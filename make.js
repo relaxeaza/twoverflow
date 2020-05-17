@@ -9,6 +9,10 @@ const hasOwn = Object.prototype.hasOwnProperty
 const MINIMUM_TRANSLATED = 50
 const LANG_ID_SOURCE = 'en_us'
 const overflow = generateOverflowModule()
+const SUCCESS = 0
+const LINT_ERROR = 1
+const LESS_ERROR = 2
+const MINIFY_ERROR = 3
 
 function init () {
     fs.mkdirSync(`${projectRoot}/dist`, {
@@ -23,35 +27,33 @@ function init () {
         .then(replaceInFile)
         .then(minifyCode)
         .then(function () {
-            console.log('Build finished')
-
-            fs.rmdirSync(`${projectRoot}/tmp`, {
-                recursive: true
-            })
+            console.log('\nBuild finished')
 
             notifySend.notify({
                 title: 'TWOverflow',
                 message: 'Build complete',
                 timeout: 1000
             })
+
+            process.exit(SUCCESS)
         })
-        .catch(function (error) {
-            console.log('Build failed')
-
-            fs.rmdirSync(`${projectRoot}/tmp`, {
-                recursive: true
-            })
-
-            if (typeof error !== 'undefined') {
-                console.log(error)
-            }
+        .catch(function (errorCode) {
+            console.log('\nBuild failed')
 
             notifySend.notify({
                 title: 'TWOverflow',
                 message: 'Build failed',
                 timeout: 2000
             })
+
+            process.exit(errorCode)
         })
+        .finally(function () {
+            fs.rmdirSync(`${projectRoot}/tmp`, {
+                recursive: true
+            })
+        })
+
 }
 
 function lintCode () {
@@ -62,32 +64,19 @@ function lintCode () {
 
         console.log('Running lint')
 
-        const LINT_SEVERITY_CODES = { 1: 'WARN', 2: 'ERROR' }
-        const CLIEngine = require('eslint').CLIEngine
-        const cli = new CLIEngine()
-        let lint = cli.executeOnFiles(`${projectRoot}/src`)
+        const eslint = require('eslint')
+        const CLIEngine = eslint.CLIEngine
+        const cli = new CLIEngine
+        const lint = cli.executeOnFiles(`${projectRoot}/src`)
 
-        lint.results.forEach(function (fileLint) {
-            if (fileLint.messages.length) {
-                console.log('  ' + fileLint.filePath)
-
-                fileLint.messages.forEach(function (error) {
-                    let severityLabel = LINT_SEVERITY_CODES[error.severity]
-
-                    console.log(`    ${error.line}:${error.column}  ${severityLabel}  ${error.message}`)
-                })
-
-                console.log('')
-            }
-        })
+        if (lint.errorCount || lint.warningCount) {
+            const formatter = cli.getFormatter()
+            console.log(formatter(lint.results))
+        }
 
         if (lint.errorCount) {
-            reject()
+            reject(LINT_ERROR)
         } else {
-            if (!lint.warningCount) {
-                console.log('OK\n')
-            }
-
             resolve()
         }
     })
@@ -103,7 +92,6 @@ function concatCode () {
 
         fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, code.join('\n'), 'utf8')
 
-        console.log('OK\n')
         resolve()
     })
 }
@@ -128,16 +116,20 @@ function compileLess () {
                 compress: true
             }).then(function (output) {
                 fs.writeFileSync(`${destinationDir}/${fileName}`, output.css, 'utf8')
+            }).catch(function (error) {
+                console.log(`\nError in ${sourceLocation} on line ${error.line} column ${error.column}:`)
+                console.log(`${error.line-1} ${error.extract[0]}`)
+                console.log(`${error.line} ${error.extract[1]}`)
+                console.log(`${error.line+1} ${error.extract[2]}`)
+
+                reject(LESS_ERROR)
             })
 
             lessPromises.push(promise)
         }
 
         Promise.all(lessPromises).then(function () {
-            console.log('OK\n')
             resolve()
-        }).catch(function (error) {
-            reject(error)
         })
     })
 }
@@ -165,7 +157,6 @@ function minifyHTML () {
             fs.writeFileSync(`${projectRoot}${destination}`, output, 'utf8')
         }
 
-        console.log('OK\n')
         resolve()
     })
 }
@@ -207,7 +198,6 @@ function generateLanguageFile () {
 
         fs.writeFileSync(`${projectRoot}/tmp/i18n.json`, JSON.stringify(mergedTranslations, null, 4), 'utf8')
 
-        console.log('OK\n')
         resolve()
     })
 }
@@ -251,7 +241,6 @@ function replaceInFile () {
 
         fs.writeFileSync(`${projectRoot}/dist/tw2overflow.js`, target, 'utf8')
 
-        console.log('OK\n')
         resolve()
     })
 }
@@ -279,12 +268,10 @@ function minifyCode () {
             console.log('\n' + error.filename)
             console.log(`${error.line}:${error.col}  ${error.name}  ${error.message}\n`)
 
-            return reject()
+            return reject(MINIFY_ERROR)
         }
 
         fs.writeFileSync(`${projectRoot}/dist/tw2overflow.min.js`, minified.code, 'utf8')
-
-        console.log('OK\n')
         resolve()
     })
 }
