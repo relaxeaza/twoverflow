@@ -180,6 +180,15 @@ define('two/commandQueue/ui', [
         }
     }
 
+    const setupCountdownForCommand = function() {
+        if(!command.updateCountdown) {
+            command.updateCountdown = function() {
+                this.countdown = this.sendTime - $timeHelper.gameTime()
+            }.bind(command)
+        }
+        $timeHelper.timer.add(command.updateCountdown)
+    }
+
     const updateWaitingCommands = function () {
         $scope.waitingCommands = commandQueue.getWaitingCommands()
     }
@@ -290,6 +299,8 @@ define('two/commandQueue/ui', [
         ).then(function (command) {
             updateWaitingCommands()
             updateVisibleCommands()
+            setupCountdownForCommand(command)
+
             utils.notif('success', genNotifText(command.type, 'added'))
         }).catch(function (error) {
             switch (error) {
@@ -636,7 +647,7 @@ define('two/commandQueue/ui', [
         })
         
         $scope.waitingCommands.forEach((command) => {
-            $timeHelper.timer.add(command.updateCountdown)
+            setupCountdownForCommand(command)
         })
 
         let eventScope = new EventScope('twoverflow_queue_window', function () {

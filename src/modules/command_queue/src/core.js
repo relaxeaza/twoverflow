@@ -139,6 +139,8 @@ define('two/commandQueue', [
             }
         })
     }
+    
+    
 
     const parseDynamicUnits = function (command) {
         const playerVillages = modelDataService.getVillages()
@@ -376,9 +378,6 @@ define('two/commandQueue', [
                     type: commandType,
                     catapultTarget: catapultTarget,
                     countdown: sendTime - timeHelper.gameTime(),
-                    updateCountdown: function() {
-                        this.countdown = this.sendTime - timeHelper.gameTime()
-                    }
                 }
 
                 pushWaitingCommand(command)
