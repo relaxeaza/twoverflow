@@ -180,11 +180,11 @@ define('two/commandQueue/ui', [
         }
     }
 
-    const setupCountdownForCommand = function() {
+    const setupCountdownForCommand = function(command) {
         if(!command.updateCountdown) {
             command.updateCountdown = function() {
-                this.countdown = this.sendTime - $timeHelper.gameTime()
-            }.bind(command)
+                command.countdown = command.sendTime - $timeHelper.gameTime()
+            }
         }
         $timeHelper.timer.add(command.updateCountdown)
     }
