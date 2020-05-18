@@ -183,7 +183,10 @@ define('two/commandQueue/ui', [
     const setupCountdownForCommand = function(command) {
         if(!command.updateCountdown) {
             command.updateCountdown = function() {
-                command.countdown = command.sendTime - $timeHelper.gameTime()
+                const gameClockTime = $timeHelper.serverTime() + $rootScope.GAME_TIME_OFFSET // this yields the current time displayed by the game clock
+                const displaySendTime = command.sendTime - (new Date()).getTimezoneOffset()*60*1000 // at time of writing, the command.sendTime is buggy - it's off by GMT offset plus GAME_TIME_OFFSET. This corrects that for display.
+
+                command.countdown = displaySendTime - gameClockTime
             }
         }
         $timeHelper.timer.add(command.updateCountdown)
@@ -464,6 +467,11 @@ define('two/commandQueue/ui', [
                 y: data.y,
                 name: data.name
             }
+        },
+        clearCountdownUpdates: function () {
+            commandQueue.getWaitingCommands().forEach((command) => {
+                $timeHelper.timer.remove(command.updateCountdown)
+            })
         }
     }
 
@@ -652,6 +660,7 @@ define('two/commandQueue/ui', [
 
         let eventScope = new EventScope('twoverflow_queue_window', function () {
             clearInterval(travelTimesTimer)
+            eventHandlers.clearCountdownUpdates()
         })
 
         eventScope.register(eventTypeProvider.ARMY_PRESET_UPDATE, eventHandlers.updatePresets, true)
