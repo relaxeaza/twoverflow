@@ -25,6 +25,8 @@ function init () {
         recursive: true
     })
 
+    let exitCode
+
     lintCode()
         .then(concatCode)
         .then(compileLess)
@@ -33,19 +35,21 @@ function init () {
         .then(replaceInFile)
         .then(minifyCode)
         .then(function () {
+            exitCode = SUCCESS
             notifySuccess()
-            process.exit(SUCCESS)
         })
         .catch(function (errorCode) {
+            exitCode = errorCode
             notifyFail()
-            process.exit(errorCode)
         })
         .finally(function () {
+            console.log('clean')
             fs.rmdirSync(`${projectRoot}/tmp`, {
                 recursive: true
             })
-        })
 
+            process.exit(exitCode)
+        })
 }
 
 function lintCode () {
