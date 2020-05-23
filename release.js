@@ -1,7 +1,15 @@
+let git
+
+try {
+    git = require('git-promise')
+} catch (e) {
+    console.log('You need to install the package "git-promise".')
+    process.exit(1)
+}
+
 const projectRoot = __dirname.replace(/\\/g, '/')
 const fs = require('fs')
 const package = JSON.parse(fs.readFileSync(`${projectRoot}/package.json`, 'utf8'))
-const git = require('git-promise')
 const argv = require('yargs').argv
 
 const cdnPath = `${projectRoot}/share/cdn`

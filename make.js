@@ -2,7 +2,6 @@ const fs = require('fs')
 const glob = require('glob')
 const path = require('path')
 const pkg = require('./package.json')
-const notifySend = require('node-notifier')
 const argv = require('yargs').argv
 const projectRoot = __dirname.replace(/\\/g, '/')
 const hasOwn = Object.prototype.hasOwnProperty
@@ -13,6 +12,13 @@ const SUCCESS = 0
 const LINT_ERROR = 1
 const LESS_ERROR = 2
 const MINIFY_ERROR = 3
+
+// optional packages
+let notifySend
+
+try {
+    notifySend = require('node-notifier')
+} catch (e) {}
 
 function init () {
     fs.mkdirSync(`${projectRoot}/dist`, {
@@ -27,25 +33,11 @@ function init () {
         .then(replaceInFile)
         .then(minifyCode)
         .then(function () {
-            console.log('\nBuild finished')
-
-            notifySend.notify({
-                title: 'TWOverflow',
-                message: 'Build complete',
-                timeout: 1000
-            })
-
+            notifySuccess()
             process.exit(SUCCESS)
         })
         .catch(function (errorCode) {
-            console.log('\nBuild failed')
-
-            notifySend.notify({
-                title: 'TWOverflow',
-                message: 'Build failed',
-                timeout: 2000
-            })
-
+            notifyFail()
             process.exit(errorCode)
         })
         .finally(function () {
@@ -565,6 +557,26 @@ function replaceText (source, token, replace) {
     } while((index = source.indexOf(token, index + 1)) > -1)
 
     return source
+}
+
+function notifySuccess () {
+    console.log('\nBuild finished')
+
+    notifySend && notifySend.notify({
+        title: 'TWOverflow',
+        message: 'Build complete',
+        timeout: 1000
+    })
+}
+
+function notifyFail () {
+    console.log('\nBuild failed')
+
+    notifySend && notifySend.notify({
+        title: 'TWOverflow',
+        message: 'Build failed',
+        timeout: 2000
+    })
 }
 
 init()
