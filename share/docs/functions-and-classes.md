@@ -164,3 +164,24 @@ All fetched villages.
 #### `twoMapData.isLoaded()`
 
 Check if the data is already ready to be used.
+
+# ready
+
+Execute code only when specific elements of game has been loaded.
+
+#### `ready( callback [, readyElements ] )`
+
+- *Function* `callback` Function called when all parts has been loaded.
+- *Array|String* `readyElements` List with all ready-elements to wait befored executing code. The default value if not specified is `map`.
+
+##### List of available `readyElements`
+
+Check out `/ready.js` for an up-to-date list.
+
+ - `map`
+ - `tribe_relations`
+ - `initial_village`
+ - `all_villages_ready`
+ - `minimap_data`
+ - `presets`
+ - `world_config`
