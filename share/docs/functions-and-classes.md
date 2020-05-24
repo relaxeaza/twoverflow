@@ -145,3 +145,22 @@ Create an divisor inside the main menu.
 #### `interfaceOverflow.isInitialized()`
 
 Return `true` if the interface is ready to be used.
+
+# twoMapData
+
+Load basic info about all villages present in the would like coordinates, owner and tribe.
+
+#### `twoMapData.load( callback, force )`
+
+Get already fetched data or fetch it again.
+
+ - *Function* `callback` Function called with the data.
+ - *Boolean* `force` Force downloading up-to-date data.
+
+#### `twoMapData.getVillages()`
+
+All fetched villages.
+
+#### `twoMapData.isLoaded()`
+
+Check if the data is already ready to be used.
