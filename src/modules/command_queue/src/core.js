@@ -205,6 +205,14 @@ define('two/commandQueue', [
         }, 1000 / CHECKS_PER_SECOND)
     }
 
+    const validAxisCoord = function (input) {
+        return !isNaN(input) && input > 0 && input < 1000
+    }
+
+    const validCoords = function (input) {
+        return hasOwn.call(input, 'x') && hasOwn.call(input, 'y') && validAxisCoord(input.x) && validAxisCoord(input.y)
+    }
+
     let commandQueue = {
         initialized: false
     }
@@ -264,11 +272,11 @@ define('two/commandQueue', [
         let parsedOfficers = {}
 
         return new Promise(function (resolve, reject) {
-            if (!origin || typeof origin.x !== 'number' || typeof origin.y !== 'number') {
+            if (!validCoords(origin)) {
                 return reject(ERROR_CODES.INVALID_ORIGIN)
             }
 
-            if (!target || typeof target.x !== 'number' || typeof target.y !== 'number') {
+            if (!validCoords(target)) {
                 return reject(ERROR_CODES.INVALID_TARGET)
             }
 
