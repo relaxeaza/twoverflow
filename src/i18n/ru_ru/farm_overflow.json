@@ -67,7 +67,7 @@
         "target_multiple_farmers": "Разрешить целям получать множество атак с разных деревень",
         "farmer_cycle_interval": "Интервали между фарм цыклами (минуты)",
         "ignore_on_loss": "Игнорировать деревни, которые приносят потери",
-        "ignore_full_storage": "Не фармить если при заполнении склада",
+        "ignore_full_storage": "Не фармить при заполнении склада",
         "step_cycle_header": "",
         "step_cycle": "",
         "step_cycle_notifs": "Цыкл уведомлений",
