@@ -329,6 +329,8 @@ function mergeSouceIntoTranslation (source, translation) {
 // }
 
 function generateModule (moduleId, moduleDir) {
+    console.log(`Generating module "${moduleId}"`)
+
     const modulePath = `/src/modules/${moduleDir}`
     let data = {
         id: moduleId,
@@ -418,14 +420,10 @@ function generateModules () {
         const info = JSON.parse(fs.readFileSync(path.join(__dirname, 'src', 'modules', moduleDir, 'module.json'), 'utf8'))
 
         if (argv.only && argv.only !== info.id && info.id !== 'interface') {
-            console.log(`Ignoring module ${info.id}`)
-
             return false
         }
 
         if (argv.ignore && argv.ignore.split(',').includes(info.id)) {
-            console.log(`Ignoring module ${info.id}`)
-
             return false
         }
 
