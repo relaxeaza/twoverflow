@@ -67,7 +67,7 @@
         "target_multiple_farmers": "Разрешить целям получать множество атак с разных деревень",
         "farmer_cycle_interval": "Интервали между фарм цыклами (минуты)",
         "ignore_on_loss": "Игнорировать деревни, которые приносят потери",
-        "ignore_full_storage": "",
+        "ignore_full_storage": "Не фармить при заполнении склада",
         "step_cycle_header": "",
         "step_cycle": "",
         "step_cycle_notifs": "Цыкл уведомлений",
@@ -89,8 +89,8 @@
         "clear_logs": "Очистить журнал события",
         "reseted_logs": "Зарегистрованный журнал событий обнулён.",
         "date_added": "Данные добавлены",
-        "multiple_attacks_interval": "",
+        "multiple_attacks_interval": "Интервал атак на одну и ту же деревню в минутах",
         "next_cycle_in": "",
-        "target_limit_per_village": ""
+        "target_limit_per_village": "Лимит исходящих атак деревни"
     }
 }
