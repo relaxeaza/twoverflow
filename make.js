@@ -367,8 +367,8 @@ function generateModule (moduleId, moduleDir) {
     // Load all complementaty js sources
     const source = glob.sync(path.join(__dirname, modulePath, 'src', '*.js'), {
         ignore: [
-            path.join(__dirname, modulePath, 'core.js'),
-            path.join(__dirname, modulePath, 'init.js')
+            path.join(__dirname, modulePath, 'src', 'core.js'),
+            path.join(__dirname, modulePath, 'src', 'init.js')
         ]
     })
 
