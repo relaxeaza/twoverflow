@@ -11,7 +11,8 @@ const SUCCESS = 0
 const LINT_ERROR = 1
 const LESS_ERROR = 2
 const MINIFY_ERROR = 3
-
+const timeStart = new Date().getTime()
+let makeTime
 
 // optional packages
 let notifySend
@@ -34,6 +35,9 @@ function init () {
         .then(generateLanguageFile)
         .then(replaceInFile)
         .then(minifyCode)
+        .then(function () {
+            makeTime = (new Date().getTime()) - timeStart
+        })
         .then(function () {
             exitCode = SUCCESS
             notifySuccess()
@@ -562,7 +566,7 @@ function replaceText (source, token, replace) {
 }
 
 function notifySuccess () {
-    console.log('\nBuild finished')
+    console.log('\nBuild finished in', makeTime, 'ms')
 
     notifySend && notifySend.notify({
         title: 'TWOverflow',
@@ -572,7 +576,7 @@ function notifySuccess () {
 }
 
 function notifyFail () {
-    console.log('\nBuild failed')
+    console.log('\nBuild failed in', makeTime, 'ms')
 
     notifySend && notifySend.notify({
         title: 'TWOverflow',
