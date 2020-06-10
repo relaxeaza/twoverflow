@@ -2,9 +2,9 @@
     "about": {
         "contact": "Контакты",
         "email": "E-mail",
-        "links": "Ссылки проекта",
+        "links": "Ссылки ",
         "source_code": "Исходный код",
         "issues_suggestions": "Вопросы/предложения",
-        "translations": "переводчики"
+        "translations": "Перевод"
     }
 }
