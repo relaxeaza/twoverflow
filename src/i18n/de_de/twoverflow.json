@@ -1,12 +1,12 @@
 {
     "common": {
-        "start": "",
+        "start": "Start",
         "started": "Gestartet",
-        "pause": "",
+        "pause": "Pause",
         "paused": "Pausiert",
         "stop": "Anhalten",
         "stopped": "Angehalten",
-        "status": "",
+        "status": "Status",
         "none": "Keine",
         "info": "Informationen",
         "settings": "Einstellungen",
