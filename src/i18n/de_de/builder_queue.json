@@ -22,7 +22,7 @@
         "position": "Platz",
         "remove_building": "Entferne Gebäudestufe aus der Sequenz",
         "clone": "Kopieren",
-        "remove_sequence": "",
+        "remove_sequence": "Lösche gewählte Sequenz",
         "name_sequence_min_lenght": "Name muss mindestens aus 3 Zeichen bestehen.",
         "sequence_created": "Neue Sequenz %d erstellt.",
         "sequence_updated": "Sequenz %d aktualisiert.",
