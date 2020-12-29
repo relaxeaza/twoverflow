@@ -17,8 +17,8 @@
         "status_unknown": "Unbekannter Status",
         "status_attacking": "Angreifen",
         "status_waiting_cycle": "Wartezyklus",
-        "status_user_stop": "",
-        "status_expired_step": "",
+        "status_user_stop": "Vom Spieler gestoppt",
+        "status_expired_step": "Befehl abgelaufen",
         "not_loaded": "Nicht geladen.",
         "ignored_targets": "Ignorierte Ziele",
         "no_ignored_targets": "Nichts ignoriert",
@@ -89,8 +89,8 @@
         "clear_logs": "Protokoll löschen",
         "reseted_logs": "Protokoll wurde zurückgesetzt.",
         "date_added": "Datum hinzugefügt",
-        "multiple_attacks_interval": "",
-        "next_cycle_in": "",
-        "target_limit_per_village": ""
+        "multiple_attacks_interval": "Intervall zwischen Angriffen im selben Ziel (Minuten)",
+        "next_cycle_in": "Nächster Zyklus start in",
+        "target_limit_per_village": "Limit der Ziele pro Dorf"
     }
 }
