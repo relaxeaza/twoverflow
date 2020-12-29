@@ -38,11 +38,11 @@
         "settings_preserve_iron": "",
         "discard_changes_title": "",
         "discard_changes_text": "",
-        "clone_warn_changed_sequence_title": "",
+        "clone_warn_changed_sequence_title": "Sequenz geändert",
         "clone_warn_changed_sequence_text": "",
         "clone_sequence": "Kopiere gewählte Sequenz",
-        "amount": "",
-        "empty_sequence": ""
+        "amount": "Anzahl",
+        "empty_sequence": "Leere Sequenz"
     },
     "builder_queue_add_building_modal": {
         "title": "Neue Gebäudestufe hinzufügen"
