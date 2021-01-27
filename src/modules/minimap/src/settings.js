@@ -17,15 +17,15 @@ define('two/minimap/settings', [], function () {
         COLOR_PROVINCE: 'color_province',
         COLOR_CONTINENT: 'color_continent',
         COLOR_VIEW_REFERENCE: 'color_view_reference'
-    }
-})
+    };
+});
 
 define('two/minimap/settings/updates', function () {
     return {
         MINIMAP: 'minimap',
         MAP_POSITION: 'map_position'
-    }
-})
+    };
+});
 
 define('two/minimap/settings/map', [
     'two/minimap/settings',
@@ -155,5 +155,5 @@ define('two/minimap/settings/map', [
             inputType: 'color',
             updates: [UPDATES.MINIMAP]
         }
-    }
-})
+    };
+});

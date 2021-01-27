@@ -11,5 +11,5 @@ define('two/attackView/unitSpeedOrder', [
         UNIT_TYPES.RAM,
         UNIT_TYPES.SNOB,
         UNIT_TYPES.TREBUCHET
-    ]
-})
+    ];
+});

@@ -9,11 +9,11 @@ require([
     farmOverflowInterface
 ) {
     if (farmOverflow.isInitialized()) {
-        return false
+        return false;
     }
 
     ready(function () {
-        farmOverflow.init()
-        farmOverflowInterface()
-    }, ['map', 'presets'])
-})
+        farmOverflow.init();
+        farmOverflowInterface();
+    }, ['map', 'presets']);
+});

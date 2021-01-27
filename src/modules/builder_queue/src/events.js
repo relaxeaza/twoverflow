@@ -12,6 +12,6 @@ define('two/builderQueue/events', [], function () {
         BUILDER_QUEUE_NO_SEQUENCES: 'builder_queue_no_sequences',
         COMMAND_QUEUE_ADD_INVALID_OFFICER: 'command_queue_add_invalid_officer',
         COMMAND_QUEUE_ADD_RELOCATE_DISABLED: 'command_queue_add_relocate_disabled'
-    })
-})
+    });
+});
 

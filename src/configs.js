@@ -6,9 +6,9 @@ require([
     Lockr
 ) {
     ready(function () {
-        let $player = modelDataService.getSelectedCharacter()
+        const $player = modelDataService.getSelectedCharacter();
 
         // Lockr settings
-        Lockr.prefix = $player.getId() + '_twOverflow_' + $player.getWorldId() + '-'
-    })
-})
+        Lockr.prefix = $player.getId() + '_twOverflow_' + $player.getWorldId() + '-';
+    });
+});

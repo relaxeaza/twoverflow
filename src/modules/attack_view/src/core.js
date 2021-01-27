@@ -27,64 +27,64 @@ define('two/attackView', [
     mapData,
     eventQueue
 ) {
-    let initialized = false
-    let overviewService = injector.get('overviewService')
-    let globalInfoModel
-    let commands = []
-    let commandQueue = false
-    let filters = {}
-    let filterParams = {}
-    let sorting = {
+    let initialized = false;
+    const overviewService = injector.get('overviewService');
+    let globalInfoModel;
+    let commands = [];
+    let commandQueue = false;
+    let filters = {};
+    let filterParams = {};
+    const sorting = {
         reverse: false,
         column: COLUMN_TYPES.TIME_COMPLETED
-    }
-    let COMMAND_QUEUE_DATE_TYPES
+    };
+    let COMMAND_QUEUE_DATE_TYPES;
     const STORAGE_KEYS = {
         FILTERS: 'attack_view_filters'
-    }
-    const INCOMING_UNITS_FILTER = {}
-    const COMMAND_TYPES_FILTER = {}
+    };
+    const INCOMING_UNITS_FILTER = {};
+    const COMMAND_TYPES_FILTER = {};
 
     const formatFilters = function () {
-        const toArray = [FILTER_TYPES.COMMAND_TYPES]
-        const currentVillageId = modelDataService.getSelectedVillage().getId()
-        let arrays = {}
+        const toArray = [FILTER_TYPES.COMMAND_TYPES];
+        const currentVillageId = modelDataService.getSelectedVillage().getId();
+        const arrays = {};
 
         // format filters for backend
         for (let i = 0; i < toArray.length; i++) {
-            for (let j in filters[toArray[i]]) {
+            for (const j in filters[toArray[i]]) {
                 if (!arrays[toArray[i]]) {
-                    arrays[toArray[i]] = []
+                    arrays[toArray[i]] = [];
                 }
 
                 if (filters[toArray[i]][j]) {
                     switch (toArray[i]) {
                         case FILTER_TYPES.COMMAND_TYPES: {
                             if (j === COMMAND_TYPES.ATTACK) {
-                                arrays[toArray[i]].push(COMMAND_TYPES.ATTACK)
+                                arrays[toArray[i]].push(COMMAND_TYPES.ATTACK);
                             } else if (j === COMMAND_TYPES.SUPPORT) {
-                                arrays[toArray[i]].push(COMMAND_TYPES.SUPPORT)
+                                arrays[toArray[i]].push(COMMAND_TYPES.SUPPORT);
                             } else if (j === COMMAND_TYPES.RELOCATE) {
-                                arrays[toArray[i]].push(COMMAND_TYPES.RELOCATE)
+                                arrays[toArray[i]].push(COMMAND_TYPES.RELOCATE);
                             }
-                            break
+                            break;
                         }
                     }
                 }
             }
         }
 
-        filterParams = arrays
-        filterParams.village = filters[FILTER_TYPES.VILLAGE] ? [currentVillageId] : []
-    }
+        filterParams = arrays;
+        filterParams.village = filters[FILTER_TYPES.VILLAGE] ? [currentVillageId] : [];
+    };
 
     /**
      * Command was sent.
      */
     const onCommandIncomming = function () {
         // we can never know if the command is currently visible (because of filters, sorting and stuff) -> reload
-        attackView.loadCommands()
-    }
+        attackView.loadCommands();
+    };
 
     /**
      * Command was cancelled.
@@ -93,8 +93,8 @@ define('two/attackView', [
      * @param {Object} data The backend-data
      */
     const onCommandCancelled = function (event, data) {
-        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMAND_CANCELLED, [data.id || data.command_id])
-    }
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMAND_CANCELLED, [data.id || data.command_id]);
+    };
 
     /**
      * Command ignored.
@@ -105,12 +105,12 @@ define('two/attackView', [
     const onCommandIgnored = function (event, data) {
         for (let i = 0; i < commands.length; i++) {
             if (commands[i].command_id === data.command_id) {
-                commands.splice(i, 1)
+                commands.splice(i, 1);
             }
         }
 
-        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMAND_IGNORED, [data.command_id])
-    }
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMAND_IGNORED, [data.command_id]);
+    };
 
     /**
      * Village name changed.
@@ -121,24 +121,24 @@ define('two/attackView', [
     const onVillageNameChanged = function (event, data) {
         for (let i = 0; i < commands.length; i++) {
             if (commands[i].target_village_id === data.village_id) {
-                commands[i].target_village_name = data.name
-                commands[i].targetVillage.name = data.name
+                commands[i].target_village_name = data.name;
+                commands[i].targetVillage.name = data.name;
             } else if (commands[i].origin_village_id === data.village_id) {
-                commands[i].origin_village_name = data.name
-                commands[i].originVillage.name = data.name
+                commands[i].origin_village_name = data.name;
+                commands[i].originVillage.name = data.name;
             }
         }
 
-        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_VILLAGE_RENAMED, [data])
-    }
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_VILLAGE_RENAMED, [data]);
+    };
 
     const onVillageSwitched = function (e, newVillageId) {
         if (filterParams[FILTER_TYPES.VILLAGE].length) {
-            filterParams[FILTER_TYPES.VILLAGE] = [newVillageId]
+            filterParams[FILTER_TYPES.VILLAGE] = [newVillageId];
 
-            attackView.loadCommands()
+            attackView.loadCommands();
         }
-    }
+    };
 
     /**
      * @param {CommandModel} command
@@ -148,25 +148,25 @@ define('two/attackView', [
         const origin = {
             x: command.origin_x,
             y: command.origin_y
-        }
+        };
         const target = {
             x: command.target_x,
             y: command.target_y
-        }
+        };
         const unitDurationDiff = UNIT_SPEED_ORDER.map(function (unit) {
-            const travelTime = utils.getTravelTime(origin, target, {[unit]: 1}, command.command_type, {}, false)
-            const durationDiff = Math.abs(travelTime - command.model.duration)
+            const travelTime = utils.getTravelTime(origin, target, {[unit]: 1}, command.command_type, {}, false);
+            const durationDiff = Math.abs(travelTime - command.model.duration);
 
             return {
                 unit: unit,
                 diff: durationDiff
-            }
+            };
         }).sort(function (a, b) {
-            return a.diff - b.diff
-        })
+            return a.diff - b.diff;
+        });
 
-        return unitDurationDiff[0].unit
-    }
+        return unitDurationDiff[0].unit;
+    };
 
     /**
      * Sort a set of villages by distance from a specified village.
@@ -177,12 +177,12 @@ define('two/attackView', [
      */
     const sortByDistance = function (villages, origin) {
         return villages.sort(function (villageA, villageB) {
-            let distA = math.actualDistance(origin, villageA)
-            let distB = math.actualDistance(origin, villageB)
+            const distA = math.actualDistance(origin, villageA);
+            const distB = math.actualDistance(origin, villageB);
 
-            return distA - distB
-        })
-    }
+            return distA - distB;
+        });
+    };
 
     /**
      * Order:
@@ -194,86 +194,86 @@ define('two/attackView', [
      * @param {Function} callback
      */
     const closestNonHostileVillage = function (origin, callback) {
-        const size = 25
-        let loadBlockIndex = 0
+        const size = 25;
+        let loadBlockIndex = 0;
 
         if (mapData.hasTownDataInChunk(origin.x, origin.y)) {
-            const sectors = mapData.loadTownData(origin.x, origin.y, size, size, size)
-            const tribeId = modelDataService.getSelectedCharacter().getTribeId()
-            const playerId = modelDataService.getSelectedCharacter().getId()
-            let targets = []
-            let closestTargets
+            const sectors = mapData.loadTownData(origin.x, origin.y, size, size, size);
+            const tribeId = modelDataService.getSelectedCharacter().getTribeId();
+            const playerId = modelDataService.getSelectedCharacter().getId();
+            const targets = [];
+            let closestTargets;
 
             sectors.forEach(function (sector) {
-                for (let x in sector.data) {
-                    for (let y in sector.data[x]) {
-                        targets.push(sector.data[x][y])
+                for (const x in sector.data) {
+                    for (const y in sector.data[x]) {
+                        targets.push(sector.data[x][y]);
                     }
                 }
-            })
+            });
 
 
             const barbs = targets.filter(function (target) {
-                return target.character_id === null && target.id > 0
-            })
+                return target.character_id === null && target.id > 0;
+            });
 
             const own = targets.filter(function (target) {
-                return target.character_id === playerId && origin.id !== target.id
-            })
+                return target.character_id === playerId && origin.id !== target.id;
+            });
 
             if (barbs.length) {
-                closestTargets = sortByDistance(barbs, origin)
+                closestTargets = sortByDistance(barbs, origin);
             } else if (own.length) {
-                closestTargets = sortByDistance(own, origin)
+                closestTargets = sortByDistance(own, origin);
             } else if (tribeId) {
                 const tribe = targets.filter(function (target) {
-                    return target.tribe_id === tribeId
-                })
+                    return target.tribe_id === tribeId;
+                });
 
                 if (tribe.length) {
-                    closestTargets = sortByDistance(tribe, origin)
+                    closestTargets = sortByDistance(tribe, origin);
                 } else {
-                    return callback(false)
+                    return callback(false);
                 }
             } else {
-                return callback(false)
+                return callback(false);
             }
 
-            return callback(closestTargets[0])
+            return callback(closestTargets[0]);
         }
         
-        const loads = convert.scaledGridCoordinates(origin.x, origin.y, size, size, size)
+        const loads = convert.scaledGridCoordinates(origin.x, origin.y, size, size, size);
 
         mapData.loadTownDataAsync(origin.x, origin.y, size, size, function () {
             if (++loadBlockIndex === loads.length) {
-                closestNonHostileVillage(origin, callback)
+                closestNonHostileVillage(origin, callback);
             }
-        })
-    }
+        });
+    };
 
     /**
      * @param {Object} data The data-object from the backend
      */
     const onOverviewIncomming = function (data) {
-        commands = data.commands
+        commands = data.commands;
 
         for (let i = 0; i < commands.length; i++) {
-            overviewService.formatCommand(commands[i])
-            commands[i].slowestUnit = getSlowestUnit(commands[i])
+            overviewService.formatCommand(commands[i]);
+            commands[i].slowestUnit = getSlowestUnit(commands[i]);
         }
 
         commands = commands.filter(function (command) {
-            return filters[FILTER_TYPES.INCOMING_UNITS][command.slowestUnit]
-        })
+            return filters[FILTER_TYPES.INCOMING_UNITS][command.slowestUnit];
+        });
 
-        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMANDS_LOADED, [commands])
-    }
+        eventQueue.trigger(eventTypeProvider.ATTACK_VIEW_COMMANDS_LOADED, [commands]);
+    };
 
-    let attackView = {}
+    const attackView = {};
 
     attackView.loadCommands = function () { 
-        const incomingCommands = globalInfoModel.getCommandListModel().getIncomingCommands().length
-        const count = incomingCommands > 25 ? incomingCommands : 25
+        const incomingCommands = globalInfoModel.getCommandListModel().getIncomingCommands().length;
+        const count = incomingCommands > 25 ? incomingCommands : 25;
 
         socketService.emit(routeProvider.OVERVIEW_GET_INCOMING, {
             'count': count,
@@ -283,20 +283,20 @@ define('two/attackView', [
             'groups': [],
             'command_types': filterParams[FILTER_TYPES.COMMAND_TYPES],
             'villages': filterParams[FILTER_TYPES.VILLAGE]
-        }, onOverviewIncomming)
-    }
+        }, onOverviewIncomming);
+    };
 
     attackView.getCommands = function () {
-        return commands
-    }
+        return commands;
+    };
 
     attackView.getFilters = function () {
-        return filters
-    }
+        return filters;
+    };
 
     attackView.getSortings = function () {
-        return sorting
-    }
+        return sorting;
+    };
 
     /**
      * Toggles the given filter.
@@ -306,27 +306,27 @@ define('two/attackView', [
      */
     attackView.toggleFilter = function (type, opt_filter) {
         if (!opt_filter) {
-            filters[type] = !filters[type]
+            filters[type] = !filters[type];
         } else {
-            filters[type][opt_filter] = !filters[type][opt_filter]
+            filters[type][opt_filter] = !filters[type][opt_filter];
         }
 
         // format filters for the backend
-        formatFilters()
-        Lockr.set(STORAGE_KEYS.FILTERS, filters)
-        attackView.loadCommands()
-    }
+        formatFilters();
+        Lockr.set(STORAGE_KEYS.FILTERS, filters);
+        attackView.loadCommands();
+    };
 
     attackView.toggleSorting = function (newColumn) {
         if (newColumn === sorting.column) {
-            sorting.reverse = !sorting.reverse
+            sorting.reverse = !sorting.reverse;
         } else {
-            sorting.column = newColumn
-            sorting.reverse = false
+            sorting.column = newColumn;
+            sorting.reverse = false;
         }
 
-        attackView.loadCommands()
-    }
+        attackView.loadCommands();
+    };
 
     /**
      * Set an automatic command with all units from the village
@@ -337,67 +337,67 @@ define('two/attackView', [
      */
     attackView.setCommander = function (command, date) {
         closestNonHostileVillage(command.targetVillage, function (closestVillage) {
-            const origin = command.targetVillage
-            const target = closestVillage
-            const commandType = target.character_id ? COMMAND_TYPES.SUPPORT : COMMAND_TYPES.ATTACK
-            let units = {}
+            const origin = command.targetVillage;
+            const target = closestVillage;
+            const commandType = target.character_id ? COMMAND_TYPES.SUPPORT : COMMAND_TYPES.ATTACK;
+            const units = {};
 
             utils.each(UNIT_TYPES, function (unit) {
-                units[unit] = '*'
-            })
+                units[unit] = '*';
+            });
 
-            commandQueue.addCommand(origin, target, date, COMMAND_QUEUE_DATE_TYPES.OUT, units, {}, commandType , BUILDING_TYPES.WALL)
+            commandQueue.addCommand(origin, target, date, COMMAND_QUEUE_DATE_TYPES.OUT, units, {}, commandType, BUILDING_TYPES.WALL);
 
             if (!commandQueue.isRunning()) {
-                commandQueue.start()
+                commandQueue.start();
             }
-        })
-    }
+        });
+    };
 
     attackView.commandQueueEnabled = function () {
-        return !!commandQueue
-    }
+        return !!commandQueue;
+    };
 
     attackView.isInitialized = function () {
-        return initialized
-    }
+        return initialized;
+    };
 
     attackView.init = function () {
         for (let i = 0; i < UNIT_SPEED_ORDER.length; i++) {
-            INCOMING_UNITS_FILTER[UNIT_SPEED_ORDER[i]] = true
+            INCOMING_UNITS_FILTER[UNIT_SPEED_ORDER[i]] = true;
         }
 
-        for (let i in COMMAND_TYPES) {
-            COMMAND_TYPES_FILTER[COMMAND_TYPES[i]] = true
+        for (const i in COMMAND_TYPES) {
+            COMMAND_TYPES_FILTER[COMMAND_TYPES[i]] = true;
         }
 
         try {
-            commandQueue = require('two/commandQueue')
-            COMMAND_QUEUE_DATE_TYPES = require('two/commandQueue/types/dates')
+            commandQueue = require('two/commandQueue');
+            COMMAND_QUEUE_DATE_TYPES = require('two/commandQueue/types/dates');
         } catch (e) {}
 
         const defaultFilters = {
             [FILTER_TYPES.COMMAND_TYPES]: angular.copy(COMMAND_TYPES_FILTER),
             [FILTER_TYPES.INCOMING_UNITS]: angular.copy(INCOMING_UNITS_FILTER),
             [FILTER_TYPES.VILLAGE]: false
-        }
+        };
 
-        initialized = true
-        globalInfoModel = modelDataService.getSelectedCharacter().getGlobalInfo()
-        filters = Lockr.get(STORAGE_KEYS.FILTERS, defaultFilters, true)
+        initialized = true;
+        globalInfoModel = modelDataService.getSelectedCharacter().getGlobalInfo();
+        filters = Lockr.get(STORAGE_KEYS.FILTERS, defaultFilters, true);
 
         ready(function () {
-            formatFilters()
+            formatFilters();
 
-            $rootScope.$on(eventTypeProvider.COMMAND_INCOMING, onCommandIncomming)
-            $rootScope.$on(eventTypeProvider.COMMAND_CANCELLED, onCommandCancelled)
-            $rootScope.$on(eventTypeProvider.MAP_SELECTED_VILLAGE, onVillageSwitched)
-            $rootScope.$on(eventTypeProvider.VILLAGE_NAME_CHANGED, onVillageNameChanged)
-            $rootScope.$on(eventTypeProvider.COMMAND_IGNORED, onCommandIgnored)
+            $rootScope.$on(eventTypeProvider.COMMAND_INCOMING, onCommandIncomming);
+            $rootScope.$on(eventTypeProvider.COMMAND_CANCELLED, onCommandCancelled);
+            $rootScope.$on(eventTypeProvider.MAP_SELECTED_VILLAGE, onVillageSwitched);
+            $rootScope.$on(eventTypeProvider.VILLAGE_NAME_CHANGED, onVillageNameChanged);
+            $rootScope.$on(eventTypeProvider.COMMAND_IGNORED, onCommandIgnored);
 
-            attackView.loadCommands()
-        }, ['initial_village'])
-    }
+            attackView.loadCommands();
+        }, ['initial_village']);
+    };
 
-    return attackView
-})
+    return attackView;
+});

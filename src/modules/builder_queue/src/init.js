@@ -9,11 +9,11 @@ require([
     builderQueueInterface
 ) {
     if (builderQueue.isInitialized()) {
-        return false
+        return false;
     }
 
     ready(function () {
-        builderQueue.init()
-        builderQueueInterface()
-    })
-})
+        builderQueue.init();
+        builderQueueInterface();
+    });
+});

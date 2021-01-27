@@ -9,11 +9,11 @@ require([
     attackViewInterface
 ) {
     if (attackView.isInitialized()) {
-        return false
+        return false;
     }
 
     ready(function () {
-        attackView.init()
-        attackViewInterface()
-    })
-})
+        attackView.init();
+        attackViewInterface();
+    });
+});

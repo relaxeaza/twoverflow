@@ -19,5 +19,5 @@ define('two/farmOverflow/events', [], function () {
         FARM_OVERFLOW_EXCEPTION_LOGS_UPDATED: 'farm_overflow_exception_logs_updated',
         FARM_OVERFLOW_CYCLE_BEGIN: 'farm_overflow_cycle_begin',
         FARM_OVERFLOW_CYCLE_END: 'farm_overflow_cycle_end'
-    })
-})
+    });
+});

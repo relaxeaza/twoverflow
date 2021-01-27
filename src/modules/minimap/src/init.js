@@ -13,12 +13,12 @@ require([
     minimapInterface
 ) {
     if (minimap.initialized) {
-        return false
+        return false;
     }
 
     ready(function () {
-        minimap.init()
-        minimapInterface()
-        minimap.run()
-    }, 'map')
-})
+        minimap.init();
+        minimapInterface();
+        minimap.run();
+    }, 'map');
+});

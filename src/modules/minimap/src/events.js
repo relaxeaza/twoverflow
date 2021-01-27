@@ -10,5 +10,5 @@ define('two/minimap/events', [], function () {
         MINIMAP_START_MOVE: 'minimap_start_move',
         MINIMAP_STOP_MOVE: 'minimap_stop_move',
         MINIMAP_AREA_LOADED: 'minimap_area_loaded'
-    })
-})
+    });
+});

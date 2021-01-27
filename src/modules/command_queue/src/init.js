@@ -9,15 +9,15 @@ require([
     commandQueueInterface
 ) {
     if (commandQueue.initialized) {
-        return false
+        return false;
     }
 
     ready(function () {
-        commandQueue.init()
-        commandQueueInterface()
+        commandQueue.init();
+        commandQueueInterface();
 
         if (commandQueue.getWaitingCommands().length > 0) {
-            commandQueue.start(true)
+            commandQueue.start(true);
         }
-    }, ['map', 'world_config'])
-})
+    }, ['map', 'world_config']);
+});

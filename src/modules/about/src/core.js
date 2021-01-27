@@ -1,15 +1,15 @@
 define('two/about', [], function () {
-    let initialized = false
+    let initialized = false;
 
-    let about = {}
+    const about = {};
 
     about.isInitialized = function () {
-        return initialized
-    }
+        return initialized;
+    };
 
     about.init = function () {
-        initialized = true
-    }
+        initialized = true;
+    };
 
-    return about
-})
+    return about;
+});

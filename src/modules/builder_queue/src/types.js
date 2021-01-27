@@ -4,5 +4,5 @@ define('two/builderQueue/sequenceStatus', [], function () {
         SEQUENCE_EXISTS: 'sequence_exists',
         SEQUENCE_INVALID: 'sequence_invalid',
         SEQUENCE_SAVED: 'sequence_saved'
-    }
-})
+    };
+});

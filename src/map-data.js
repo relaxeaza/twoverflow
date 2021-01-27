@@ -3,111 +3,111 @@ define('two/mapData', [
 ], function (
     conf
 ) {
-    let villages = []
-    let grid = []
-    let loading = false
-    let loaded = false
-    let callbackQueue = []
-    const MINIMAP_WIDTH = 306
-    const MINIMAP_HEIGHT = 306
+    let villages = [];
+    const grid = [];
+    let loading = false;
+    let loaded = false;
+    let callbackQueue = [];
+    const MINIMAP_WIDTH = 306;
+    const MINIMAP_HEIGHT = 306;
 
     angular.extend(eventTypeProvider, {
         MAP_DATA_LOADED: 'map_data_loaded'
-    })
+    });
 
     const init = function () {
-        const xChunks = Math.ceil(conf.MAP_SIZE / MINIMAP_WIDTH)
-        const yChunks = Math.ceil(conf.MAP_SIZE / MINIMAP_HEIGHT)
+        const xChunks = Math.ceil(conf.MAP_SIZE / MINIMAP_WIDTH);
+        const yChunks = Math.ceil(conf.MAP_SIZE / MINIMAP_HEIGHT);
 
         for (let gridX = 0; gridX < xChunks; gridX++) {
-            grid.push([])
+            grid.push([]);
 
-            let chunkX = MINIMAP_WIDTH * gridX
-            let chunkWidth = MINIMAP_WIDTH.bound(0, chunkX + MINIMAP_WIDTH).bound(0, conf.MAP_SIZE - chunkX)
-            chunkX = chunkX.bound(0, conf.MAP_SIZE)
+            let chunkX = MINIMAP_WIDTH * gridX;
+            const chunkWidth = MINIMAP_WIDTH.bound(0, chunkX + MINIMAP_WIDTH).bound(0, conf.MAP_SIZE - chunkX);
+            chunkX = chunkX.bound(0, conf.MAP_SIZE);
 
             for (let gridY = 0; gridY < yChunks; gridY++) {
-                let chunkY = MINIMAP_HEIGHT * gridY
-                let chunkHeight = MINIMAP_HEIGHT.bound(0, chunkY + MINIMAP_HEIGHT).bound(0, conf.MAP_SIZE - chunkY)
-                chunkY = chunkY.bound(0, conf.MAP_SIZE)
+                let chunkY = MINIMAP_HEIGHT * gridY;
+                const chunkHeight = MINIMAP_HEIGHT.bound(0, chunkY + MINIMAP_HEIGHT).bound(0, conf.MAP_SIZE - chunkY);
+                chunkY = chunkY.bound(0, conf.MAP_SIZE);
 
                 grid[gridX].push({
                     x: chunkX,
                     y: chunkY,
                     width: chunkWidth,
                     height: chunkHeight
-                })
+                });
             }
         }
-    }
+    };
 
-    let twoMapData = {}
+    const twoMapData = {};
 
     twoMapData.load = function (callback = noop, force) {
         if (force) {
-            loaded = false
+            loaded = false;
         } else if (loading) {
-            return callbackQueue.push(callback)
+            return callbackQueue.push(callback);
         } else if (loaded) {
-            return callback(villages)
+            return callback(villages);
         }
 
-        callbackQueue.push(callback)
-        loading = true
-        let cells = []
+        callbackQueue.push(callback);
+        loading = true;
+        const cells = [];
 
         for (let gridX = 0; gridX < grid.length; gridX++) {
             for (let gridY = 0; gridY < grid[gridX].length; gridY++) {
-                cells.push(grid[gridX][gridY])
+                cells.push(grid[gridX][gridY]);
             }
         }
 
-        let requests = []
+        const requests = [];
 
         cells.forEach(function (cell) {
-            let promise = new Promise(function (resolve, reject) {
+            const promise = new Promise(function (resolve, reject) {
                 socketService.emit(routeProvider.MAP_GET_MINIMAP_VILLAGES, cell, function (data) {
                     if (data.message) {
-                        return reject(data.message)
+                        return reject(data.message);
                     }
 
                     if (data.villages.length) {
-                        villages = villages.concat(data.villages)
+                        villages = villages.concat(data.villages);
                     }
 
-                    resolve()
-                })
-            })
+                    resolve();
+                });
+            });
 
-            requests.push(promise)
-        })
+            requests.push(promise);
+        });
 
         return Promise.all(requests).then(function () {
-            loading = false
-            loaded = true
+            loading = false;
+            loaded = true;
 
-            $rootScope.$broadcast(eventTypeProvider.MAP_DATA_LOADED)
+            $rootScope.$broadcast(eventTypeProvider.MAP_DATA_LOADED);
             
             callbackQueue.forEach(function (queuedCallback) {
-                queuedCallback(villages)
-            })
+                queuedCallback(villages);
+            });
 
-            callbackQueue = []
+            callbackQueue = [];
         }).catch(function (error) {
             // eslint-disable-next-line no-console
-            console.error(error.message)
-        })
-    }
+            console.error(error.message);
+        });
+    };
 
     twoMapData.getVillages = function () {
-        return villages
-    }
+        return villages;
+    };
 
     twoMapData.isLoaded = function () {
-        return loaded
-    }
+        return loaded;
+    };
 
-    init()
+    init();
 
-    return twoMapData
-})
+    return twoMapData;
+});

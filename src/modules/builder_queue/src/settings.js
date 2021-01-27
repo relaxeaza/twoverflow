@@ -7,14 +7,14 @@ define('two/builderQueue/settings', [], function () {
         PRESERVE_CLAY: 'preserve_clay',
         PRESERVE_IRON: 'preserve_iron',
         PRIORIZE_FARM: 'priorize_farm'
-    }
-})
+    };
+});
 
 define('two/builderQueue/settings/updates', [], function () {
     return {
         ANALYSE: 'analyse'
-    }
-})
+    };
+});
 
 define('two/builderQueue/settings/map', [
     'two/builderQueue/defaultOrders',
@@ -69,5 +69,5 @@ define('two/builderQueue/settings/map', [
             inputType: 'checkbox',
             updates: [UPDATES.ANALYSE]
         }
-    }
-})
+    };
+});

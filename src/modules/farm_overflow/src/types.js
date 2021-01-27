@@ -3,8 +3,8 @@ define('two/farmOverflow/types/errors', [], function () {
         NO_PRESETS: 'no_presets',
         USER_STOP: 'user_stop',
         KILL_FARMER: 'kill_farmer'
-    }
-})
+    };
+});
 
 define('two/farmOverflow/types/status', [], function () {
     return {
@@ -26,8 +26,8 @@ define('two/farmOverflow/types/status', [], function () {
         WAITING_CYCLE: 'waiting_cycle',
         USER_STOP: 'user_stop',
         EXPIRED_STEP: 'expired_step'
-    }
-})
+    };
+});
 
 define('two/farmOverflow/types/logs', [], function () {
     return {
@@ -38,5 +38,5 @@ define('two/farmOverflow/types/logs', [], function () {
         IGNORED_VILLAGE_REMOVED: 'ignored_village_removed',
         INCLUDED_VILLAGE_REMOVED: 'included_village_removed',
         ATTACKED_VILLAGE: 'attacked_village'
-    }
-})
+    };
+});

@@ -15,5 +15,5 @@ define('two/commandQueue/events', [], function () {
         COMMAND_QUEUE_REMOVE_ERROR: 'commandqueue_remove_error',
         COMMAND_QUEUE_START: 'commandqueue_start',
         COMMAND_QUEUE_STOP: 'commandqueue_stop'
-    })
-})
+    });
+});

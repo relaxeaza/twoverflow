@@ -6,5 +6,5 @@ define('two/attackView/events', [], function () {
         ATTACK_VIEW_COMMAND_IGNORED: 'attack_view_command_ignored',
         ATTACK_VIEW_VILLAGE_RENAMED: 'attack_view_village_renamed',
         ATTACK_VIEW_COMMANDS_LOADED: 'attack_view_commands_loaded'
-    })
-})
+    });
+});

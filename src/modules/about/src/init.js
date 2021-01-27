@@ -8,11 +8,11 @@ require([
     aboutInterface
 ) {
     if (about.isInitialized()) {
-        return false
+        return false;
     }
 
     ready(function () {
-        about.init()
-        aboutInterface()
-    }, ['map'])
-})
+        about.init();
+        aboutInterface();
+    }, ['map']);
+});

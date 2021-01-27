@@ -19,8 +19,8 @@ define('two/farmOverflow/settings', [], function () {
         LOGS_LIMIT: 'logs_limit',
         IGNORE_ON_LOSS: 'ignore_on_loss',
         TARGET_LIMIT: 'target_limit'
-    }
-})
+    };
+});
 
 define('two/farmOverflow/settings/updates', function () {
     return {
@@ -32,8 +32,8 @@ define('two/farmOverflow/settings/updates', function () {
         FULL_STORAGE: 'full_storage',
         LOGS: 'logs',
         INTERVAL_TIMERS: 'interval_timers'
-    }
-})
+    };
+});
 
 define('two/farmOverflow/settings/map', [
     'two/farmOverflow/settings',
@@ -197,5 +197,5 @@ define('two/farmOverflow/settings/map', [
             min: 0,
             max: 500
         }
-    }
-})
+    };
+});
