@@ -31,7 +31,5 @@
     "release-testing": "node make.js --lint --minify --dev && node release.js --testing",
     "server": "http-server ./dist/ --ssl --cert=share/server/cert.pem --key=share/server/key.pem -p 2838"
   },
-  "dependencies": {
-    "node-notifier": "^7.0.1"
-  }
+  "dependencies": {}
 }
