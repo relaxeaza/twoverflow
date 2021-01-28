@@ -1,33 +1,31 @@
-const fs = require('fs')
-const glob = require('glob')
-const path = require('path')
-const archiver = require('archiver')
-const pkg = require('./package.json')
-const argv = require('yargs').argv
-const hasOwn = Object.prototype.hasOwnProperty
-const MINIMUM_TRANSLATED = 50
-const LANG_ID_SOURCE = 'en_us'
-const overflow = generateOverflowModule()
-const SUCCESS = 0
-const LINT_ERROR = 1
-const LESS_ERROR = 2
-const MINIFY_ERROR = 3
-const timeStart = new Date().getTime()
-let makeTime
+const fs = require('fs');
+const glob = require('glob');
+const path = require('path');
+const archiver = require('archiver');
+const pkg = require('./package.json');
+const argv = require('yargs').argv;
+const LANG_ID_SOURCE = 'en_us';
+const overflow = generateOverflowModule();
+const SUCCESS = 0;
+const LINT_ERROR = 1;
+const LESS_ERROR = 2;
+const MINIFY_ERROR = 3;
+const timeStart = new Date().getTime();
+let makeTime;
 
 // optional packages
-let notifySend
+let notifySend;
 
 try {
-    notifySend = require('node-notifier')
+    notifySend = require('node-notifier');
 } catch (e) {}
 
 function init () {
     fs.mkdirSync(path.join(__dirname, 'dist'), {
         recursive: true
-    })
+    });
 
-    let exitCode
+    let exitCode;
 
     lintCode()
         .then(concatCode)
@@ -38,111 +36,111 @@ function init () {
         .then(minifyCode)
         .then(buildExtension)
         .then(function () {
-            makeTime = (new Date().getTime()) - timeStart
+            makeTime = (new Date().getTime()) - timeStart;
         })
         .then(function () {
-            exitCode = SUCCESS
-            notifySuccess()
+            exitCode = SUCCESS;
+            notifySuccess();
         })
         .catch(function (error) {
-            console.log(error)
-            exitCode = 1
-            notifyFail()
+            console.log(error);
+            exitCode = 1;
+            notifyFail();
         })
         .finally(function () {
             fs.rmdirSync(path.join(__dirname, 'tmp'), {
                 recursive: true
-            })
+            });
 
-            process.exit(exitCode)
-        })
+            process.exit(exitCode);
+        });
 }
 
 function lintCode () {
     return new Promise(function (resolve, reject) {
         if (!argv.lint) {
-            return resolve()
+            return resolve();
         }
 
-        console.log('Running lint')
+        console.log('Running lint');
 
-        const eslint = require('eslint')
-        const CLIEngine = eslint.CLIEngine
-        const cli = new CLIEngine
-        const lint = cli.executeOnFiles(path.join(__dirname, 'src'))
+        const eslint = require('eslint');
+        const CLIEngine = eslint.CLIEngine;
+        const cli = new CLIEngine;
+        const lint = cli.executeOnFiles(path.join(__dirname, 'src'));
 
         if (lint.errorCount || lint.warningCount) {
-            const formatter = cli.getFormatter()
-            console.log(formatter(lint.results))
+            const formatter = cli.getFormatter();
+            console.log(formatter(lint.results));
         }
 
         if (lint.errorCount) {
-            reject(LINT_ERROR)
+            reject(LINT_ERROR);
         } else {
-            resolve()
+            resolve();
         }
-    })
+    });
 }
 
 function concatCode () {
     return new Promise(function (resolve) {
-        console.log('Concatenating scripts')
+        console.log('Concatenating scripts');
 
         const code = overflow.js.map(function (file) {
-            return fs.readFileSync(path.join(__dirname, file), 'utf8')
-        })
+            return fs.readFileSync(path.join(__dirname, file), 'utf8');
+        });
 
-        fs.writeFileSync(path.join(__dirname, 'dist', 'tw2overflow.js'), code.join('\n'), 'utf8')
+        fs.writeFileSync(path.join(__dirname, 'dist', 'tw2overflow.js'), code.join('\n'), 'utf8');
 
-        resolve()
-    })
+        resolve();
+    });
 }
 
 function compileLess () {
     return new Promise(function (resolve, reject) {
-        console.log('Compiling styles')
+        console.log('Compiling styles');
 
-        let lessPromises = []
+        const lessPromises = [];
 
-        for (let destination in overflow.css) {
-            const sourceLocation = overflow.css[destination]
-            const source = fs.readFileSync(path.join(__dirname, sourceLocation), 'utf8')
-            const fileName = path.basename(destination)
-            const destinationDir = path.join(__dirname, path.dirname(destination))
+        for (const destination in overflow.css) {
+            const sourceLocation = overflow.css[destination];
+            const source = fs.readFileSync(path.join(__dirname, sourceLocation), 'utf8');
+            const fileName = path.basename(destination);
+            const destinationDir = path.join(__dirname, path.dirname(destination));
 
             fs.mkdirSync(destinationDir, {
                 recursive: true
-            })
+            });
 
-            let promise = require('less').render(source, {
+            const promise = require('less').render(source, {
                 compress: true
             }).then(function (output) {
-                fs.writeFileSync(`${destinationDir}/${fileName}`, output.css, 'utf8')
+                fs.writeFileSync(`${destinationDir}/${fileName}`, output.css, 'utf8');
             }).catch(function (error) {
-                console.log(`\nError in ${sourceLocation} on line ${error.line} column ${error.column}:`)
-                console.log(`${error.line-1} ${error.extract[0]}`)
-                console.log(`${error.line} ${error.extract[1]}`)
-                console.log(`${error.line+1} ${error.extract[2]}`)
+                console.log(`\nError in ${sourceLocation} on line ${error.line} column ${error.column}:`);
+                console.log(`${error.line-1} ${error.extract[0]}`);
+                console.log(`${error.line} ${error.extract[1]}`);
+                console.log(`${error.line+1} ${error.extract[2]}`);
 
-                reject(LESS_ERROR)
-            })
+                reject(LESS_ERROR);
+            });
 
-            lessPromises.push(promise)
+            lessPromises.push(promise);
         }
 
         Promise.all(lessPromises).then(function () {
-            resolve()
-        })
-    })
+            resolve();
+        });
+    });
 }
 
 function minifyHTML () {
     return new Promise(function (resolve) {
-        console.log('Minifying templates')
+        console.log('Minifying templates');
 
-        for (let destination in overflow.html) {
-            const sourceLocation = overflow.html[destination]
-            const source = fs.readFileSync(path.join(__dirname, sourceLocation), 'utf8')
+        for (const destination in overflow.html) {
+            const sourceLocation = overflow.html[destination];
+            const source = fs.readFileSync(path.join(__dirname, sourceLocation), 'utf8');
 
             let output = require('html-minifier').minify(source, {
                 removeRedundantAttributes: true,
@@ -151,111 +149,111 @@ function minifyHTML () {
                 removeComments: true,
                 removeTagWhitespace: false,
                 quoteCharacter: '"'
-            })
+            });
 
             // workaround! waiting https://github.com/terser/terser/issues/518
-            output = output.replace(/"/g, '\\"')
+            output = output.replace(/"/g, '\\"');
 
-            fs.writeFileSync(path.join(__dirname, destination), output, 'utf8')
+            fs.writeFileSync(path.join(__dirname, destination), output, 'utf8');
         }
 
-        resolve()
-    })
+        resolve();
+    });
 }
 
 function generateLanguageFile () {
-    console.log('Merging i18n files')
+    console.log('Merging i18n files');
 
     return new Promise(function (resolve, reject) {
         const langs = fs.readdirSync(path.join(__dirname, 'src', 'i18n'), {
             withFileTypes: true
         }).filter(function (dirent) {
-            return dirent.isDirectory() && dirent.name !== LANG_ID_SOURCE
+            return dirent.isDirectory() && dirent.name !== LANG_ID_SOURCE;
         }).map(function (moduleDir) {
-            return moduleDir.name
-        })
+            return moduleDir.name;
+        });
 
-        const mergedTranslations = {}
-        mergedTranslations[LANG_ID_SOURCE] = {}
+        const mergedTranslations = {};
+        mergedTranslations[LANG_ID_SOURCE] = {};
 
         langs.forEach(function (langId) {
-            const modules = fs.readdirSync(path.join(__dirname, 'src', 'i18n', langId))
-            mergedTranslations[langId] = {}
+            const modules = fs.readdirSync(path.join(__dirname, 'src', 'i18n', langId));
+            mergedTranslations[langId] = {};
 
             modules.forEach(function (moduleId) {
-                const sourcePath = path.join(__dirname, 'src', 'i18n', LANG_ID_SOURCE, moduleId)
-                const modulePath = path.join(__dirname, 'src', 'i18n', langId, moduleId)
-                const sourceTranslations = JSON.parse(fs.readFileSync(sourcePath, 'utf8'))
-                const moduleTranslations = JSON.parse(fs.readFileSync(modulePath, 'utf8'))
+                const sourcePath = path.join(__dirname, 'src', 'i18n', LANG_ID_SOURCE, moduleId);
+                const modulePath = path.join(__dirname, 'src', 'i18n', langId, moduleId);
+                const sourceTranslations = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+                const moduleTranslations = JSON.parse(fs.readFileSync(modulePath, 'utf8'));
 
                 mergedTranslations[LANG_ID_SOURCE] = {
                     ...mergedTranslations[LANG_ID_SOURCE],
                     ...sourceTranslations
-                }
+                };
 
                 mergedTranslations[langId] = {
                     ...mergedTranslations[langId],
                     ...mergeSouceIntoTranslation(sourceTranslations, moduleTranslations)
-                }
-            })
-        })
+                };
+            });
+        });
 
-        fs.writeFileSync(path.join(__dirname, 'tmp', 'i18n.json'), JSON.stringify(mergedTranslations, null, 4), 'utf8')
+        fs.writeFileSync(path.join(__dirname, 'tmp', 'i18n.json'), JSON.stringify(mergedTranslations, null, 4), 'utf8');
 
-        resolve()
-    })
+        resolve();
+    });
 }
 
 function replaceInFile () {
     return new Promise(function (resolve) {
-        console.log('Replacing values')
+        console.log('Replacing values');
 
-        const delimiters = ['___', '']
-        let target = fs.readFileSync(path.join(__dirname, 'dist', 'tw2overflow.js'), 'utf8')
-        let search
-        let replace
-        let ordered = {
+        const delimiters = ['___', ''];
+        let target = fs.readFileSync(path.join(__dirname, 'dist', 'tw2overflow.js'), 'utf8');
+        let search;
+        let replace;
+        const ordered = {
             file: {},
             text: {}
-        }
+        };
 
         for (search in overflow.replaces) {
-            replace = overflow.replaces[search]
+            replace = overflow.replaces[search];
 
             if (replace.slice(0, 11) === '~read-file:') {
-                ordered.file[search] = fs.readFileSync(path.join(__dirname, replace.slice(11)), 'utf8')
+                ordered.file[search] = fs.readFileSync(path.join(__dirname, replace.slice(11)), 'utf8');
             } else {
-                ordered.text[search] = replace
+                ordered.text[search] = replace;
             }
         }
 
         for (search in ordered.file) {
-            replace = ordered.file[search]
-            search = `${delimiters[0]}${search}${delimiters[1]}`
+            replace = ordered.file[search];
+            search = `${delimiters[0]}${search}${delimiters[1]}`;
 
-            target = replaceText(target, search, replace)
+            target = replaceText(target, search, replace);
         }
 
         for (search in ordered.text) {
-            replace = ordered.text[search]
-            search = `${delimiters[0]}${search}${delimiters[1]}`
+            replace = ordered.text[search];
+            search = `${delimiters[0]}${search}${delimiters[1]}`;
 
-            target = replaceText(target, search, replace)
+            target = replaceText(target, search, replace);
         }
 
-        fs.writeFileSync(path.join(__dirname, 'dist', 'tw2overflow.js'), target, 'utf8')
+        fs.writeFileSync(path.join(__dirname, 'dist', 'tw2overflow.js'), target, 'utf8');
 
-        resolve()
-    })
+        resolve();
+    });
 }
 
 function minifyCode () {
     return new Promise(function (resolve, reject) {
         if (!argv.minify) {
-            return resolve()
+            return resolve();
         }
 
-        console.log('Compressing script')
+        console.log('Compressing script');
 
         const minified = require('terser').minify({
             'tw2overflow.js': fs.readFileSync(path.join(__dirname, 'dist', 'tw2overflow.js'), 'utf8')
@@ -264,20 +262,20 @@ function minifyCode () {
                 quote_style: 3, // note: it's not working
                 max_line_len: 1000
             }
-        })
+        });
         
         if (minified.error) {
-            const error = minified.error
+            const error = minified.error;
 
-            console.log('\n' + error.filename)
-            console.log(`${error.line}:${error.col}  ${error.name}  ${error.message}\n`)
+            console.log('\n' + error.filename);
+            console.log(`${error.line}:${error.col}  ${error.name}  ${error.message}\n`);
 
-            return reject(MINIFY_ERROR)
+            return reject(MINIFY_ERROR);
         }
 
-        fs.writeFileSync(path.join(__dirname, 'dist', 'tw2overflow.min.js'), minified.code, 'utf8')
-        resolve()
-    })
+        fs.writeFileSync(path.join(__dirname, 'dist', 'tw2overflow.min.js'), minified.code, 'utf8');
+        resolve();
+    });
 }
 
 // function getTranslationEntries (translation) {
@@ -295,21 +293,21 @@ function minifyCode () {
 // }
 
 function mergeSouceIntoTranslation (source, translation) {
-    let merged = {}
+    const merged = {};
 
-    for (let category in source) {
-        merged[category] = {}
+    for (const category in source) {
+        merged[category] = {};
 
-        for (let key in source[category]) {
+        for (const key in source[category]) {
             if (translation[category][key]) {
-                merged[category][key] = translation[category][key]
+                merged[category][key] = translation[category][key];
             } else {
-                merged[category][key] = source[category][key]
+                merged[category][key] = source[category][key];
             }
         }
     }
 
-    return merged
+    return merged;
 }
 
 // function getTranslationStatus (moduleId, translationId, source, translation) {
@@ -336,10 +334,10 @@ function mergeSouceIntoTranslation (source, translation) {
 // }
 
 function generateModule (moduleId, moduleDir) {
-    console.log(`Generating module "${moduleId}"`)
+    console.log(`Generating module "${moduleId}"`);
 
-    const modulePath = `/src/modules/${moduleDir}`
-    let data = {
+    const modulePath = `/src/modules/${moduleDir}`;
+    const data = {
         id: moduleId,
         dir: moduleDir,
         js: [],
@@ -347,24 +345,24 @@ function generateModule (moduleId, moduleDir) {
         html: [],
         replaces: {},
         lang: false
-    }
+    };
 
     // Load module info file
     if (fs.existsSync(path.join(__dirname, modulePath, 'module.json'))) {
-        const modulePackage = JSON.parse(fs.readFileSync(path.join(__dirname, modulePath, 'module.json'), 'utf8'))
+        const modulePackage = JSON.parse(fs.readFileSync(path.join(__dirname, modulePath, 'module.json'), 'utf8'));
 
-        for (let key in modulePackage) {
-            data.replaces[`${moduleId}_${key}`] = modulePackage[key]
+        for (const key in modulePackage) {
+            data.replaces[`${moduleId}_${key}`] = modulePackage[key];
         }
     } else {
-        return console.error(`Module "${moduleId}" is missing "module.json"`)
+        return console.error(`Module "${moduleId}" is missing "module.json"`);
     }
 
     // Load the main js source
     if (fs.existsSync(path.join(__dirname, modulePath, 'src', 'core.js'))) {
-        data.js.push(`${modulePath}/src/core.js`)
+        data.js.push(`${modulePath}/src/core.js`);
     } else {
-        return console.error(`Module "${moduleId}" is missing "core.js"`)
+        return console.error(`Module "${moduleId}" is missing "core.js"`);
     }
 
     // Load all complementaty js sources
@@ -373,43 +371,43 @@ function generateModule (moduleId, moduleDir) {
             path.join(__dirname, modulePath, 'src', 'core.js'),
             path.join(__dirname, modulePath, 'src', 'init.js')
         ]
-    })
+    });
 
     source.forEach(function (filePath) {
-        data.js.push(filePath.replace(__dirname, ''))
-    })
+        data.js.push(filePath.replace(__dirname, ''));
+    });
 
     // Load the initialization source
     if (fs.existsSync(path.join(__dirname, modulePath, 'src', 'init.js'))) {
-        data.js.push(path.join(modulePath, 'src', 'init.js'))
+        data.js.push(path.join(modulePath, 'src', 'init.js'));
     } else {
-        return console.error(`Module "${moduleId}" is missing "init.js"`)
+        return console.error(`Module "${moduleId}" is missing "init.js"`);
     }
 
     // Load assets, if exists
     if (fs.existsSync(path.join(__dirname, modulePath, 'assets'))) {
         data.html = glob.sync(path.join(__dirname, modulePath, 'assets', '*.html')).map(function (htmlPath) {
-            return htmlPath.replace(__dirname, '')
-        })
+            return htmlPath.replace(__dirname, '');
+        });
         data.css = glob.sync(path.join(__dirname, modulePath, 'assets', '*.less')).map(function (cssPath) {
-            return cssPath.replace(__dirname, '')
-        })
+            return cssPath.replace(__dirname, '');
+        });
 
         data.html.forEach(function (htmlPath) {
-            htmlPath = htmlPath.replace(__dirname, '')
+            htmlPath = htmlPath.replace(__dirname, '');
 
-            const filename = path.basename(htmlPath, '.html')
-            data.replaces[`${moduleId}_html_${filename}`] = htmlPath
-        })
+            const filename = path.basename(htmlPath, '.html');
+            data.replaces[`${moduleId}_html_${filename}`] = htmlPath;
+        });
 
         data.css.forEach(function (cssPath) {
-            cssPath = cssPath.replace(__dirname, '')
-            const filename = path.basename(cssPath, '.less')
-            data.replaces[`${moduleId}_css_${filename}`] = cssPath
-        })
+            cssPath = cssPath.replace(__dirname, '');
+            const filename = path.basename(cssPath, '.less');
+            data.replaces[`${moduleId}_css_${filename}`] = cssPath;
+        });
     }
 
-    return data
+    return data;
 }
 
 /**
@@ -417,40 +415,40 @@ function generateModule (moduleId, moduleDir) {
  * from each with generateModule().
  */
 function generateModules () {
-    let modules = []
+    const modules = [];
 
     fs.readdirSync(path.join(__dirname, 'src', 'modules')).forEach(function (moduleDir) {
         if (!fs.existsSync(path.join(__dirname, 'src', 'modules', moduleDir, 'module.json'))) {
-            return false
+            return false;
         }
 
-        const info = JSON.parse(fs.readFileSync(path.join(__dirname, 'src', 'modules', moduleDir, 'module.json'), 'utf8'))
+        const info = JSON.parse(fs.readFileSync(path.join(__dirname, 'src', 'modules', moduleDir, 'module.json'), 'utf8'));
 
         if (argv.only && argv.only !== info.id && info.id !== 'interface') {
-            return false
+            return false;
         }
 
         if (argv.ignore && argv.ignore.split(',').includes(info.id)) {
-            return false
+            return false;
         }
 
-        modules.push(generateModule(info.id, moduleDir))
-    })
+        modules.push(generateModule(info.id, moduleDir));
+    });
 
-    return modules
+    return modules;
 }
 
 function generateOverflowModule () {
-    const modules = generateModules()
+    const modules = generateModules();
 
     // Store information from all modules as a single module to be build.
-    let overflow = {
+    const overflow = {
         js: [],
         html: {},
         css: {},
         replaces: {},
         lang: {}
-    }
+    };
 
     overflow.js = overflow.js.concat([
         `/src/header.js`,
@@ -464,134 +462,129 @@ function generateOverflowModule () {
         `/src/ui.js`,
         `/src/init.js`,
         `/src/libs/lockr.js`
-    ])
-
-    // Generate the common translations
-    const coreLangFiles = glob.sync(path.join(__dirname, 'src', 'lang', '*.json')).map(function (langPath) {
-        return langPath.replace(__dirname, '')
-    })
+    ]);
 
     // Generate the common replaces
-    overflow.replaces['overflow_name'] = pkg.name
-    overflow.replaces['overflow_version'] = pkg.version + (argv.dev ? '-dev' : '')
-    overflow.replaces['overflow_author_name'] = pkg.author.name
-    overflow.replaces['overflow_author_url'] = pkg.author.url
-    overflow.replaces['overflow_author_email'] = pkg.author.email
-    overflow.replaces['overflow_author'] = JSON.stringify(pkg.author)
-    overflow.replaces['overflow_date'] = new Date().toUTCString()
-    overflow.replaces['overflow_lang'] = `~read-file:/tmp/i18n.json`
+    overflow.replaces['overflow_name'] = pkg.name;
+    overflow.replaces['overflow_version'] = pkg.version + (argv.dev ? '-dev' : '');
+    overflow.replaces['overflow_author_name'] = pkg.author.name;
+    overflow.replaces['overflow_author_url'] = pkg.author.url;
+    overflow.replaces['overflow_author_email'] = pkg.author.email;
+    overflow.replaces['overflow_author'] = JSON.stringify(pkg.author);
+    overflow.replaces['overflow_date'] = new Date().toUTCString();
+    overflow.replaces['overflow_lang'] = `~read-file:/tmp/i18n.json`;
 
     // Move all modules information to a single module (overflow)
     modules.forEach(function (module) {
         // js
-        overflow.js = overflow.js.concat(module.js)
+        overflow.js = overflow.js.concat(module.js);
 
         // html
         module.html.forEach(function (htmlPath) {
-            overflow.html[`/tmp${htmlPath}`] = htmlPath
-        })
+            overflow.html[`/tmp${htmlPath}`] = htmlPath;
+        });
 
         // css
         module.css.forEach(function (lessPath) {
-            const cssPath = lessPath.replace(/\.less$/, '.css')
-            overflow.css[`/tmp${cssPath}`] = lessPath
-        })
+            const cssPath = lessPath.replace(/\.less$/, '.css');
+            overflow.css[`/tmp${cssPath}`] = lessPath;
+        });
 
         // lang
         if (module.lang) {
-            overflow.replaces[`${module.id}_lang`] = `~read-file:/tmp/src/modules/${module.dir}/lang/lang.json`
+            overflow.replaces[`${module.id}_lang`] = `~read-file:/tmp/src/modules/${module.dir}/lang/lang.json`;
         }
 
         // replaces
-        for (let id in module.replaces) {
-            const value = module.replaces[id]
+        for (const id in module.replaces) {
+            const value = module.replaces[id];
 
             // If the replace value is a file, create a template to
             // grunt replace later.
             if (fs.existsSync(path.join(__dirname, value))) {
-                let filePath = value
-                const ext = path.extname(value)
+                let filePath = value;
+                const ext = path.extname(value);
 
                 if (ext === '.less') {
-                    filePath = filePath.replace(/\.less$/, '.css')
+                    filePath = filePath.replace(/\.less$/, '.css');
                 }
 
                 // lang replaces already have the temporary path included.
                 if (id !== `${module.id}_lang`) {
-                    filePath = `/tmp${filePath}`
+                    filePath = `/tmp${filePath}`;
                 }
 
-                overflow.replaces[id] = `~read-file:${filePath}`
+                overflow.replaces[id] = `~read-file:${filePath}`;
             } else {
-                overflow.replaces[id] = value
+                overflow.replaces[id] = value;
             }   
         }
-    })
+    });
 
-    overflow.js.push(`/src/footer.js`)
+    overflow.js.push(`/src/footer.js`);
 
     // Load core assets, if exists
     if (fs.existsSync(path.join(__dirname, 'src', 'assets'))) {
         fs.mkdirSync(path.join(__dirname, 'tmp', 'src', 'assets'), {
             recursive: true
-        })
+        });
 
         glob.sync(path.join(__dirname, 'src', 'assets', '*.html')).forEach(function (htmlPath) {
-            htmlPath = htmlPath.replace(__dirname, '')
+            htmlPath = htmlPath.replace(__dirname, '');
 
-            const filename = path.basename(htmlPath, '.html')
+            const filename = path.basename(htmlPath, '.html');
 
-            overflow.replaces[`overflow_html_${filename}`] = `~read-file:/tmp${htmlPath}`
-            overflow.html[path.join(__dirname, 'tmp', htmlPath)] = path.join(__dirname, htmlPath)
-        })
+            overflow.replaces[`overflow_html_${filename}`] = `~read-file:/tmp${htmlPath}`;
+            overflow.html[path.join(__dirname, 'tmp', htmlPath)] = path.join(__dirname, htmlPath);
+        });
 
         glob.sync(path.join(__dirname, 'src', 'assets', '*.less')).forEach(function (lessPath) {
-            lessPath = lessPath.replace(__dirname, '')
+            lessPath = lessPath.replace(__dirname, '');
 
-            const filename = path.basename(lessPath, '.less')
+            const filename = path.basename(lessPath, '.less');
 
-            overflow.replaces[`overflow_css_${filename}`] = `~read-file:/tmp${lessPath}`
-            overflow.css[`/tmp${lessPath}`] = `${lessPath}`
-        })
+            overflow.replaces[`overflow_css_${filename}`] = `~read-file:/tmp${lessPath}`;
+            overflow.css[`/tmp${lessPath}`] = `${lessPath}`;
+        });
     }
 
-    return overflow
+    return overflow;
 }
 
 function replaceText (source, token, replace) {
-    let index = 0
+    let index = 0;
 
     do {
-        source = source.replace(token, replace)
-    } while((index = source.indexOf(token, index + 1)) > -1)
+        source = source.replace(token, replace);
+    } while((index = source.indexOf(token, index + 1)) > -1);
 
-    return source
+    return source;
 }
 
 function notifySuccess () {
-    console.log('\nBuild finished in', makeTime, 'ms')
+    console.log('\nBuild finished in', makeTime, 'ms');
 
     notifySend && notifySend.notify({
         title: 'TWOverflow',
         message: 'Build complete',
         timeout: 1000
-    })
+    });
 }
 
 function notifyFail () {
-    console.log('\nBuild failed in', makeTime, 'ms')
+    console.log('\nBuild failed in', makeTime, 'ms');
 
     notifySend && notifySend.notify({
         title: 'TWOverflow',
         message: 'Build failed',
         timeout: 2000
-    })
+    });
 }
 
 function buildExtension () {
     return new Promise(function (resolve) {
         if (!argv.extension) {
-            return resolve()
+            return resolve();
         }
 
         const manifest = fs.readFileSync(path.join(__dirname, 'share', 'extension', 'manifest.json'), 'utf8')
@@ -600,34 +593,34 @@ function buildExtension () {
             .replace('${description}', pkg.description)
             .replace('${author.name}', pkg.author.name)
             .replace('${author.email}', pkg.author.email)
-            .replace('${homepage}', pkg.repository.url)
+            .replace('${homepage}', pkg.repository.url);
 
-        fs.mkdirSync(path.join(__dirname, 'tmp', 'extension', ''), {recursive: true})
-        fs.writeFileSync(path.join(__dirname, 'tmp', 'extension', 'manifest.json'), manifest)
+        fs.mkdirSync(path.join(__dirname, 'tmp', 'extension', ''), {recursive: true});
+        fs.writeFileSync(path.join(__dirname, 'tmp', 'extension', 'manifest.json'), manifest);
         fs.copyFileSync(
             path.join(__dirname, 'share', 'extension', 'loader.js'),
             path.join(__dirname, 'tmp', 'extension', 'loader.js')
-        )
+        );
         fs.copyFileSync(
             path.join(__dirname, 'share', 'logo', 'logo.png'),
             path.join(__dirname, 'tmp', 'extension', 'overflow.png')
-        )
+        );
         fs.copyFileSync(
             path.join(__dirname, 'share', 'logo', 'logo-128.png'),
             path.join(__dirname, 'tmp', 'extension', 'overflow-128.png')
-        )
+        );
         fs.copyFileSync(
             path.join(__dirname, 'dist', 'tw2overflow.js'),
             path.join(__dirname, 'tmp', 'extension', 'tw2overflow.js')
-        )
+        );
 
-        const output = fs.createWriteStream(path.join(__dirname, 'dist', `tw2overflow-extension-${pkg.version}.zip`))
-        const archive = archiver('zip', {zlib: {level: 0}})
+        const output = fs.createWriteStream(path.join(__dirname, 'dist', `tw2overflow-extension-${pkg.version}.zip`));
+        const archive = archiver('zip', {zlib: {level: 0}});
 
-        archive.pipe(output)
-        archive.directory(path.join(__dirname, 'tmp', 'extension'), false)
-        archive.finalize()
-    })
+        archive.pipe(output);
+        archive.directory(path.join(__dirname, 'tmp', 'extension'), false);
+        archive.finalize();
+    });
 }
 
-init()
+init();
