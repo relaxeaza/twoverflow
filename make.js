@@ -1,6 +1,7 @@
 const fs = require('fs')
 const glob = require('glob')
 const path = require('path')
+const archiver = require('archiver')
 const pkg = require('./package.json')
 const argv = require('yargs').argv
 const hasOwn = Object.prototype.hasOwnProperty
@@ -35,6 +36,7 @@ function init () {
         .then(generateLanguageFile)
         .then(replaceInFile)
         .then(minifyCode)
+        .then(buildExtension)
         .then(function () {
             makeTime = (new Date().getTime()) - timeStart
         })
@@ -42,8 +44,9 @@ function init () {
             exitCode = SUCCESS
             notifySuccess()
         })
-        .catch(function (errorCode) {
-            exitCode = errorCode
+        .catch(function (error) {
+            console.log(error)
+            exitCode = 1
             notifyFail()
         })
         .finally(function () {
@@ -582,6 +585,48 @@ function notifyFail () {
         title: 'TWOverflow',
         message: 'Build failed',
         timeout: 2000
+    })
+}
+
+function buildExtension () {
+    return new Promise(function (resolve) {
+        if (!argv.extension) {
+            return resolve()
+        }
+
+        const manifest = fs.readFileSync(path.join(__dirname, 'share', 'extension', 'manifest.json'), 'utf8')
+            .replace('${name}', pkg.title)
+            .replace('${version}', pkg.version)
+            .replace('${description}', pkg.description)
+            .replace('${author.name}', pkg.author.name)
+            .replace('${author.email}', pkg.author.email)
+            .replace('${homepage}', pkg.repository.url)
+
+        fs.mkdirSync(path.join(__dirname, 'tmp', 'extension', ''), {recursive: true})
+        fs.writeFileSync(path.join(__dirname, 'tmp', 'extension', 'manifest.json'), manifest)
+        fs.copyFileSync(
+            path.join(__dirname, 'share', 'extension', 'loader.js'),
+            path.join(__dirname, 'tmp', 'extension', 'loader.js')
+        )
+        fs.copyFileSync(
+            path.join(__dirname, 'share', 'logo', 'logo.png'),
+            path.join(__dirname, 'tmp', 'extension', 'overflow.png')
+        )
+        fs.copyFileSync(
+            path.join(__dirname, 'share', 'logo', 'logo-128.png'),
+            path.join(__dirname, 'tmp', 'extension', 'overflow-128.png')
+        )
+        fs.copyFileSync(
+            path.join(__dirname, 'dist', 'tw2overflow.js'),
+            path.join(__dirname, 'tmp', 'extension', 'tw2overflow.js')
+        )
+
+        const output = fs.createWriteStream(path.join(__dirname, 'dist', `tw2overflow-extension-${pkg.version}.zip`))
+        const archive = archiver('zip', {zlib: {level: 0}})
+
+        archive.pipe(output)
+        archive.directory(path.join(__dirname, 'tmp', 'extension'), false)
+        archive.finalize()
     })
 }
 

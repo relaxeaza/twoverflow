@@ -97,7 +97,7 @@ define('two/ui', [
     interfaceOverflow.addMenuButton = function (label, order, _tooltip) {
         const $button = document.createElement('div');
         $button.className = 'btn-border btn-orange button';
-        $button.innerHTML = label;
+        $button.innerText = label;
         $button.style.order = order;
         $menu.appendChild($button);
 

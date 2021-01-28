@@ -8,7 +8,13 @@
  * as published by Sam Hocevar. See the LICENCE file for more details.
  */
 
-;(function (window, undefined) {
+(function awaitInjector (main) {
+    if (typeof injector === 'undefined') {
+        setTimeout(() => awaitInjector(main), 250)
+    } else {
+        main(window)
+    }
+})(function (window, undefined) {
 
 const $rootScope = injector.get('$rootScope')
 const transferredSharedDataService = injector.get('transferredSharedDataService')
