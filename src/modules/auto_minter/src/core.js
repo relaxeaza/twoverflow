@@ -29,7 +29,7 @@ define('two/autoMinter', [
     let selectedVillages = [];
 
     const STORAGE_KEYS = {
-        SETTINGS: 'auto_minter_settingss'
+        SETTINGS: 'auto_minter_settings'
     };
 
     const RESOURCE_TYPES = ['wood', 'clay', 'iron'];
