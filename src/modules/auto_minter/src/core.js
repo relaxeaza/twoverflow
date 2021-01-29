@@ -22,10 +22,10 @@ define('two/autoMinter', [
     let settings;
     let minterSettings;
     let intervalId;
-    const costPerCoin = modelDataService.getGameData().getCostsPerCoin();
+    const coinCost = modelDataService.getGameData().getCostsPerCoin();
     let checkInterval;
 
-    const preveseResources = {};
+    const preserve = {};
     let selectedVillages = [];
 
     const STORAGE_KEYS = {
@@ -55,9 +55,9 @@ define('two/autoMinter', [
     };
 
     const updateSettingValues = function () {
-        preveseResources.wood = minterSettings[SETTINGS.PRESERVE_WOOD];
-        preveseResources.clay = minterSettings[SETTINGS.PRESERVE_CLAY];
-        preveseResources.iron = minterSettings[SETTINGS.PRESERVE_IRON];
+        preserve.wood = minterSettings[SETTINGS.PRESERVE_WOOD];
+        preserve.clay = minterSettings[SETTINGS.PRESERVE_CLAY];
+        preserve.iron = minterSettings[SETTINGS.PRESERVE_IRON];
         checkInterval = humanInterval(minterSettings[SETTINGS.CHECK_INTERVAL]);
     };
 
@@ -68,24 +68,23 @@ define('two/autoMinter', [
             return false;
         }
 
-        const availableResources = {};
-        const maxCoinsByResource = {};
-        const resources = village.getResources().getComputed();
+        const maxCoinsPerResource = [];
+        const villageResources = village.getResources().getComputed();
 
         for (const resourceType of RESOURCE_TYPES) {
-            availableResources[resourceType] = Math.max(0, resources[resourceType].currentStock - preveseResources[resourceType]);
-            maxCoinsByResource[resourceType] = Math.floor(availableResources[resourceType] / costPerCoin[resourceType]);
+            const available = Math.max(0, villageResources[resourceType].currentStock - preserve[resourceType]);
+            maxCoinsPerResource.push(Math.floor(available / coinCost[resourceType]));
         }
 
-        const maxCoins = Math.min(...Object.values(maxCoinsByResource));
+        const villageMaxCoins = Math.min(...maxCoinsPerResource);
 
-        if (!maxCoins) {
+        if (!villageMaxCoins) {
             return false;
         }
 
         return {
             village_id: village.getId(),
-            amount: maxCoins
+            amount: villageMaxCoins
         };
     };
 
