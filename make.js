@@ -461,7 +461,9 @@ function generateOverflowModule () {
         `/src/map-data.js`,
         `/src/ui.js`,
         `/src/init.js`,
-        `/src/libs/lockr.js`
+        `/src/libs/lockr.js`,
+        `/src/libs/numbered.js`,
+        `/src/libs/human-interval.js`
     ]);
 
     // Generate the common replaces

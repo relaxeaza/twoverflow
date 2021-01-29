@@ -1,10 +1,18 @@
 define('two/Settings', [
     'two/utils',
-    'Lockr'
+    'Lockr',
+    'humanInterval'
 ], function (
     utils,
-    Lockr
+    Lockr,
+    humanInterval
 ) {
+    const validators = {
+        'readable_time': function (value) {
+            return typeof value === 'string' && !isNaN(humanInterval(value));
+        }
+    };
+
     const generateDiff = function (before, after) {
         const changes = {};
 
@@ -73,6 +81,14 @@ define('two/Settings', [
         return angular.copy(this.settings);
     };
 
+    Settings.prototype.valid = function (inputType, value) {
+        if (hasOwn.call(validators, inputType)) {
+            return validators[inputType].call(this, value);
+        }
+
+        return false;
+    };
+
     Settings.prototype.getDefault = function (id) {
         return hasOwn.call(this.defaults, id) ? this.defaults[id] : undefined;
     };
@@ -87,7 +103,7 @@ define('two/Settings', [
         }
 
         const map = this.settingsMap[id];
-        
+
         if (map.inputType === 'number') {
             value = parseInt(value, 10);
 
@@ -98,6 +114,8 @@ define('two/Settings', [
             if (hasOwn.call(map, 'max')) {
                 value = Math.min(map.max, value);
             }
+        } else if (map.inputType === 'readable_time') {
+            value = humanInterval(value);
         }
 
         const before = angular.copy(this.settings);
@@ -175,7 +193,7 @@ define('two/Settings', [
             if (!hasOwn.call(this.settingsMap, id)) {
                 continue;
             }
-            
+
             const map = this.settingsMap[id];
 
             if (map.inputType === 'checkbox') {
