@@ -8,8 +8,14 @@ define('two/Settings', [
     humanInterval
 ) {
     const validators = {
-        'readable_time': function (value) {
+        readable_time: function (value) {
             return typeof value === 'string' && !isNaN(humanInterval(value));
+        }
+    };
+
+    const parsers = {
+        readable_time: function (value) {
+            return humanInterval(value);
         }
     };
 
@@ -74,11 +80,26 @@ define('two/Settings', [
     };
 
     Settings.prototype.get = function (id) {
-        return angular.copy(this.settings[id]);
+        const value = angular.copy(this.settings[id]);
+        const inputType = this.settingsMap[id].inputType;
+
+        return hasOwn.call(parsers, inputType)
+            ? parsers[inputType].call(this, value)
+            : value;
     };
 
     Settings.prototype.getAll = function () {
-        return angular.copy(this.settings);
+        const copy = angular.copy(this.settings);
+
+        for (const id of Object.keys(copy)) {
+            const {inputType} = this.settingsMap[id];
+
+            if (hasOwn.call(parsers, inputType)) {
+                copy[id] = parsers[inputType].call(this, copy[id]);
+            }
+        }
+
+        return copy;
     };
 
     Settings.prototype.valid = function (inputType, value) {
