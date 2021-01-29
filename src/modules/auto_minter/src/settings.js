@@ -11,8 +11,8 @@ define('two/autoMinter/settings', [], function () {
 define('two/autoMinter/settings/updates', function () {
     return {
         GROUPS: 'groups',
-        VALUES: 'values',
-        CHECKER: 'checker'
+        PRESERVE_RESOURSES: 'preserve_resourses',
+        UPDATE_INTERVAL: 'update_interval'
     };
 });
 
@@ -27,7 +27,7 @@ define('two/autoMinter/settings/map', [
         [SETTINGS.PRESERVE_WOOD]: {
             default: 50000,
             updates: [
-                UPDATES.VALUES
+                UPDATES.PRESERVE_RESOURSES
             ],
             inputType: 'number',
             min: 0,
@@ -36,7 +36,7 @@ define('two/autoMinter/settings/map', [
         [SETTINGS.PRESERVE_CLAY]: {
             default: 50000,
             updates: [
-                UPDATES.VALUES
+                UPDATES.PRESERVE_RESOURSES
             ],
             inputType: 'number',
             min: 0,
@@ -45,7 +45,7 @@ define('two/autoMinter/settings/map', [
         [SETTINGS.PRESERVE_IRON]: {
             default: 50000,
             updates: [
-                UPDATES.VALUES
+                UPDATES.PRESERVE_RESOURSES
             ],
             inputType: 'number',
             min: 0,
@@ -64,7 +64,7 @@ define('two/autoMinter/settings/map', [
         [SETTINGS.CHECK_INTERVAL]: {
             default: '60 minutes',
             updates: [
-                UPDATES.CHECKER
+                UPDATES.UPDATE_INTERVAL
             ],
             inputType: 'readable_time'
         }

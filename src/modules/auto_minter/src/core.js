@@ -22,8 +22,10 @@ define('two/autoMinter', [
     let settings;
     let minterSettings;
     let intervalId;
-    const coinCost = modelDataService.getGameData().getCostsPerCoin();
     let checkInterval;
+
+    const coinCost = modelDataService.getGameData().getCostsPerCoin();
+    const groupList = modelDataService.getGroupList();
 
     const preserve = {};
     let selectedVillages = [];
@@ -34,30 +36,25 @@ define('two/autoMinter', [
 
     const RESOURCE_TYPES = ['wood', 'clay', 'iron'];
 
-    const updateGroups = function () {
-        const selectedGroups = [];
+    const updateSelectedVillages = function () {
         selectedVillages = [];
 
-        const allGroups = modelDataService.getGroupList().getGroups();
         const enabledGroups = minterSettings[SETTINGS.ENABLED_GROUPS];
 
         for (const groupId of enabledGroups) {
-            selectedGroups.push(allGroups[groupId]);
-        }
-
-        for (const group of selectedGroups) {
-            const groupVillages = modelDataService.getGroupList().getGroupVillageIds(group.id);
-
-            for (const villageId of groupVillages) {
+            for (const villageId of groupList.getGroupVillageIds(groupId)) {
                 selectedVillages.push(modelDataService.getVillage(villageId));
             }
         }
     };
 
-    const updateSettingValues = function () {
+    const updatePreserveResources = function () {
         preserve.wood = minterSettings[SETTINGS.PRESERVE_WOOD];
         preserve.clay = minterSettings[SETTINGS.PRESERVE_CLAY];
         preserve.iron = minterSettings[SETTINGS.PRESERVE_IRON];
+    };
+
+    const updateCheckInterval = function () {
         checkInterval = humanInterval(minterSettings[SETTINGS.CHECK_INTERVAL]);
     };
 
@@ -132,15 +129,15 @@ define('two/autoMinter', [
         settings.onChange(function (changes, updates) {
             minterSettings = settings.getAll();
 
-            if (updates[UPDATES.VALUES]) {
-                updateSettingValues();
+            if (updates[UPDATES.PRESERVE_RESOURSES]) {
+                updatePreserveResources();
             }
 
             if (updates[UPDATES.GROUPS]) {
-                updateGroups();
+                updateSelectedVillages();
             }
 
-            if (updates[UPDATES.CHECKER]) {
+            if (updates[UPDATES.UPDATE_INTERVAL]) {
                 stopChecker();
                 startChecker();
             }
@@ -148,14 +145,15 @@ define('two/autoMinter', [
 
         minterSettings = settings.getAll();
 
-        $rootScope.$on(eventTypeProvider.GROUPS_CREATED, updateGroups);
-        $rootScope.$on(eventTypeProvider.GROUPS_DESTROYED, updateGroups);
-        $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_LINKED, updateGroups);
-        $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_UNLINKED, updateGroups);
+        $rootScope.$on(eventTypeProvider.GROUPS_CREATED, updateSelectedVillages);
+        $rootScope.$on(eventTypeProvider.GROUPS_DESTROYED, updateSelectedVillages);
+        $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_LINKED, updateSelectedVillages);
+        $rootScope.$on(eventTypeProvider.GROUPS_VILLAGE_UNLINKED, updateSelectedVillages);
 
         ready(function () {
-            updateGroups();
-            updateSettingValues();
+            updateSelectedVillages();
+            updatePreserveResources();
+            updateCheckInterval();
         }, 'all_villages_ready');
     };
 
