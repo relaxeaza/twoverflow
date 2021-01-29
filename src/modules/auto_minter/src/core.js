@@ -139,8 +139,11 @@ define('two/autoMinter', [
 
             if (updates[UPDATES.UPDATE_INTERVAL]) {
                 updateCheckInterval();
-                stopChecker();
-                startChecker();
+                
+                if (running) {
+                    stopChecker();
+                    startChecker();
+                }
             }
         });
 
