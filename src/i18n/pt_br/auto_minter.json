@@ -1,0 +1,10 @@
+{
+    "auto_minter": {
+        "enabled_groups": "Cunhar moedas apenas em aldeias do grupo",
+        "preserve_wood": "Preservar madeira das aldeias",
+        "preserve_clay": "Preservar argila das aldeias",
+        "preserve_iron": "Preservar ferro das aldeias",
+        "check_interval": "Intervalo: Cunhar moedas todo",
+        "error_invalid_interval": "Intervalo inválido. Alguns valores válidos:<br/>\"1 minute\", \"30 minutes\", \"4 hours\", \"1 day\"."
+    }
+}
