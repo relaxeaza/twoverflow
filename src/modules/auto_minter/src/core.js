@@ -55,7 +55,7 @@ define('two/autoMinter', [
     };
 
     const updateCheckInterval = function () {
-        checkInterval = humanInterval(minterSettings[SETTINGS.CHECK_INTERVAL]);
+        checkInterval = minterSettings[SETTINGS.CHECK_INTERVAL];
     };
 
     const getVillageMaxCoins = function (village) {
@@ -138,6 +138,7 @@ define('two/autoMinter', [
             }
 
             if (updates[UPDATES.UPDATE_INTERVAL]) {
+                updateCheckInterval();
                 stopChecker();
                 startChecker();
             }
