@@ -99,6 +99,10 @@ define('two/autoMinter', [
             }
         }
 
+        if (!massMintVillages.length) {
+            return;
+        }
+
         socketService.emit(routeProvider.MASS_MINT_COINS, {
             villages: massMintVillages
         });
